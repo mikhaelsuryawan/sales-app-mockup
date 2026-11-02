@@ -414,6 +414,7 @@ const USERS = {
   'fmcg.tari': {name:'Lestari Putri', init:'LP', role:'fmcg', roleLabel:'Promotor FMCG', nip:'SIM-24-01355', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
   'md.rangga': {name:'Rangga Saputra', init:'RS', role:'fmcg', roleLabel:'Merchandising (MD)', nip:'SIM-23-01102', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
   'mobile.fikri':{name:'Fikri Ramadhan', init:'FR', role:'spg', roleLabel:'Mobile Promotor', nip:'SIM-24-01377', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Beberapa toko dan event', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
+  'trainer.joko':{name:'Joko Susilo', init:'JS', role:'trainer', roleLabel:'Trainer', nip:'SIM-20-00412', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Kelas pelatihan Jakarta Selatan', sched:'WFO', main:{key:'quiz',label:'Quiz',icon:'quiz'}},
   'bantuan.eko':{name:'Eko Prabowo', init:'EP', role:'spg', menu:'bantuan', roleLabel:'Promotor Bantuan', nip:'BTN-0007', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
   'reliever.gita':{name:'Gita Puspita', init:'GP', role:'spg', menu:'bantuan', roleLabel:'Reliever', nip:'RLV-0031', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}}
 };
@@ -524,6 +525,7 @@ function freshState(){
       canvas:[{id:'v1',place:'Toko Sinar Jaya Elektronik',time:'09:00',tasks:['Penjualan','Ambil retur'],status:'Selesai',photos:{0:1,1:1},cin:'09:02',cout:'09:31',dur:'29 mnt'},{id:'v2',place:'Toko Makmur Abadi',time:'10:30',tasks:['Penjualan'],status:'Belum',photos:{}},{id:'v3',place:'Toko Berkah Elektronik',time:'13:00',tasks:['Penjualan','Cek display'],status:'Belum',photos:{}},{id:'v4',place:'Toko Cahaya Baru',time:'15:00',tasks:['Penjualan'],status:'Belum',photos:{}}],
       order:[{id:'v1',place:'Toko Mega Elektronik',time:'10:00',tasks:['Ambil pesanan'],status:'Selesai',photos:{0:1},cin:'10:04',cout:'10:30',dur:'26 mnt'},{id:'v2',place:'CV Sumber Rejeki Elektronik',time:'13:30',tasks:['Ambil pesanan','Penagihan'],status:'Belum',photos:{}},{id:'v3',place:'Toko Abadi Jaya',time:'15:30',tasks:['Ambil pesanan'],status:'Belum',photos:{}}],
       leads:[{id:'v1',place:'Ahmad Fauzi (nasabah)',time:'10:00',tasks:['Survey usaha'],status:'Belum',photos:{}},{id:'v2',place:'Yuliana Putri (nasabah)',time:'14:00',tasks:['Verifikasi dokumen'],status:'Belum',photos:{}}],
+      trainer:[{id:'v1',place:'Kelas pelatihan Jakarta Selatan',time:'10:00',tasks:['Quiz','Survey'],status:'Belum',photos:{}}],
       fmcg:[{id:'v1',place:'Electronic City Kemang',time:'09:00',tasks:['Cek stok','Facing display'],status:'Belum',photos:{}}],
       spv:[{id:'v1',place:'Electronic City Kemang',time:'11:00',tasks:['Supervisi SPG'],status:'Belum',photos:{}}]
     },
@@ -711,6 +713,7 @@ const MENUS = {
   order:[['Buat pesanan','order',"act(()=>startOrder())",1],['Daftar pesanan','file',"tab('pesanan')"],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Usulkan toko','plus',"act(()=>go('toko-baru'))",1],['Ajukan izin','file',"go('izin')"]],
   leads:[['Leads saya','users',"tab('leads')"],['Buat leads','plus',"act(()=>go('lead-baru'))",1],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   fmcg:[['Aktivitas toko','grid',"tab('aktivitas')"],['Buat jadwal','route',"act(()=>go('kunjungan-form'))",1],['SKU display','grid',"go('sku')"],['Market share','pie',"go('share')"],['Kunjungan','route',"tab('kunjungan')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
+  trainer:[['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Kunjungan','route',"tab('kunjungan')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   cbd:[['Leads saya','users',"tab('leads')"],['Buat leads','plus',"act(()=>go('lead-baru'))",1],['Mitra saya','user',"go('mitra')"],['Task Team Leader','check',"go('cbd-task')"],['Kunjungan','route',"tab('kunjungan')"],['Target & KPI','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   arco:[['Assign leads','users',"go('assign')"],['Semua leads','file',"go('leads-all')"],['Tim saya','user',"tab('tim')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   bantuan:[['Catat penjualan','bag',"act(()=>startSale())",1],['Riwayat penjualan','file',"tab('penjualan')"],['Kunjungan','route',"tab('kunjungan')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
@@ -752,6 +755,7 @@ SCR.home = () => {
 };
 function fieldDash(){
   const r=role();
+  if(r==='trainer') return `<div class="sec-title">Kunjungan pelatihan</div><div class="banner blue">${I('quiz',18)}<span>Trainer mendukung tim lewat quiz, survey, dan kunjungan. Tanpa penjualan dan leads.</span></div>${todayVisits()}`;
   if(r==='fmcg') return `<div class="sec-title">Aktivitas hari ini <a onclick="tab('aktivitas')">Semua</a></div>
     <div class="banner blue">${I('grid',18)}<span>Promotor FMCG dan MD mencatat aktivitas toko, bukan penjualan.</span></div>
     ${todayVisits()}`;
@@ -1706,11 +1710,11 @@ SCR.posm = () => ({note:'POSM dan planogram (MOM 13). User memotret lokasi, lalu
   html:`${appbar('Campaign, POSM & planogram')}<main class="content"><div class="list">${POSM.map(x=>`<button class="li" onclick="go('posm-detail',{id:'${x.id}'})"><div class="ico-tile">${I('image',20)}</div><div class="grow"><div class="t">${x.name}</div><div class="s">${x.kind}</div></div>${S.posm[x.id]?chip('Nilai '+S.posm[x.id],'green'):chip('Belum','amber')}</button>`).join('')}</div></main>`});
 SCR['posm-detail'] = p => {
   const x=POSM.find(a=>a.id===p.id), n=S.posm[x.id];
-  return {note:'Nilai AI di sini simulasi. Acuan penilaian masih ditunggu dari klien.',
+  return {note:'Nilai AI di sini simulasi. Rekomendasi ambang: 80 atau lebih lulus, 70 sampai 79 ditinjau Team Leader, di bawah 70 foto ulang. Acuan final menunggu klien.',
   html:`${appbar(x.kind)}<main class="content">
     <div class="card"><b>${x.name}</b><div class="small muted" style="margin-top:2px">Acuan: ${x.acuan}</div></div>
     <div class="sec-title">Foto brief</div><div class="wm-photo">${I('image',26)}</div>
-    <div class="sec-title">Foto kamu</div>${n?`<div class="wm-photo">${I('image',26)}</div><div class="card" style="margin-top:12px"><div class="small muted">Nilai AI</div><div class="big-num num">${n}</div><p class="hint">Cocok dengan foto brief.</p></div>`:`<button class="wm-photo add" onclick="act(()=>posmShoot('${x.id}'))" aria-label="Ambil foto">${I('camera',26)}<span class="small">Ambil foto</span></button>`}
+    <div class="sec-title">Foto kamu</div>${n?`<div class="wm-photo">${I('image',26)}</div><div class="card" style="margin-top:12px"><div class="row between"><div class="small muted">Nilai AI</div>${n>=80?chip('Lulus','green'):n>=70?chip('Ditinjau Team Leader','amber'):chip('Foto ulang','red')}</div><div class="big-num num">${n}</div><p class="hint">Dicocokkan dengan foto brief.</p></div>`:`<button class="wm-photo add" onclick="act(()=>posmShoot('${x.id}'))" aria-label="Ambil foto">${I('camera',26)}<span class="small">Ambil foto</span></button>`}
   </main>`};
 };
 function posmShoot(id){ S.posm[id]=86; render(false,true); toast('Foto dinilai AI: 86','camera'); }

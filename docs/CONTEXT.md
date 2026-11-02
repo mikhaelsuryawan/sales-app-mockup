@@ -43,7 +43,7 @@ Acuan revisi: `../docs/00-sources/extracted/S5-mom-workshop-27-28-okt-2026.md`. 
 
 ### Mobile (`mobile/index.html`)
 
-14 user demo (password bebas). Panel demo juga bisa mengganti jadwal WFO, WFA, dan OFF.
+15 user demo (password bebas). Panel demo juga bisa mengganti jadwal WFO, WFA, dan OFF.
 
 | Username | Role |
 |---|---|
@@ -59,10 +59,11 @@ Acuan revisi: `../docs/00-sources/extracted/S5-mom-workshop-27-28-okt-2026.md`. 
 | `fmcg.tari`, `md.rangga` | Promotor FMCG, Merchandising |
 | `mobile.fikri` | Mobile Promotor |
 | `bantuan.eko`, `reliever.gita` | Promotor Bantuan, Reliever |
+| `trainer.joko` | Trainer (quiz, survey, kunjungan pelatihan) |
 
 - **Login dan absen:** foto wajah referensi wajib saat login pertama. Beranda terkunci sebelum absen masuk. WFO dalam radius 100 m, WFA bebas, OFF tidak bisa absen. Ada pengingat sebelum absen dengan pilihan suara.
 - **Kunjungan:** jadwal dibuat Team Leader. Hanya Promotor FMCG dan MD yang membuat sendiri (1 hari 1 toko). Periode harian, mingguan, 2 mingguan, bulanan. Check-in dan check-out wajib 2-3 foto ber-watermark. Lupa check-out ditutup otomatis. Canvassing cukup submit kunjungan. Quiz dan Survey bisa menjadi tugas kunjungan.
-- **Penjualan (SPG, Canvassing, Mobile Promotor, Promotor Bantuan):** pilih toko → foto invoice dengan OCR (harga invoice, harga toko, dan harga principal sebagai pembanding) → foto dan data pelanggan wajib → konfirmasi. Mobile Promotor juga memilih toko lain dan event.
+- **Penjualan (SPG, Canvassing, Mobile Promotor, Promotor Bantuan):** pilih toko → foto invoice dengan OCR (harga invoice, harga toko, dan harga principal sebagai pembanding) → foto dan data pelanggan wajib → konfirmasi. Mobile Promotor juga memilih toko lain dan event. Event berasal dari master Event di dashboard dan muncul selama masa acara.
 - **Canvassing:** limit nominal per hari, stok dari input manual atau foto invoice, foto tanda terima, retur layak dan tidak layak, rekap akhir hari (penjualan dihitung dari retur), outlet isi sendiri.
 - **Promotor FMCG dan MD:** tanpa penjualan. Cek stok multi satuan, price promo, facing display dengan phasing, support task, SKU display dan market share harian.
 - **SPG Elektronik:** SKU display (scan atau foto barcode, SKU rusak membuat task), market share (draft, kompetitor manual), stock opname, Campaign, POSM, dan planogram dengan nilai AI simulasi.
@@ -76,29 +77,27 @@ Acuan revisi: `../docs/00-sources/extracted/S5-mom-workshop-27-28-okt-2026.md`. 
 - **Operasional:** Absensi, Kunjungan (Team Leader membuat jadwal), Approval, Task pending (produk rusak dan task CBD), Aktivitas lapangan (log FMCG dan MD, kinerja Reliever dan Promotor Bantuan).
 - **Penjualan:** Laporan penjualan, Target dan sell-in (termasuk Multi Finance), Canvassing, laporan SKU display, laporan market share (hanya data check-out, rata-rata antar penginput), Promo, Insentif, Grading (dengan formula per klien dan role).
 - **Sales automation:** Leads pinjaman (import assign), Overdue.
-- **Master data dengan CRUD:** Client, Region, Kategori toko, Toko, Brand, Kategori produk, Produk dan harga (harga per toko dan cabang, mapping outlet, produk price promo), Satuan, Mitra, User SIM (jadwal off dan NPO dari BPR), IAM (16 role dengan segmen dan tipe, struktur approval, matrix approval, log), Parameter.
+- **Master data dengan CRUD:** Client, Region, Kategori toko, Toko, Brand, Kategori produk, Produk dan harga (harga per toko dan cabang, mapping outlet, produk price promo), Satuan, Event, Mitra (dengan kode dan alamat), User SIM (jadwal off dan NPO dari BPR), IAM (16 role dengan segmen dan tipe, struktur approval, matrix approval, log), Parameter.
 - **Konten:** Campaign, POSM, dan planogram, Quiz, Survey (jadwal berkala, tanpa opsi anonim).
 
 Semua data dummy. CRUD bekerja di memori dan hilang saat reload. Mobile dan dashboard tidak berbagi data, jadi hak akses di IAM dan data dashboard tidak mengubah mobile.
 
 ## 5. Hal yang tidak ada di mockup
 
-- Penjualan oleh Mobile Promotor di event hanya berupa pilihan tujuan. Rinciannya tidak ada di MOM.
-- Trainer hanya ada di dashboard karena tugasnya belum dirinci.
+- Rincian penjualan Mobile Promotor di event. Mockup hanya menampilkan event sebagai tujuan, dengan alur yang sama seperti toko.
 - Nilai AI, OCR, pembacaan foto, dan KPI adalah simulasi.
-- Tambahan yang tidak disebut MOM diberi label "Usulan".
+- Tambahan yang tidak disebut MOM diberi label "Usulan" atau "Rekomendasi".
 
-## 6. Hal yang masih terbuka
+## 6. Keputusan dan hal yang masih terbuka
 
-Menunggu klien atau pemilik produk (lihat `OPEN-QUESTIONS.md`):
+Keputusan 2 Nov 2026 (lengkap di `../docs/00-sources/OPEN-QUESTIONS.md` dan `../docs/01-product/fsd-revisi-mom.md`):
 
-- Bentuk leveling produk, hierarki lengkap CBD, mitra, REA, SPG Multi Finance, Arco, dan Team Leader, serta format data mitra.
-- Use case semua variasi aturan leads Multi Finance dan format file leads dari CRM.
-- Siapa pembuat jadwal untuk Mobile Promotor, Taking Order, dan CBD.
-- Sumber jadwal off dari BPR dan frekuensi sinkronnya.
-- Acuan penilaian AI untuk planogram dan akurasi OCR price tag.
-- API ganti password ke IOS 1 atau BPR.
-- Sumber data overdue dan sumber nominal goal pinjaman (URD tidak konsisten).
+- **FSD direvisi mengikuti MOM** ([ADR-0015](../../docs/02-architecture/decisions/ADR-0015-fsd-ikut-mom-workshop.md)). Sepuluh konflik FSD dan MOM tidak lagi terbuka.
+- **Dijawab MOM:** pembuat jadwal kunjungan (Team Leader, kecuali FMCG dan MD), dua dokumen Deal, bentuk leveling produk.
+- **Rekomendasi, dikonfirmasi di MOM hasil review berikutnya:** scan barcode hanya di SKU Display, foto submit Canvassing dihitung sebagai foto check-out, Reliever dan Promotor Bantuan dua role, badge sidebar dihapus, hierarki, tugas Trainer, format data mitra dan file leads, sinkron BPR harian, ambang nilai AI (80 lulus, 70 sampai 79 ditinjau, di bawah 70 foto ulang), sumber overdue dan goal.
+- **Menunggu pihak lain:** API ganti password ke IOS 1 atau BPR, use case lengkap aturan leads Multi Finance.
+
+Catatan: klien sudah mengesahkan MOM pertama. MOM hasil review di meeting berikutnya akan menjadi sumber baru dan bisa mengubah keputusan di atas.
 
 ## 7. Catatan teknis
 
