@@ -454,16 +454,16 @@ const SALES=[
 ];
 const byU=u=>SALES.find(s=>s.u===u);
 const PRODUCTS=[
-  {id:'tv50',name:'AQUOS 4K Google TV 50"',sku:'4T-C50FL1I',cat:'TV',price:6499000,lvl:'A',inc:75000},
-  {id:'tv43',name:'AQUOS Full HD TV 43"',sku:'2T-C43EG1I',cat:'TV',price:3899000,lvl:'B',inc:50000},
-  {id:'kl2p',name:'Kulkas 2 Pintu 315 L',sku:'SJ-IG316',cat:'Kulkas',price:4299000,lvl:'B',inc:60000},
-  {id:'mc85',name:'Mesin Cuci Top Load 8,5 kg',sku:'ES-T85CL',cat:'Mesin Cuci',price:2199000,lvl:'C',inc:40000},
-  {id:'ac1',name:'AC Inverter 1 PK',sku:'AH-X9ZEY',cat:'AC',price:4599000,lvl:'A',inc:70000},
-  {id:'ap30',name:'Air Purifier Plasmacluster',sku:'FP-J30Y',cat:'Air Purifier',price:1799000,lvl:'C',inc:30000},
-  {id:'rc18',name:'Rice Cooker 1,8 L',sku:'KS-N18MG',cat:'Small Appliances',price:459000,lvl:'C',inc:10000},
-  {id:'bl11',name:'Blender 1 L',sku:'EM-11',cat:'Small Appliances',price:389000,lvl:'C',inc:10000},
-  {id:'kp16',name:'Kipas Angin Dinding 16"',sku:'PJ-A36',cat:'Small Appliances',price:299000,lvl:'C',inc:8000},
-  {id:'ds72',name:'Dispenser Galon Bawah',sku:'SWD-72EHL',cat:'Small Appliances',price:1150000,lvl:'B',inc:25000}
+  {id:'tv50',name:'VISTARA 4K Google TV 50"',sku:'AR-TV50G',cat:'TV',price:6499000,lvl:'A',inc:75000},
+  {id:'tv43',name:'VISTARA Full HD TV 43"',sku:'AR-TV43F',cat:'TV',price:3899000,lvl:'B',inc:50000},
+  {id:'kl2p',name:'Kulkas 2 Pintu 315 L',sku:'AR-KL315',cat:'Kulkas',price:4299000,lvl:'B',inc:60000},
+  {id:'mc85',name:'Mesin Cuci Top Load 8,5 kg',sku:'AR-MC85',cat:'Mesin Cuci',price:2199000,lvl:'C',inc:40000},
+  {id:'ac1',name:'AC Inverter 1 PK',sku:'AR-AC1PK',cat:'AC',price:4599000,lvl:'A',inc:70000},
+  {id:'ap30',name:'Air Purifier Puraklin',sku:'AR-AP30',cat:'Air Purifier',price:1799000,lvl:'C',inc:30000},
+  {id:'rc18',name:'Rice Cooker 1,8 L',sku:'AR-RC18',cat:'Small Appliances',price:459000,lvl:'C',inc:10000},
+  {id:'bl11',name:'Blender 1 L',sku:'AR-BL11',cat:'Small Appliances',price:389000,lvl:'C',inc:10000},
+  {id:'kp16',name:'Kipas Angin Dinding 16"',sku:'AR-KP16',cat:'Small Appliances',price:299000,lvl:'C',inc:8000},
+  {id:'ds72',name:'Dispenser Galon Bawah',sku:'AR-DS72',cat:'Small Appliances',price:1150000,lvl:'B',inc:25000}
 ];
 const TOKO=[
   {id:'t1',name:'Electronic City Kemang',cat:'Modern Retail',cabang:'Jakarta Selatan',dealer:'PT Sinar Elektronik',sales:['rina'],addr:'Jl. Kemang Raya No. 8'},
@@ -485,7 +485,7 @@ const D={
     {id:'a3',type:'Hapus penjualan',u:'rina',detail:'TRX-2510-0087 · Kulkas 2 Pintu · Rp4.084.050',reason:'Salah pilih produk, seharusnya Mesin Cuci',when:'25 Okt, 16:02'},
     {id:'a5',type:'Pulang cepat',u:'sinta',detail:'Pulang 15:30, 1 jam 30 menit sebelum jadwal',reason:'Izin kontrol ke dokter',when:'24 Okt, 15:31'},
     {id:'a6',type:'Batal pesanan',u:'dimas',detail:'PO-2610-014 · Toko Mega Elektronik · Rp16.095.000',reason:'Toko menunda pembelian',when:'26 Okt, 11:40'},
-    {id:'a7',type:'Promo baru',u:null,by:'Dewi Kartika (Admin)',detail:'Bundling AC + Air Purifier diskon 7% · 1–30 Nov',reason:'Program akhir tahun SHARP',when:'26 Okt, 10:05'}
+    {id:'a7',type:'Promo baru',u:null,by:'Dewi Kartika (Admin)',detail:'Bundling AC + Air Purifier diskon 7% · 1–30 Nov',reason:'Program akhir tahun ARUNIKA',when:'26 Okt, 10:05'}
   ],
   leads:[
     {id:'L-2610-031',name:'Ahmad Fauzi',prod:'Kredit Modal Kerja',amount:10e6,tenor:12,status:'Baru',owner:'andi',date:'26 Okt',sync:''},
@@ -509,8 +509,8 @@ const D={
     {name:'Ratna Sari',no:'PJ-0624-0207',ang:650000,due:'22 Okt 2026',days:4,phone:'0838-1192-6670',addr:'Pejaten Barat',sisa:20}
   ],
   promos:[
-    {id:'PR-01',name:'Cashback e-wallet Rp300.000',type:'Cashback e-wallet',prod:'AQUOS 4K TV 50"',period:'1–31 Okt 2026',scope:'Semua toko',combine:true,cust:true,status:'Aktif',used:42},
-    {id:'PR-02',name:'Diskon 10% AQUOS 50"',type:'Diskon',prod:'AQUOS 4K TV 50"',period:'15–31 Okt 2026',scope:'Modern Retail',combine:false,cust:false,status:'Aktif',used:18},
+    {id:'PR-01',name:'Cashback e-wallet Rp300.000',type:'Cashback e-wallet',prod:'VISTARA 4K TV 50"',period:'1–31 Okt 2026',scope:'Semua toko',combine:true,cust:true,status:'Aktif',used:42},
+    {id:'PR-02',name:'Diskon 10% VISTARA 50"',type:'Diskon',prod:'VISTARA 4K TV 50"',period:'15–31 Okt 2026',scope:'Modern Retail',combine:false,cust:false,status:'Aktif',used:18},
     {id:'PR-03',name:'Diskon 5% Kulkas',type:'Diskon',prod:'Kulkas 2 Pintu 315 L',period:'1–31 Okt 2026',scope:'Semua toko',combine:true,cust:false,status:'Aktif',used:27},
     {id:'PR-04',name:'Gratis tumbler',type:'Free gift',prod:'Mesin Cuci 8,5 kg',period:'1 Okt – 15 Nov 2026',scope:'Jakarta Selatan',combine:true,cust:false,status:'Aktif',used:31},
     {id:'PR-05',name:'Bundling AC + Air Purifier 7%',type:'Diskon',prod:'AC 1 PK, Air Purifier',period:'1–30 Nov 2026',scope:'Semua toko',combine:false,cust:false,status:'Menunggu approval',used:0},
@@ -527,12 +527,12 @@ const D={
     {u:'kevin',place:'Toko Jaya Abadi Kembangan',plan:'09:30',cin:'09:41',cout:'10:20',dur:'39 mnt',tasks:'Penjualan',photos:3,status:'Selesai'}
   ],
   quizzes:[
-    {id:'Q-07',name:'Product knowledge AQUOS & Plasmacluster',type:'Quiz',q:3,scope:'Semua cabang',status:'Terbit',done:41,of:58,avg:82},
+    {id:'Q-07',name:'Product knowledge VISTARA & Puraklin',type:'Quiz',q:3,scope:'Semua cabang',status:'Terbit',done:41,of:58,avg:82},
     {id:'Q-06',name:'SOP pencatatan penjualan',type:'Quiz',q:10,scope:'Semua cabang',status:'Selesai',done:57,of:58,avg:88},
     {id:'Q-08',name:'Promo akhir tahun',type:'Quiz',q:8,scope:'Jakarta Selatan',status:'Draft',done:0,of:0,avg:0},
     {id:'S-03',name:'Kondisi toko Oktober 2026',type:'Survey',q:3,scope:'SPG',status:'Terbit',done:22,of:31,avg:null}
   ],
-  ws:[['all','Semua klien'],['sharp','SHARP Indonesia'],['bpr','BPR Mitra Usaha']]
+  ws:[['all','Semua klien'],['arunika','Arunika Elektronik'],['bpr','BPR Mitra Usaha']]
 };
 // deterministic pseudo random
 let seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return (seed-1)/2147483646; };
@@ -634,10 +634,10 @@ function salesReport(u){
   `${btn('Absensi',{v:'card',on:`closeLayer();go('/absensi?q=${encodeURIComponent(s.name)}')`})}${btn('Insentif',{v:'card',on:"closeLayer();go('/insentif')"})}${btn('Unduh laporan',{v:'accent',icon:'down',on:`toast('Laporan sales diunduh','laporan_${u}_okt2026.pdf')`})}`,{sub:s.job+' · '+s.cabang}); }
 
 const ORDERS=[
-  {id:'PO-2610-014',toko:'Toko Mega Elektronik',u:'dimas',items:'AQUOS 43" ×3, Mesin Cuci ×2',total:16095000,date:'26 Okt',ship:'28 Okt',st:'Menunggu batal',tone:'warning'},
+  {id:'PO-2610-014',toko:'Toko Mega Elektronik',u:'dimas',items:'VISTARA 43" ×3, Mesin Cuci ×2',total:16095000,date:'26 Okt',ship:'28 Okt',st:'Menunggu batal',tone:'warning'},
   {id:'PO-2510-087',toko:'CV Sumber Rejeki Elektronik',u:'dimas',items:'Kulkas 2 Pintu ×4',total:17196000,date:'24 Okt',ship:'27 Okt',st:'Dikirim',tone:'accent'},
   {id:'PO-2210-061',toko:'Toko Abadi Jaya',u:'dimas',items:'AC 1 PK ×2',total:9198000,date:'22 Okt',ship:'23 Okt',st:'Lunas',tone:'success'},
-  {id:'PO-2010-052',toko:'Toko Mega Elektronik',u:'dimas',items:'AQUOS 50" ×2',total:12348000,date:'20 Okt',ship:'22 Okt',st:'Lunas',tone:'success'},
+  {id:'PO-2010-052',toko:'Toko Mega Elektronik',u:'dimas',items:'VISTARA 50" ×2',total:12348000,date:'20 Okt',ship:'22 Okt',st:'Lunas',tone:'success'},
   {id:'PO-1710-040',toko:'CV Sumber Rejeki Elektronik',u:'dimas',items:'Mesin Cuci ×5',total:10665000,date:'17 Okt',ship:'19 Okt',st:'Lunas',tone:'success'}
 ];
 // incentive (BRD 3.2.3–3.2.5)
@@ -1061,7 +1061,7 @@ function promoPanel(id){ const p=D.promos.find(x=>x.id===id);
   ${p.cust?`<div style="margin-top:10px">${callout('Cashback e-wallet: data pelanggan wajib diisi saat penjualan (BRD 7.1.6).','blue')}</div>`:''}`,
   p.status==='Menunggu approval'?btn('Buka approval',{v:'accent',on:"closeLayer();go('/approval?type=Promo baru')"}):`${btn('Ubah',{v:'card',icon:'edit',on:"closeLayer();toast('Perubahan diajukan','Perubahan promo menunggu approval.')"})}`,{sub:p.id}); }
 function promoForm(){ openPanel('Buat promo',`<div class="grid" style="gap:14px">
-  <label class="field"><span>Nama promo</span><span class="inp"><input placeholder="contoh: Diskon akhir tahun AQUOS"></span></label>
+  <label class="field"><span>Nama promo</span><span class="inp"><input placeholder="contoh: Diskon akhir tahun VISTARA"></span></label>
   <label class="field"><span>Jenis</span>${sel(['Diskon','Free gift','Free product','Cashback e-wallet'],'Diskon','',{label:'Jenis'})}</label>
   <label class="field"><span>Produk</span>${sel(PRODUCTS.map(p=>p.name),PRODUCTS[0].name,'',{label:'Produk'})}</label>
   <div class="grid g2" style="gap:10px"><label class="field"><span>Mulai</span><span class="inp"><input type="date" value="2026-11-01"></span></label><label class="field"><span>Selesai</span><span class="inp"><input type="date" value="2026-11-30"></span></label></div>
@@ -1077,7 +1077,7 @@ function pageInsentif(q){
   if(tab==='hitung') body=dataTable('inc',{rows:INC.map(r=>({...r,_id:r.u})),rowClick:r=>`incPanel('${r.u}')`,cols:[
     {label:'Sales',render:r=>byU(r.u).name,prim:true},{label:'Dealer (sell-in)',render:r=>`<span class="tabular">${r.dAch}%</span>`,align:'r'},{label:'Sales (sell-out)',render:r=>`<span class="tabular">${r.sAch}%</span>`,align:'r'},
     {label:'Syarat',render:r=>r.ok?tag('Terpenuhi','success'):tag('Belum','danger')},{label:'Perhitungan',render:r=>rp(r.gross),align:'r',hide:true},{label:'Insentif',render:r=>`<b class="fg tabular">${rp(r.final)}</b>`,align:'r'}]});
-  if(tab==='rekon') body=`${ST.rekonFile?`<div class="callout blue" style="margin-bottom:12px">${I('file',18)}<span><b>rekap_insentif_sharp_okt.xlsx</b> dicocokkan: 5 cocok, 1 selisih.</span></div>`:`<div style="margin-bottom:12px">${btn('Upload file klien',{v:'accent',icon:'up',on:"ST.rekonFile=true;render(false);toast('File dicocokkan','5 cocok, 1 selisih ditandai.')"})}</div>`}
+  if(tab==='rekon') body=`${ST.rekonFile?`<div class="callout blue" style="margin-bottom:12px">${I('file',18)}<span><b>rekap_insentif_arunika_okt.xlsx</b> dicocokkan: 5 cocok, 1 selisih.</span></div>`:`<div style="margin-bottom:12px">${btn('Upload file klien',{v:'accent',icon:'up',on:"ST.rekonFile=true;render(false);toast('File dicocokkan','5 cocok, 1 selisih ditandai.')"})}</div>`}
     ${dataTable('rkn',{rows:REKON.map(r=>({...r,_id:r.u})),rowClick:r=>`incPanel('${r.u}')`,cols:[
       {label:'Sales',render:r=>byU(r.u).name,prim:true},{label:'Sistem',render:r=>rp(r.sys),align:'r'},{label:'Data klien',render:r=>ST.rekonFile?rp(r.cli):'–',align:'r'},
       {label:'Status',render:r=>!ST.rekonFile?tag('Belum dicocokkan','neutral'):r.adj?tag('Disesuaikan','info'):r.sys===r.cli?tag('Cocok','success'):tag('Selisih '+rp(r.sys-r.cli),'danger')},
@@ -1184,7 +1184,7 @@ function genPerm(kind){
 }
 const MD={
   client:[
-    {id:'cl1',code:'SHARP',name:'SHARP Indonesia',ind:'Elektronik',modul:['Sales retail'],pic:'Bambang Sutrisno',email:'bambang.s@sharp-indonesia.com',phone:'021-5790-1234',api:'Terhubung',status:'Aktif'},
+    {id:'cl1',code:'ARUNIKA',name:'Arunika Elektronik',ind:'Elektronik',modul:['Sales retail'],pic:'Bambang Sutrisno',email:'bambang.s@arunika.example',phone:'021-5790-1234',api:'Terhubung',status:'Aktif'},
     {id:'cl2',code:'BPRMU',name:'BPR Mitra Usaha',ind:'Perbankan',modul:['Sales automation'],pic:'Ratih Kusuma',email:'ratih@bprmitrausaha.co.id',phone:'021-7654-3210',api:'Terhubung',status:'Aktif'},
     {id:'cl4',code:'NHA',name:'PT Nusantara Home Appliances',ind:'Elektronik',modul:['Sales retail'],pic:'Yulia Andriani',email:'yulia@nha.co.id',phone:'021-5551-2020',api:'Terhubung',status:'Aktif'},
     {id:'cl3',code:'MTI',name:'PT Maju Tekstil Indonesia',ind:'Tekstil',modul:['Sales retail'],pic:'Hendro Wijaya',email:'hendro@majutekstil.co.id',phone:'022-555-7788',api:'Belum terhubung',status:'Nonaktif'}
@@ -1243,7 +1243,7 @@ const stPill=s=>spill(s,s==='Aktif'?'success':'neutral');
 const ENT={
   client:{label:'Client',plural:'Daftar client',prefix:'cl',store:()=>MD.client,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code+r.pic,unique:'code',
     blank:()=>({modul:['Sales retail'],ind:'Elektronik',api:'Belum terhubung'}),
-    fields:[{k:'code',label:'Kode client',req:true,ph:'contoh: SHARP',hint:'Huruf kapital, dipakai di nomor transaksi'},{k:'name',label:'Nama perusahaan',req:true},{k:'ind',label:'Industri',type:'select',opts:['Elektronik','Perbankan','FMCG','Tekstil','Otomotif','Lainnya']},
+    fields:[{k:'code',label:'Kode client',req:true,ph:'contoh: ARUNIKA',hint:'Huruf kapital, dipakai di nomor transaksi'},{k:'name',label:'Nama perusahaan',req:true},{k:'ind',label:'Industri',type:'select',opts:['Elektronik','Perbankan','FMCG','Tekstil','Otomotif','Lainnya']},
       {k:'modul',label:'Modul yang dipakai',type:'multi',req:true,opts:['Sales retail','Sales automation'],hint:'Sales retail: BRD penjualan. Sales automation: leads pinjaman.'},
       {k:'pic',label:'PIC klien',req:true},{k:'email',label:'Email PIC',type:'email',req:true},{k:'phone',label:'Telepon',type:'tel'},{k:'api',label:'Integrasi API',type:'select',opts:['Terhubung','Belum terhubung'],hint:'Kirim penjualan & tarik produk/harga (BRD 2.18)'}],
     cols:[{label:'Client',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.code)}</span>`,prim:true},{label:'Industri',k:'ind',hide:true},{label:'Modul',render:r=>r.modul.map(m=>tag(m,m==='Sales retail'?'accent':'info')).join(' ')},
@@ -1414,7 +1414,7 @@ function pageProduk(q){
       {label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="mono muted" style="display:block">${r.sku}</span>`,prim:true},{label:'Kategori',k:'cat'},{label:'Level',render:r=>tag(r.lvl,r.lvl==='A'?'accent':r.lvl==='B'?'info':'neutral')},{label:'Harga dasar',render:r=>rp(r.price),align:'r'}]})
     :`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">${sel(tokoList.map(x=>[x.id,x.name]),toko.id,"setQ({toko:this.value})",{label:'Pilih toko'})}<span class="xs muted">Cabang ${esc(toko.cabang)}</span></div>
     ${dataTable('hrg',{rows:PRODUCTS.map(p=>({...p,_id:p.id})),cols:[{label:'Produk',k:'name',prim:true},{label:'Harga principal',render:r=>`<span class="tabular">${rp(prin(r))}</span>`,align:'r'},{label:'Harga toko',render:r=>`<span class="tabular">${rp(atToko(r))}</span>`,align:'r'},{label:'Markup',render:r=>`<span class="tabular">${String(((atToko(r)/prin(r)-1)*100).toFixed(1)).replace('.',',')}%</span>`,align:'r',hide:true}]})}`}`,
-    {acts:`${btn('Import',{v:'soft',size:'sm',icon:'up',on:"uploadModal('Harga produk')"})}${btn('Export',{v:'soft',size:'sm',icon:'down',on:"toast('Harga produk diunduh','Per toko dan cabang.')"})}${btn('Sinkron dari klien',{v:'accent',size:'sm',icon:'refresh',on:"toast('Produk dan harga tersinkron','Terakhir 26 Okt, 13:40 dari sistem SHARP.')"})}`})}`};
+    {acts:`${btn('Import',{v:'soft',size:'sm',icon:'up',on:"uploadModal('Harga produk')"})}${btn('Export',{v:'soft',size:'sm',icon:'down',on:"toast('Harga produk diunduh','Per toko dan cabang.')"})}${btn('Sinkron dari klien',{v:'accent',size:'sm',icon:'refresh',on:"toast('Produk dan harga tersinkron','Terakhir 26 Okt, 13:40 dari sistem ARUNIKA.')"})}`})}`};
 }
 function prTab(t){ setQ({tab:t}); }
 
@@ -1427,7 +1427,7 @@ function pageParameter(){
     ${card('Jam kerja per job',`<div class="rows">${p('SPG / Promotor','08:00–17:00','Fixed, WFO di toko')}${p('Canvasing','08:00–17:00','Fixed, WFA')}${p('Taking Order','08:00–17:00','Fixed, WFA')}${p('Multi Finance','08:00–17:00','Fixed, WFO kantor cabang')}</div>`,{icon:'clock'})}
     ${card('Penjualan',`<div class="rows">${p('Backdate maksimal','2 hari','Penjualan dan pesanan (BRD 2.14.6, 2.15.4)')}${p('Hapus transaksi','Perlu approval','Supervisor (BRD 2.14.5)')}${p('Follow up pesanan','Offline','Diinput sales (BRD 2.15.7)')}</div>`,{icon:'chart'})}
     ${card('Invoice & OCR',`<div class="rows">${p('Foto invoice di penjualan','Wajib','Kecuali dengan alasan manual (ditinjau supervisor)')}${p('Harga acuan transaksi','Harga invoice','Harga sistem hanya pembanding')}${p('Batas selisih harga','10%','Di atas ini transaksi ditandai untuk review')}${p('Minimal keyakinan OCR','70%','Di bawahnya foto diminta diulang')}</div>`,{icon:'file'})}
-    ${card('Hari libur',`<div class="rows">${[['17 Agu 2026','Hari Kemerdekaan','Nasional'],['25 Des 2026','Hari Natal','Nasional'],['30 Okt 2026','Stock opname SHARP','Khusus klien']].map(([d,n,t])=>`<div class="rowlink" style="cursor:default"><span class="tabular sm" style="width:96px">${d}</span><span style="flex:1" class="sm fg">${n}</span>${tag(t,t==='Nasional'?'neutral':'info')}</div>`).join('')}</div>`,{icon:'cal',acts:btn('Tambah',{v:'soft',size:'sm',icon:'plus',on:"toast('Hari libur ditambahkan')"})})}
+    ${card('Hari libur',`<div class="rows">${[['17 Agu 2026','Hari Kemerdekaan','Nasional'],['25 Des 2026','Hari Natal','Nasional'],['30 Okt 2026','Stock opname ARUNIKA','Khusus klien']].map(([d,n,t])=>`<div class="rowlink" style="cursor:default"><span class="tabular sm" style="width:96px">${d}</span><span style="flex:1" class="sm fg">${n}</span>${tag(t,t==='Nasional'?'neutral':'info')}</div>`).join('')}</div>`,{icon:'cal',acts:btn('Tambah',{v:'soft',size:'sm',icon:'plus',on:"toast('Hari libur ditambahkan')"})})}
   </div>`};
 }
 
@@ -1435,8 +1435,8 @@ function pageParameter(){
 const QTYPES={Quiz:[['pg','Pilihan ganda'],['bs','Benar / salah']],Survey:[['skala','Skala 1–5'],['bs','Benar / salah'],['singkat','Isian singkat'],['essay','Essay']]};
 const QTN=Object.fromEntries([...QTYPES.Quiz,...QTYPES.Survey]);
 MD.konten=[
-  {id:'Q-07',type:'Quiz',name:'Product knowledge AQUOS & Plasmacluster',desc:'Pengetahuan produk TV AQUOS dan air purifier untuk sales lapangan.',roles:['r3','r4','r5'],cabang:['Semua cabang'],start:'2026-10-20',end:'2026-10-31',limit:5,pass:70,urut:'Acak',feedback:'Ya',status:'Terbit',done:41,of:58,avg:82,
-    questions:[{q:'Teknologi pemurni udara khas SHARP disebut…',type:'pg',opts:['Plasmacluster','Nanoe X','Ionizer Pro','HEPA Max'],key:0,acc:93},{q:'AQUOS 4T-C50FL1I menggunakan sistem operasi…',type:'pg',opts:['Tizen','Google TV','webOS','VIDAA'],key:1,acc:78},{q:'Promo cashback e-wallet wajib disertai data pelanggan.',type:'bs',opts:['Benar','Salah'],key:0,acc:74}]},
+  {id:'Q-07',type:'Quiz',name:'Product knowledge VISTARA & Puraklin',desc:'Pengetahuan produk TV VISTARA dan air purifier untuk sales lapangan.',roles:['r3','r4','r5'],cabang:['Semua cabang'],start:'2026-10-20',end:'2026-10-31',limit:5,pass:70,urut:'Acak',feedback:'Ya',status:'Terbit',done:41,of:58,avg:82,
+    questions:[{q:'Teknologi pemurni udara khas ARUNIKA disebut…',type:'pg',opts:['Puraklin','Udara Segar','Ionizer Pro','HEPA Max'],key:0,acc:93},{q:'VISTARA AR-TV50G menggunakan sistem operasi…',type:'pg',opts:['Tizen','Google TV','webOS','VIDAA'],key:1,acc:78},{q:'Promo cashback e-wallet wajib disertai data pelanggan.',type:'bs',opts:['Benar','Salah'],key:0,acc:74}]},
   {id:'Q-06',type:'Quiz',name:'SOP pencatatan penjualan',desc:'Aturan input penjualan, backdate, dan penghapusan transaksi.',roles:['r3','r4'],cabang:['Semua cabang'],start:'2026-10-01',end:'2026-10-12',limit:10,pass:75,urut:'Urut',feedback:'Ya',status:'Selesai',done:57,of:58,avg:88,
     questions:[{q:'Penjualan bisa diinput mundur maksimal…',type:'pg',opts:['1 hari','2 hari','7 hari','Bebas'],key:1,acc:90},{q:'Menghapus transaksi butuh approval supervisor.',type:'bs',opts:['Benar','Salah'],key:0,acc:96}]},
   {id:'Q-09',type:'Quiz',name:'Produk kredit BPR Mitra Usaha',desc:'Syarat dan tenor Kredit Modal Kerja dan Kredit Multiguna.',roles:['r6','r2'],cabang:['Jakarta Selatan'],start:'2026-10-22',end:'2026-11-05',limit:8,pass:70,urut:'Acak',feedback:'Tidak',status:'Terbit',done:3,of:4,avg:76,
@@ -1444,7 +1444,7 @@ MD.konten=[
   {id:'Q-08',type:'Quiz',name:'Promo akhir tahun',desc:'Promo November–Desember untuk SPG.',roles:['r3'],cabang:['Jakarta Selatan'],start:'2026-11-01',end:'2026-11-15',limit:5,pass:70,urut:'Acak',feedback:'Ya',status:'Draft',done:0,of:0,avg:0,
     questions:[{q:'Promo bundling AC + Air Purifier bisa digabung dengan promo lain.',type:'bs',opts:['Benar','Salah'],key:1}]},
   {id:'S-03',type:'Survey',name:'Kondisi toko Oktober 2026',desc:'Ramai pengunjung, promo kompetitor, dan produk yang sering ditanyakan.',roles:['r3'],cabang:['Semua cabang'],start:'2026-10-15',end:'2026-10-31',limit:'',pass:'',urut:'Urut',feedback:'Tidak',jadwal:'Bulanan',status:'Terbit',done:22,of:31,avg:null,
-    questions:[{q:'Seberapa ramai pengunjung toko minggu ini?',type:'skala',dist:[2,4,7,6,3]},{q:'Ada promo kompetitor yang sedang berjalan?',type:'bs',opts:['Ya','Tidak'],dist:[15,7]},{q:'Produk apa yang paling sering ditanyakan?',type:'singkat',top:['AQUOS 50" (9)','AC Inverter (6)','Kulkas 2 pintu (4)']}]},
+    questions:[{q:'Seberapa ramai pengunjung toko minggu ini?',type:'skala',dist:[2,4,7,6,3]},{q:'Ada promo kompetitor yang sedang berjalan?',type:'bs',opts:['Ya','Tidak'],dist:[15,7]},{q:'Produk apa yang paling sering ditanyakan?',type:'singkat',top:['VISTARA 50" (9)','AC Inverter (6)','Kulkas 2 pintu (4)']}]},
   {id:'S-04',type:'Survey',name:'Kepuasan aplikasi Sales App',desc:'Masukan pengguna untuk perbaikan aplikasi.',roles:['r3','r4','r5','r6'],cabang:['Semua cabang'],start:'2026-11-01',end:'2026-11-14',limit:'',pass:'',urut:'Urut',feedback:'Tidak',jadwal:'Sekali',status:'Draft',done:0,of:0,avg:null,
     questions:[{q:'Seberapa mudah mencatat penjualan di aplikasi?',type:'skala'},{q:'Fitur apa yang ingin ditambahkan?',type:'essay'}]}
 ];
@@ -1529,7 +1529,7 @@ function pageKonten(q,kind){
       {label:'Peserta',render:r=>r.of?`<div style="display:flex;gap:8px;align-items:center;min-width:110px"><div class="bar" style="flex:1"><i style="width:${r.done/r.of*100}%"></i></div><span class="tabular xs">${r.done}/${r.of}</span></div>`:'<span class="muted">–</span>'},
       {label:'Status',render:r=>spill(r.status,r.status==='Terbit'?'success':r.status==='Draft'?'neutral':'accent')}]})}`,
     {acts:isQuiz?btn('Quiz',{v:'accent',size:'sm',icon:'plus',on:"openForm('konten')"}):btn('Survey',{v:'accent',size:'sm',icon:'plus',on:"openForm('konten',null,{type:'Survey',jadwal:'Bulanan',limit:'',pass:'',questions:[{q:'',type:'skala'}]})"})})}
-  ${!isQuiz?card('Catatan',`<p class="sm muted">Pertanyaan master cukup general. Hasil survey hanya untuk evaluasi dan tidak masuk perhitungan grading.</p>`):card('Leaderboard quiz',`<div class="xs muted" style="margin-bottom:6px">Product knowledge AQUOS & Plasmacluster</div><div class="rows">${[['Putri Ayuningtyas',100],['Fajar Nugroho',100],['Rina Marlina',95],['Kevin Halim',90],['Sinta Dewi',90]].map(([n,s],i)=>`<div class="rowlink" style="cursor:default"><span class="tabular muted" style="width:16px">${i+1}</span>${av(n)}<span style="flex:1" class="sm fg">${n}</span><b class="tabular fg">${s}</b></div>`).join('')}</div>`,{icon:'award',acts:btn('Hasil',{v:'soft',size:'sm',on:"kontenResult('Q-07')"})})}
+  ${!isQuiz?card('Catatan',`<p class="sm muted">Pertanyaan master cukup general. Hasil survey hanya untuk evaluasi dan tidak masuk perhitungan grading.</p>`):card('Leaderboard quiz',`<div class="xs muted" style="margin-bottom:6px">Product knowledge VISTARA & Puraklin</div><div class="rows">${[['Putri Ayuningtyas',100],['Fajar Nugroho',100],['Rina Marlina',95],['Kevin Halim',90],['Sinta Dewi',90]].map(([n,s],i)=>`<div class="rowlink" style="cursor:default"><span class="tabular muted" style="width:16px">${i+1}</span>${av(n)}<span style="flex:1" class="sm fg">${n}</span><b class="tabular fg">${s}</b></div>`).join('')}</div>`,{icon:'award',acts:btn('Hasil',{v:'soft',size:'sm',on:"kontenResult('Q-07')"})})}
   </div>`};
 }
 const fmtD=d=>{ if(!d) return '–'; const [y,m,dd]=d.split('-'); return +dd+' '+['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'][+m-1]; };

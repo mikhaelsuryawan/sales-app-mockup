@@ -402,26 +402,26 @@ const LOGO = 'data:image/webp;base64,UklGRpgMAABXRUJQVlA4IIwMAADQNgCdASosAU8APpE
    DATA (dummy – nanti dari API SIM / BPR1)
    ========================================================= */
 const USERS = {
-  'spg.rina':  {name:'Rina Marlina', init:'RM', role:'spg', roleLabel:'SPG / Sales Promotor', nip:'SIM-24-01187', client:'SHARP Indonesia', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
-  'sales.budi':{name:'Budi Santoso', init:'BS', role:'canvas', roleLabel:'Sales Canvasing', nip:'SIM-23-00912', client:'SHARP Indonesia', unit:'Cabang Jakarta Selatan', place:'Rute Pasar Minggu – Cilandak', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
-  'sales.dimas':{name:'Dimas Prasetyo', init:'DP', role:'order', roleLabel:'Sales Taking Order', nip:'SIM-24-00455', client:'SHARP Indonesia', unit:'Cabang Jakarta Selatan', place:'Area Fatmawati – Bintaro', sched:'WFA', main:{key:'pesanan',label:'Pesanan',icon:'order'}},
+  'spg.rina':  {name:'Rina Marlina', init:'RM', role:'spg', roleLabel:'SPG / Sales Promotor', nip:'SIM-24-01187', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
+  'sales.budi':{name:'Budi Santoso', init:'BS', role:'canvas', roleLabel:'Sales Canvasing', nip:'SIM-23-00912', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Rute Pasar Minggu – Cilandak', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
+  'sales.dimas':{name:'Dimas Prasetyo', init:'DP', role:'order', roleLabel:'Sales Taking Order', nip:'SIM-24-00455', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Area Fatmawati – Bintaro', sched:'WFA', main:{key:'pesanan',label:'Pesanan',icon:'order'}},
   'sales.andi':{name:'Andi Wijaya', init:'AW', role:'leads', roleLabel:'Multi Finance', nip:'SIM-22-00731', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'leads',label:'Leads',icon:'users'}},
-  'spv.sari':  {name:'Sari Wulandari', init:'SW', role:'spv', roleLabel:'Supervisor / Sales Manager', nip:'SIM-19-00208', client:'SHARP Indonesia & BPR Mitra Usaha', unit:'Cabang Jakarta Selatan', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}}
+  'spv.sari':  {name:'Sari Wulandari', init:'SW', role:'spv', roleLabel:'Supervisor / Sales Manager', nip:'SIM-19-00208', client:'Arunika Elektronik & BPR Mitra Usaha', unit:'Cabang Jakarta Selatan', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}}
 };
 const PRODUCTS = [
-  {id:'tv50',name:'AQUOS 4K Google TV 50"',sku:'4T-C50FL1I',cat:'TV',price:6499000},
-  {id:'tv43',name:'AQUOS Full HD TV 43"',sku:'2T-C43EG1I',cat:'TV',price:3899000},
-  {id:'kl2p',name:'Kulkas 2 Pintu 315 L',sku:'SJ-IG316',cat:'Kulkas',price:4299000},
-  {id:'mc85',name:'Mesin Cuci Top Load 8,5 kg',sku:'ES-T85CL',cat:'Mesin Cuci',price:2199000},
-  {id:'ac1', name:'AC Inverter 1 PK',sku:'AH-X9ZEY',cat:'AC',price:4599000},
-  {id:'ap30',name:'Air Purifier Plasmacluster',sku:'FP-J30Y',cat:'Air Purifier',price:1799000}
+  {id:'tv50',name:'VISTARA 4K Google TV 50"',sku:'AR-TV50G',cat:'TV',price:6499000},
+  {id:'tv43',name:'VISTARA Full HD TV 43"',sku:'AR-TV43F',cat:'TV',price:3899000},
+  {id:'kl2p',name:'Kulkas 2 Pintu 315 L',sku:'AR-KL315',cat:'Kulkas',price:4299000},
+  {id:'mc85',name:'Mesin Cuci Top Load 8,5 kg',sku:'AR-MC85',cat:'Mesin Cuci',price:2199000},
+  {id:'ac1', name:'AC Inverter 1 PK',sku:'AR-AC1PK',cat:'AC',price:4599000},
+  {id:'ap30',name:'Air Purifier Puraklin',sku:'AR-AP30',cat:'Air Purifier',price:1799000}
 ];
 const CANVAS_PRODUCTS = [
-  {id:'rc18',name:'Rice Cooker 1,8 L',sku:'KS-N18MG',price:459000},
-  {id:'bl11',name:'Blender 1 L',sku:'EM-11',price:389000},
-  {id:'st3', name:'Setrika Listrik',sku:'EI-N3',price:179000},
-  {id:'kp16',name:'Kipas Angin Dinding 16"',sku:'PJ-A36',price:299000},
-  {id:'ds72',name:'Dispenser Galon Bawah',sku:'SWD-72EHL',price:1150000}
+  {id:'rc18',name:'Rice Cooker 1,8 L',sku:'AR-RC18',price:459000},
+  {id:'bl11',name:'Blender 1 L',sku:'AR-BL11',price:389000},
+  {id:'st3', name:'Setrika Listrik',sku:'AR-ST03',price:179000},
+  {id:'kp16',name:'Kipas Angin Dinding 16"',sku:'AR-KP16',price:299000},
+  {id:'ds72',name:'Dispenser Galon Bawah',sku:'AR-DS72',price:1150000}
 ];
 const PROMOS = [
   {id:'p1',name:'Cashback e-wallet Rp300.000',type:'cashback',products:['tv50'],value:300000,needCustomer:true},
@@ -515,7 +515,7 @@ function freshState(){
     },
     plans:[{place:'Rudi Hartanto (nasabah)',date:'28 Okt 2026',status:'Menunggu approval'}],
     sku:{t1:null,t2:null}, skuTasks:[],
-    share:{SHARP:18,Samsung:22,LG:15,Polytron:9,Lainnya:6}, shareState:null,
+    share:{ARUNIKA:18,Samsung:22,LG:15,Polytron:9,Lainnya:6}, shareState:null,
     quizDone:false, quizScore:null, surveyDone:false,
     myRequests:[], newToko:[],
     cart:null, ord:null
@@ -1047,7 +1047,7 @@ SCR['jual-detail'] = p => {
   const list=role()==='canvas'?S.canvasSales:S.sales, x=list.find(s=>s.id===p.id);
   return {note:'Detail transaksi. Kalau salah input, sales mengajukan penghapusan yang perlu disetujui supervisor.',
   html:`${appbar(x.id)}<main class="content">
-    <div class="card"><div class="kv"><span>Toko</span><span>${x.toko}</span></div><div class="kv"><span>Waktu</span><span>${dayLabel(x.d)}, ${x.time}</span></div><div class="kv"><span>Pelanggan</span><span>${x.cust||'–'}</span></div><div class="kv"><span>Status</span><span>${x.status==='Terkirim'?'Terkirim ke sistem SHARP':x.status}</span></div></div>
+    <div class="card"><div class="kv"><span>Toko</span><span>${x.toko}</span></div><div class="kv"><span>Waktu</span><span>${dayLabel(x.d)}, ${x.time}</span></div><div class="kv"><span>Pelanggan</span><span>${x.cust||'–'}</span></div><div class="kv"><span>Status</span><span>${x.status==='Terkirim'?'Terkirim ke sistem ARUNIKA':x.status}</span></div></div>
     ${x.inv?invCard(x.inv):''}<div class="sec-title">Produk</div><div class="list">${x.items.map(i=>{const pr=prodById(i.id);return `<div class="li"><div class="grow"><div class="t">${pr.name}</div><div class="s">${pr.sku} · ${i.q} × ${rp(unitOf(i,pr))}</div></div><b class="num">${rp(unitOf(i,pr)*i.q)}</b></div>`}).join('')}</div>
     <div class="kv" style="margin-top:10px;font-size:16px"><span>Total</span><span class="num">${rp(x.total)}</span></div>
   </main><footer class="actions">${x.status==='Menunggu hapus'?`<button class="btn" disabled>Menunggu approval hapus</button>`:`<button class="btn danger" onclick="act(()=>delSaleSheet('${x.id}'))">${I('trash',20)} Ajukan hapus transaksi</button>`}</footer>`};
@@ -1209,7 +1209,7 @@ function pickPromo(pid,id){ S.cart.pick=S.cart.pick||{}; S.cart.pick[pid]=id; re
 function setQty(id,d){ const r=role(); const q=(S.cart.items[id]||0)+d; const max=r==='canvas'?S.stock[id].good:99; S.cart.items[id]=Math.max(0,Math.min(max,q)); render(false,true); }
 SCR['jual-produk'] = p => {
   const r=role(), list=r==='canvas'?CANVAS_PRODUCTS:PRODUCTS, c=cartCalc(), q=(p.q||'').toLowerCase();
-  return {note:(r==='canvas'?'Langkah 2: jumlah dibatasi stok layak jual yang dibawa. Harga mengikuti toko dan cabang (MOM 6.2).':'Langkah 2: pilih produk dan jumlah. Harga mengikuti toko dan cabang (MOM 6.2). Promo dihitung otomatis; kalau ada promo yang <b>tidak bisa digabung</b>, sales memilih salah satu sesuai pilihan pelanggan (BRD 7.1.8–7.1.9). Coba tambah AQUOS 50".')+'',
+  return {note:(r==='canvas'?'Langkah 2: jumlah dibatasi stok layak jual yang dibawa. Harga mengikuti toko dan cabang (MOM 6.2).':'Langkah 2: pilih produk dan jumlah. Harga mengikuti toko dan cabang (MOM 6.2). Promo dihitung otomatis; kalau ada promo yang <b>tidak bisa digabung</b>, sales memilih salah satu sesuai pilihan pelanggan (BRD 7.1.8–7.1.9). Coba tambah VISTARA 50".')+'',
   html:`${appbar('Pilih produk')}<main class="content">
     <p class="small muted" style="margin:0 2px 10px">Langkah 2 dari 3 · ${esc(S.cart.toko)} · harga toko ini</p>
     <div class="row" style="gap:8px;margin-bottom:12px"><div style="position:relative;flex:1"><span style="position:absolute;left:14px;top:14px;color:var(--muted)">${I('search',20)}</span><input class="input" style="padding-left:44px" placeholder="Cari produk atau SKU" value="${esc(p.q||'')}" oninput="cur().p.q=this.value;clearTimeout(window._qs);window._qs=setTimeout(()=>{render(false,true);const i=document.querySelector('.content input');i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)"></div></div>
@@ -1264,7 +1264,7 @@ function saveSale(){
   go('jual-sukses',{id,total:c.total,off:S.demo.offline});
 }
 SCR['jual-sukses'] = p => ({note:p.off?'<span class="tagx">Usulan</span><b>Mode offline.</b> Transaksi disimpan di HP lalu dikirim otomatis saat sinyal kembali. Coba ubah Koneksi ke Online di panel.':'Penjualan tersimpan dan terkirim ke sistem klien. Pencapaian target ikut ter-update.',
-  html:`<div class="result" style="padding-top:var(--sb)">${bigRing('#12875F','check')}<h2>Penjualan tersimpan</h2><p>${p.id} senilai <b class="num">${rp(p.total)}</b> ${p.off?'tersimpan di HP dan akan dikirim otomatis saat online.':'sudah tercatat dan terkirim ke sistem SHARP.'}</p></div>
+  html:`<div class="result" style="padding-top:var(--sb)">${bigRing('#12875F','check')}<h2>Penjualan tersimpan</h2><p>${p.id} senilai <b class="num">${rp(p.total)}</b> ${p.off?'tersimpan di HP dan akan dikirim otomatis saat online.':'sudah tercatat dan terkirim ke sistem ARUNIKA.'}</p></div>
   <footer class="actions stack"><button class="btn" onclick="S.stack.pop();startSale()">Catat penjualan lain</button><button class="btn ghost" onclick="back()">Selesai</button></footer>`});
 
 SCR.scan = p => ({dark:true, note:'Scan QR atau barcode produk di rak. Nama produk dan SKU otomatis masuk ke SKU Display (MOM 7).',
@@ -1611,7 +1611,7 @@ function saveSku(t){
   back(); toast(bad.length?`SKU display tersimpan, ${bad.length} task perbaikan dibuat`:`SKU display ${toko.name} tersimpan`);
 }
 SCR.share = () => {
-  const sh=S.share, tot=Object.values(sh).reduce((s,x)=>s+x,0)||1, colors={SHARP:'#0AA5EE',Samsung:'#123F75',LG:'#F09A66',Polytron:'#8FB8D8',Lainnya:'#C9D5E2'}, st=S.shareState;
+  const sh=S.share, tot=Object.values(sh).reduce((s,x)=>s+x,0)||1, colors={ARUNIKA:'#0AA5EE',Samsung:'#123F75',LG:'#F09A66',Polytron:'#8FB8D8',Lainnya:'#C9D5E2'}, st=S.shareState;
   return {note:'Market share diinput harian per toko (MOM 8). Produk kompetitor bisa ditambah manual, harga opsional. Draft tidak masuk laporan; hanya data yang sudah check-out yang ditarik ke report. Satu toko bisa diinput lebih dari satu orang, report mengambil rata-rata.',
   html:`${appbar('Market share')}<main class="content">
     <div class="row" style="gap:8px;margin-bottom:12px"><select class="input grow"><option>Electronic City Kemang</option><option>Best Denki Senayan City</option></select><select class="input" style="width:120px"><option>TV</option><option>Kulkas</option><option>Mesin Cuci</option></select></div>
@@ -1620,7 +1620,7 @@ SCR.share = () => {
       <div style="display:flex;height:16px;border-radius:99px;overflow:hidden;margin:12px 0">${Object.entries(sh).map(([k,v])=>`<i style="width:${v/tot*100}%;background:${colors[k]||'#9AA9BC'}"></i>`).join('')}</div>
       <div class="row" style="flex-wrap:wrap;gap:6px 14px">${Object.entries(sh).map(([k,v])=>`<span class="small"><i style="display:inline-block;width:9px;height:9px;border-radius:3px;background:${colors[k]||'#9AA9BC'};margin-right:5px"></i>${esc(k)} <b class="num">${Math.round(v/tot*100)}%</b></span>`).join('')}</div></div>
     <div class="sec-title">Unit terjual hari ini <a onclick="shareAddSheet()">+ Tambah kompetitor</a></div>
-    <div class="list">${Object.keys(sh).map(k=>`<div class="li"><div class="grow"><div class="t">${esc(k)}${k==='SHARP'?' '+chip('Klien','blue'):''}</div></div><div class="stepper"><button onclick="act(()=>{S.share['${k}']=Math.max(0,S.share['${k}']-1);render(false,true)})">${I('minus',18,2.2)}</button><span class="num">${sh[k]}</span><button onclick="act(()=>{S.share['${k}']++;render(false,true)})">${I('plus',18,2.2)}</button></div></div>`).join('')}</div>
+    <div class="list">${Object.keys(sh).map(k=>`<div class="li"><div class="grow"><div class="t">${esc(k)}${k==='ARUNIKA'?' '+chip('Klien','blue'):''}</div></div><div class="stepper"><button onclick="act(()=>{S.share['${k}']=Math.max(0,S.share['${k}']-1);render(false,true)})">${I('minus',18,2.2)}</button><span class="num">${sh[k]}</span><button onclick="act(()=>{S.share['${k}']++;render(false,true)})">${I('plus',18,2.2)}</button></div></div>`).join('')}</div>
     <p class="hint" style="margin-top:12px">Draft tidak masuk laporan. Data masuk laporan setelah kamu check-out dari toko.</p>
   </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="act(()=>{S.shareState='draft';render(false,true);toast('Draft tersimpan, belum masuk laporan')})">Simpan draft</button><button class="btn" onclick="act(()=>{S.shareState='kirim';back();toast('Market share tersimpan')})">Simpan</button></footer>`};
 };
@@ -1640,13 +1640,13 @@ function shareAdd(){
 
 /* ---------- Quiz, Leaderboard, Survey ---------- */
 const QUIZ=[
-  {q:'Teknologi pemurni udara khas SHARP disebut…',o:['Plasmacluster','Nanoe X','Ionizer Pro','HEPA Max'],a:0},
-  {q:'AQUOS 4T-C50FL1I menggunakan sistem operasi…',o:['Tizen','Google TV','webOS','VIDAA'],a:1},
+  {q:'Teknologi pemurni udara khas ARUNIKA disebut…',o:['Puraklin','Udara Segar','Ionizer Pro','HEPA Max'],a:0},
+  {q:'VISTARA AR-TV50G menggunakan sistem operasi…',o:['Tizen','Google TV','webOS','VIDAA'],a:1},
   {q:'Promo cashback e-wallet wajib disertai…',o:['Foto toko','Nota manual','Data pelanggan','Tanda tangan SPV'],a:2}
 ];
 SCR.quiz = () => ({note:'Quiz dibuat admin di Web, sales mengerjakannya di mobile. Skor langsung tampil, lalu ada feedback dan leaderboard top 10 (BRD III.2.8).',
   html:`${appbar('Quiz')}<main class="content">
-    <div class="card"><div class="row"><div class="ico-tile tan">${I('quiz',22)}</div><div class="grow"><b>Product knowledge AQUOS & Plasmacluster</b><div class="small muted">3 soal · 5 menit · berlaku s.d. 31 Okt</div></div></div>
+    <div class="card"><div class="row"><div class="ico-tile tan">${I('quiz',22)}</div><div class="grow"><b>Product knowledge VISTARA & Puraklin</b><div class="small muted">3 soal · 5 menit · berlaku s.d. 31 Okt</div></div></div>
       ${S.quizDone?`<div class="kv" style="margin-top:10px"><span>Skor kamu</span><span class="num">${S.quizScore}/100</span></div>`:`<button class="btn" style="margin-top:14px" onclick="go('quiz-main',{i:0,ans:[]})">Mulai quiz</button>`}</div>
     <div class="list" style="margin-top:14px"><div class="li"><div class="ico-tile green">${I('check',20)}</div><div class="grow"><div class="t">SOP pencatatan penjualan</div><div class="s">Selesai 12 Okt</div></div><b class="num">90</b></div></div>
     <button class="btn sec" style="margin-top:14px" onclick="go('leaderboard')">${I('trophy',20)} Lihat leaderboard</button>
@@ -1669,7 +1669,7 @@ SCR['quiz-hasil'] = p => ({note:'Skor langsung tampil setelah submit, lalu user 
 SCR.leaderboard = () => {
   const me=U().name, base=[['Putri Ayuningtyas',100],['Fajar Nugroho',100],['Rina Marlina',95],['Kevin Halim',90],['Sinta Dewi',90],['Budi Santoso',85],['Rizky Maulana',80],['Dimas Prasetyo',80],['Ayu Lestari',75],['Andi Wijaya',70]];
   return {note:'Leaderboard 10 besar skor quiz (BRD 6.1.14).',
-  html:`${appbar('Leaderboard')}<main class="content"><p class="small muted" style="margin:0 2px 12px">Product knowledge AQUOS & Plasmacluster · seluruh cabang</p>
+  html:`${appbar('Leaderboard')}<main class="content"><p class="small muted" style="margin:0 2px 12px">Product knowledge VISTARA & Puraklin · seluruh cabang</p>
   <div class="list">${base.map((b,i)=>`<div class="li" style="${b[0]===me?'background:var(--blue-50)':''}"><span class="rank ${i<3?'top':''}">${i+1}</span><div class="av ${b[0]===me?'blue':''}" style="width:34px;height:34px;font-size:12px">${b[0].split(' ').map(s=>s[0]).join('')}</div><div class="grow"><div class="t">${b[0]}${b[0]===me?' (kamu)':''}</div></div><b class="num">${b[1]}</b></div>`).join('')}</div></main>`};
 };
 SCR.survey = p => ({note:'Survey dari admin (scala, true/false, isian singkat) diisi di mobile (BRD 0.12, fitur 31).',
@@ -1686,7 +1686,7 @@ SCR.notif = () => {
   const r=role();
   const n = r==='spv'?[['check','amber','Budi Santoso absen terlambat','Perlu approval · 08:22'],['users','blue','4 leads baru masuk dari backend','Siap di-assign · 06:00'],['alert','red','4 nasabah lewat jatuh tempo','Data overdue diperbarui · 06:00']]
   : r==='leads'?[['clock','amber','Jangan lupa absen pulang','Pengingat otomatis setelah jam kerja 17:00'],['users','blue','2 leads baru di-assign ke kamu','Dari Sari Wulandari · 07:30'],['calendar','tan','Pengingat: kunjungan Ahmad Fauzi','Hari ini, 10:00'],['check','green','Deal Hendra Saputra diterima SIM','23 Okt']]
-  : [['clock','amber','Jangan lupa absen pulang','Pengingat otomatis setelah jam kerja 17:00'],['calendar','tan','Pengingat kunjungan besok','Notifikasi H-1 · 27 Okt'],['check','green','Absen terlambat 23 Okt disetujui','Oleh Sari Wulandari'],['quiz','blue','Quiz baru: Product knowledge AQUOS','Berlaku s.d. 31 Okt']];
+  : [['clock','amber','Jangan lupa absen pulang','Pengingat otomatis setelah jam kerja 17:00'],['calendar','tan','Pengingat kunjungan besok','Notifikasi H-1 · 27 Okt'],['check','green','Absen terlambat 23 Okt disetujui','Oleh Sari Wulandari'],['quiz','blue','Quiz baru: Product knowledge VISTARA','Berlaku s.d. 31 Okt']];
   return {note:'Notifikasi: pengingat absen pulang (BRD 1.10.20), approval, penugasan H-1 (BRD 4.1.14), leads baru, quiz.',
   html:`${appbar('Notifikasi')}<main class="content"><div class="list">${n.map(x=>`<div class="li"><div class="ico-tile ${x[1]}">${I(x[0],20)}</div><div class="grow"><div class="t">${x[2]}</div><div class="s">${x[3]}</div></div></div>`).join('')}</div></main>`};
 };
