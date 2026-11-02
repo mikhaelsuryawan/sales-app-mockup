@@ -14,7 +14,7 @@ Dokumen sumber kanonis ada di repo `docs` (`../docs/00-sources`, daftar di `REGI
 | `URD_Sales_Automation.pdf` | URD Sales Automation (April 2026): leads pinjaman, assign manager ke member, status Deal/Prospect/Rejected, goal, kirim ke SIM, overdue. 12 halaman |
 | `MOM_Gabungan_27-28_Okt_2026.docx` dan `Notes_Meeting_27-28_Okt_2026.docx` | Catatan workshop dengan client |
 
-Rangkuman workshop yang sudah dirapikan: `../docs/00-sources/inbox/hasil-workshop-27-28-okt-2026.md` (juga `.docx`), menunggu intake. Pertanyaan yang disiapkan sebelum workshop: `../docs/00-sources/inbox/pertanyaan-workshop-requirement.md`.
+Rangkuman workshop yang sudah dirapikan: `../docs/01-product/analysis/HASIL_WORKSHOP_27-28_OKT_2026.md`. Pertanyaan yang disiapkan sebelum workshop: `../docs/01-product/analysis/PERTANYAAN_WORKSHOP_REQUIREMENT.md`.
 
 ## 2. Isi folder
 
@@ -62,7 +62,7 @@ Semua data dummy. CRUD bekerja di memori (hilang saat reload). Mobile dan dashbo
 
 ## Status revisi MOM 27-28 Okt 2026
 
-Acuan revisi: `../docs/00-sources/inbox/MOM-SIM-Group-Sales-App-27-28-Oktober-2026.docx`.
+Acuan revisi: `../docs/00-sources/extracted/S5-mom-workshop-27-28-okt-2026.md`.
 
 - **Tahap 1 (ubah layar yang ada): selesai.** Bagian 4 di atas masih menggambarkan kondisi sebelum revisi. Yang berubah: estimasi insentif dan target per toko dihapus dari mobile; Rejected menjadi Belum Tertarik dengan tiga turunan; proses sendiri dihapus; Sales Member menjadi Multi Finance; jadwal kunjungan dibuat Team Leader; check-in dan check-out memakai 2-3 foto ber-watermark dengan auto check-out; SKU display dan market share harian; harga principal dan harga toko di OCR; foto pelanggan wajib; scan barcode pindah dari penjualan ke SKU display; menu Quiz dan Survey dipisah; harga per toko dan cabang; badge sidebar dihapus.
 - **Tahap 2 (role, hak akses, master data, laporan): selesai.** Mobile punya 14 user demo. Dashboard punya 16 role dengan izin membuat jadwal per role, Sales Structure Approval, master Region, Brand, Kategori produk, Satuan, Mitra, mapping produk per outlet, formula grading per klien dan role, serta laporan SKU display dan market share. Trainer hanya ada di dashboard karena tugasnya belum dirinci klien. Role baru di mobile masih memakai alur role dasarnya; alur khususnya ada di Tahap 3.
