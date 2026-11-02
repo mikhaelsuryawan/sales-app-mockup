@@ -493,6 +493,8 @@ function freshState(){
       {id:'PO-2210-061',toko:'Toko Abadi Jaya',items:[{id:'ac1',q:2}],total:9198000,date:'22 Okt 2026',ship:'23 Okt 2026',status:'Lunas',tone:'green',fu:[{t:'Pesanan dibuat',s:'22 Okt, 11:00'},{t:'Dikirim',s:'23 Okt, 08:30'},{t:'Diterima toko',s:'23 Okt, 14:12'},{t:'Pembayaran lunas',s:'25 Okt, 10:40 · Transfer'}]}
     ],
     leads:[
+      {id:'L-2610-051',name:'Hasan Basri',prod:'Kredit Multiguna',amount:9000000,tenor:12,phone:'0812-7000-3301',job:'Karyawan',addr:'Cilandak',cabang:'Cilandak',status:'Baru',date:'26 Okt 2026',log:[]},
+      {id:'L-2610-052',name:'Intan Permata',prod:'Kredit Modal Kerja',amount:18000000,tenor:24,phone:'0812-7000-3302',job:'Pedagang',addr:'Cilandak',cabang:'Cilandak',status:'Baru',date:'26 Okt 2026',log:[]},
       {id:'L-2610-041',name:'Rahmat Hidayat',prod:'Kredit Modal Kerja',amount:15000000,tenor:24,phone:'0812-7000-1101',job:'Pedagang',addr:'Cilandak',status:'Baru',owner:'cbd.tono',date:'26 Okt 2026',log:[]},
       {id:'L-2610-042',name:'Dewi Anggun',prod:'Kredit Multiguna',amount:12000000,tenor:18,phone:'0812-7000-1102',job:'Karyawan',addr:'Fatmawati',status:'Baru',owner:'rea.nina',date:'26 Okt 2026',log:[]},
       {id:'L-2610-031',age:'masuk 12 mnt lalu',name:'Ahmad Fauzi',prod:'Kredit Modal Kerja',amount:10000000,tenor:12,phone:'0812-8841-2207',job:'Pedagang sembako',addr:'Jl. Fatmawati Raya No. 41, Cilandak',status:'Baru',owner:'sales.andi',date:'26 Okt 2026',log:[]},
@@ -518,7 +520,7 @@ function freshState(){
       {id:'a3',type:'Hapus penjualan',u:'spg.rina',detail:'TRX-2510-0087 · Kulkas 2 Pintu · Rp4.084.050',reason:'Salah pilih produk, seharusnya Mesin Cuci',when:'Kemarin'}
     ],
     visits:{
-      spg:[{id:'v1',place:'Electronic City Kemang',time:'08:00 – 13:00',tasks:['Cek SKU display','Penjualan'],status:'Berjalan',photos:{},cin:'08:03'},{id:'v2',place:'Best Denki Senayan City',time:'14:00 – 17:00',tasks:['Survey toko','Cek SKU display'],status:'Belum',photos:{}}],
+      spg:[{id:'v1',place:'Electronic City Kemang',time:'08:00 – 13:00',tasks:['Cek SKU display','Penjualan'],status:'Berjalan',photos:{},cin:'08:03'},{id:'v2',place:'Best Denki Senayan City',time:'14:00 – 17:00',tasks:['Survey toko','Cek SKU display','Quiz'],status:'Belum',photos:{}}],
       canvas:[{id:'v1',place:'Toko Sinar Jaya Elektronik',time:'09:00',tasks:['Penjualan','Ambil retur'],status:'Selesai',photos:{0:1,1:1},cin:'09:02',cout:'09:31',dur:'29 mnt'},{id:'v2',place:'Toko Makmur Abadi',time:'10:30',tasks:['Penjualan'],status:'Belum',photos:{}},{id:'v3',place:'Toko Berkah Elektronik',time:'13:00',tasks:['Penjualan','Cek display'],status:'Belum',photos:{}},{id:'v4',place:'Toko Cahaya Baru',time:'15:00',tasks:['Penjualan'],status:'Belum',photos:{}}],
       order:[{id:'v1',place:'Toko Mega Elektronik',time:'10:00',tasks:['Ambil pesanan'],status:'Selesai',photos:{0:1},cin:'10:04',cout:'10:30',dur:'26 mnt'},{id:'v2',place:'CV Sumber Rejeki Elektronik',time:'13:30',tasks:['Ambil pesanan','Penagihan'],status:'Belum',photos:{}},{id:'v3',place:'Toko Abadi Jaya',time:'15:30',tasks:['Ambil pesanan'],status:'Belum',photos:{}}],
       leads:[{id:'v1',place:'Ahmad Fauzi (nasabah)',time:'10:00',tasks:['Survey usaha'],status:'Belum',photos:{}},{id:'v2',place:'Yuliana Putri (nasabah)',time:'14:00',tasks:['Verifikasi dokumen'],status:'Belum',photos:{}}],
@@ -526,6 +528,7 @@ function freshState(){
       spv:[{id:'v1',place:'Electronic City Kemang',time:'11:00',tasks:['Supervisi SPG'],status:'Belum',photos:{}}]
     },
     plans:[{place:'Rudi Hartanto (nasabah)',date:'28 Okt 2026',status:'Menunggu approval'}],
+    canvasArea:{'sales.budi':'Rute Pasar Minggu – Cilandak'}, cabang:'Fatmawati', sharePrice:{},
     sku:{t1:null,t2:null}, skuTasks:[{t:'t1',id:'kl2p',toko:'Electronic City Kemang',st:'Sedang diperbaiki'}],
     fm:{stok:{},extra:[],stokDone:false,foto:{},facing:0,tasks:[{t:'Bersihkan etalase depan',from:'Dari Team Leader',done:false}]}, posm:{}, mitraLog:{}, cbdDone:false, notifOn:{in:true,out:true}, sound:'Bawaan',
     bawa:{rc18:8,bl11:6,st3:9,kp16:5,ds72:2}, kembali:{}, muatInv:[], receipt:false,
@@ -554,7 +557,9 @@ const cur = () => S.stack[S.stack.length-1];
 const prodById = id => PRODUCTS.find(p=>p.id===id) || CANVAS_PRODUCTS.find(p=>p.id===id);
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const val = id => (document.getElementById(id)?.value||'').trim();
-const allToko = () => [...TOKO.spg,...TOKO.canvas,...TOKO.order,...S.newToko];
+const EXTRA_TOKO=[{id:'t3',name:'Electronic Solution Puri',addr:'Puri Indah Mall Lt. 2',cat:'Modern Retail'},{id:'ev1',name:'Event Pameran Elektronik Kota Kasablanka',addr:'Atrium Lt. 1 · 24–26 Okt',cat:'Event',event:true}];
+const isMobilePromo = () => U()?.roleLabel==='Mobile Promotor';
+const allToko = () => [...TOKO.spg,...TOKO.canvas,...TOKO.order,...EXTRA_TOKO,...S.newToko];
 const tokoById = id => allToko().find(t=>t.id===id);
 const tokoByName = n => allToko().find(t=>t.name===n);
 const priceAt = (p,tokoName) => Math.round(p.price*(CATF[tokoByName(tokoName)?.cat]||1)/1000)*1000;
@@ -701,7 +706,7 @@ SCR['enroll-done'] = () => { S.enrolled[S.user]=true; return {note:'Wajah refere
 
 /* ---------- Home ---------- */
 const MENUS = {
-  spg:[['Catat penjualan','bag',"act(()=>startSale())",1],['Riwayat penjualan','file',"tab('penjualan')"],['SKU display','grid',"go('sku')"],['Market share','pie',"go('share')"],['POSM & planogram','image',"go('posm')"],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  spg:[['Catat penjualan','bag',"act(()=>startSale())",1],['Riwayat penjualan','file',"tab('penjualan')"],['SKU display','grid',"go('sku')"],['Market share','pie',"go('share')"],['Stock opname','box',"go('fm-stok')"],['Campaign & POSM','image',"go('posm')"],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   canvas:[['Jual dari stok','bag',"act(()=>startSale())",1],['Stok bawaan','box',"go('stok')"],['Catat retur','retur',"act(()=>go('stok-form',{kind:'retur'}))",1],['Usulkan toko','plus',"act(()=>go('toko-baru'))",1],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   order:[['Buat pesanan','order',"act(()=>startOrder())",1],['Daftar pesanan','file',"tab('pesanan')"],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Usulkan toko','plus',"act(()=>go('toko-baru'))",1],['Ajukan izin','file',"go('izin')"]],
   leads:[['Leads saya','users',"tab('leads')"],['Buat leads','plus',"act(()=>go('lead-baru'))",1],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
@@ -709,7 +714,7 @@ const MENUS = {
   cbd:[['Leads saya','users',"tab('leads')"],['Buat leads','plus',"act(()=>go('lead-baru'))",1],['Mitra saya','user',"go('mitra')"],['Task Team Leader','check',"go('cbd-task')"],['Kunjungan','route',"tab('kunjungan')"],['Target & KPI','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   arco:[['Assign leads','users',"go('assign')"],['Semua leads','file',"go('leads-all')"],['Tim saya','user',"tab('tim')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   bantuan:[['Catat penjualan','bag',"act(()=>startSale())",1],['Riwayat penjualan','file',"tab('penjualan')"],['Kunjungan','route',"tab('kunjungan')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
-  spv:[['Approval','check',"go('approval')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tugaskan tim','route',"act(()=>go('kunjungan-form',{spv:1}))",1],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Kunjungan','calendar',"tab('kunjungan')"],['Quiz','quiz',"go('quiz')"]]
+  spv:[['Approval','check',"go('approval')"],['Assign canvasser','route',"go('assign-canvas')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tugaskan tim','route',"act(()=>go('kunjungan-form',{spv:1}))",1],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Kunjungan','calendar',"tab('kunjungan')"],['Quiz','quiz',"go('quiz')"]]
 };
 function attCard(){
   const a=att(), m=mode();
@@ -771,7 +776,8 @@ function fieldDash(){
   return `<div class="sec-title">Penjualan hari ini <a onclick="go('target')">Target</a></div>
   <div class="card"><div class="row between"><div><div class="small muted">Terjual</div><div class="big-num num">${rpShort(today)}</div></div><div style="text-align:right"><div class="small muted">Target hari ini</div><b class="num">${rpShort(target)}</b></div></div>
   <div class="bar" style="margin:12px 0 6px"><i style="width:${Math.min(100,today/target*100)}%"></i></div>
-  <div class="small muted">${Math.round(today/target*100)}% tercapai · Objektif hari ini 3 unit · ${list.length} transaksi${r==='canvas'?` · Stok layak jual ${Object.values(S.stock).reduce((s,x)=>s+x.good,0)} unit`:''}</div></div>
+  <div class="stat3" style="margin:6px 0"><div><small>Target hari ini</small><b>${rpShort(target)}</b></div><div><small>Sudah terjual</small><b style="color:var(--green)">${rpShort(today)}</b></div><div><small>Objektif</small><b>${list.reduce((s,x)=>s+x.items.reduce((a,i)=>a+i.q,0),0)}<span class="muted small">/${r==='canvas'?12:3} unit</span></b></div></div>
+  <div class="small muted">${Math.round(today/target*100)}% tercapai · ${list.length} transaksi${r==='canvas'?` · Stok layak jual ${Object.values(S.stock).reduce((s,x)=>s+x.good,0)} unit`:''}</div></div>
   ${todayVisits()}`;
 }
 function todayVisits(){
@@ -845,10 +851,11 @@ function mapSvg(m,inR,loaded){
 }
 SCR['absen-lokasi'] = p => {
   const m=mode(), u=U(), inR=S.demo.inRadius, loaded=!!p.loaded, isIn=p.mode==='in';
-  const blocked = loaded && m==='WFO' && !inR;
+  const blocked = loaded && ((m==='WFO' && !inR) || m==='OFF');
   const dist = m==='WFO' ? (inR?'38 m':'1,2 km') : '';
   let status;
   if(!loaded) status = `<div class="banner blue">${I('pin',18)}<span>Mengambil lokasi GPS kamu…</span></div>`;
+  else if(m==='OFF') status = `<div class="banner">${I('calendar',18)}<span><b>Jadwal OFF.</b> Hari ini jadwal libur kamu dari data BPR, jadi absen tidak tersedia. Libur di luar weekend mengikuti jadwal off individu (MOM 4).</span></div>`;
   else if(m==='WFA') status = `<div class="banner green">${I('check',18,2.2)}<span><b>Work From Anywhere.</b> Hari ini kamu bisa absen dari lokasi mana pun. Lokasi tetap direkam.</span></div>`;
   else if(inR) status = `<div class="banner green">${I('check',18,2.2)}<span>Kamu berada <b>${dist}</b> dari ${u.place}. Masih di dalam radius absen.</span></div>`;
   else status = `<div class="banner red">${I('alert',18)}<span>Kamu berada <b>${dist}</b> dari ${u.place}. Jadwal hari ini WFO, jadi absen hanya bisa dalam radius 100 m dari lokasi kerja.</span></div>`;
@@ -866,7 +873,7 @@ SCR['absen-lokasi'] = p => {
     </div>
   </main>
   <footer class="actions">${blocked
-    ? `<button class="btn ghost" onclick="cur().p.loaded=false;render(false)">${I('refresh',20)} Perbarui lokasi</button><button class="btn" disabled>Di luar radius</button>`
+    ? `${m==='OFF'?'':`<button class="btn ghost" onclick="cur().p.loaded=false;render(false)">${I('refresh',20)} Perbarui lokasi</button>`}<button class="btn" disabled>${m==='OFF'?'Jadwal OFF':'Di luar radius'}</button>`
     : `<button class="btn" ${loaded?'':'disabled'} onclick="go('absen-selfie',{mode:'${p.mode}'})">${I('camera',20)} Lanjut selfie</button>`}</footer>`};
 };
 SCR['absen-selfie'] = p => {
@@ -942,6 +949,10 @@ function daySummary(){
 }
 
 /* ---------- Kunjungan / Penugasan ---------- */
+const AREA_CANVAS=['Rute Pasar Minggu – Cilandak','Rute Kebon Jeruk – Kembangan','Area Fatmawati – Bintaro'];
+SCR['assign-canvas'] = () => ({note:'Jika promotor adalah canvasser, Team Leader meng-assign area atau toko ke promotor itu. Promotor elektronik yang stay di toko tidak perlu di-assign (MOM 11.1).',
+  html:`${appbar('Assign canvasser')}<main class="content"><div class="list">${[['sales.budi','Budi Santoso',1],['sales.dimas','Dimas Prasetyo',1],['mobile.fikri','Fikri Ramadhan',1],['spg.rina','Rina Marlina',0]].map(([u,n,c])=>`<button class="li" ${c?`onclick="act(()=>canvasSheet('${u}'))"`:'disabled'}><div class="av blue">${USERS[u].init}</div><div class="grow"><div class="t">${n}</div><div class="s">${c?(S.canvasArea[u]||'Belum di-assign'):'Stay di toko, tidak perlu assign'}</div></div>${c?I('right',18):''}</button>`).join('')}</div></main>`});
+function canvasSheet(u){ sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Assign ${USERS[u].name.split(' ')[0]} ke</h3><div class="list">${AREA_CANVAS.map(a=>`<button class="li" onclick="S.canvasArea['${u}']='${a}';closeSheet();render(false,true);toast('Area di-assign')"><div class="grow"><div class="t">${a}</div></div></button>`).join('')}</div>`); }
 const canSchedule = r => (r==='spv'&&U().menu!=='arco')||r==='fmcg';
 SCR.kunjungan = p => {
   const seg=p.seg||'hari', r=role();
@@ -970,7 +981,7 @@ SCR['kunjungan-detail'] = p => {
       ${x.cin?`<div class="kv" style="margin-top:8px"><span>Check-in</span><span class="num">${x.cin} · 24 m dari titik toko</span></div>${x.cout?`<div class="kv"><span>Check-out</span><span class="num">${x.cout} · durasi ${x.dur}</span></div>`:''}`
       :`<div class="banner blue" style="margin-top:12px">${I('pin',18)}<span>Check-in saat sudah sampai. Lokasi kamu dicocokkan dengan titik toko (radius 100 m).</span></div>`}</div>
     <div class="sec-title">Tugas</div>
-    <div class="list">${x.tasks.map(t=>`<div class="li"><div class="ico-tile">${I('check',18,2.2)}</div><div class="grow"><div class="t">${t}</div></div></div>`).join('')}</div>
+    <div class="list">${x.tasks.map(t=>/^(Quiz|Survey)$/.test(t)?`<button class="li" onclick="go('${t.toLowerCase()}')"><div class="ico-tile tan">${I(t==='Quiz'?'quiz':'survey',18,2)}</div><div class="grow"><div class="t">${t}</div><div class="s">Dikerjakan di dalam kunjungan</div></div>${I('right',18)}</button>`:`<div class="li"><div class="ico-tile">${I('check',18,2.2)}</div><div class="grow"><div class="t">${t}</div></div></div>`).join('')}</div>
     ${x.cin?`<div class="sec-title">Foto check-in</div><div class="thumbs">${visitPhotos(x,'in')}</div>`:''}
     ${x.cout?`<div class="sec-title">Foto check-out</div><div class="thumbs">${visitPhotos(x,'out')}</div>`:''}
     <label class="field" style="margin-top:14px"><span>Catatan (opsional)</span><textarea class="input" placeholder="Hasil kunjungan, kendala, dll."></textarea></label>
@@ -1023,7 +1034,7 @@ SCR['kunjungan-form'] = p => {
   const spv=!!p.spv, kind=p.kind||'adhoc', tasks=p.tasks||[];
   const r=role();
   const places = spv?['Electronic City Kemang','Best Denki Senayan City','Toko Makmur Abadi','Ahmad Fauzi (nasabah)']:r==='leads'?S.leads.filter(l=>l.owner===S.user).map(l=>l.name+' (nasabah)'):(TOKO[r]||TOKO.spg).map(t=>t.name);
-  const taskOpts = r==='fmcg'?['Cek stok','Price promo','Facing display','Support task']:r==='leads'?['Survey usaha','Verifikasi dokumen','Tanda tangan akad','Penagihan']:['Penjualan','Cek SKU display','Survey toko','Ambil pesanan','Penagihan'];
+  const taskOpts = r==='fmcg'?['Cek stok','Price promo','Facing display','Support task','Quiz','Survey']:r==='leads'?['Survey usaha','Verifikasi dokumen','Tanda tangan akad','Penagihan']:['Penjualan','Cek SKU display','Survey toko','Ambil pesanan','Penagihan'];
   return {note:spv?'Team Leader menjadwalkan kunjungan anggota tim: sekali atau berkala dengan periode harian, mingguan, 2 mingguan, atau bulanan (MOM 5.1).':'Promotor FMCG dan MD membuat jadwal sendiri, 1 hari 1 toko, dengan periode harian, mingguan, 2 mingguan, atau bulanan (MOM 5.1, 10.1).',
   html:`${appbar(spv?'Tugaskan ke tim':'Tambah kunjungan')}<main class="content">
     ${spv?`<label class="field"><span>Anggota tim</span><select class="input"><option>Rina Marlina – SPG</option><option>Budi Santoso – Canvasing</option><option>Dimas Prasetyo – Taking Order</option><option>Andi Wijaya – Leads</option></select></label>`:''}
@@ -1080,11 +1091,11 @@ function delSaleSheet(id){
   <button class="btn danger" onclick="const l=role()==='canvas'?S.canvasSales:S.sales;l.find(s=>s.id==='${id}').status='Menunggu hapus';closeSheet();render(false);toast('Pengajuan hapus dikirim ke supervisor')">Kirim pengajuan</button>`);
 }
 function tokoPicker(r,pickFn){
-  const active=[...TOKO[r],...S.newToko.filter(t=>t.role===r&&t.status==='Aktif')];
+  const active=[...TOKO[r],...(r==='spg'&&isMobilePromo()?EXTRA_TOKO:[]),...S.newToko.filter(t=>t.role===r&&t.status==='Aktif')];
   const pend=S.newToko.filter(t=>t.role===r&&t.status!=='Aktif');
   return `<div class="list">${active.map(t=>`<button class="li" onclick="${pickFn}('${t.id}')"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t">${esc(t.name)}${t.isNew?' '+chip('Baru','green'):''}</div><div class="s">${esc(t.addr)} · ${t.cat}</div></div>${I('right',20)}</button>`).join('')}</div>
   ${pend.length?`<div class="sec-title">Menunggu verifikasi</div><div class="list">${pend.map(t=>`<button class="li" onclick="pendingTokoSheet('${t.id}')"><div class="ico-tile amber">${I('clock',20)}</div><div class="grow"><div class="t">${esc(t.name)}</div><div class="s">${esc(t.addr)}</div></div>${chip('Diverifikasi admin','amber')}</button>`).join('')}</div>`:''}
-  ${r==='spg'?`<p class="hint" style="margin-top:12px">Hanya toko yang ditugaskan ke kamu. Untuk berjualan di toko lain, minta supervisor menugaskanmu ke toko tersebut.</p>`
+  ${r==='spg'&&isMobilePromo()?`<p class="hint" style="margin-top:12px">Mobile Promotor berpindah ke beberapa toko dan bisa berjualan di event tertentu (MOM 1, 11.2). Event muncul selama masa acara.</p>`:r==='spg'?`<p class="hint" style="margin-top:12px">Hanya toko yang ditugaskan ke kamu. Untuk berjualan di toko lain, minta supervisor menugaskanmu ke toko tersebut.</p>`
   :`<button class="btn ghost" style="margin-top:14px" onclick="act(()=>go('toko-baru'))">${I('plus',20)} Usulkan toko baru</button><p class="hint" style="text-align:center">Toko belum terdaftar? Usulkan ke admin untuk diverifikasi.</p>`}`;
 }
 function pickSaleToko(id){ S.cart.toko=tokoById(id).name; S.cart.inv=null; S.cart.noInv=null; S.cart.items={}; go('jual-invoice'); }
@@ -1430,6 +1441,10 @@ function fuSheet(id){
 const LTONE={Baru:'blue',Prospect:'amber',Deal:'green','Belum Tertarik':'red'};
 const leadClosed = l => l.status==='Deal'||l.sub==='Rejected';
 const leadLabel = l => l.sub?l.status+' · '+l.sub:l.status;
+const leadCab = l => l.cabang||'Fatmawati';
+function cabangSheet(){ sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Pindah cabang</h3><div class="list">${['Fatmawati','Cilandak'].map(c=>`<button class="li" onclick="pindahCabang('${c}')"><div class="grow"><div class="t">${c}</div><div class="s">${S.leads.filter(l=>leadCab(l)===c).length} leads</div></div>${S.cabang===c?chip('Sekarang','green'):''}</button>`).join('')}</div>`); }
+function pindahCabang(c){ S.cabang=c; closeSheet(); render(false,true); toast('Sekarang di cabang '+c+', '+S.leads.filter(l=>leadCab(l)===c).length+' leads diterima'); }
+function moveType(){ const u=U(), rl=u.roleLabel; if(/Canvas|Taking|CBD|Mobile/.test(rl)||u.role==='canvas'||u.role==='order') return 'Bergerak (lebih dari 1 toko)'; if(u.role==='spg') return TOKO.spg.length>1?'Bergerak (lebih dari 1 toko)':'Diam (1 toko)'; if(u.role==='fmcg'||/REA/.test(rl)) return 'Diam (1 lokasi)'; return '–'; }
 function leadRow(l,showOwner){
   return `<button class="li" onclick="go('lead-detail',{id:'${l.id}'})"><div class="av ${l.status==='Baru'?'blue':''}">${l.name.split(' ').map(s=>s[0]).join('').slice(0,2)}</div><div class="grow"><div class="t">${l.name}</div><div class="s">${l.prod} · ${rpShort(l.amount)}${showOwner?' · '+(l.owner?USERS[l.owner].name.split(' ')[0]:'Belum di-assign'):''}${l.status==='Baru'&&l.age?' · '+l.age:''}${l.status==='Prospect'&&l.fu?' · follow up '+l.fu:''}${l.pending?' · menunggu sinkron':''}</div></div>${chip(l.status==='Deal'?'Deal '+rpShort(l.goal):l.status,LTONE[l.status])}</button>`;
 }
@@ -1442,8 +1457,8 @@ SCR.leads = p => {
   </main>`};
 };
 SCR['leads-all'] = p => {
-  const f=p.f||'Semua', list=S.leads.filter(l=>f==='Semua'||(f==='Belum di-assign'?!l.owner:l.status===f));
-  return {note:'Team Leader melihat semua leads cabangnya (URD FR-003, MOM 12.5).',
+  const f=p.f||'Semua', list=S.leads.filter(l=>leadCab(l)===S.cabang).filter(l=>f==='Semua'||(f==='Belum di-assign'?!l.owner:l.status===f));
+  return {note:'Team Leader melihat leads di cabang tempat ia bekerja. Saat pindah cabang, ia menerima leads cabang baru (MOM 12.5). Pindah cabang ada di menu Akun.',
   html:`${appbar('Semua leads',{right:`<button class="ib" onclick="go('assign')" aria-label="Assign">${I('users',22)}</button>`})}<main class="content">
     <div class="segtabs">${['Semua','Belum di-assign','Baru','Prospect','Deal','Belum Tertarik'].map(x=>`<button class="${f===x?'on':''}" onclick="setP({f:'${x}'})">${x}</button>`).join('')}</div>
     <div class="list">${list.map(l=>leadRow(l,true)).join('')}</div>
@@ -1566,10 +1581,10 @@ function rejectSheet(id){
   <button class="btn danger" onclick="if(!val('rr')){$('#rerr').innerHTML='<div class=err>Alasan wajib diisi.</div>';return;}S.approvals=S.approvals.filter(a=>a.id!=='${id}');closeSheet();render(false);toast('Pengajuan ditolak')">Tolak pengajuan</button>`);
 }
 SCR.assign = p => {
-  const sel=p.sel||[], list=S.leads.filter(l=>!l.owner);
+  const sel=p.sel||[], list=S.leads.filter(l=>!l.owner&&leadCab(l)===S.cabang);
   return {note:'Arco dan Team Leader meng-assign leads berdasarkan cabang ke promotor di cabang itu, satu per satu atau lewat import (MOM 12.5).',
   html:`${appbar('Assign leads')}<main class="content">
-    <div class="banner blue" style="margin-bottom:14px">${I('file',18)}<span>${list.length} leads baru di cabang Fatmawati. Leads melekat ke cabang.</span></div>
+    <div class="banner blue" style="margin-bottom:14px">${I('file',18)}<span>${list.length} leads baru di cabang ${S.cabang}. Leads melekat ke cabang.</span></div>
     ${list.length?`<button class="btn ghost sm" style="margin-bottom:12px" onclick="act(()=>importAssign())">${I('file',18)} Import assign dari file</button>`:''}
     ${list.length?`<div class="list">${list.map(l=>`<button class="li" onclick="toggleSel('${l.id}')"><span class="check ${sel.includes(l.id)?'on':''}">${sel.includes(l.id)?I('check',14,3):''}</span><div class="grow"><div class="t">${l.name}</div><div class="s">${l.prod} · ${rp(l.amount)} · ${l.addr}</div></div></button>`).join('')}</div>
     <button class="link" style="margin-top:12px;display:block" onclick="setP({sel:${sel.length===list.length?'[]':'['+list.map(l=>`'${l.id}'`).join(',')+']'}})">${sel.length===list.length?'Batal pilih semua':'Pilih semua'}</button>`:`<div class="empty"><div class="ico-tile green">${I('check',24)}</div>Semua leads sudah di-assign.</div>`}
@@ -1609,7 +1624,7 @@ SCR.target = () => {
     <div class="row" style="flex-wrap:wrap;gap:6px;margin-top:12px">${chip(I('star',12,2.2)+' Top 3 cabang','tan')}${chip(I('clock',12,2.2)+' Rajin 9 hari','green')}${chip(I('trophy',12,2.2)+' Quiz 95','blue')}</div>
     <p class="hint">Grade final tetap dihitung di sistem (BRD Grading).</p></div>`;
   return {note:'Target diset admin di Web. Di mobile sales melihat pencapaian, target harian prorata, dan carry forward (BRD 2.9.10–2.9.11). Estimasi insentif dan target per toko dihapus dari tampilan promotor (MOM 9.1). <span class="tagx">Usulan</span>Kartu <b>Pencapaian kamu</b> (peringkat, streak, badge).',
-  html:`${appbar('Target & pencapaian')}<main class="content">${main}${achv}
+  html:`${appbar('Target & pencapaian')}<main class="content">${main}${achv}${r==='spg'?`<div class="card"><b>Pergantian promotor</b><p class="hint" style="margin-top:6px">Jika promotor diganti di tengah bulan, target promotor baru mengikuti target toko yang sudah diinput, bukan sisa target setelah dikurangi capaian promotor sebelumnya (MOM 9.1).</p></div>`:''}
   </main>`};
 };
 
@@ -1618,7 +1633,7 @@ const photoSlot = (label,on,click) => `<button class="thumb ${on?'':'add'}" styl
 
 /* ---------- FMCG & MD ---------- */
 const FMCG_SKU=[{id:'f1',name:'Sabun Cair Segar 500 ml',sku:'FM-SC500'},{id:'f2',name:'Mi Instan Rasa Soto',sku:'FM-MI75'},{id:'f3',name:'Teh Melati Botol 350 ml',sku:'FM-TM350'},{id:'f4',name:'Kopi Sachet Susu',sku:'FM-KS25'},{id:'f5',name:'Biskuit Kelapa 120 g',sku:'FM-BK120'}];
-const fmSkus = () => [...FMCG_SKU,...S.fm.extra];
+const fmSkus = () => [...(role()==='spg'?PRODUCTS.slice(0,6).map(p=>({id:p.id,name:p.name,sku:p.sku})):FMCG_SKU),...S.fm.extra];
 const fmRow = id => S.fm.stok[id]||(S.fm.stok[id]={d:'',g:'',u:'Pcs',k:'',saved:false});
 const fmFull = id => { const x=fmRow(id); return x.d!==''&&x.g!==''; };
 function fmSet(id,k,v){ const x=fmRow(id); x[k]=v; x.saved=false; }
@@ -1660,6 +1675,7 @@ SCR['fm-facing'] = () => {
   return {note:'Facing display (MOM 10.2). Foto dan price tag, dibandingkan dengan plan tata letak. SKU display bisa diatur sendiri (phasing).',
   html:`${appbar('Facing display')}<main class="content">
     <div class="card"><b>Plan tata letak</b><div class="kv" style="margin-top:6px"><span>Rak utama</span><span>6 facing</span></div><div class="kv"><span>End gondola</span><span>4 facing</span></div></div>
+    <div class="field" style="margin-top:14px"><span>Phasing SKU display</span><div class="opts">${['Minggu 1','Minggu 2','Minggu 3','Minggu 4'].map(w=>`<button class="opt ${(S.fm.phase||'Minggu 4')===w?'on':''}" onclick="S.fm.phase='${w}';render(false,true)">${w}</button>`).join('')}</div><div class="hint">SKU display bisa diatur sendiri per tahap (MOM 10.2).</div></div>
     <div class="field" style="margin-top:14px"><span>Facing aktual</span><div class="stepper" style="width:max-content"><button onclick="S.fm.facing=Math.max(0,S.fm.facing-1);render(false,true)" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${S.fm.facing}</span><button onclick="S.fm.facing++;render(false,true)" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>
     <div class="thumbs">${photoSlot('Foto display',S.fm.foto.fc,"fmPhoto('fc')")}${photoSlot('Price tag',S.fm.foto.ft,"fmPhoto('ft')")}</div>
   </main><footer class="actions"><button class="btn" ${ok?'':'disabled'} onclick="back();toast('Facing display terkirim')">Kirim facing display</button></footer>`};
@@ -1685,9 +1701,9 @@ function fmTaskSave(){
 }
 
 /* ---------- POSM & planogram ---------- */
-const POSM=[{id:'pm1',name:'Planogram rak utama',kind:'Planogram',acuan:'Urutan brand dan jumlah facing'},{id:'pm2',name:'POSM wobbler promo akhir tahun',kind:'POSM',acuan:'Posisi wobbler di depan rak'}];
+const POSM=[{id:'pm3',name:'Campaign: penempatan barang promo akhir tahun',kind:'Campaign',acuan:'Barang promo di end gondola'},{id:'pm1',name:'Planogram rak utama',kind:'Planogram',acuan:'Urutan brand dan jumlah facing'},{id:'pm2',name:'POSM wobbler promo akhir tahun',kind:'POSM',acuan:'Posisi wobbler di depan rak'}];
 SCR.posm = () => ({note:'POSM dan planogram (MOM 13). User memotret lokasi, lalu foto dicocokkan dengan foto brief yang di-assign. AI memberi nilai berdasarkan acuan (simulasi).',
-  html:`${appbar('POSM & planogram')}<main class="content"><div class="list">${POSM.map(x=>`<button class="li" onclick="go('posm-detail',{id:'${x.id}'})"><div class="ico-tile">${I('image',20)}</div><div class="grow"><div class="t">${x.name}</div><div class="s">${x.kind}</div></div>${S.posm[x.id]?chip('Nilai '+S.posm[x.id],'green'):chip('Belum','amber')}</button>`).join('')}</div></main>`});
+  html:`${appbar('Campaign, POSM & planogram')}<main class="content"><div class="list">${POSM.map(x=>`<button class="li" onclick="go('posm-detail',{id:'${x.id}'})"><div class="ico-tile">${I('image',20)}</div><div class="grow"><div class="t">${x.name}</div><div class="s">${x.kind}</div></div>${S.posm[x.id]?chip('Nilai '+S.posm[x.id],'green'):chip('Belum','amber')}</button>`).join('')}</div></main>`});
 SCR['posm-detail'] = p => {
   const x=POSM.find(a=>a.id===p.id), n=S.posm[x.id];
   return {note:'Nilai AI di sini simulasi. Acuan penilaian masih ditunggu dari klien.',
@@ -1798,7 +1814,7 @@ SCR.aktivitas = () => {
     ${row('tag','Price promo','Foto display dan price tag promo',"go('fm-promo')")}
     ${row('grid','Facing display','Foto dan plan tata letak',"go('fm-facing')")}
     ${row('check','Support task','Foto before, after, dan catatan',"go('fm-task')")}
-    ${row('image','POSM & planogram','Foto dinilai AI',"go('posm')")}
+    ${row('image','Campaign, POSM & planogram','Foto dinilai AI',"go('posm')")}
     ${row('grid','SKU display','Input harian di toko',"go('sku')")}
     ${row('pie','Market share','Input harian, bisa draft',"go('share')")}
   </div></main>`};
@@ -1846,7 +1862,7 @@ SCR.share = () => {
       <div style="display:flex;height:16px;border-radius:99px;overflow:hidden;margin:12px 0">${Object.entries(sh).map(([k,v])=>`<i style="width:${v/tot*100}%;background:${colors[k]||'#9AA9BC'}"></i>`).join('')}</div>
       <div class="row" style="flex-wrap:wrap;gap:6px 14px">${Object.entries(sh).map(([k,v])=>`<span class="small"><i style="display:inline-block;width:9px;height:9px;border-radius:3px;background:${colors[k]||'#9AA9BC'};margin-right:5px"></i>${esc(k)} <b class="num">${Math.round(v/tot*100)}%</b></span>`).join('')}</div></div>
     <div class="sec-title">Unit terjual hari ini <a onclick="shareAddSheet()">+ Tambah kompetitor</a></div>
-    <div class="list">${Object.keys(sh).map(k=>`<div class="li"><div class="grow"><div class="t">${esc(k)}${k==='ARUNIKA'?' '+chip('Klien','blue'):''}</div></div><div class="stepper"><button onclick="act(()=>{S.share['${k}']=Math.max(0,S.share['${k}']-1);render(false,true)})">${I('minus',18,2.2)}</button><span class="num">${sh[k]}</span><button onclick="act(()=>{S.share['${k}']++;render(false,true)})">${I('plus',18,2.2)}</button></div></div>`).join('')}</div>
+    <div class="list">${Object.keys(sh).map(k=>`<div class="li"><div class="grow"><div class="t">${esc(k)}${k==='ARUNIKA'?' '+chip('Klien','blue'):''}</div>${S.sharePrice[k]?`<div class="s">Harga ${rp(S.sharePrice[k])}</div>`:''}</div><div class="stepper"><button onclick="act(()=>{S.share['${k}']=Math.max(0,S.share['${k}']-1);render(false,true)})">${I('minus',18,2.2)}</button><span class="num">${sh[k]}</span><button onclick="act(()=>{S.share['${k}']++;render(false,true)})">${I('plus',18,2.2)}</button></div></div>`).join('')}</div>
     <p class="hint" style="margin-top:12px">Draft tidak masuk laporan. Data masuk laporan setelah kamu check-out dari toko.</p>
   </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="act(()=>{S.shareState='draft';render(false,true);toast('Draft tersimpan, belum masuk laporan')})">Simpan draft</button><button class="btn" onclick="act(()=>{S.shareState='kirim';back();toast('Market share tersimpan')})">Simpan</button></footer>`};
 };
@@ -1858,10 +1874,11 @@ function shareAddSheet(){
   <div class="row" style="gap:10px"><label class="field grow"><span>Qty</span><input class="input num" id="sa_q" inputmode="numeric" value="1"></label><label class="field grow"><span>Harga (opsional)</span><input class="input num" id="sa_h" inputmode="numeric"></label></div>
   <button class="btn" onclick="shareAdd()">Tambah</button>`);
 }
+function shareAddPrice(n,h){ if(h) S.sharePrice[n]=h; }
 function shareAdd(){
   const n=val('sa_n').replace(/['"\\<>`]/g,'').trim(), q=parseInt(val('sa_q'))||0;
   if(!val('sa_c')||!val('sa_s')||!n||q<1){ toast('Isi kategori, sub kategori, nama produk, dan qty','alert'); return; }
-  S.share[n]=(S.share[n]||0)+q; closeSheet(); render(false,true); toast(n+' ditambahkan');
+  shareAddPrice(n,parseInt(val('sa_h').replace(/\D/g,''))||0); S.share[n]=(S.share[n]||0)+q; closeSheet(); render(false,true); toast(n+' ditambahkan');
 }
 
 /* ---------- Quiz, Leaderboard, Survey ---------- */
@@ -1921,9 +1938,10 @@ SCR.akun = () => {
   return {tab:'akun', note:'Profil pegawai disinkronkan dari data SIM (BPR1), jadi tidak bisa diubah di aplikasi. User bisa ganti password dan melihat wajah referensi.',
   html:`${appbar('Akun',{backBtn:false})}<main class="content">
     <div class="card" style="text-align:center;padding:22px 16px"><div class="av" style="width:72px;height:72px;font-size:24px;margin:0 auto 10px;background:var(--grad);color:#fff">${u.init}</div><b style="font-size:18px">${u.name}</b><div class="small muted" style="margin-top:2px">${u.roleLabel}</div></div>
-    <div class="card"><div class="kv"><span>NIP</span><span>${u.nip}</span></div><div class="kv"><span>Username</span><span>${S.user}</span></div><div class="kv"><span>Klien</span><span>${u.client}</span></div><div class="kv"><span>Unit</span><span>${u.unit}</span></div><div class="kv"><span>Penempatan</span><span>${u.place}</span></div><div class="kv"><span>Atasan</span><span>${S.user==='spv.sari'?'Irwan A. (AM Head)':'Sari Wulandari'}</span></div>
+    <div class="card"><div class="kv"><span>NIP</span><span>${u.nip}</span></div><div class="kv"><span>Username</span><span>${S.user}</span></div><div class="kv"><span>Klien</span><span>${u.client}</span></div><div class="kv"><span>Unit</span><span>${u.unit}</span></div><div class="kv"><span>Penempatan</span><span>${u.place}</span></div><div class="kv"><span>Penugasan toko</span><span>${moveType()}</span></div><div class="kv"><span>Atasan</span><span>${S.user==='spv.sari'?'Irwan A. (AM Head)':'Sari Wulandari'}</span></div>
       <p class="hint">${I('refresh',13,2)} Data disinkronkan dari sistem SIM (BPR1)</p></div>
     <div class="list" style="margin-top:14px">
+      ${U().role==='spv'?`<button class="li" onclick="cabangSheet()"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t">Pindah cabang</div><div class="s">Cabang sekarang: ${S.cabang}</div></div>${I('right',20)}</button>`:''}
       <button class="li" onclick="go('wajah')"><div class="ico-tile">${I('face',20)}</div><div class="grow"><div class="t">Wajah referensi</div><div class="s">Direkam 26 Okt 2026</div></div>${I('right',20)}</button>
       <button class="li" onclick="go('notif-absen')"><div class="ico-tile">${I('bell',20)}</div><div class="grow"><div class="t">Notifikasi absen</div><div class="s">Pengingat dan suara</div></div>${I('right',20)}</button>
       <button class="li" onclick="go('password')"><div class="ico-tile">${I('key',20)}</div><div class="grow"><div class="t">Ganti password</div></div>${I('right',20)}</button>
@@ -1998,7 +2016,7 @@ function renderPanel(){
     <p class="sub">Atur skenario demo di sini. Semua data adalah dummy, nanti diganti API SIM (BPR1). Label <span class="tagx">Usulan</span>menandai fitur tambahan di luar BRD.</p>
     <a href="../dashboard/" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-4px 0 14px;padding:10px 12px;border-radius:12px;background:var(--blue-50);color:var(--blue-700);font-size:12.5px;font-weight:700">Buka dashboard web ${I('right',16,2.2)}</a>
     <div class="pgroup"><h3>Login sebagai</h3><div class="ulist">${Object.entries(USERS).map(([k,x])=>`<button class="${u===k?'on':''}" onclick="loginAs('${k}');togglePanel(false)"><span class="av blue">${x.init}</span><span><b>${x.name}</b><small>${x.roleLabel}</small></span></button>`).join('')}</div></div>
-    <div class="pgroup"><h3>Jadwal hari ini</h3><div class="seg"><button class="${m==='WFO'?'on':''}" onclick="demoSet('mode','WFO')">WFO</button><button class="${m==='WFA'?'on':''}" onclick="demoSet('mode','WFA')">WFA</button></div></div>
+    <div class="pgroup"><h3>Jadwal hari ini</h3><div class="seg"><button class="${m==='WFO'?'on':''}" onclick="demoSet('mode','WFO')">WFO</button><button class="${m==='WFA'?'on':''}" onclick="demoSet('mode','WFA')">WFA</button><button class="${m==='OFF'?'on':''}" onclick="demoSet('mode','OFF')">OFF</button></div></div>
     <div class="pgroup"><h3>Posisi GPS (untuk WFO)</h3><div class="seg"><button class="${d.inRadius?'on':''}" onclick="demoSet('inRadius',true)">Dalam radius</button><button class="${!d.inRadius?'on':''}" onclick="demoSet('inRadius',false)">Luar radius</button></div></div>
     <div class="pgroup"><h3>Hasil baca invoice (OCR)</h3><div class="seg"><button class="${d.ocr!=='bad'?'on':''}" onclick="demoSet('ocr','ok')">Berhasil</button><button class="${d.ocr==='bad'?'on':''}" onclick="demoSet('ocr','bad')">Foto buram</button></div></div>
     <div class="pgroup"><h3>Hasil face recognition</h3><div class="seg"><button class="${d.faceOk?'on':''}" onclick="demoSet('faceOk',true)">Cocok</button><button class="${!d.faceOk?'on':''}" onclick="demoSet('faceOk',false)">Tidak cocok</button></div></div>

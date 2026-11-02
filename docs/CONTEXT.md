@@ -37,59 +37,68 @@ Menjalankan: `python3 -m http.server 5173`, lalu buka `http://localhost:5173/` (
 - Fitur di luar BRD/URD diberi label **"Usulan"** di panel demo mobile, supaya client dapat membedakan.
 - Warna merah hanya untuk status bahaya (ditolak, overdue, error).
 
-## 4. Isi mockup (kondisi sebelum revisi workshop)
+## 4. Isi mockup (setelah revisi MOM 27-28 Okt 2026)
+
+Acuan revisi: `../docs/00-sources/extracted/S5-mom-workshop-27-28-okt-2026.md`. Konflik dengan FSD dan hal yang ambigu ada di `../docs/00-sources/OPEN-QUESTIONS.md` (KONFLIK-001 sampai 016).
 
 ### Mobile (`mobile/index.html`)
 
-5 user demo (password bebas): `spg.rina`, `sales.budi` (Canvasing), `sales.dimas` (Taking Order), `sales.andi` (Leads), `spv.sari` (Supervisor).
+14 user demo (password bebas). Panel demo juga bisa mengganti jadwal WFO, WFA, dan OFF.
 
-- **Login** (validasi ke API SIM), **foto wajah referensi wajib saat login pertama**, beranda terkunci sebelum absen masuk.
-- **Absen:** lokasi dan jadwal (WFO dalam radius 100 m, WFA bebas), selfie face match, terlambat (alasan, approval), pulang cepat, pengajuan izin, rekap bulanan.
-- **Kunjungan:** ad hoc, terencana (approval), berkala, check-in/out dengan geotag, foto dokumentasi.
-- **Penjualan (SPG, Canvasing):** pilih toko → **foto invoice + OCR** (harga acuan = harga invoice, harga sistem sebagai pembanding, selisih lebih dari 10% ditandai) → data pelanggan → konfirmasi. Promo, backdate maksimal 2 hari, harga per kategori toko, riwayat berfilter, hapus dengan approval, mode offline, scan barcode.
-- **Canvasing:** stok bawaan, retur layak/tidak layak, penyesuaian, usulan toko baru.
-- **Taking Order:** pesanan, follow up, batal dengan approval, upload follow up dari file.
-- **Leads (pinjaman):** daftar, status Deal/Prospect/Rejected, goal, kirim ke SIM, hasil kontak, pengingat.
-- **Supervisor:** dashboard tim, approval, assign leads, data overdue.
-- Lainnya: target, SKU display, market share, quiz, survey, notifikasi, akun. Estimasi insentif (SPG, Canvasing) ada di mockup tetapi **akan dihapus** menurut workshop.
-- Panel demo: ganti user, WFO/WFA, dalam/luar radius, face match cocok/tidak, absen tepat/telat, pulang normal/cepat, online/offline, hasil OCR berhasil/buram.
+| Username | Role |
+|---|---|
+| `spg.rina` | SPG / Sales Promotor Elektronik |
+| `sales.budi` | Sales Canvassing |
+| `sales.dimas` | Sales Taking Order |
+| `sales.andi` | Multi Finance |
+| `spv.sari` | Team Leader (SPV 1) |
+| `ffor.yoga` | FFOR (SPV 2) |
+| `arco.maya` | Arco |
+| `cbd.tono` | CBD / Mediator |
+| `rea.nina` | REA / SPG Multi Finance |
+| `fmcg.tari`, `md.rangga` | Promotor FMCG, Merchandising |
+| `mobile.fikri` | Mobile Promotor |
+| `bantuan.eko`, `reliever.gita` | Promotor Bantuan, Reliever |
+
+- **Login dan absen:** foto wajah referensi wajib saat login pertama. Beranda terkunci sebelum absen masuk. WFO dalam radius 100 m, WFA bebas, OFF tidak bisa absen. Ada pengingat sebelum absen dengan pilihan suara.
+- **Kunjungan:** jadwal dibuat Team Leader. Hanya Promotor FMCG dan MD yang membuat sendiri (1 hari 1 toko). Periode harian, mingguan, 2 mingguan, bulanan. Check-in dan check-out wajib 2-3 foto ber-watermark. Lupa check-out ditutup otomatis. Canvassing cukup submit kunjungan. Quiz dan Survey bisa menjadi tugas kunjungan.
+- **Penjualan (SPG, Canvassing, Mobile Promotor, Promotor Bantuan):** pilih toko → foto invoice dengan OCR (harga invoice, harga toko, dan harga principal sebagai pembanding) → foto dan data pelanggan wajib → konfirmasi. Mobile Promotor juga memilih toko lain dan event.
+- **Canvassing:** limit nominal per hari, stok dari input manual atau foto invoice, foto tanda terima, retur layak dan tidak layak, rekap akhir hari (penjualan dihitung dari retur), outlet isi sendiri.
+- **Promotor FMCG dan MD:** tanpa penjualan. Cek stok multi satuan, price promo, facing display dengan phasing, support task, SKU display dan market share harian.
+- **SPG Elektronik:** SKU display (scan atau foto barcode, SKU rusak membuat task), market share (draft, kompetitor manual), stock opname, Campaign, POSM, dan planogram dengan nilai AI simulasi.
+- **Multi Finance:** leads dengan status Baru, Prospect, Deal, Belum Tertarik (turunan tertarik, masih prospect, rejected). Buat leads sendiri. Deal memuat nominal, tenor, foto approval, dan dokumen pencairan. CBD punya alur Follow Up → Input Order → Verify Dokumen → Scoring → Survey, mitra, dan task dari Team Leader. Insentif REA cair setelah dokumen pencairan diunggah.
+- **Team Leader dan Arco:** assign leads per cabang, import assign, pindah cabang (menerima leads cabang baru), assign canvasser, Task Pending sampai closed, approval.
+- **Beranda dan target:** kartu target hari ini, sudah terjual, dan objektif. Estimasi insentif dan target per toko tidak ada. Target Multi Finance memuat KPI.
+- Lainnya: quiz, survey, notifikasi, akun (termasuk penugasan toko bergerak atau diam).
 
 ### Dashboard (`dashboard/index.html`)
 
-Overview, Absensi, Kunjungan, Approval, **Laporan penjualan** (per klien, cabang, toko, sales; transaksi dengan selisih invoice; drill-down), Target & sell-in, Promo, Insentif (perhitungan, rekonsiliasi, parameter), Grading, Leads, Overdue, **Master data dengan CRUD** (Client, Kategori toko, Toko + usulan dari lapangan, Produk & harga, User SIM, IAM dengan role, hak akses, matrix approval, log aktivitas), Parameter, **Quiz & Survey dengan CRUD** dan assign by role, Pengaturan.
+- **Operasional:** Absensi, Kunjungan (Team Leader membuat jadwal), Approval, Task pending (produk rusak dan task CBD), Aktivitas lapangan (log FMCG dan MD, kinerja Reliever dan Promotor Bantuan).
+- **Penjualan:** Laporan penjualan, Target dan sell-in (termasuk Multi Finance), Canvassing, laporan SKU display, laporan market share (hanya data check-out, rata-rata antar penginput), Promo, Insentif, Grading (dengan formula per klien dan role).
+- **Sales automation:** Leads pinjaman (import assign), Overdue.
+- **Master data dengan CRUD:** Client, Region, Kategori toko, Toko, Brand, Kategori produk, Produk dan harga (harga per toko dan cabang, mapping outlet, produk price promo), Satuan, Mitra, User SIM (jadwal off dan NPO dari BPR), IAM (16 role dengan segmen dan tipe, struktur approval, matrix approval, log), Parameter.
+- **Konten:** Campaign, POSM, dan planogram, Quiz, Survey (jadwal berkala, tanpa opsi anonim).
 
-Semua data dummy. CRUD bekerja di memori (hilang saat reload). Mobile dan dashboard belum berbagi data.
+Semua data dummy. CRUD bekerja di memori dan hilang saat reload. Mobile dan dashboard tidak berbagi data, jadi hak akses di IAM dan data dashboard tidak mengubah mobile.
 
-## Status revisi MOM 27-28 Okt 2026
+## 5. Hal yang tidak ada di mockup
 
-Acuan revisi: `../docs/00-sources/extracted/S5-mom-workshop-27-28-okt-2026.md`.
-
-- **Tahap 1 (ubah layar yang ada): selesai.** Bagian 4 di atas masih menggambarkan kondisi sebelum revisi. Yang berubah: estimasi insentif dan target per toko dihapus dari mobile; Rejected menjadi Belum Tertarik dengan tiga turunan; proses sendiri dihapus; Sales Member menjadi Multi Finance; jadwal kunjungan dibuat Team Leader; check-in dan check-out memakai 2-3 foto ber-watermark dengan auto check-out; SKU display dan market share harian; harga principal dan harga toko di OCR; foto pelanggan wajib; scan barcode pindah dari penjualan ke SKU display; menu Quiz dan Survey dipisah; harga per toko dan cabang; badge sidebar dihapus.
-- **Tahap 2 (role, hak akses, master data, laporan): selesai.** Mobile punya 14 user demo. Dashboard punya 16 role dengan izin membuat jadwal per role, Sales Structure Approval, master Region, Brand, Kategori produk, Satuan, Mitra, mapping produk per outlet, formula grading per klien dan role, serta laporan SKU display dan market share. Trainer hanya ada di dashboard karena tugasnya belum dirinci klien. Role baru di mobile masih memakai alur role dasarnya; alur khususnya ada di Tahap 3.
-- **Tahap 3 (alur per tipe sales): selesai di lokal.** Mobile: cek stok, price promo, facing display, support task, POSM dan planogram, Task Pending, limit dan rekap retur canvassing, buat leads, dokumen Deal, alur CBD, mitra, task CBD, import assign, notifikasi absen. Dashboard: Task pending, Aktivitas lapangan, Canvassing, POSM & planogram, target Multi Finance, import assign. Penilaian AI dan OCR disimulasikan. Data mobile dan dashboard tetap tidak saling terhubung.
-
-## 5. Hasil workshop yang belum masuk ke mockup
-
-Daftar perubahan lengkap ada di bagian 14 dokumen workshop. Ringkasnya:
-
-- Tambah role: Team Leader, FFOR, Arco, **CBD**, **REA / SPG Multi Finance**, Promotor FMCG/MD, Mobile Promotor, Reliever, Trainer. Ganti nama Sales Member menjadi Multi Finance.
-- **CBD memonitor mitra dan boleh menjual**; mitra melekat pada CBD; REA dan SPG Multi Finance boleh membuat leads sendiri.
-- Jadwal kunjungan dibuat Team Leader (kecuali FMCG dan MD). Check-in/out dengan 2–3 foto ber-watermark.
-- **Hapus estimasi insentif** dari mobile. Hapus "Proses sendiri" pada leads.
-- Status leads: Rejected menjadi **Belum Tertarik** dengan 3 turunan. Leads Deal wajib foto approval dan dokumen pencairan (REA).
-- Alur Promotor FMCG tanpa penjualan (cek stok multi satuan, price promo, facing display, support task, stock opname).
-- SKU display diinput harian oleh promotor, SKU rusak otomatis membuat task perbaikan. Market share dengan draft.
-- Pisahkan menu Quiz dan Survey; hapus opsi anonim; jadwal berkala.
-- Master data baru: Region, Brand, level produk berjenjang, satuan, harga per toko dan cabang.
+- Penjualan oleh Mobile Promotor di event hanya berupa pilihan tujuan. Rinciannya tidak ada di MOM.
+- Trainer hanya ada di dashboard karena tugasnya belum dirinci.
+- Nilai AI, OCR, pembacaan foto, dan KPI adalah simulasi.
+- Tambahan yang tidak disebut MOM diberi label "Usulan".
 
 ## 6. Hal yang masih terbuka
 
-- Hierarki lengkap CBD, mitra, REA, SPG Multi Finance, Arco, Team Leader (catatan terpotong).
-- Apakah mitra punya akun login atau hanya dipantau CBD.
-- 12 perbedaan antar catatan di bagian 13 dokumen workshop (misalnya arti "takeout", CBD bergerak atau diam).
+Menunggu klien atau pemilik produk (lihat `OPEN-QUESTIONS.md`):
+
+- Bentuk leveling produk, hierarki lengkap CBD, mitra, REA, SPG Multi Finance, Arco, dan Team Leader, serta format data mitra.
+- Use case semua variasi aturan leads Multi Finance dan format file leads dari CRM.
+- Siapa pembuat jadwal untuk Mobile Promotor, Taking Order, dan CBD.
+- Sumber jadwal off dari BPR dan frekuensi sinkronnya.
+- Acuan penilaian AI untuk planogram dan akurasi OCR price tag.
+- API ganti password ke IOS 1 atau BPR.
 - Sumber data overdue dan sumber nominal goal pinjaman (URD tidak konsisten).
-- Apakah laporan memakai harga invoice atau harga sistem.
-- Pertanyaan P1 lain di `docs/pertanyaan-workshop-requirement.md`.
 
 ## 7. Catatan teknis
 
