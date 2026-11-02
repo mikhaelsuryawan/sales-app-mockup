@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIM Group Sales App</title>
+<meta name="description" content="Pilih mockup Sales App SIMGROUP: aplikasi mobile atau dashboard web.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0B1B3A; --muted:#4B5C7C; --card:rgba(255,255,255,.72); --line:rgba(255,255,255,.7);
+  --blue-600:#0A92F2; --blue-700:#3466FF; --tan:#EFA477;
+  --bg:linear-gradient(160deg,#21CFF7 0%,#0A92F2 45%,#3466FF 100%);
+}
+@media (prefers-color-scheme:dark){
+  :root{--ink:#F2F6FF; --muted:#B7C4E4; --card:rgba(10,22,52,.58); --line:rgba(255,255,255,.14);
+    --bg:linear-gradient(160deg,#0B5E86 0%,#0A4C9A 45%,#1B2F8F 100%)}
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:"Plus Jakarta Sans",system-ui,sans-serif;color:var(--ink);background:var(--bg) fixed;
+  display:flex;align-items:center;justify-content:center;padding:32px 16px;min-height:100vh}
+main{width:100%;max-width:880px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:28px;color:#fff}
+header img{height:36px;width:auto;border-radius:8px;background:#fff;padding:4px}
+header p{margin:0;font-size:13px;font-weight:600;opacity:.9}
+h1{margin:0 0 6px;font-size:clamp(28px,5vw,40px);line-height:1.1;color:#fff;font-weight:800;letter-spacing:-.02em}
+h1 span{color:var(--tan)}
+.lead{margin:0 0 28px;color:#fff;opacity:.92;font-size:15px;max-width:52ch}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+a.card{display:flex;flex-direction:column;gap:10px;padding:24px;border-radius:24px;text-decoration:none;color:var(--ink);
+  background:var(--card);border:1px solid var(--line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  box-shadow:0 18px 40px -18px rgba(8,30,90,.5);transition:transform .15s ease,box-shadow .15s ease}
+a.card:hover,a.card:focus-visible{transform:translateY(-3px);box-shadow:0 24px 48px -18px rgba(8,30,90,.6)}
+a.card:focus-visible{outline:3px solid var(--tan);outline-offset:2px}
+.tag{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--blue-700);
+  background:rgba(52,102,255,.12);padding:4px 10px;border-radius:999px}
+a.card h2{margin:0;font-size:22px;font-weight:800}
+a.card p{margin:0;color:var(--muted);font-size:14px;line-height:1.55}
+ul{margin:4px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+li{font-size:12px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.go{margin-top:auto;padding-top:8px;font-weight:700;font-size:14px;color:var(--blue-700)}
+@media (prefers-color-scheme:dark){.tag,.go{color:#8FB0FF}}
+footer{margin-top:22px;color:#fff;opacity:.85;font-size:12px}
+@media (max-width:640px){.grid{grid-template-columns:1fr}a.card{padding:20px}}
+@media (prefers-reduced-motion:reduce){a.card{transition:none}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img src="assets/logo-simgroup.webp" alt="SIMGROUP">
+    <p>Mockup Sales App</p>
+  </header>
+  <h1>Pilih mockup<span>.</span></h1>
+  <p class="lead">Dua tampilan dalam satu tautan. Pilih aplikasi lapangan untuk sales, atau dashboard web untuk admin dan manajer.</p>
+  <div class="grid">
+    <a class="card" href="mobile/">
+      <span class="tag">Mobile</span>
+      <h2>Aplikasi sales lapangan</h2>
+      <p>Alur harian sales: absen, kunjungan, penjualan, dan leads. Di desktop tampil sebagai frame iPhone.</p>
+      <ul><li>Absensi</li><li>Kunjungan</li><li>Penjualan</li><li>Leads</li></ul>
+      <span class="go">Buka mockup mobile →</span>
+    </a>
+    <a class="card" href="dashboard/">
+      <span class="tag">Dashboard</span>
+      <h2>Dashboard web</h2>
+      <p>Pantauan tim, approval, laporan penjualan, dan master data. Tersedia tema terang dan gelap.</p>
+      <ul><li>Laporan</li><li>Approval</li><li>Master data</li><li>IAM</li></ul>
+      <span class="go">Buka dashboard →</span>
+    </a>
+  </div>
+  <footer>Semua data di mockup ini fiktif dan tidak tersimpan setelah halaman dimuat ulang.</footer>
+</main>
+</body>
+</html>

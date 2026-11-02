@@ -1,0 +1,17 @@
+# OS
+.DS_Store
+
+# Office lock/temp files
+~$*
+.~lock.*#
+
+# Editor
+.idea/
+.vscode/
+*.swp
+
+# Vercel
+.vercel/
+
+# Preferensi pribadi
+CLAUDE.local.md
