@@ -409,7 +409,7 @@ const USERS = {
   'spv.sari':  {name:'Sari Wulandari', init:'SW', role:'spv', roleLabel:'Team Leader (SPV 1)', nip:'SIM-19-00208', client:'Arunika Elektronik & BPR Mitra Usaha', unit:'Cabang Jakarta Selatan', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
   'ffor.yoga': {name:'Yoga Permana', init:'YP', role:'spv', roleLabel:'FFOR (SPV 2)', nip:'SIM-18-00144', client:'Arunika Elektronik', unit:'Region Jakarta', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
   'arco.maya': {name:'Maya Anggraini', init:'MA', role:'spv', menu:'arco', roleLabel:'Arco (Leader SPG)', nip:'ARCO-0012', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
-  'cbd.tono':  {name:'Tono Hidayat', init:'TH', role:'leads', roleLabel:'CBD / Mediator', nip:'SIM-23-00871', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'Area Fatmawati', sched:'WFA', main:{key:'leads',label:'Leads',icon:'users'}},
+  'cbd.tono':  {name:'Tono Hidayat', init:'TH', role:'leads', menu:'cbd', roleLabel:'CBD / Mediator', nip:'SIM-23-00871', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'Area Fatmawati', sched:'WFA', main:{key:'leads',label:'Leads',icon:'users'}},
   'rea.nina':  {name:'Nina Safitri', init:'NS', role:'leads', roleLabel:'REA / SPG Multi Finance', nip:'SIM-24-01322', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'leads',label:'Leads',icon:'users'}},
   'fmcg.tari': {name:'Lestari Putri', init:'LP', role:'fmcg', roleLabel:'Promotor FMCG', nip:'SIM-24-01355', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
   'md.rangga': {name:'Rangga Saputra', init:'RS', role:'fmcg', roleLabel:'Merchandising (MD)', nip:'SIM-23-01102', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
@@ -526,7 +526,9 @@ function freshState(){
       spv:[{id:'v1',place:'Electronic City Kemang',time:'11:00',tasks:['Supervisi SPG'],status:'Belum',photos:{}}]
     },
     plans:[{place:'Rudi Hartanto (nasabah)',date:'28 Okt 2026',status:'Menunggu approval'}],
-    sku:{t1:null,t2:null}, skuTasks:[],
+    sku:{t1:null,t2:null}, skuTasks:[{t:'t1',id:'kl2p',toko:'Electronic City Kemang',st:'Sedang diperbaiki'}],
+    fm:{stok:{},extra:[],stokDone:false,foto:{},facing:0,tasks:[{t:'Bersihkan etalase depan',from:'Dari Team Leader',done:false}]}, posm:{}, mitraLog:{}, cbdDone:false, notifOn:{in:true,out:true}, sound:'Bawaan',
+    bawa:{rc18:8,bl11:6,st3:9,kp16:5,ds72:2}, kembali:{}, muatInv:[], receipt:false,
     share:{ARUNIKA:18,Samsung:22,LG:15,Polytron:9,Lainnya:6}, shareState:null,
     quizDone:false, quizScore:null, surveyDone:false,
     myRequests:[], newToko:[],
@@ -699,14 +701,15 @@ SCR['enroll-done'] = () => { S.enrolled[S.user]=true; return {note:'Wajah refere
 
 /* ---------- Home ---------- */
 const MENUS = {
-  spg:[['Catat penjualan','bag',"act(()=>startSale())",1],['Riwayat penjualan','file',"tab('penjualan')"],['SKU display','grid',"go('sku')"],['Market share','pie',"go('share')"],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  spg:[['Catat penjualan','bag',"act(()=>startSale())",1],['Riwayat penjualan','file',"tab('penjualan')"],['SKU display','grid',"go('sku')"],['Market share','pie',"go('share')"],['POSM & planogram','image',"go('posm')"],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   canvas:[['Jual dari stok','bag',"act(()=>startSale())",1],['Stok bawaan','box',"go('stok')"],['Catat retur','retur',"act(()=>go('stok-form',{kind:'retur'}))",1],['Usulkan toko','plus',"act(()=>go('toko-baru'))",1],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   order:[['Buat pesanan','order',"act(()=>startOrder())",1],['Daftar pesanan','file',"tab('pesanan')"],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Usulkan toko','plus',"act(()=>go('toko-baru'))",1],['Ajukan izin','file',"go('izin')"]],
-  leads:[['Leads saya','users',"tab('leads')"],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
+  leads:[['Leads saya','users',"tab('leads')"],['Buat leads','plus',"act(()=>go('lead-baru'))",1],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   fmcg:[['Aktivitas toko','grid',"tab('aktivitas')"],['Buat jadwal','route',"act(()=>go('kunjungan-form'))",1],['SKU display','grid',"go('sku')"],['Market share','pie',"go('share')"],['Kunjungan','route',"tab('kunjungan')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
+  cbd:[['Leads saya','users',"tab('leads')"],['Buat leads','plus',"act(()=>go('lead-baru'))",1],['Mitra saya','user',"go('mitra')"],['Task Team Leader','check',"go('cbd-task')"],['Kunjungan','route',"tab('kunjungan')"],['Target & KPI','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   arco:[['Assign leads','users',"go('assign')"],['Semua leads','file',"go('leads-all')"],['Tim saya','user',"tab('tim')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   bantuan:[['Catat penjualan','bag',"act(()=>startSale())",1],['Riwayat penjualan','file',"tab('penjualan')"],['Kunjungan','route',"tab('kunjungan')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
-  spv:[['Approval','check',"go('approval')"],['Assign leads','users',"go('assign')"],['Tugaskan tim','route',"act(()=>go('kunjungan-form',{spv:1}))",1],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Kunjungan','calendar',"tab('kunjungan')"],['Quiz','quiz',"go('quiz')"]]
+  spv:[['Approval','check',"go('approval')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tugaskan tim','route',"act(()=>go('kunjungan-form',{spv:1}))",1],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Kunjungan','calendar',"tab('kunjungan')"],['Quiz','quiz',"go('quiz')"]]
 };
 function attCard(){
   const a=att(), m=mode();
@@ -768,7 +771,7 @@ function fieldDash(){
   return `<div class="sec-title">Penjualan hari ini <a onclick="go('target')">Target</a></div>
   <div class="card"><div class="row between"><div><div class="small muted">Terjual</div><div class="big-num num">${rpShort(today)}</div></div><div style="text-align:right"><div class="small muted">Target hari ini</div><b class="num">${rpShort(target)}</b></div></div>
   <div class="bar" style="margin:12px 0 6px"><i style="width:${Math.min(100,today/target*100)}%"></i></div>
-  <div class="small muted">${Math.round(today/target*100)}% tercapai · ${list.length} transaksi${r==='canvas'?` · Stok layak jual ${Object.values(S.stock).reduce((s,x)=>s+x.good,0)} unit`:''}</div></div>
+  <div class="small muted">${Math.round(today/target*100)}% tercapai · Objektif hari ini 3 unit · ${list.length} transaksi${r==='canvas'?` · Stok layak jual ${Object.values(S.stock).reduce((s,x)=>s+x.good,0)} unit`:''}</div></div>
   ${todayVisits()}`;
 }
 function todayVisits(){
@@ -786,7 +789,7 @@ function spvDash(){
   const unassigned=L.filter(l=>!l.owner).length;
   return `<div class="sec-title">Kehadiran tim hari ini <a onclick="tab('tim')">Detail</a></div>
   <div class="card"><div class="stat3"><div><small>Hadir</small><b>2<span class="muted small">/4</span></b></div><div><small>Terlambat</small><b style="color:var(--amber)">1</b></div><div><small>Cuti / belum</small><b>2</b></div></div>
-  <button class="li" style="padding:12px 0 0;margin-top:12px;border-top:1px solid var(--line)" onclick="go('approval')"><div class="ico-tile amber">${I('check',20)}</div><div class="grow"><div class="t">${S.approvals.length} pengajuan menunggu approval</div><div class="s">Absen terlambat, cuti, hapus penjualan, rencana kunjungan</div></div>${I('right',20)}</button></div>
+  <button class="li" style="padding:12px 0 0;margin-top:12px;border-top:1px solid var(--line)" onclick="go('approval')"><div class="ico-tile amber">${I('check',20)}</div><div class="grow"><div class="t">${S.approvals.length} pengajuan menunggu approval</div><div class="s">Absen terlambat, cuti, hapus penjualan</div></div>${I('right',20)}</button></div>
   <div class="sec-title">Leads pinjaman <a onclick="go('leads-all')">Semua leads</a></div>
   <div class="card">
     <div class="row between"><div><div class="small muted">Total pengajuan Oktober</div><div class="big-num num">${L.length+38}</div></div><div style="text-align:right"><div class="small muted">Sudah dihubungi</div><b class="num">${L.filter(l=>l.status!=='Baru').length+27}</b></div></div>
@@ -1178,6 +1181,7 @@ SCR['jual-toko'] = () => {
   html:`${appbar('Pilih toko')}<main class="content">
     <p class="small muted" style="margin:0 2px 12px">Langkah 1 dari 3</p>
     ${tokoPicker(r,'pickSaleToko')}
+    ${r==='canvas'?`<button class="btn ghost" style="margin-top:12px" onclick="saleFreeToko()">Isi outlet sendiri</button>`:''}
   </main>`};
 };
 function pendingTokoSheet(id){
@@ -1298,7 +1302,7 @@ SCR.scan = p => ({dark:true, note:'Scan QR atau barcode produk di rak. Nama prod
 /* ---------- Stok bawaan (Canvasing) ---------- */
 SCR.stok = () => {
   const good=Object.values(S.stock).reduce((s,x)=>s+x.good,0), bad=Object.values(S.stock).reduce((s,x)=>s+x.bad,0);
-  return {note:'Stok bawaan canvasing (BRD 2.16): muat stok awal, retur dari toko (layak/tidak layak jual), penyesuaian dengan alasan, dan mutasi stok.',
+  return {note:'Stok bawaan canvassing (MOM 11.1): limit nominal per hari, input manual atau dari foto invoice, foto tanda terima, dan penjualan dihitung dari retur saat kembali.',
   html:`${appbar('Stok bawaan')}<main class="content">
     <div class="stat3" style="grid-template-columns:1fr 1fr"><div style="background:var(--green-50)"><small>Layak jual</small><b class="num" style="color:var(--green)">${good} unit</b></div><div style="background:var(--red-50)"><small>Retur (tidak layak)</small><b class="num" style="color:var(--red)">${bad} unit</b></div></div>
     <div class="row" style="gap:8px;margin-top:12px">
@@ -1306,6 +1310,9 @@ SCR.stok = () => {
       <button class="btn sec sm grow" onclick="act(()=>go('stok-form',{kind:'retur'}))">${I('retur',18)} Retur</button>
       <button class="btn sec sm grow" onclick="act(()=>go('stok-form',{kind:'adjust'}))">${I('adjust',18)} Sesuaikan</button>
     </div>
+    <div class="card" style="margin-top:12px"><div class="kv"><span>Nilai barang dibawa</span><span class="num">${rp(stockValue())}</span></div><div class="kv"><span>Limit per hari</span><span class="num">${rp(CANVAS_LIMIT)}</span></div><div class="bar" style="margin-top:6px"><i style="width:${Math.min(100,stockValue()/CANVAS_LIMIT*100)}%"></i></div></div>
+    <div class="thumbs">${photoSlot('Dari foto invoice',0,"act(()=>startStokInv())")}${photoSlot(S.receipt?'Tanda terima ada':'Foto tanda terima',S.receipt,"act(()=>{S.receipt=true;render(false,true);toast('Tanda terima tersimpan','camera')})")}</div>
+    <button class="btn sec" style="margin-top:12px" onclick="act(()=>go('stok-rekap'))">${I('retur',18)} Rekap akhir hari</button>
     <div class="sec-title">Per produk</div>
     <div class="list">${CANVAS_PRODUCTS.map(p=>`<div class="li"><div class="grow"><div class="t">${p.name}</div><div class="s">${p.sku}</div></div><div class="r"><b class="num">${S.stock[p.id].good}</b><div class="small" style="color:${S.stock[p.id].bad?'var(--red)':'var(--muted)'}">${S.stock[p.id].bad} retur</div></div></div>`).join('')}</div>
     <div class="sec-title">Mutasi hari ini</div>
@@ -1314,9 +1321,9 @@ SCR.stok = () => {
 };
 SCR['stok-form'] = p => {
   const k=p.kind, title={muat:'Muat stok',retur:'Catat retur',adjust:'Penyesuaian stok'}[k];
-  return {note:{muat:'Input stok yang dibawa. Batas jumlah mengikuti parameter klien, misalnya maksimal sesuai target harian (BRD 2.16.3–2.16.4).',retur:'Retur dari toko menambah stok bawaan dengan status layak / tidak layak jual (BRD 2.16.5, 2.16.12).',adjust:'Penyesuaian naik/turun wajib dengan alasan (BRD 2.16.6).'}[k],
+  return {note:{muat:'Input stok yang dibawa harus dari master produk, dibatasi limit nominal per hari (MOM 11.1).',retur:'Retur dari toko menambah stok bawaan dengan status layak / tidak layak jual (BRD 2.16.5, 2.16.12).',adjust:'Penyesuaian naik/turun wajib dengan alasan (BRD 2.16.6).'}[k],
   html:`${appbar(title)}<main class="content">
-    ${k==='muat'?`<div class="banner blue" style="margin-bottom:14px">${I('target',18)}<span>Maksimal muat hari ini sesuai target harian: <b>40 unit</b>.</span></div>`:''}
+    ${k==='muat'?`<div class="banner blue" style="margin-bottom:14px">${I('target',18)}<span>Sisa limit hari ini: <b>${rp(Math.max(0,CANVAS_LIMIT-stockValue()))}</b>.</span></div>`:''}
     ${k==='retur'?`<label class="field"><span>Dari toko</span><select class="input">${TOKO.canvas.map(t=>`<option>${t.name}</option>`).join('')}</select></label>`:''}
     <label class="field"><span>Produk</span><select class="input" id="sp">${CANVAS_PRODUCTS.map(x=>`<option value="${x.id}">${x.name} (${x.sku})</option>`).join('')}</select></label>
     ${k==='adjust'?`<div class="field"><span>Arah</span><div class="opts"><button class="opt ${p.dir!=='down'?'on':''}" onclick="setP({dir:'up'})">Tambah</button><button class="opt ${p.dir==='down'?'on':''}" onclick="setP({dir:'down'})">Kurangi</button></div></div>`:''}
@@ -1327,7 +1334,8 @@ SCR['stok-form'] = p => {
 };
 function saveStock(k){
   const p=cur().p, id=val('sp'), q=Math.max(1,parseInt(val('sq'))||1), pr=prodById(id);
-  if(k==='muat'){ S.stock[id].good+=q; S.mutasi.unshift({t:'Muat stok',d:`${pr.name} ×${q}`,time:'13:10',sign:'+'}); }
+  if(k==='muat'&&stockValue()+q*pr.price>CANVAS_LIMIT){ toast('Melebihi limit nominal hari ini','alert'); return; }
+  if(k==='muat'){ S.bawa[id]=(S.bawa[id]||0)+q; S.stock[id].good+=q; S.mutasi.unshift({t:'Muat stok',d:`${pr.name} ×${q}`,time:'13:10',sign:'+'}); }
   if(k==='retur'){ if(p.cond==='bad') S.stock[id].bad+=q; else S.stock[id].good+=q; S.mutasi.unshift({t:'Retur dari toko',d:`${pr.name} ×${q} (${p.cond==='bad'?'tidak layak jual':'layak jual'})`,time:'13:10',sign:'+'}); }
   if(k==='adjust'){ const d=p.dir==='down'?-q:q; S.stock[id].good=Math.max(0,S.stock[id].good+d); S.mutasi.unshift({t:'Penyesuaian',d:`${pr.name} ${d>0?'+':''}${d}`,time:'13:10',sign:d>0?'+':'-'}); }
   back(); toast('Stok diperbarui');
@@ -1428,14 +1436,14 @@ function leadRow(l,showOwner){
 SCR.leads = p => {
   const f=p.f||'Semua', mine=S.leads.filter(l=>l.owner===S.user), list=mine.filter(l=>f==='Semua'||l.status===f);
   return {tab:'leads', note:'Multi Finance hanya melihat leads yang di-assign ke dia (URD FR-004, FR-008). Verifikasi dilakukan manual lewat telepon/WA, lalu hasilnya diinput di aplikasi.',
-  html:`${appbar('Leads saya',{backBtn:false})}<main class="content">
+  html:`${appbar('Leads saya',{backBtn:false,right:`<button class="ib" onclick="act(()=>go('lead-baru'))" aria-label="Buat leads">${I('plus',24,2)}</button>`})}<main class="content">
     <div class="segtabs">${['Semua','Baru','Prospect','Deal','Belum Tertarik'].map(x=>`<button class="${f===x?'on':''}" onclick="setP({f:'${x}'})">${x} ${x==='Semua'?mine.length:mine.filter(l=>l.status===x).length}</button>`).join('')}</div>
     <div class="list">${list.length?list.map(l=>leadRow(l)).join(''):`<div class="empty">Tidak ada leads dengan status ini.</div>`}</div>
   </main>`};
 };
 SCR['leads-all'] = p => {
   const f=p.f||'Semua', list=S.leads.filter(l=>f==='Semua'||(f==='Belum di-assign'?!l.owner:l.status===f));
-  return {note:'Sales Manager melihat semua leads (URD FR-003). Manager juga bisa memproses leads sendiri tanpa assign.',
+  return {note:'Team Leader melihat semua leads cabangnya (URD FR-003, MOM 12.5).',
   html:`${appbar('Semua leads',{right:`<button class="ib" onclick="go('assign')" aria-label="Assign">${I('users',22)}</button>`})}<main class="content">
     <div class="segtabs">${['Semua','Belum di-assign','Baru','Prospect','Deal','Belum Tertarik'].map(x=>`<button class="${f===x?'on':''}" onclick="setP({f:'${x}'})">${x}</button>`).join('')}</div>
     <div class="list">${list.map(l=>leadRow(l,true)).join('')}</div>
@@ -1447,7 +1455,8 @@ SCR['lead-detail'] = p => {
   html:`${appbar(l.id)}<main class="content">
     <div class="card"><div class="row"><div class="av blue" style="width:48px;height:48px;font-size:16px">${l.name.split(' ').map(s=>s[0]).join('').slice(0,2)}</div><div class="grow"><div style="font-weight:800;font-size:17px">${l.name}</div><div class="small muted">${l.job}</div></div>${chip(leadLabel(l),LTONE[l.status])}</div>
       <div class="row" style="gap:8px;margin-top:14px"><a class="btn sec sm grow" href="tel:${l.phone}" onclick="event.preventDefault();contactLead('${l.id}','phone')">${I('phone',18)} Telepon</a><a class="btn sec sm grow" href="#" onclick="event.preventDefault();contactLead('${l.id}','chat')">${I('chat',18)} WhatsApp</a></div></div>
-    <div class="card"><div class="kv"><span>Produk</span><span>${l.prod}</span></div><div class="kv"><span>Nominal pengajuan</span><span class="num">${rp(l.amount)}</span></div><div class="kv"><span>Tenor</span><span>${l.tenor} bulan</span></div>${l.status==='Deal'?`<div class="kv"><span>Nominal disetujui (goal)</span><span class="num" style="color:var(--green)">${rp(l.goal)}</span></div>`:''}<div class="kv"><span>No. HP</span><span class="num">${l.phone}</span></div><div class="kv"><span>Alamat</span><span>${l.addr}</span></div><div class="kv"><span>Masuk</span><span>${l.date} · upload backend</span></div><div class="kv"><span>Ditangani</span><span>${l.owner?USERS[l.owner].name:'Belum di-assign'}</span></div>${l.calls?`<div class="kv"><span>Percobaan kontak</span><span>${l.calls} kali</span></div>`:''}</div>
+    <div class="card"><div class="kv"><span>Produk</span><span>${l.prod}</span></div><div class="kv"><span>Nominal pengajuan</span><span class="num">${l.amount?rp(l.amount):'Diisi saat Deal'}</span></div><div class="kv"><span>Tenor</span><span>${l.tenor} bulan</span></div>${l.status==='Deal'?`<div class="kv"><span>Nominal disetujui (goal)</span><span class="num" style="color:var(--green)">${rp(l.goal)}</span></div>`:''}<div class="kv"><span>No. HP</span><span class="num">${l.phone}</span></div><div class="kv"><span>Alamat</span><span>${l.addr}</span></div><div class="kv"><span>Masuk</span><span>${l.date} · upload backend</span></div><div class="kv"><span>Ditangani</span><span>${l.owner?USERS[l.owner].name:'Belum di-assign'}</span></div>${l.calls?`<div class="kv"><span>Percobaan kontak</span><span>${l.calls} kali</span></div>`:''}</div>
+    ${leadExtra(l)}
     ${l.log.length?`<div class="sec-title">Riwayat status</div><div class="card"><div class="timeline">${l.log.map(x=>`<div class="ti"><b>${x.t}</b><small>${x.s}</small></div>`).join('')}</div></div>`:''}
   </main>${!leadClosed(l)?`<footer class="actions"><button class="btn ${isLocked()?'locked':''}" onclick="act(()=>go('lead-hasil',{id:'${l.id}'}))">${isLocked()?I('lock',18):''} Input hasil verifikasi</button></footer>`:''}`};
 };
@@ -1456,11 +1465,13 @@ SCR['lead-hasil'] = p => {
   const opts=[['Deal','green','check','Nasabah setuju dan memenuhi kriteria'],['Prospect','amber','clock','Masih proses, perlu follow up'],['Belum Tertarik','red','x','Nasabah belum tertarik, pilih status turunan']];
   return {note:'Input status (URD FR-009–FR-014, MOM 12.4). Kalau <b>Deal</b>, sales menentukan nominal disetujui (goal), lalu data dikirim ke sistem SIM. <b>Belum Tertarik</b> menggantikan Rejected dan punya tiga status turunan.',
   html:`${appbar('Hasil verifikasi')}<main class="content">
-    <div class="card" style="padding:12px 16px"><div class="row between"><div><b>${l.name}</b><div class="small muted">${l.prod}</div></div><b class="num">${rp(l.amount)}</b></div></div>
+    <div class="card" style="padding:12px 16px"><div class="row between"><div><b>${l.name}</b><div class="small muted">${l.prod}</div></div><b class="num">${l.amount?rp(l.amount):'–'}</b></div></div>
     <div class="sec-title">Status</div>
     <div class="list">${opts.map(o=>`<button class="li" onclick="setP({st:'${o[0]}'})" style="${st===o[0]?'background:var(--blue-50)':''}"><div class="ico-tile ${o[1]}">${I(o[2],20,2.2)}</div><div class="grow"><div class="t">${o[0]}</div><div class="s">${o[3]}</div></div><span class="check ${st===o[0]?'on':''}" style="border-radius:50%">${st===o[0]?I('check',14,3):''}</span></button>`).join('')}</div>
     <div style="height:16px"></div>
-    ${st==='Deal'?`<label class="field"><span>Nominal disetujui (goal)</span><input class="input num" id="lg" inputmode="numeric" value="${l.amount.toLocaleString('id-ID')}" oninput="this.value=this.value.replace(/\\D/g,'')?(+this.value.replace(/\\D/g,'')).toLocaleString('id-ID'):''"><div class="hint">Tidak harus sama dengan pengajuan. Contoh: pengajuan Rp10 jt, disetujui Rp5 jt.</div></label>`:''}
+    ${st==='Deal'?`<label class="field"><span>Nominal pengajuan</span><input class="input num" id="lg" inputmode="numeric" value="${esc(p.g??l.amount.toLocaleString('id-ID'))}" oninput="cur().p.g=this.value=this.value.replace(/\\D/g,'')?(+this.value.replace(/\\D/g,'')).toLocaleString('id-ID'):''"></label>
+    <label class="field"><span>Tenor (bulan)</span><input class="input num" id="lt" inputmode="numeric" value="${esc(p.ten??l.tenor)}" oninput="cur().p.ten=this.value"></label>
+    <div class="field"><span>Foto approval *</span><div class="thumbs">${photoSlot('Bukti approve',p.doc,'setP({doc:1})')}</div></div>`:''}
     ${st==='Prospect'?`<label class="field"><span>Jadwal follow up</span><input class="input" type="date" value="2026-10-29"></label>`:''}
     ${st==='Belum Tertarik'?`<div class="field"><span>Status turunan</span><div class="opts">${['Tertarik','Masih prospect','Rejected'].map(x=>`<button class="opt ${p.sub===x?'on':''}" onclick="setP({sub:'${x}'})">${x}</button>`).join('')}</div><div class="hint">${p.sub==='Masih prospect'?'Leads kembali ke status Prospect.':p.sub==='Rejected'?'Leads ditutup.':p.sub==='Tertarik'?'Leads tetap terbuka untuk diproses lagi.':'Pilih salah satu.'}</div></div>`:''}
     ${st==='Belum Tertarik'&&p.sub==='Rejected'?`<label class="field"><span>Alasan</span><select class="input" id="lr2"><option>Penghasilan tidak memenuhi syarat</option><option>Nasabah tidak tertarik</option><option>Tidak bisa dihubungi</option><option>Dokumen tidak lengkap</option></select></label>`:''}
@@ -1485,8 +1496,11 @@ function saveLead(id){
   const l=S.leads.find(x=>x.id===id), st=cur().p.st, note=val('ln');
   if(st==='Deal'){
     const g=parseInt(val('lg').replace(/\D/g,''))||0;
-    if(!g){ toast('Isi nominal disetujui','alert'); return; }
+    if(!g){ toast('Isi nominal pengajuan','alert'); return; }
+    if(!cur().p.doc){ toast('Lampirkan foto approval','alert'); return; }
+    if(!l.amount) l.amount=g;
     if(g>l.amount){ toast('Nominal disetujui melebihi pengajuan','alert'); return; }
+    l.tenor=parseInt(val('lt'))||l.tenor; l.docOk=true; delete l.sub;
     l.goal=g; l.status='Deal'; l.log.unshift({t:'Deal',s:`26 Okt · Disetujui ${rp(g)} · ${S.demo.offline?'Menunggu sinkron ke SIM':'Terkirim ke SIM'}${note?' · '+note:''}`});
     if(!l.owner) l.owner=S.user;
     if(S.demo.offline){ l.pending=true; back(); toast('Deal disimpan di HP, dikirim ke SIM saat online','refresh'); return; }
@@ -1553,13 +1567,15 @@ function rejectSheet(id){
 }
 SCR.assign = p => {
   const sel=p.sel||[], list=S.leads.filter(l=>!l.owner);
-  return {note:'Sales Manager memilih beberapa leads dari upload backend lalu assign ke Multi Finance (URD FR-005–FR-007). Hanya manager yang bisa assign.',
+  return {note:'Arco dan Team Leader meng-assign leads berdasarkan cabang ke promotor di cabang itu, satu per satu atau lewat import (MOM 12.5).',
   html:`${appbar('Assign leads')}<main class="content">
-    <div class="banner blue" style="margin-bottom:14px">${I('file',18)}<span>${list.length} leads baru dari upload backend, ${'26 Okt 2026'} 06:00.</span></div>
+    <div class="banner blue" style="margin-bottom:14px">${I('file',18)}<span>${list.length} leads baru di cabang Fatmawati. Leads melekat ke cabang.</span></div>
+    ${list.length?`<button class="btn ghost sm" style="margin-bottom:12px" onclick="act(()=>importAssign())">${I('file',18)} Import assign dari file</button>`:''}
     ${list.length?`<div class="list">${list.map(l=>`<button class="li" onclick="toggleSel('${l.id}')"><span class="check ${sel.includes(l.id)?'on':''}">${sel.includes(l.id)?I('check',14,3):''}</span><div class="grow"><div class="t">${l.name}</div><div class="s">${l.prod} · ${rp(l.amount)} · ${l.addr}</div></div></button>`).join('')}</div>
     <button class="link" style="margin-top:12px;display:block" onclick="setP({sel:${sel.length===list.length?'[]':'['+list.map(l=>`'${l.id}'`).join(',')+']'}})">${sel.length===list.length?'Batal pilih semua':'Pilih semua'}</button>`:`<div class="empty"><div class="ico-tile green">${I('check',24)}</div>Semua leads sudah di-assign.</div>`}
   </main>${list.length?`<footer class="actions"><button class="btn" ${sel.length?'':'disabled'} onclick="act(()=>assignSheet())">Assign ${sel.length||''} leads</button></footer>`:''}`};
 };
+function importAssign(){ let n=0; S.leads.forEach(l=>{ if(!l.owner){ l.owner=['sales.andi','cbd.tono','rea.nina'][n++%3]; } }); render(false); toast(n+' leads di-assign dari file'); }
 function toggleSel(id){ const p=cur().p; p.sel=p.sel||[]; p.sel=p.sel.includes(id)?p.sel.filter(x=>x!==id):[...p.sel,id]; render(false,true); }
 function assignSheet(){
   const members=[['sales.andi','Andi Wijaya'],['cbd.tono','Tono Hidayat'],['rea.nina','Nina Safitri']].map(([u,n])=>[u,n,S.leads.filter(l=>l.owner===u&&!leadClosed(l)).length]);
@@ -1581,7 +1597,7 @@ SCR.overdue = () => ({note:'Data keterlambatan pembayaran untuk tim collection (
 SCR.target = () => {
   const r=role();
   let main;
-  if(r==='leads') main=`<div class="card"><div class="small muted">Goal pencairan Oktober</div><div class="big-num num">Rp5 jt <span class="muted" style="font-size:15px;font-weight:600">/ Rp150 jt</span></div><div class="bar tan" style="margin:10px 0"><i style="width:4%"></i></div><div class="kv"><span>Jumlah deal</span><span>1 / 12</span></div><div class="kv"><span>Leads dihubungi</span><span>3 / 6</span></div></div>`;
+  if(r==='leads') main=`<div class="card"><div class="small muted">Goal pencairan Oktober</div><div class="big-num num">Rp5 jt <span class="muted" style="font-size:15px;font-weight:600">/ Rp150 jt</span></div><div class="bar tan" style="margin:10px 0"><i style="width:4%"></i></div><div class="kv"><span>Jumlah deal</span><span>1 / 12</span></div><div class="kv"><span>Leads dihubungi</span><span>3 / 6</span></div><div class="kv"><span>KPI</span><span>72 / 100</span></div></div>`;
   else if(r==='order') main=`<div class="card"><div class="small muted">Nilai pesanan Oktober</div><div class="big-num num">Rp110,5 jt <span class="muted" style="font-size:15px;font-weight:600">/ Rp150 jt</span></div><div class="bar" style="margin:10px 0"><i style="width:74%"></i></div><div class="kv"><span>Toko aktif memesan</span><span>14 / 20</span></div></div>`;
   else if(r==='spv') main=`<div class="card"><div class="small muted">Sell-out tim Oktober</div><div class="big-num num">Rp286 jt <span class="muted" style="font-size:15px;font-weight:600">/ Rp400 jt</span></div><div class="bar" style="margin:10px 0"><i style="width:71%"></i></div></div>`;
   else { const isC=r==='canvas'; main=`<div class="card"><div class="small muted">Penjualan Oktober</div><div class="big-num num">${isC?'Rp48,2 jt':'Rp214 jt'} <span class="muted" style="font-size:15px;font-weight:600">/ ${isC?'Rp80 jt':'Rp300 jt'}</span></div><div class="bar" style="margin:10px 0"><i style="width:${isC?60:71}%"></i></div>
@@ -1597,15 +1613,196 @@ SCR.target = () => {
   </main>`};
 };
 
-SCR.aktivitas = () => ({tab:'aktivitas', note:'Promotor FMCG dan MD tidak mencatat penjualan (MOM 10). Alur cek stok, price promo, facing display, dan support task menyusul di Tahap 3.',
-  html:`${appbar('Aktivitas toko',{backBtn:false})}<main class="content">
-    <div class="list">
-      <button class="li" onclick="go('sku')"><div class="ico-tile">${I('grid',20)}</div><div class="grow"><div class="t">SKU display</div><div class="s">Input harian di toko</div></div>${I('right',18)}</button>
-      <button class="li" onclick="go('share')"><div class="ico-tile">${I('pie',20)}</div><div class="grow"><div class="t">Market share</div><div class="s">Input harian, bisa draft</div></div>${I('right',18)}</button>
-      <button class="li" onclick="tab('kunjungan')"><div class="ico-tile">${I('route',20)}</div><div class="grow"><div class="t">Jadwal kunjungan</div><div class="s">Kamu bisa membuat jadwal sendiri</div></div>${I('right',18)}</button>
-    </div>
-    <p class="hint" style="margin-top:14px">Cek stok, price promo, facing display, dan support task menyusul di revisi berikutnya.</p>
+/* ---------- Komponen foto ---------- */
+const photoSlot = (label,on,click) => `<button class="thumb ${on?'':'add'}" style="width:auto;flex:1;min-width:92px;height:72px;font-size:11px;font-weight:600;gap:2px;align-content:center" onclick="${click}" aria-label="${label}">${I(on?'check':'camera',20,2)}<span>${label}</span></button>`;
+
+/* ---------- FMCG & MD ---------- */
+const FMCG_SKU=[{id:'f1',name:'Sabun Cair Segar 500 ml',sku:'FM-SC500'},{id:'f2',name:'Mi Instan Rasa Soto',sku:'FM-MI75'},{id:'f3',name:'Teh Melati Botol 350 ml',sku:'FM-TM350'},{id:'f4',name:'Kopi Sachet Susu',sku:'FM-KS25'},{id:'f5',name:'Biskuit Kelapa 120 g',sku:'FM-BK120'}];
+const fmSkus = () => [...FMCG_SKU,...S.fm.extra];
+const fmRow = id => S.fm.stok[id]||(S.fm.stok[id]={d:'',g:'',u:'Pcs',k:'',saved:false});
+const fmFull = id => { const x=fmRow(id); return x.d!==''&&x.g!==''; };
+function fmSet(id,k,v){ const x=fmRow(id); x[k]=v; x.saved=false; }
+function fmSave(id){ if(!fmFull(id)){ toast('Isi stok display dan gudang','alert'); return; } fmRow(id).saved=true; render(false,true); toast('Item tersimpan'); }
+function fmAi(id){ Object.assign(fmRow(id),{d:'6',g:'12',saved:false}); render(false,true); toast('Foto terbaca, periksa hasilnya','camera'); }
+function fmAddSheet(){
+  sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Tambah SKU</h3><p class="small muted" style="margin:-6px 0 12px">Ditandai sebagai barang di luar planned product.</p>
+  <label class="field"><span>Nama barang</span><input class="input" id="fa_n"></label><label class="field"><span>Kode SKU</span><input class="input" id="fa_s"></label>
+  <button class="btn" onclick="fmAdd()">Tambah</button>`);
+}
+function fmAdd(){ const n=val('fa_n'); if(!n){ toast('Isi nama barang','alert'); return; } S.fm.extra.push({id:'x'+(S.fm.extra.length+1),name:n,sku:val('fa_s')||'–',off:true}); closeSheet(); render(false,true); toast('SKU ditambahkan, dicatat di log'); }
+function fmSubmit(){
+  const miss=fmSkus().filter(x=>!fmFull(x.id)).length;
+  if(miss){ toast(miss+' item belum terisi','alert'); return; }
+  S.fm.stokDone=true; fmSkus().forEach(x=>fmRow(x.id).saved=true); back(); toast('Stock opname terkirim');
+}
+SCR['fm-stok'] = () => {
+  const list=fmSkus(), done=list.filter(x=>fmRow(x.id).saved).length;
+  return {note:'Stock opname (MOM 10.2). Barang sudah dipetakan per outlet. Kotak stok default kosong. Simpan per item boleh, tetapi submit wajib terisi semua. Foto barang dan price tag dibaca AI (simulasi). Sales bisa menambah SKU, ditandai di luar planned product.',
+  html:`${appbar('Cek stok')}<main class="content">
+    <div class="row between" style="margin:0 2px 12px"><b>${done} dari ${list.length} tersimpan</b>${S.fm.stokDone?chip('Terkirim','green'):chip('Belum dikirim','amber')}</div>
+    ${list.map(x=>{const v=fmRow(x.id);return `<div class="card" style="margin-bottom:10px"><div class="row between"><div class="grow"><b>${esc(x.name)}</b><div class="small muted">${esc(x.sku)}</div></div>${x.off?chip('Di luar planned','amber'):v.saved?chip('Tersimpan','green'):''}</div>
+      <div class="row" style="gap:8px;margin-top:10px"><label class="field grow" style="margin:0"><span>Display</span><input class="input num" inputmode="numeric" value="${v.d}" oninput="fmSet('${x.id}','d',this.value)"></label><label class="field grow" style="margin:0"><span>Gudang</span><input class="input num" inputmode="numeric" value="${v.g}" oninput="fmSet('${x.id}','g',this.value)"></label></div>
+      <div class="row" style="gap:8px;margin-top:8px"><label class="field grow" style="margin:0"><span>Satuan</span><select class="input" onchange="fmSet('${x.id}','u',this.value)">${['Pcs','Dus'].map(u=>`<option ${v.u===u?'selected':''}>${u}</option>`).join('')}</select></label><label class="field grow" style="margin:0"><span>Stok kompetitor</span><input class="input num" inputmode="numeric" value="${v.k}" oninput="fmSet('${x.id}','k',this.value)"></label></div>
+      <div class="row" style="gap:8px;margin-top:10px"><button class="btn ghost sm grow" onclick="fmAi('${x.id}')">${I('camera',18)} Foto</button><button class="btn sec sm grow" onclick="fmSave('${x.id}')">Simpan item</button></div></div>`}).join('')}
+    <button class="btn ghost" onclick="fmAddSheet()">${I('plus',20)} Tambah SKU</button>
+  </main><footer class="actions"><button class="btn" onclick="fmSubmit()">Submit stock opname</button></footer>`};
+};
+const PROMO_CEK=[{id:'p1',name:'Sabun Cair Segar 500 ml',price:'Rp24.900'},{id:'p2',name:'Teh Melati Botol 350 ml',price:'Rp5.500'}];
+function fmPhoto(k){ S.fm.foto[k]=true; render(false,true); toast('Foto tersimpan','camera'); }
+SCR['fm-promo'] = () => {
+  const ok=PROMO_CEK.every(x=>S.fm.foto[x.id+'d']&&S.fm.foto[x.id+'t']);
+  return {note:'Price promo (MOM 10.2). Produk yang dicek sesuai setup admin. Foto display beserta foto price tag promo.',
+  html:`${appbar('Price promo')}<main class="content">${PROMO_CEK.map(x=>`<div class="card" style="margin-bottom:10px"><div class="row between"><b>${x.name}</b><b class="num">${x.price}</b></div><div class="thumbs">${photoSlot('Foto display',S.fm.foto[x.id+'d'],`fmPhoto('${x.id}d')`)}${photoSlot('Price tag',S.fm.foto[x.id+'t'],`fmPhoto('${x.id}t')`)}</div></div>`).join('')}
+  </main><footer class="actions"><button class="btn" ${ok?'':'disabled'} onclick="back();toast('Price promo terkirim')">Kirim price promo</button></footer>`};
+};
+SCR['fm-facing'] = () => {
+  const ok=S.fm.foto.fc&&S.fm.foto.ft;
+  return {note:'Facing display (MOM 10.2). Foto dan price tag, dibandingkan dengan plan tata letak. SKU display bisa diatur sendiri (phasing).',
+  html:`${appbar('Facing display')}<main class="content">
+    <div class="card"><b>Plan tata letak</b><div class="kv" style="margin-top:6px"><span>Rak utama</span><span>6 facing</span></div><div class="kv"><span>End gondola</span><span>4 facing</span></div></div>
+    <div class="field" style="margin-top:14px"><span>Facing aktual</span><div class="stepper" style="width:max-content"><button onclick="S.fm.facing=Math.max(0,S.fm.facing-1);render(false,true)" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${S.fm.facing}</span><button onclick="S.fm.facing++;render(false,true)" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>
+    <div class="thumbs">${photoSlot('Foto display',S.fm.foto.fc,"fmPhoto('fc')")}${photoSlot('Price tag',S.fm.foto.ft,"fmPhoto('ft')")}</div>
+  </main><footer class="actions"><button class="btn" ${ok?'':'disabled'} onclick="back();toast('Facing display terkirim')">Kirim facing display</button></footer>`};
+};
+SCR['fm-task'] = () => ({note:'Support task (MOM 10.2). Sales membuat task sendiri, atau task di-assign outlet atau Team Leader. Team Leader melihat hasilnya tanpa approval.',
+  html:`${appbar('Support task',{right:`<button class="ib" onclick="act(()=>go('fm-task-form',{}))" aria-label="Buat task">${I('plus',24,2)}</button>`})}<main class="content">
+    <div class="list">${S.fm.tasks.map((x,i)=>`<button class="li" onclick="act(()=>go('fm-task-form',{i:${i}}))"><div class="ico-tile ${x.done?'green':'tan'}">${I(x.done?'check':'clock',20,2)}</div><div class="grow"><div class="t">${esc(x.t)}</div><div class="s">${x.from}</div></div>${chip(x.done?'Selesai':'Berjalan',x.done?'green':'amber')}</button>`).join('')}</div>
   </main>`});
+SCR['fm-task-form'] = p => {
+  const x=p.i!=null?S.fm.tasks[p.i]:null;
+  return {note:'Isi task: foto before, foto after, dan catatan.',
+  html:`${appbar(x?'Isi task':'Buat task')}<main class="content">
+    ${x?`<div class="card"><b>${esc(x.t)}</b><div class="small muted">${x.from}</div></div>`:`<label class="field"><span>Nama task</span><input class="input" id="ft_t" value="${esc(p.t||'')}" placeholder="Contoh: Bersihkan freezer"></label>`}
+    <div class="thumbs" style="margin-top:12px">${photoSlot('Foto before',p.b,`cur().p.t=val('ft_t');setP({b:1})`)}${photoSlot('Foto after',p.a,`cur().p.t=val('ft_t');setP({a:1})`)}</div>
+    <label class="field" style="margin-top:14px"><span>Catatan</span><textarea class="input" id="ft_n"></textarea></label>
+  </main><footer class="actions"><button class="btn" ${p.b&&p.a?'':'disabled'} onclick="fmTaskSave()">Simpan task</button></footer>`};
+};
+function fmTaskSave(){
+  const p=cur().p;
+  if(p.i!=null) S.fm.tasks[p.i].done=true;
+  else { const t=val('ft_t'); if(!t){ toast('Isi nama task','alert'); return; } S.fm.tasks.unshift({t,from:'Dibuat sendiri',done:true}); }
+  back(); toast('Task tersimpan, Team Leader bisa melihatnya');
+}
+
+/* ---------- POSM & planogram ---------- */
+const POSM=[{id:'pm1',name:'Planogram rak utama',kind:'Planogram',acuan:'Urutan brand dan jumlah facing'},{id:'pm2',name:'POSM wobbler promo akhir tahun',kind:'POSM',acuan:'Posisi wobbler di depan rak'}];
+SCR.posm = () => ({note:'POSM dan planogram (MOM 13). User memotret lokasi, lalu foto dicocokkan dengan foto brief yang di-assign. AI memberi nilai berdasarkan acuan (simulasi).',
+  html:`${appbar('POSM & planogram')}<main class="content"><div class="list">${POSM.map(x=>`<button class="li" onclick="go('posm-detail',{id:'${x.id}'})"><div class="ico-tile">${I('image',20)}</div><div class="grow"><div class="t">${x.name}</div><div class="s">${x.kind}</div></div>${S.posm[x.id]?chip('Nilai '+S.posm[x.id],'green'):chip('Belum','amber')}</button>`).join('')}</div></main>`});
+SCR['posm-detail'] = p => {
+  const x=POSM.find(a=>a.id===p.id), n=S.posm[x.id];
+  return {note:'Nilai AI di sini simulasi. Acuan penilaian masih ditunggu dari klien.',
+  html:`${appbar(x.kind)}<main class="content">
+    <div class="card"><b>${x.name}</b><div class="small muted" style="margin-top:2px">Acuan: ${x.acuan}</div></div>
+    <div class="sec-title">Foto brief</div><div class="wm-photo">${I('image',26)}</div>
+    <div class="sec-title">Foto kamu</div>${n?`<div class="wm-photo">${I('image',26)}</div><div class="card" style="margin-top:12px"><div class="small muted">Nilai AI</div><div class="big-num num">${n}</div><p class="hint">Cocok dengan foto brief.</p></div>`:`<button class="wm-photo add" onclick="act(()=>posmShoot('${x.id}'))" aria-label="Ambil foto">${I('camera',26)}<span class="small">Ambil foto</span></button>`}
+  </main>`};
+};
+function posmShoot(id){ S.posm[id]=86; render(false,true); toast('Foto dinilai AI: 86','camera'); }
+
+/* ---------- Task Pending (Team Leader) ---------- */
+const TASK_FLOW=['Menunggu assign','Sedang diperbaiki','Sudah selesai diperbaiki','Closed'];
+SCR['task-pending'] = () => ({note:'Task Pending (MOM 6.4, 7). SKU rusak otomatis menjadi task. Team Leader meng-assign, memantau, dan menutup task sampai closed.',
+  html:`${appbar('Task pending')}<main class="content">${S.skuTasks.length?`<div class="list">${S.skuTasks.map((x,i)=>{const d=x.st==='Closed';return `<div class="li"><div class="ico-tile ${d?'green':'amber'}">${I(d?'check':'alert',20,2)}</div><div class="grow"><div class="t">${prodById(x.id).name}</div><div class="s">${x.toko}</div><div style="margin-top:6px">${chip(x.st,d?'green':'amber')}</div></div>${d?'':`<button class="btn sec sm" style="width:auto" onclick="act(()=>taskNext(${i}))">${x.st==='Menunggu assign'?'Assign':x.st==='Sedang diperbaiki'?'Selesai':'Close'}</button>`}</div>`}).join('')}</div>`:`<div class="empty">Tidak ada task pending.</div>`}</main>`});
+function taskNext(i){ const x=S.skuTasks[i]; x.st=TASK_FLOW[TASK_FLOW.indexOf(x.st)+1]; render(false,true); toast('Status task: '+x.st); }
+
+/* ---------- Canvassing ---------- */
+const CANVAS_LIMIT=5000000;
+const stockValue = () => CANVAS_PRODUCTS.reduce((s,p)=>s+S.stock[p.id].good*p.price,0);
+SCR['stok-invoice'] = p => {
+  const L=S.muatInv, tot=L.reduce((s,l)=>s+l.q*l.price,0), over=stockValue()+tot>CANVAS_LIMIT;
+  return {note:'Stok bawaan dari foto invoice (MOM 11.1). OCR membuat daftar produk; qty dan harga bisa diubah.',
+  html:`${appbar('Stok dari invoice')}<main class="content">
+    <div class="list">${L.map((l,i)=>`<div class="li"><div class="grow"><div class="t">${prodById(l.id).name}</div><div class="s num">${rp(l.price)}</div></div><div class="stepper"><button onclick="S.muatInv[${i}].q=Math.max(0,S.muatInv[${i}].q-1);render(false,true)" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${l.q}</span><button onclick="S.muatInv[${i}].q++;render(false,true)" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>`).join('')}</div>
+    <div class="card" style="margin-top:14px"><div class="kv"><span>Total invoice</span><span class="num">${rp(tot)}</span></div><div class="kv"><span>Limit bawaan</span><span class="num">${rp(CANVAS_LIMIT)}</span></div></div>
+    ${over?`<div class="banner red" style="margin-top:12px">${I('alert',18)}<span>Total melebihi limit. Kurangi qty dulu.</span></div>`:''}
+  </main><footer class="actions"><button class="btn" ${over?'disabled':''} onclick="saveStokInv()">Masukkan ke stok</button></footer>`};
+};
+function saveStokInv(){ S.muatInv.forEach(l=>{ if(l.q){ S.stock[l.id].good+=l.q; S.bawa[l.id]=(S.bawa[l.id]||0)+l.q; S.mutasi.unshift({t:'Muat dari invoice',d:`${prodById(l.id).name} ×${l.q}`,time:'13:10',sign:'+'}); } }); back(); toast('Stok bawaan bertambah'); }
+function startStokInv(){ S.muatInv=[{id:'rc18',q:1,price:429000},{id:'kp16',q:1,price:270000}]; go('stok-invoice'); }
+SCR['stok-rekap'] = () => {
+  const rows=CANVAS_PRODUCTS.map(p=>{const b=S.bawa[p.id]||0, k=S.kembali[p.id]??S.stock[p.id].good; return {p,b,k,j:Math.max(0,b-k)};});
+  const tot=rows.reduce((s,x)=>s+x.j*x.p.price,0);
+  return {note:'Penjualan dihitung dari retur saat sales kembali: stok yang tidak dibawa pulang dianggap terjual (MOM 11.1).',
+  html:`${appbar('Rekap akhir hari')}<main class="content">
+    <div class="list">${rows.map(x=>`<div class="li"><div class="grow"><div class="t">${x.p.name}</div><div class="s">Dibawa ${x.b} · terjual ${x.j}</div></div><div class="stepper"><button onclick="S.kembali['${x.p.id}']=Math.max(0,${x.k}-1);render(false,true)" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${x.k}</span><button onclick="S.kembali['${x.p.id}']=Math.min(${x.b},${x.k}+1);render(false,true)" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>`).join('')}</div>
+    <p class="hint" style="margin-top:10px">Angka di kanan adalah jumlah barang yang dibawa pulang.</p>
+    <div class="card" style="margin-top:12px"><div class="kv" style="font-size:16px"><span style="color:var(--ink);font-weight:700">Penjualan dari retur</span><span class="num">${rp(tot)}</span></div></div>
+  </main><footer class="actions"><button class="btn" onclick="back();toast('Rekap akhir hari tersimpan')">Simpan rekap</button></footer>`};
+};
+function saleFreeToko(){
+  sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Outlet di luar daftar</h3><label class="field"><span>Nama outlet</span><input class="input" id="ft_o" placeholder="Nama toko"></label><button class="btn" onclick="saleFreeGo()">Lanjut</button>`);
+}
+function saleFreeGo(){ const n=val('ft_o'); if(!n){ toast('Isi nama outlet','alert'); return; } closeSheet(); S.cart.toko=n; go('jual-invoice'); }
+
+/* ---------- Multi Finance ---------- */
+const isCbd = () => S.user==='cbd.tono';
+const CBD_FLOW=['Follow Up','Input Order','Verify Dokumen','Scoring','Survey'];
+function leadStep(id){ const l=S.leads.find(x=>x.id===id); l.step=(l.step||0)+1; l.log.unshift({t:CBD_FLOW[l.step-1],s:'26 Okt · Selesai'}); render(false,true); toast('Tahap '+CBD_FLOW[l.step-1]+' selesai'); }
+function leadDoc(id){ const l=S.leads.find(x=>x.id===id); l.docCair=true; l.log.unshift({t:'Dokumen pencairan',s:'26 Okt · Terunggah'}); render(false,true); toast('Dokumen pencairan terunggah'); }
+function leadExtra(l){
+  const cbd=isCbd()?`<div class="sec-title">Alur CBD</div><div class="card"><div class="timeline">${CBD_FLOW.map((x,i)=>`<div class="ti ${i>(l.step||0)?'dim':''}"><b>${x}</b><small>${i<(l.step||0)?'Selesai':i===(l.step||0)?'Tahap saat ini':'Belum'}</small></div>`).join('')}</div>${(l.step||0)<CBD_FLOW.length?`<button class="btn sec sm" style="margin-top:10px" onclick="act(()=>leadStep('${l.id}'))">Selesaikan ${CBD_FLOW[l.step||0]}</button>`:''}</div>`:'';
+  const doc=l.status==='Deal'&&l.docOk?`<div class="sec-title">Dokumen</div><div class="card"><div class="kv"><span>Bukti sudah approve</span><span style="color:var(--green)">Terunggah</span></div><div class="kv"><span>Persetujuan pencairan dana</span><span style="color:${l.docCair?'var(--green)':'var(--amber)'}">${l.docCair?'Terunggah':'Belum'}</span></div>${S.user==='rea.nina'?`<p class="hint">${l.docCair?'Insentif sudah berhak diterima.':'Insentif cair setelah foto dokumen pencairan diunggah.'}</p>`:''}${l.docCair?'':`<button class="btn sec sm" style="margin-top:10px" onclick="act(()=>leadDoc('${l.id}'))">${I('camera',18)} Unggah dokumen pencairan</button>`}</div>`:'';
+  return cbd+doc;
+}
+SCR['lead-baru'] = () => ({note:'CBD dan REA/SPG boleh membuat leads sendiri. Customer yang sudah terdaftar di REA lain tetap boleh dibuat; duplikat tidak masalah (MOM 12.4).',
+  html:`${appbar('Buat leads')}<main class="content">
+    <label class="field"><span>Nama nasabah *</span><input class="input" id="nl_n"></label>
+    <label class="field"><span>Nomor HP *</span><input class="input" id="nl_p" inputmode="tel"></label>
+    <label class="field"><span>Produk</span><select class="input" id="nl_d"><option>Kredit Modal Kerja</option><option>Kredit Multiguna</option><option>Dana Tunai</option></select></label>
+    <label class="field"><span>Pekerjaan</span><input class="input" id="nl_j"></label>
+    <label class="field"><span>Alamat</span><input class="input" id="nl_a"></label>
+    <p class="hint">Nominal diisi saat leads menjadi Deal.</p>
+  </main><footer class="actions"><button class="btn" onclick="saveNewLead()">Simpan leads</button></footer>`});
+function saveNewLead(){
+  const n=val('nl_n'), h=val('nl_p');
+  if(!n||!h){ toast('Isi nama dan nomor HP','alert'); return; }
+  S.leads.unshift({id:'L-2610-'+(100+S.leads.length),name:n,prod:val('nl_d'),amount:0,tenor:12,phone:h,job:val('nl_j')||'–',addr:val('nl_a')||'–',status:'Baru',owner:S.user,date:'26 Okt 2026',self:true,log:[]});
+  back(); toast('Leads tersimpan');
+}
+const MITRA=[{id:'mt1',name:'Agen Sejahtera Fatmawati',area:'Fatmawati',phone:'0812-7000-2201',leads:6},{id:'mt2',name:'Agen Berkah Cilandak',area:'Cilandak',phone:'0812-7000-2202',leads:3}];
+SCR.mitra = () => ({note:'Mitra adalah agent di luar SIM. Datanya dari client, hanya berupa data, dan melekat pada CBD (MOM 12.2).',
+  html:`${appbar('Mitra saya')}<main class="content"><div class="list">${MITRA.map(m=>`<button class="li" onclick="go('mitra-detail',{id:'${m.id}'})"><div class="ico-tile">${I('users',20)}</div><div class="grow"><div class="t">${m.name}</div><div class="s">${m.area} · ${m.leads} leads</div></div>${S.mitraLog[m.id]?chip('Dipantau','green'):chip('Belum','amber')}</button>`).join('')}</div></main>`});
+SCR['mitra-detail'] = p => {
+  const m=MITRA.find(x=>x.id===p.id);
+  return {note:'CBD memonitor mitra. Data KPI CBD berupa foto dan catatan (MOM 12.2).',
+  html:`${appbar(m.name)}<main class="content">
+    <div class="card"><div class="kv"><span>Area</span><span>${m.area}</span></div><div class="kv"><span>Telepon</span><span class="num">${m.phone}</span></div><div class="kv"><span>Leads</span><span>${m.leads}</span></div></div>
+    <div class="thumbs" style="margin-top:12px">${photoSlot('Foto monitoring',p.f,'setP({f:1})')}</div>
+    <label class="field" style="margin-top:14px"><span>Catatan</span><textarea class="input" id="mt_n"></textarea></label>
+  </main><footer class="actions"><button class="btn" ${p.f?'':'disabled'} onclick="act(()=>{S.mitraLog['${m.id}']=true;back();toast('Monitoring mitra tersimpan')})">Simpan monitoring</button></footer>`};
+};
+const CBD_TASK=[{id:'ct1',t:'Alasan leads tidak goal',q:['Kenapa nasabah menolak?','Produk apa yang lebih diminati?']}];
+SCR['cbd-task'] = p => {
+  const x=CBD_TASK[0], done=S.cbdDone;
+  return {note:'CBD menerima task dari Team Leader berisi daftar pertanyaan, menanyakannya ke konsumen, lalu jawaban dicatat sebagai submission task (MOM 12.2).',
+  html:`${appbar('Task Team Leader')}<main class="content">
+    <div class="row between" style="margin:0 2px 12px"><b>${x.t}</b>${done?chip('Terkirim','green'):chip('Baru','blue')}</div>
+    ${x.q.map((q,i)=>`<label class="field"><span>${q}</span><textarea class="input" id="ct_${i}" ${done?'disabled':''}></textarea></label>`).join('')}
+  </main>${done?'':`<footer class="actions"><button class="btn" onclick="cbdSubmit()">Kirim jawaban</button></footer>`}`};
+};
+function cbdSubmit(){ if(CBD_TASK[0].q.some((_,i)=>!val('ct_'+i))){ toast('Isi semua jawaban','alert'); return; } S.cbdDone=true; back(); toast('Jawaban terkirim ke Team Leader'); }
+
+/* ---------- Notifikasi absen ---------- */
+SCR['notif-absen'] = () => ({note:'Push notifikasi sebelum check-in dan check-out, dengan pilihan suara (MOM 4).',
+  html:`${appbar('Notifikasi absen')}<main class="content">
+    <div class="list">${[['in','Sebelum absen masuk','15 menit sebelum jadwal'],['out','Sebelum absen pulang','15 menit sebelum jadwal']].map(([k,t,s])=>`<button class="li" onclick="S.notifOn.${k}=!S.notifOn.${k};render(false,true);toast('Pengingat '+(S.notifOn.${k}?'diaktifkan':'dimatikan'),'bell')"><div class="ico-tile">${I('bell',20)}</div><div class="grow"><div class="t">${t}</div><div class="s">${s}</div></div>${chip(S.notifOn[k]?'Aktif':'Mati',S.notifOn[k]?'green':'')}</button>`).join('')}</div>
+    <div class="sec-title">Suara notifikasi</div>
+    <div class="opts">${['Bawaan','Lonceng','Sirene','Getar saja'].map(x=>`<button class="opt ${S.sound===x?'on':''}" onclick="S.sound='${x}';render(false,true);toast('Suara ${x} dipilih','bell')">${x}</button>`).join('')}</div>
+  </main>`});
+
+SCR.aktivitas = () => {
+  const row=(ic,tt,s,go2,st)=>`<button class="li" onclick="${go2}"><div class="ico-tile">${I(ic,20)}</div><div class="grow"><div class="t">${tt}</div><div class="s">${s}</div></div>${st||I('right',18)}</button>`;
+  return {tab:'aktivitas', note:'Promotor FMCG dan MD mencatat aktivitas harian di toko, tanpa pencatatan penjualan (MOM 10). Check-in dan check-out di lokasi yang sama, bisa berulang dalam sehari.',
+  html:`${appbar('Aktivitas toko',{backBtn:false})}<main class="content"><div class="list">
+    ${row('box','Cek stok','Stok display, gudang, dan kompetitor',"go('fm-stok')",S.fm.stokDone?chip('Terkirim','green'):'')}
+    ${row('tag','Price promo','Foto display dan price tag promo',"go('fm-promo')")}
+    ${row('grid','Facing display','Foto dan plan tata letak',"go('fm-facing')")}
+    ${row('check','Support task','Foto before, after, dan catatan',"go('fm-task')")}
+    ${row('image','POSM & planogram','Foto dinilai AI',"go('posm')")}
+    ${row('grid','SKU display','Input harian di toko',"go('sku')")}
+    ${row('pie','Market share','Input harian, bisa draft',"go('share')")}
+  </div></main>`};
+};
 
 /* ---------- SKU display & Market share (SPG) ---------- */
 SCR.sku = p => {
@@ -1636,7 +1833,7 @@ function skuAdd(t){
 function skuPhoto(t){ const n=skuAdd(t); render(false,true); if(n) toast(n.name+' terbaca dari foto barcode','camera'); }
 function saveSku(t){
   const toko=TOKO.spg.find(x=>x.id===t), bad=S.sku[t].filter(d=>d.cond==='Rusak');
-  bad.forEach(d=>{ if(!S.skuTasks.some(k=>k.t===t&&k.id===d.id)) S.skuTasks.push({t,id:d.id,status:'Menunggu assign Team Leader'}); });
+  bad.forEach(d=>{ if(!S.skuTasks.some(k=>k.t===t&&k.id===d.id)) S.skuTasks.push({t,id:d.id,toko:toko.name,st:'Menunggu assign'}); });
   back(); toast(bad.length?`SKU display tersimpan, ${bad.length} task perbaikan dibuat`:`SKU display ${toko.name} tersimpan`);
 }
 SCR.share = () => {
@@ -1728,6 +1925,7 @@ SCR.akun = () => {
       <p class="hint">${I('refresh',13,2)} Data disinkronkan dari sistem SIM (BPR1)</p></div>
     <div class="list" style="margin-top:14px">
       <button class="li" onclick="go('wajah')"><div class="ico-tile">${I('face',20)}</div><div class="grow"><div class="t">Wajah referensi</div><div class="s">Direkam 26 Okt 2026</div></div>${I('right',20)}</button>
+      <button class="li" onclick="go('notif-absen')"><div class="ico-tile">${I('bell',20)}</div><div class="grow"><div class="t">Notifikasi absen</div><div class="s">Pengingat dan suara</div></div>${I('right',20)}</button>
       <button class="li" onclick="go('password')"><div class="ico-tile">${I('key',20)}</div><div class="grow"><div class="t">Ganti password</div></div>${I('right',20)}</button>
       <button class="li" onclick="tab('absensi')"><div class="ico-tile">${I('calendar',20)}</div><div class="grow"><div class="t">Riwayat absensi</div></div>${I('right',20)}</button>
       <button class="li" onclick="sheet('<h3 style=&quot;font-size:18px;font-weight:800&quot;>Keluar dari aplikasi?</h3><p class=&quot;small muted&quot; style=&quot;margin:6px 0 16px&quot;>Kamu perlu login lagi dengan username dan password.</p><button class=&quot;btn danger&quot; onclick=&quot;closeSheet();logout()&quot;>Keluar</button>')"><div class="ico-tile red">${I('logout',20)}</div><div class="grow"><div class="t" style="color:var(--red)">Keluar</div></div></button>
