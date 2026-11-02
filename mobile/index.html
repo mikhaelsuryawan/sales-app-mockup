@@ -406,7 +406,7 @@ const USERS = {
   'sales.budi':{name:'Budi Santoso', init:'BS', role:'canvas', roleLabel:'Sales Canvasing', nip:'SIM-23-00912', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Rute Pasar Minggu – Cilandak', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
   'sales.dimas':{name:'Dimas Prasetyo', init:'DP', role:'order', roleLabel:'Sales Taking Order', nip:'SIM-24-00455', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Area Fatmawati – Bintaro', sched:'WFA', main:{key:'pesanan',label:'Pesanan',icon:'order'}},
   'sales.andi':{name:'Andi Wijaya', init:'AW', role:'leads', roleLabel:'Multi Finance', nip:'SIM-22-00731', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'leads',label:'Leads',icon:'users'}},
-  'spv.sari':  {name:'Sari Wulandari', init:'SW', role:'spv', roleLabel:'Team Leader (SPV 1)', nip:'SIM-19-00208', client:'Arunika Elektronik & BPR Mitra Usaha', unit:'Cabang Jakarta Selatan', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
+  'spv.sari':  {name:'Sari Wulandari', init:'SW', role:'spv', roleLabel:'Team Leader (SPV 1)', nip:'CLT-TL-0208', client:'Arunika Elektronik & BPR Mitra Usaha', unit:'Cabang Jakarta Selatan', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
   'ffor.yoga': {name:'Yoga Permana', init:'YP', role:'spv', roleLabel:'FFOR (SPV 2)', nip:'SIM-18-00144', client:'Arunika Elektronik', unit:'Region Jakarta', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
   'arco.maya': {name:'Maya Anggraini', init:'MA', role:'spv', menu:'arco', roleLabel:'Arco (Leader SPG)', nip:'ARCO-0012', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
   'cbd.tono':  {name:'Tono Hidayat', init:'TH', role:'leads', menu:'cbd', roleLabel:'CBD / Mediator', nip:'SIM-23-00871', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'Area Fatmawati', sched:'WFA', main:{key:'leads',label:'Leads',icon:'users'}},
@@ -415,6 +415,7 @@ const USERS = {
   'md.rangga': {name:'Rangga Saputra', init:'RS', role:'fmcg', roleLabel:'Merchandising (MD)', nip:'SIM-23-01102', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
   'mobile.fikri':{name:'Fikri Ramadhan', init:'FR', role:'spg', roleLabel:'Mobile Promotor', nip:'SIM-24-01377', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Beberapa toko dan event', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
   'trainer.joko':{name:'Joko Susilo', init:'JS', role:'trainer', roleLabel:'Trainer', nip:'SIM-20-00412', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Kelas pelatihan Jakarta Selatan', sched:'WFO', main:{key:'quiz',label:'Quiz',icon:'quiz'}},
+  'sales.rudi':{name:'Rudi Hartono', init:'RH', role:'leads', roleLabel:'Multi Finance', nip:'SIM-24-01410', client:'BPR Mitra Usaha', unit:'Kantor Cabang Cilandak', place:'BPR Mitra Usaha Cilandak', sched:'WFO', main:{key:'leads',label:'Leads',icon:'users'}},
   'bantuan.eko':{name:'Eko Prabowo', init:'EP', role:'spg', menu:'bantuan', roleLabel:'Promotor Bantuan', nip:'BTN-0007', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
   'reliever.gita':{name:'Gita Puspita', init:'GP', role:'spg', menu:'bantuan', roleLabel:'Reliever', nip:'RLV-0031', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}}
 };
@@ -534,7 +535,7 @@ function freshState(){
     sku:{t1:null,t2:null}, 
     fm:{stok:{},extra:[],stokDone:false,foto:{},facing:0,tasks:[{t:'Bersihkan etalase depan',from:'Dari Team Leader',done:false}]}, posm:{}, mitraLog:{}, cbdDone:false, notifOn:{in:true,out:true}, sound:'Bawaan',
     bawa:{rc18:8,bl11:6,st3:9,kp16:5,ds72:2}, kembali:{}, muatInv:[], receipt:false,
-    share:{ARUNIKA:18,Samsung:22,LG:15,Polytron:9,Lainnya:6}, shareState:null,
+    shareClient:{tv50:6,tv43:12}, shareComp:[{brand:'Samsung',kat:'TV',sub:'Smart TV',nama:'Samsung Crystal 55"',qty:14,harga:0},{brand:'LG',kat:'TV',sub:'Smart TV',nama:'LG UHD 50"',qty:10,harga:0}], shareCat:'TV', shareState:null,
     quizDone:false, quizScore:null, surveyDone:false,
     myRequests:[], newToko:[],
     cart:null, ord:null
@@ -580,7 +581,7 @@ const isMobilePromo = () => U()?.roleLabel==='Mobile Promotor';
 const allToko = () => [...TOKO.spg,...TOKO.canvas,...TOKO.order,...getExtraToko(),...S.newToko];
 const tokoById = id => allToko().find(t=>t.id===id);
 const tokoByName = n => allToko().find(t=>t.name===n);
-const priceAt = (p,tokoName) => Math.round(p.price*(CATF[tokoByName(tokoName)?.cat]||1)/1000)*1000;
+const priceAt = (p,tokoName) => shRead('hargaToko',{})[tokoName]?.[p.id] ?? Math.round(p.price*(CATF[tokoByName(tokoName)?.cat]||1)/1000)*1000;
 const unitOf = (i,pr) => i.price||pr.price;
 
 function go(name,p={}){ S.stack.push({name,p}); render(true); }
@@ -973,7 +974,7 @@ const AREA_CANVAS=['Rute Pasar Minggu – Cilandak','Rute Kebon Jeruk – Kemban
 SCR['assign-canvas'] = () => ({note:'Jika promotor adalah canvasser, Team Leader meng-assign area atau toko ke promotor itu. Promotor elektronik yang stay di toko tidak perlu di-assign (MOM 11.1).',
   html:`${appbar('Assign canvasser')}<main class="content"><div class="list">${[['sales.budi','Budi Santoso',1],['sales.dimas','Dimas Prasetyo',1],['mobile.fikri','Fikri Ramadhan',1],['spg.rina','Rina Marlina',0]].map(([u,n,c])=>`<button class="li" ${c?`onclick="act(()=>canvasSheet('${u}'))"`:'disabled'}><div class="av blue">${USERS[u].init}</div><div class="grow"><div class="t">${n}</div><div class="s">${c?(S.canvasArea[u]||'Belum di-assign'):'Stay di toko, tidak perlu assign'}</div></div>${c?I('right',18):''}</button>`).join('')}</div></main>`});
 function canvasSheet(u){ sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Assign ${USERS[u].name.split(' ')[0]} ke</h3><div class="list">${AREA_CANVAS.map(a=>`<button class="li" onclick="S.canvasArea['${u}']='${a}';closeSheet();render(false,true);toast('Area di-assign')"><div class="grow"><div class="t">${a}</div></div></button>`).join('')}</div>`); }
-const RID={'spg.rina':'r3','sales.budi':'r4','sales.dimas':'r5','sales.andi':'r6','spv.sari':'r2','ffor.yoga':'r7','arco.maya':'r8','cbd.tono':'r9','rea.nina':'r10','fmcg.tari':'r11','md.rangga':'r12','mobile.fikri':'r13','bantuan.eko':'r14','reliever.gita':'r15','trainer.joko':'r16'};
+const RID={'spg.rina':'r3','sales.budi':'r4','sales.dimas':'r5','sales.andi':'r6','sales.rudi':'r6','spv.sari':'r2','ffor.yoga':'r7','arco.maya':'r8','cbd.tono':'r9','rea.nina':'r10','fmcg.tari':'r11','md.rangga':'r12','mobile.fikri':'r13','bantuan.eko':'r14','reliever.gita':'r15','trainer.joko':'r16'};
 const JADWAL_DEFAULT={r1:'Ya',r2:'Ya',r7:'Ya',r11:'Ya',r12:'Ya'};
 const canSchedule = () => shRead('roleJadwal',JADWAL_DEFAULT)[RID[S.user]]==='Ya';
 const apprChain = u => { const r=RID[u]; if(['r6','r8','r10'].includes(r)) return 'Arco → Team Leader'; if(['r3','r4','r5','r13'].includes(r)) return 'Team Leader → FFOR'; return 'Team Leader'; };
@@ -1485,6 +1486,7 @@ const leadLabel = l => l.sub?l.status+' · '+l.sub:l.status;
 const leadCab = l => l.cabang||'Fatmawati';
 function cabangSheet(){ sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Pindah cabang</h3><div class="list">${['Fatmawati','Cilandak'].map(c=>`<button class="li" onclick="pindahCabang('${c}')"><div class="grow"><div class="t">${c}</div><div class="s">${S.leads.filter(l=>leadCab(l)===c).length} leads</div></div>${S.cabang===c?chip('Sekarang','green'):''}</button>`).join('')}</div>`); }
 function pindahCabang(c){ S.cabang=c; closeSheet(); render(false,true); toast('Sekarang di cabang '+c+', '+S.leads.filter(l=>leadCab(l)===c).length+' leads diterima'); }
+function acctType(){ const u=S.user; if(u==='spv.sari') return 'User client (SPV 1 / CRH)'; if(u==='arco.maya') return 'User client, di luar BPR'; if(['reliever.gita','bantuan.eko'].includes(u)) return 'Di luar BPR, non SIM dan non client'; return 'Pegawai SIM (BPR)'; }
 function moveType(){ const u=U(), rl=u.roleLabel; if(/Canvas|Taking|CBD|Mobile/.test(rl)||u.role==='canvas'||u.role==='order') return 'Bergerak (lebih dari 1 toko)'; if(u.role==='spg') return TOKO.spg.length>1?'Bergerak (lebih dari 1 toko)':'Diam (1 toko)'; if(u.role==='fmcg'||/REA/.test(rl)) return 'Diam (1 lokasi)'; return '–'; }
 function leadRow(l,showOwner){
   return `<button class="li" onclick="go('lead-detail',{id:'${l.id}'})"><div class="av ${l.status==='Baru'?'blue':''}">${l.name.split(' ').map(s=>s[0]).join('').slice(0,2)}</div><div class="grow"><div class="t">${l.name}</div><div class="s">${l.prod} · ${rpShort(l.amount)}${showOwner?' · '+(l.owner?USERS[l.owner].name.split(' ')[0]:'Belum di-assign'):''}${l.status==='Baru'&&l.age?' · '+l.age:''}${l.status==='Prospect'&&l.fu?' · follow up '+l.fu:''}${l.pending?' · menunggu sinkron':''}</div></div>${chip(l.status==='Deal'?'Deal '+rpShort(l.goal):l.status,LTONE[l.status])}</button>`;
@@ -1623,7 +1625,7 @@ function rejectSheet(id){
 }
 SCR.assign = p => {
   const sel=p.sel||[], list=S.leads.filter(l=>!l.owner&&leadCab(l)===S.cabang);
-  return {note:'Arco dan Team Leader meng-assign leads berdasarkan cabang ke promotor di cabang itu, satu per satu atau lewat import (MOM 12.5).',
+  return {note:'Arco dan Team Leader meng-assign leads berdasarkan cabang, hanya ke promotor yang ada di cabang itu, satu per satu atau lewat import (MOM 12.5).',
   html:`${appbar('Assign leads')}<main class="content">
     <div class="banner blue" style="margin-bottom:14px">${I('file',18)}<span>${list.length} leads baru di cabang ${S.cabang}. Leads melekat ke cabang.</span></div>
     ${list.length?`<button class="btn ghost sm" style="margin-bottom:12px" onclick="act(()=>importAssign())">${I('file',18)} Import assign dari file</button>`:''}
@@ -1631,10 +1633,11 @@ SCR.assign = p => {
     <button class="link" style="margin-top:12px;display:block" onclick="setP({sel:${sel.length===list.length?'[]':'['+list.map(l=>`'${l.id}'`).join(',')+']'}})">${sel.length===list.length?'Batal pilih semua':'Pilih semua'}</button>`:`<div class="empty"><div class="ico-tile green">${I('check',24)}</div>Semua leads sudah di-assign.</div>`}
   </main>${list.length?`<footer class="actions"><button class="btn" ${sel.length?'':'disabled'} onclick="act(()=>assignSheet())">Assign ${sel.length||''} leads</button></footer>`:''}`};
 };
-function importAssign(){ let n=0; S.leads.forEach(l=>{ if(!l.owner){ l.owner=['sales.andi','cbd.tono','rea.nina'][n++%3]; } }); render(false); toast(n+' leads di-assign dari file'); }
+const mfUsers=()=>Object.keys(USERS).filter(u=>USERS[u].role==='leads'&&USERS[u].unit.includes(S.cabang));
+function importAssign(){ const us=mfUsers(); let n=0; S.leads.forEach(l=>{ if(!l.owner&&leadCab(l)===S.cabang&&us.length){ l.owner=us[n++%us.length]; } }); render(false); toast(n+' leads cabang '+S.cabang+' di-assign dari file'); }
 function toggleSel(id){ const p=cur().p; p.sel=p.sel||[]; p.sel=p.sel.includes(id)?p.sel.filter(x=>x!==id):[...p.sel,id]; render(false,true); }
 function assignSheet(){
-  const members=[['sales.andi','Andi Wijaya'],['cbd.tono','Tono Hidayat'],['rea.nina','Nina Safitri']].map(([u,n])=>[u,n,S.leads.filter(l=>l.owner===u&&!leadClosed(l)).length]);
+  const members=mfUsers().map(u=>[u,USERS[u].name,S.leads.filter(l=>l.owner===u&&!leadClosed(l)).length]);
   sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Assign ke</h3>
   <div class="list">${members.map(m=>`<button class="li" onclick="doAssign('${m[0]}')"><div class="av blue">${USERS[m[0]].init}</div><div class="grow"><div class="t">${m[1]}</div><div class="s">${m[2]} leads aktif</div></div>${I('right',20)}</button>`).join('')}</div>`);
 }
@@ -1674,7 +1677,7 @@ const photoSlot = (label,on,click) => `<button class="thumb ${on?'':'add'}" styl
 
 /* ---------- FMCG & MD ---------- */
 const FMCG_SKU=[{id:'f1',name:'Sabun Cair Segar 500 ml',sku:'FM-SC500'},{id:'f2',name:'Mi Instan Rasa Soto',sku:'FM-MI75'},{id:'f3',name:'Teh Melati Botol 350 ml',sku:'FM-TM350'},{id:'f4',name:'Kopi Sachet Susu',sku:'FM-KS25'},{id:'f5',name:'Biskuit Kelapa 120 g',sku:'FM-BK120'}];
-const fmSkus = () => [...(role()==='spg'?PRODUCTS.slice(0,6).map(p=>({id:p.id,name:p.name,sku:p.sku})):FMCG_SKU),...S.fm.extra];
+const fmSkus = () => { const base=role()==='spg'?PRODUCTS.slice(0,6).map(p=>({id:p.id,name:p.name,sku:p.sku})):FMCG_SKU, m=shRead('outlet',{})[U()?.place]; return [...(m?base.filter(x=>m.includes(x.id)):base),...S.fm.extra]; };
 const fmRow = id => S.fm.stok[id]||(S.fm.stok[id]={d:'',g:'',u:'Pcs',k:'',saved:false});
 const fmFull = id => { const x=fmRow(id); return x.d!==''&&x.g!==''; };
 function fmSet(id,k,v){ const x=fmRow(id); x[k]=v; x.saved=false; }
@@ -1703,12 +1706,13 @@ SCR['fm-stok'] = () => {
     <button class="btn ghost" onclick="fmAddSheet()">${I('plus',20)} Tambah SKU</button>
   </main><footer class="actions"><button class="btn" onclick="fmSubmit()">Submit stock opname</button></footer>`};
 };
-const PROMO_CEK=[{id:'p1',name:'Sabun Cair Segar 500 ml',price:'Rp24.900'},{id:'p2',name:'Teh Melati Botol 350 ml',price:'Rp5.500'}];
+const FM_PRICE={f1:'Rp24.900',f2:'Rp3.500',f3:'Rp5.500',f4:'Rp1.500',f5:'Rp9.900'};
+const promoCek=()=>shRead('pcek',['f1','f3']).filter(id=>FMCG_SKU.some(s=>s.id===id)).map(id=>({id,name:FMCG_SKU.find(s=>s.id===id).name,price:FM_PRICE[id]}));
 function fmPhoto(k){ S.fm.foto[k]=true; render(false,true); toast('Foto tersimpan','camera'); }
 SCR['fm-promo'] = () => {
-  const ok=PROMO_CEK.every(x=>S.fm.foto[x.id+'d']&&S.fm.foto[x.id+'t']);
-  return {note:'Price promo (MOM 10.2). Produk yang dicek sesuai setup admin. Foto display beserta foto price tag promo.',
-  html:`${appbar('Price promo')}<main class="content">${PROMO_CEK.map(x=>`<div class="card" style="margin-bottom:10px"><div class="row between"><b>${x.name}</b><b class="num">${x.price}</b></div><div class="thumbs">${photoSlot('Foto display',S.fm.foto[x.id+'d'],`fmPhoto('${x.id}d')`)}${photoSlot('Price tag',S.fm.foto[x.id+'t'],`fmPhoto('${x.id}t')`)}</div></div>`).join('')}
+  const ok=promoCek().length>0&&promoCek().every(x=>S.fm.foto[x.id+'d']&&S.fm.foto[x.id+'t']);
+  return {note:'Price promo (MOM 10.2). Produk yang dicek sesuai setup admin di dashboard. Foto display beserta foto price tag promo.',
+  html:`${appbar('Price promo')}<main class="content">${promoCek().length?'':`<div class="empty">Admin belum menetapkan produk price promo untuk outlet ini.</div>`}${promoCek().map(x=>`<div class="card" style="margin-bottom:10px"><div class="row between"><b>${x.name}</b><b class="num">${x.price}</b></div><div class="thumbs">${photoSlot('Foto display',S.fm.foto[x.id+'d'],`fmPhoto('${x.id}d')`)}${photoSlot('Price tag',S.fm.foto[x.id+'t'],`fmPhoto('${x.id}t')`)}</div></div>`).join('')}
   </main><footer class="actions"><button class="btn" ${ok?'':'disabled'} onclick="back();toast('Price promo terkirim')">Kirim price promo</button></footer>`};
 };
 SCR['fm-facing'] = () => {
@@ -1892,33 +1896,42 @@ function saveSku(t){
   bad.forEach(d=>{ const L=skuTasks().map(x=>({...x})); if(!L.some(k=>k.toko===toko.name&&k.prod===d.id&&k.st!=='Closed')){ L.unshift({id:'T-'+(20+L.length),prod:d.id,toko:toko.name,by:U().name,st:'Menunggu assign'}); shSet('skuTasks',L); } });
   back(); toast(bad.length?`SKU display tersimpan, ${bad.length} task perbaikan dibuat`:`SKU display ${toko.name} tersimpan`);
 }
+const SUBK_M={tv50:'Smart TV',tv43:'LED TV',kl2p:'2 Pintu',mc85:'Top Load',ac1:'Inverter',ap30:'Standar'};
+const SHARE_BRAND=['Samsung','LG','Polytron'];
 SCR.share = () => {
-  const sh=S.share, tot=Object.values(sh).reduce((s,x)=>s+x,0)||1, colors={ARUNIKA:'#0AA5EE',Samsung:'#123F75',LG:'#F09A66',Polytron:'#8FB8D8',Lainnya:'#C9D5E2'}, st=S.shareState;
-  return {note:'Market share diinput harian per toko (MOM 8). Produk kompetitor bisa ditambah manual, harga opsional. Draft tidak masuk laporan; hanya data yang sudah check-out yang ditarik ke report. Satu toko bisa diinput lebih dari satu orang, report mengambil rata-rata.',
+  const cat=S.shareCat, cats=['TV','Kulkas','Mesin Cuci'], cl=PRODUCTS.filter(p=>p.cat===cat), comp=S.shareComp.map((c,i)=>({...c,i})).filter(c=>c.kat===cat);
+  const byBrand={}; comp.forEach(c=>{ byBrand[c.brand]=(byBrand[c.brand]||0)+c.qty; });
+  const parts=[['ARUNIKA',cl.reduce((s,p)=>s+(S.shareClient[p.id]||0),0)],...Object.entries(byBrand)], tot=parts.reduce((s,x)=>s+x[1],0)||1;
+  const colors={ARUNIKA:'#0AA5EE',Samsung:'#123F75',LG:'#F09A66',Polytron:'#8FB8D8'}, st=S.shareState;
+  return {note:'Market share diinput harian per toko (MOM 8). Data klien sesuai sistem, data kompetitor diinput manual dengan kategori, sub kategori, nama produk, dan qty. Harga opsional. Draft tidak masuk laporan; hanya data yang sudah check-out yang ditarik ke report. Satu toko bisa diinput lebih dari satu orang, report mengambil rata-rata.',
   html:`${appbar('Market share')}<main class="content">
-    <div class="row" style="gap:8px;margin-bottom:12px"><select class="input grow"><option>Electronic City Kemang</option><option>Best Denki Senayan City</option></select><select class="input" style="width:120px"><option>TV</option><option>Kulkas</option><option>Mesin Cuci</option></select></div>
+    <div class="segtabs">${cats.map(c=>`<button class="${cat===c?'on':''}" onclick="S.shareCat='${c}';render(false,true)">${c}</button>`).join('')}</div>
     <div class="row between" style="margin:0 2px 12px"><b>Hari ini · 26 Okt 2026</b>${st==='draft'?chip('Draft','amber'):st==='kirim'?chip('Masuk laporan saat check-out','green'):chip('Belum diisi','amber')}</div>
-    <div class="card"><div class="small muted">Komposisi unit terjual · hari ini</div>
-      <div style="display:flex;height:16px;border-radius:99px;overflow:hidden;margin:12px 0">${Object.entries(sh).map(([k,v])=>`<i style="width:${v/tot*100}%;background:${colors[k]||'#9AA9BC'}"></i>`).join('')}</div>
-      <div class="row" style="flex-wrap:wrap;gap:6px 14px">${Object.entries(sh).map(([k,v])=>`<span class="small"><i style="display:inline-block;width:9px;height:9px;border-radius:3px;background:${colors[k]||'#9AA9BC'};margin-right:5px"></i>${esc(k)} <b class="num">${Math.round(v/tot*100)}%</b></span>`).join('')}</div></div>
-    <div class="sec-title">Unit terjual hari ini <a onclick="shareAddSheet()">+ Tambah kompetitor</a></div>
-    <div class="list">${Object.keys(sh).map(k=>`<div class="li"><div class="grow"><div class="t">${esc(k)}${k==='ARUNIKA'?' '+chip('Klien','blue'):''}</div>${S.sharePrice[k]?`<div class="s">Harga ${rp(S.sharePrice[k])}</div>`:''}</div><div class="stepper"><button onclick="act(()=>{S.share['${k}']=Math.max(0,S.share['${k}']-1);render(false,true)})">${I('minus',18,2.2)}</button><span class="num">${sh[k]}</span><button onclick="act(()=>{S.share['${k}']++;render(false,true)})">${I('plus',18,2.2)}</button></div></div>`).join('')}</div>
+    <div class="card"><div class="small muted">Komposisi unit terjual · ${cat}</div>
+      <div style="display:flex;height:16px;border-radius:99px;overflow:hidden;margin:12px 0">${parts.map(([k,v])=>`<i style="width:${v/tot*100}%;background:${colors[k]||'#9AA9BC'}"></i>`).join('')}</div>
+      <div class="row" style="flex-wrap:wrap;gap:6px 14px">${parts.map(([k,v])=>`<span class="small"><i style="display:inline-block;width:9px;height:9px;border-radius:3px;background:${colors[k]||'#9AA9BC'};margin-right:5px"></i>${esc(k)} <b class="num">${Math.round(v/tot*100)}%</b></span>`).join('')}</div></div>
+    <div class="sec-title">Produk klien (sesuai sistem)</div>
+    <div class="list">${cl.map(p=>`<div class="li"><div class="grow"><div class="t">${p.name}</div><div class="s">${p.cat} · ${SUBK_M[p.id]||'–'}</div></div><div class="stepper"><button onclick="act(()=>{S.shareClient['${p.id}']=Math.max(0,(S.shareClient['${p.id}']||0)-1);render(false,true)})" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${S.shareClient[p.id]||0}</span><button onclick="act(()=>{S.shareClient['${p.id}']=(S.shareClient['${p.id}']||0)+1;render(false,true)})" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>`).join('')||`<div class="empty">Belum ada produk klien di kategori ini.</div>`}</div>
+    <div class="sec-title">Produk kompetitor <a onclick="shareAddSheet()">+ Tambah</a></div>
+    <div class="list">${comp.map(c=>`<div class="li"><div class="grow"><div class="t">${esc(c.nama)}</div><div class="s">${esc(c.brand)} · ${esc(c.kat)} · ${esc(c.sub)}${c.harga?' · '+rp(c.harga):''}</div></div><div class="stepper"><button onclick="act(()=>{S.shareComp[${c.i}].qty=Math.max(0,S.shareComp[${c.i}].qty-1);render(false,true)})" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${c.qty}</span><button onclick="act(()=>{S.shareComp[${c.i}].qty++;render(false,true)})" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>`).join('')||`<div class="empty">Belum ada produk kompetitor. Tambah dari tombol di atas.</div>`}</div>
     <p class="hint" style="margin-top:12px">Draft tidak masuk laporan. Data masuk laporan setelah kamu check-out dari toko.</p>
   </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="act(()=>{S.shareState='draft';render(false,true);toast('Draft tersimpan, belum masuk laporan')})">Simpan draft</button><button class="btn" onclick="act(()=>{S.shareState='kirim';back();toast('Market share tersimpan')})">Simpan</button></footer>`};
 };
 function shareAddSheet(){
-  sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Tambah kompetitor</h3>
-  <label class="field"><span>Kategori</span><input class="input" id="sa_c" placeholder="Contoh: TV"></label>
+  sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Tambah produk kompetitor</h3>
+  <label class="field"><span>Brand</span><select class="input" id="sa_b">${SHARE_BRAND.map(b=>`<option>${b}</option>`).join('')}</select></label>
+  <label class="field"><span>Kategori</span><input class="input" id="sa_c" value="${esc(S.shareCat)}"></label>
   <label class="field"><span>Sub kategori</span><input class="input" id="sa_s" placeholder="Contoh: Smart TV"></label>
   <label class="field"><span>Nama produk</span><input class="input" id="sa_n" placeholder="Merek dan tipe"></label>
   <div class="row" style="gap:10px"><label class="field grow"><span>Qty</span><input class="input num" id="sa_q" inputmode="numeric" value="1"></label><label class="field grow"><span>Harga (opsional)</span><input class="input num" id="sa_h" inputmode="numeric"></label></div>
   <button class="btn" onclick="shareAdd()">Tambah</button>`);
 }
-function shareAddPrice(n,h){ if(h) S.sharePrice[n]=h; }
 function shareAdd(){
-  const n=val('sa_n').replace(/['"\\<>`]/g,'').trim(), q=parseInt(val('sa_q'))||0;
-  if(!val('sa_c')||!val('sa_s')||!n||q<1){ toast('Isi kategori, sub kategori, nama produk, dan qty','alert'); return; }
-  shareAddPrice(n,parseInt(val('sa_h').replace(/\D/g,''))||0); S.share[n]=(S.share[n]||0)+q; closeSheet(); render(false,true); toast(n+' ditambahkan');
+  const cl=s=>val(s).replace(/['"\\<>`]/g,'').trim(), q=parseInt(val('sa_q'))||0;
+  if(!cl('sa_c')||!cl('sa_s')||!cl('sa_n')||q<1){ toast('Isi kategori, sub kategori, nama produk, dan qty','alert'); return; }
+  S.shareComp.push({brand:val('sa_b'),kat:cl('sa_c'),sub:cl('sa_s'),nama:cl('sa_n'),qty:q,harga:parseInt(val('sa_h').replace(/\D/g,''))||0});
+  if(!['TV','Kulkas','Mesin Cuci'].includes(cl('sa_c'))) S.shareCat=cl('sa_c');
+  closeSheet(); render(false,true); toast(cl('sa_n')+' ditambahkan');
 }
 
 /* ---------- Quiz, Leaderboard, Survey ---------- */
@@ -1978,7 +1991,7 @@ SCR.akun = () => {
   return {tab:'akun', note:'Profil pegawai disinkronkan dari data SIM (BPR1), jadi tidak bisa diubah di aplikasi. User bisa ganti password dan melihat wajah referensi.',
   html:`${appbar('Akun',{backBtn:false})}<main class="content">
     <div class="card" style="text-align:center;padding:22px 16px"><div class="av" style="width:72px;height:72px;font-size:24px;margin:0 auto 10px;background:var(--grad);color:#fff">${u.init}</div><b style="font-size:18px">${u.name}</b><div class="small muted" style="margin-top:2px">${u.roleLabel}</div></div>
-    <div class="card"><div class="kv"><span>NIP</span><span>${u.nip}</span></div><div class="kv"><span>Username</span><span>${S.user}</span></div><div class="kv"><span>Klien</span><span>${u.client}</span></div><div class="kv"><span>Unit</span><span>${u.unit}</span></div><div class="kv"><span>Penempatan</span><span>${u.place}</span></div><div class="kv"><span>Penugasan toko</span><span>${moveType()}</span></div><div class="kv"><span>Atasan</span><span>${S.user==='spv.sari'?'Irwan A. (AM Head)':'Sari Wulandari'}</span></div>
+    <div class="card"><div class="kv"><span>NIP</span><span>${u.nip}</span></div><div class="kv"><span>Username</span><span>${S.user}</span></div><div class="kv"><span>Klien</span><span>${u.client}</span></div><div class="kv"><span>Unit</span><span>${u.unit}</span></div><div class="kv"><span>Penempatan</span><span>${u.place}</span></div><div class="kv"><span>Penugasan toko</span><span>${moveType()}</span></div><div class="kv"><span>Tipe akun</span><span>${acctType()}</span></div><div class="kv"><span>Atasan</span><span>${S.user==='spv.sari'?'Yoga Permana (FFOR)':'Sari Wulandari'}</span></div>
       <p class="hint">${I('refresh',13,2)} Data disinkronkan dari sistem SIM (BPR1)</p></div>
     <div class="list" style="margin-top:14px">
       ${U().role==='spv'?`<button class="li" onclick="cabangSheet()"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t">Pindah cabang</div><div class="s">Cabang sekarang: ${S.cabang}</div></div>${I('right',20)}</button>`:''}

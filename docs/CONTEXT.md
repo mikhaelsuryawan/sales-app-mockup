@@ -43,15 +43,15 @@ Acuan revisi: `../docs/00-sources/extracted/S5-mom-workshop-27-28-okt-2026.md`. 
 
 ### Mobile (`mobile/index.html`)
 
-15 user demo (password bebas). Panel demo juga bisa mengganti jadwal WFO, WFA, dan OFF.
+16 user demo (password bebas). Panel demo juga bisa mengganti jadwal WFO, WFA, dan OFF.
 
 | Username | Role |
 |---|---|
 | `spg.rina` | SPG / Sales Promotor Elektronik |
 | `sales.budi` | Sales Canvassing |
 | `sales.dimas` | Sales Taking Order |
-| `sales.andi` | Multi Finance |
-| `spv.sari` | Team Leader (SPV 1) |
+| `sales.andi`, `sales.rudi` | Multi Finance (Rudi di cabang Cilandak) |
+| `spv.sari` | Team Leader (SPV 1), user client |
 | `ffor.yoga` | FFOR (SPV 2) |
 | `arco.maya` | Arco |
 | `cbd.tono` | CBD / Mediator |
@@ -70,6 +70,8 @@ Acuan revisi: `../docs/00-sources/extracted/S5-mom-workshop-27-28-okt-2026.md`. 
 - **Multi Finance:** leads dengan status Baru, Prospect, Deal, Belum Tertarik (turunan tertarik, masih prospect, rejected). Buat leads sendiri. Deal memuat nominal, tenor, foto approval, dan dokumen pencairan. CBD punya alur Follow Up → Input Order → Verify Dokumen → Scoring → Survey, mitra, dan task dari Team Leader. Insentif REA cair setelah dokumen pencairan diunggah.
 - **Team Leader dan Arco:** assign leads per cabang, import assign, pindah cabang (menerima leads cabang baru), assign canvasser, Task Pending sampai closed, approval.
 - **Aturan lokasi dan form kunjungan:** check-in dan check-out harus di lokasi yang sama (cek lewat posisi GPS di panel demo). Promotor FMCG bisa check-in lagi di lokasi yang sama dalam sehari (sesi ke-2 dan seterusnya). Tiap role punya form kunjungan sendiri. Facing display dibandingkan dengan plan per tahap. Produk yang wajib difoto di SKU display ditentukan admin.
+- **Market share:** tabel produk klien sesuai sistem (kategori, sub kategori, nama, qty) dan produk kompetitor yang diinput manual (brand, kategori, sub kategori, nama, qty, harga opsional).
+- **Cabang dan akun:** leads melekat ke cabang dan hanya bisa di-assign ke promotor di cabang yang sama. Team Leader dan Arco adalah user client, Reliever dan Promotor Bantuan di luar BPR; Akun menampilkan tipe akun.
 - **Alur approval:** kartu approval menampilkan urutan approver per role (Team Leader lalu FFOR, atau Arco lalu Team Leader).
 - **Beranda dan target:** kartu target hari ini, sudah terjual, dan objektif. Estimasi insentif dan target per toko tidak ada. Target Multi Finance memuat KPI.
 - Lainnya: quiz, survey, notifikasi, akun (termasuk penugasan toko bergerak atau diam).
@@ -79,10 +81,10 @@ Acuan revisi: `../docs/00-sources/extracted/S5-mom-workshop-27-28-okt-2026.md`. 
 - **Operasional:** Absensi, Kunjungan (Team Leader membuat jadwal), Approval, Task pending (produk rusak dan task CBD), Aktivitas lapangan (log FMCG dan MD, kinerja Reliever dan Promotor Bantuan).
 - **Penjualan:** Laporan penjualan, Target dan sell-in (termasuk Multi Finance), Canvassing, laporan SKU display, laporan market share (hanya data check-out, rata-rata antar penginput), Promo, Insentif, Grading (dengan formula per klien dan role).
 - **Sales automation:** Leads pinjaman (import assign), Overdue.
-- **Master data dengan CRUD:** Client, Region, Kategori toko, Toko, Brand, Kategori produk, Produk dan harga (harga per toko dan cabang, mapping outlet, produk price promo), Satuan, Event, Mitra (dengan kode dan alamat), User SIM (jadwal off dan NPO dari BPR), IAM (16 role dengan segmen dan tipe, struktur approval, matrix approval, log), Parameter.
+- **Master data dengan CRUD:** Client, Region, Kategori toko, Toko, Brand, Kategori produk, Produk dan harga (harga per toko dan cabang yang bisa diatur sendiri, mapping outlet untuk produk elektronik dan FMCG, produk price promo, produk difoto, plan display, produk Multi Finance), Satuan, Event, Mitra (dengan kode dan alamat), User SIM (jadwal off dan NPO dari BPR), IAM (16 role dengan segmen dan tipe, struktur approval, matrix approval, log), Parameter.
 - **Konten:** Campaign, POSM, dan planogram, Quiz, Survey (jadwal berkala, tanpa opsi anonim).
 
-Semua data dummy. CRUD bekerja di memori dan hilang saat reload, kecuali tujuh data yang dibagi antara mobile dan dashboard lewat `localStorage` browser yang sama (kunci `salesapp.shared.v1`, satu domain di Vercel):
+Semua data dummy. CRUD bekerja di memori dan hilang saat reload, kecuali sepuluh data yang dibagi antara mobile dan dashboard lewat `localStorage` browser yang sama (kunci `salesapp.shared.v1`, satu domain di Vercel):
 
 | Data | Dibuat di | Dipakai di |
 |---|---|---|
@@ -92,6 +94,9 @@ Semua data dummy. CRUD bekerja di memori dan hilang saat reload, kecuali tujuh d
 | Event | Dashboard (master Event) | Mobile (tujuan penjualan Mobile Promotor) |
 | Izin membuat jadwal per role | Dashboard (IAM) | Mobile (Kunjungan) |
 | Produk wajib difoto | Dashboard (Produk dan harga) | Mobile (SKU display) |
+| Harga per toko | Dashboard (Produk dan harga, tab Harga) | Mobile (harga di penjualan) |
+| Produk price promo | Dashboard (Produk dan harga) | Mobile (Price promo FMCG) |
+| Mapping produk per outlet | Dashboard (Produk dan harga) | Mobile (Cek stok) |
 | Plan tata letak display | Dashboard (Produk dan harga) | Mobile (Facing display) |
 
 Datanya tersimpan di browser tiap pengguna, bukan di server. Tombol reset ada di panel demo mobile dan di Pengaturan dashboard. Menu per role di IAM (Lihat, Buat, Ubah, Hapus, Approve) tetap hanya tampilan.
