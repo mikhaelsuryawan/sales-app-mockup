@@ -60,6 +60,14 @@ Overview, Absensi, Kunjungan, Approval, **Laporan penjualan** (per klien, cabang
 
 Semua data dummy. CRUD bekerja di memori (hilang saat reload). Mobile dan dashboard belum berbagi data.
 
+## Status revisi MOM 27-28 Okt 2026
+
+Acuan revisi: `../docs/00-sources/inbox/MOM-SIM-Group-Sales-App-27-28-Oktober-2026.docx`.
+
+- **Tahap 1 (ubah layar yang ada): selesai.** Bagian 4 di atas masih menggambarkan kondisi sebelum revisi. Yang berubah: estimasi insentif dan target per toko dihapus dari mobile; Rejected menjadi Belum Tertarik dengan tiga turunan; proses sendiri dihapus; Sales Member menjadi Multi Finance; jadwal kunjungan dibuat Team Leader; check-in dan check-out memakai 2-3 foto ber-watermark dengan auto check-out; SKU display dan market share harian; harga principal dan harga toko di OCR; foto pelanggan wajib; scan barcode pindah dari penjualan ke SKU display; menu Quiz dan Survey dipisah; harga per toko dan cabang; badge sidebar dihapus.
+- **Tahap 2 (role, hak akses, master data, laporan SKU dan market share): belum.**
+- **Tahap 3 (alur FMCG/MD, Canvassing, Multi Finance, Task Pending, POSM dan planogram, notifikasi absen): belum.** Task perbaikan SKU sudah tercatat di state mobile, tetapi belum tampil di layar mana pun.
+
 ## 5. Hasil workshop yang belum masuk ke mockup
 
 Daftar perubahan lengkap ada di bagian 14 dokumen workshop. Ringkasnya:
