@@ -406,7 +406,16 @@ const USERS = {
   'sales.budi':{name:'Budi Santoso', init:'BS', role:'canvas', roleLabel:'Sales Canvasing', nip:'SIM-23-00912', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Rute Pasar Minggu – Cilandak', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
   'sales.dimas':{name:'Dimas Prasetyo', init:'DP', role:'order', roleLabel:'Sales Taking Order', nip:'SIM-24-00455', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Area Fatmawati – Bintaro', sched:'WFA', main:{key:'pesanan',label:'Pesanan',icon:'order'}},
   'sales.andi':{name:'Andi Wijaya', init:'AW', role:'leads', roleLabel:'Multi Finance', nip:'SIM-22-00731', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'leads',label:'Leads',icon:'users'}},
-  'spv.sari':  {name:'Sari Wulandari', init:'SW', role:'spv', roleLabel:'Supervisor / Sales Manager', nip:'SIM-19-00208', client:'Arunika Elektronik & BPR Mitra Usaha', unit:'Cabang Jakarta Selatan', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}}
+  'spv.sari':  {name:'Sari Wulandari', init:'SW', role:'spv', roleLabel:'Team Leader (SPV 1)', nip:'SIM-19-00208', client:'Arunika Elektronik & BPR Mitra Usaha', unit:'Cabang Jakarta Selatan', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
+  'ffor.yoga': {name:'Yoga Permana', init:'YP', role:'spv', roleLabel:'FFOR (SPV 2)', nip:'SIM-18-00144', client:'Arunika Elektronik', unit:'Region Jakarta', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
+  'arco.maya': {name:'Maya Anggraini', init:'MA', role:'spv', menu:'arco', roleLabel:'Arco (Leader SPG)', nip:'ARCO-0012', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
+  'cbd.tono':  {name:'Tono Hidayat', init:'TH', role:'leads', roleLabel:'CBD / Mediator', nip:'SIM-23-00871', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'Area Fatmawati', sched:'WFA', main:{key:'leads',label:'Leads',icon:'users'}},
+  'rea.nina':  {name:'Nina Safitri', init:'NS', role:'leads', roleLabel:'REA / SPG Multi Finance', nip:'SIM-24-01322', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'leads',label:'Leads',icon:'users'}},
+  'fmcg.tari': {name:'Lestari Putri', init:'LP', role:'fmcg', roleLabel:'Promotor FMCG', nip:'SIM-24-01355', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
+  'md.rangga': {name:'Rangga Saputra', init:'RS', role:'fmcg', roleLabel:'Merchandising (MD)', nip:'SIM-23-01102', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
+  'mobile.fikri':{name:'Fikri Ramadhan', init:'FR', role:'spg', roleLabel:'Mobile Promotor', nip:'SIM-24-01377', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Beberapa toko dan event', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
+  'bantuan.eko':{name:'Eko Prabowo', init:'EP', role:'spg', menu:'bantuan', roleLabel:'Promotor Bantuan', nip:'BTN-0007', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
+  'reliever.gita':{name:'Gita Puspita', init:'GP', role:'spg', menu:'bantuan', roleLabel:'Reliever', nip:'RLV-0031', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}}
 };
 const PRODUCTS = [
   {id:'tv50',name:'VISTARA 4K Google TV 50"',sku:'AR-TV50G',cat:'TV',price:6499000},
@@ -484,6 +493,8 @@ function freshState(){
       {id:'PO-2210-061',toko:'Toko Abadi Jaya',items:[{id:'ac1',q:2}],total:9198000,date:'22 Okt 2026',ship:'23 Okt 2026',status:'Lunas',tone:'green',fu:[{t:'Pesanan dibuat',s:'22 Okt, 11:00'},{t:'Dikirim',s:'23 Okt, 08:30'},{t:'Diterima toko',s:'23 Okt, 14:12'},{t:'Pembayaran lunas',s:'25 Okt, 10:40 · Transfer'}]}
     ],
     leads:[
+      {id:'L-2610-041',name:'Rahmat Hidayat',prod:'Kredit Modal Kerja',amount:15000000,tenor:24,phone:'0812-7000-1101',job:'Pedagang',addr:'Cilandak',status:'Baru',owner:'cbd.tono',date:'26 Okt 2026',log:[]},
+      {id:'L-2610-042',name:'Dewi Anggun',prod:'Kredit Multiguna',amount:12000000,tenor:18,phone:'0812-7000-1102',job:'Karyawan',addr:'Fatmawati',status:'Baru',owner:'rea.nina',date:'26 Okt 2026',log:[]},
       {id:'L-2610-031',age:'masuk 12 mnt lalu',name:'Ahmad Fauzi',prod:'Kredit Modal Kerja',amount:10000000,tenor:12,phone:'0812-8841-2207',job:'Pedagang sembako',addr:'Jl. Fatmawati Raya No. 41, Cilandak',status:'Baru',owner:'sales.andi',date:'26 Okt 2026',log:[]},
       {id:'L-2610-029',age:'masuk 1 jam lalu',name:'Yuliana Putri',prod:'Kredit Multiguna',amount:25000000,tenor:24,phone:'0813-1170-5582',job:'Karyawan swasta',addr:'Pondok Labu, Jakarta Selatan',status:'Baru',owner:'sales.andi',date:'26 Okt 2026',log:[]},
       {id:'L-2510-022',fu:'28 Okt',name:'Rudi Hartanto',prod:'Kredit Modal Kerja',amount:15000000,tenor:18,phone:'0857-2290-1134',job:'Bengkel motor',addr:'Jl. Pangeran Antasari No. 7',status:'Prospect',owner:'sales.andi',date:'25 Okt 2026',log:[{t:'Prospect',s:'25 Okt · Minta waktu diskusi dengan istri, follow up 28 Okt'}]},
@@ -511,6 +522,7 @@ function freshState(){
       canvas:[{id:'v1',place:'Toko Sinar Jaya Elektronik',time:'09:00',tasks:['Penjualan','Ambil retur'],status:'Selesai',photos:{0:1,1:1},cin:'09:02',cout:'09:31',dur:'29 mnt'},{id:'v2',place:'Toko Makmur Abadi',time:'10:30',tasks:['Penjualan'],status:'Belum',photos:{}},{id:'v3',place:'Toko Berkah Elektronik',time:'13:00',tasks:['Penjualan','Cek display'],status:'Belum',photos:{}},{id:'v4',place:'Toko Cahaya Baru',time:'15:00',tasks:['Penjualan'],status:'Belum',photos:{}}],
       order:[{id:'v1',place:'Toko Mega Elektronik',time:'10:00',tasks:['Ambil pesanan'],status:'Selesai',photos:{0:1},cin:'10:04',cout:'10:30',dur:'26 mnt'},{id:'v2',place:'CV Sumber Rejeki Elektronik',time:'13:30',tasks:['Ambil pesanan','Penagihan'],status:'Belum',photos:{}},{id:'v3',place:'Toko Abadi Jaya',time:'15:30',tasks:['Ambil pesanan'],status:'Belum',photos:{}}],
       leads:[{id:'v1',place:'Ahmad Fauzi (nasabah)',time:'10:00',tasks:['Survey usaha'],status:'Belum',photos:{}},{id:'v2',place:'Yuliana Putri (nasabah)',time:'14:00',tasks:['Verifikasi dokumen'],status:'Belum',photos:{}}],
+      fmcg:[{id:'v1',place:'Electronic City Kemang',time:'09:00',tasks:['Cek stok','Facing display'],status:'Belum',photos:{}}],
       spv:[{id:'v1',place:'Electronic City Kemang',time:'11:00',tasks:['Supervisi SPG'],status:'Belum',photos:{}}]
     },
     plans:[{place:'Rudi Hartanto (nasabah)',date:'28 Okt 2026',status:'Menunggu approval'}],
@@ -691,6 +703,9 @@ const MENUS = {
   canvas:[['Jual dari stok','bag',"act(()=>startSale())",1],['Stok bawaan','box',"go('stok')"],['Catat retur','retur',"act(()=>go('stok-form',{kind:'retur'}))",1],['Usulkan toko','plus',"act(()=>go('toko-baru'))",1],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   order:[['Buat pesanan','order',"act(()=>startOrder())",1],['Daftar pesanan','file',"tab('pesanan')"],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Usulkan toko','plus',"act(()=>go('toko-baru'))",1],['Ajukan izin','file',"go('izin')"]],
   leads:[['Leads saya','users',"tab('leads')"],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
+  fmcg:[['Aktivitas toko','grid',"tab('aktivitas')"],['Buat jadwal','route',"act(()=>go('kunjungan-form'))",1],['SKU display','grid',"go('sku')"],['Market share','pie',"go('share')"],['Kunjungan','route',"tab('kunjungan')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
+  arco:[['Assign leads','users',"go('assign')"],['Semua leads','file',"go('leads-all')"],['Tim saya','user',"tab('tim')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
+  bantuan:[['Catat penjualan','bag',"act(()=>startSale())",1],['Riwayat penjualan','file',"tab('penjualan')"],['Kunjungan','route',"tab('kunjungan')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   spv:[['Approval','check',"go('approval')"],['Assign leads','users',"go('assign')"],['Tugaskan tim','route',"act(()=>go('kunjungan-form',{spv:1}))",1],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Kunjungan','calendar',"tab('kunjungan')"],['Quiz','quiz',"go('quiz')"]]
 };
 function attCard(){
@@ -706,7 +721,7 @@ function attCard(){
 }
 SCR.home = () => {
   const u=U(), r=role(), locked=isLocked();
-  const menus=MENUS[r];
+  const menus=MENUS[u.menu||r];
   let extra='';
   if(r==='spv') extra = spvDash();
   else extra = fieldDash();
@@ -729,6 +744,9 @@ SCR.home = () => {
 };
 function fieldDash(){
   const r=role();
+  if(r==='fmcg') return `<div class="sec-title">Aktivitas hari ini <a onclick="tab('aktivitas')">Semua</a></div>
+    <div class="banner blue">${I('grid',18)}<span>Promotor FMCG dan MD mencatat aktivitas toko, bukan penjualan.</span></div>
+    ${todayVisits()}`;
   if(r==='leads'){
     const mine=S.leads.filter(l=>l.owner===S.user), c=k=>mine.filter(l=>l.status===k).length;
     const goal=mine.filter(l=>l.status==='Deal').reduce((s,l)=>s+(l.goal||0),0);
@@ -921,7 +939,7 @@ function daySummary(){
 }
 
 /* ---------- Kunjungan / Penugasan ---------- */
-const canSchedule = r => ['spv','fmcg','md'].includes(r);
+const canSchedule = r => (r==='spv'&&U().menu!=='arco')||r==='fmcg';
 SCR.kunjungan = p => {
   const seg=p.seg||'hari', r=role();
   const v=S.visits[r]||[];
@@ -1002,26 +1020,27 @@ SCR['kunjungan-form'] = p => {
   const spv=!!p.spv, kind=p.kind||'adhoc', tasks=p.tasks||[];
   const r=role();
   const places = spv?['Electronic City Kemang','Best Denki Senayan City','Toko Makmur Abadi','Ahmad Fauzi (nasabah)']:r==='leads'?S.leads.filter(l=>l.owner===S.user).map(l=>l.name+' (nasabah)'):(TOKO[r]||TOKO.spg).map(t=>t.name);
-  const taskOpts = r==='leads'?['Survey usaha','Verifikasi dokumen','Tanda tangan akad','Penagihan']:['Penjualan','Cek SKU display','Survey toko','Ambil pesanan','Penagihan'];
-  return {note:spv?'Team Leader menjadwalkan kunjungan anggota tim: sekali atau berkala dengan periode harian, mingguan, 2 mingguan, atau bulanan (MOM 5.1).':'Sales membuat penugasan sendiri: ad hoc (langsung masuk jadwal) atau terencana yang butuh approval supervisor (BRD 4.1.4–4.1.5). Satu kunjungan bisa punya beberapa jenis tugas.',
+  const taskOpts = r==='fmcg'?['Cek stok','Price promo','Facing display','Support task']:r==='leads'?['Survey usaha','Verifikasi dokumen','Tanda tangan akad','Penagihan']:['Penjualan','Cek SKU display','Survey toko','Ambil pesanan','Penagihan'];
+  return {note:spv?'Team Leader menjadwalkan kunjungan anggota tim: sekali atau berkala dengan periode harian, mingguan, 2 mingguan, atau bulanan (MOM 5.1).':'Promotor FMCG dan MD membuat jadwal sendiri, 1 hari 1 toko, dengan periode harian, mingguan, 2 mingguan, atau bulanan (MOM 5.1, 10.1).',
   html:`${appbar(spv?'Tugaskan ke tim':'Tambah kunjungan')}<main class="content">
     ${spv?`<label class="field"><span>Anggota tim</span><select class="input"><option>Rina Marlina – SPG</option><option>Budi Santoso – Canvasing</option><option>Dimas Prasetyo – Taking Order</option><option>Andi Wijaya – Leads</option></select></label>`:''}
-    <div class="field"><span>Jenis kunjungan</span><div class="opts">${(spv?[['adhoc','Sekali (ad hoc)'],['berkala','Berkala']]:[['adhoc','Hari ini (ad hoc)'],['rencana','Terencana'],['berkala','Berkala']]).map(o=>`<button class="opt ${kind===o[0]?'on':''}" onclick="setP({kind:'${o[0]}'})">${o[1]}</button>`).join('')}</div>
-      ${kind==='rencana'?`<div class="hint">Kunjungan terencana dikirim ke supervisor untuk disetujui dulu.</div>`:''}</div>
+    <div class="field"><span>Jenis kunjungan</span><div class="opts">${(spv?[['adhoc','Sekali'],['berkala','Berkala']]:[['adhoc','Hari ini'],['berkala','Berkala']]).map(o=>`<button class="opt ${kind===o[0]?'on':''}" onclick="setP({kind:'${o[0]}'})">${o[1]}</button>`).join('')}</div>
+      ${spv?'':`<div class="hint">Dalam satu hari kamu hanya menuju satu toko.</div>`}</div>
     <label class="field"><span>${r==='leads'&&!spv?'Nasabah':'Toko / tujuan'}</span><select class="input" id="kp">${places.map(x=>`<option>${x}</option>`).join('')}</select></label>
     ${kind==='berkala'?`<div class="field"><span>Periode</span><div class="opts">${['Harian','Mingguan','2 mingguan','Bulanan'].map((d,i)=>`<button class="opt ${(p.per||'Mingguan')===d?'on':''}" onclick="setP({per:'${d}'})">${d}</button>`).join('')}</div></div>
       <div class="field"><span>Ulangi setiap</span><div class="opts">${['Sen','Sel','Rab','Kam','Jum','Sab'].map((d,i)=>`<button class="opt ${i===0||i===3?'on':''}" onclick="this.classList.toggle('on')">${d}</button>`).join('')}</div></div>
       <div class="row" style="gap:10px"><label class="field grow"><span>Mulai</span><input class="input" type="date" value="2026-10-27"></label><label class="field grow"><span>Berakhir</span><input class="input" type="date" value="2026-12-31"></label></div>`
     :`<div class="row" style="gap:10px"><label class="field grow"><span>Tanggal</span><input class="input" type="date" value="${kind==='adhoc'?'2026-10-26':'2026-10-28'}"></label><label class="field grow"><span>Jam</span><input class="input" type="time" value="13:00"></label></div>`}
     <div class="field"><span>Jenis tugas</span><div class="opts">${taskOpts.map(t=>`<button class="opt ${tasks.includes(t)?'on':''}" onclick="toggleTask('${t}')">${t}</button>`).join('')}</div></div>
-  </main><footer class="actions"><button class="btn" onclick="saveVisit()">${spv?'Kirim penugasan':kind==='rencana'?'Ajukan rencana':'Simpan kunjungan'}</button></footer>`};
+  </main><footer class="actions"><button class="btn" onclick="saveVisit()">${spv?'Kirim penugasan':'Simpan kunjungan'}</button></footer>`};
 };
 function toggleTask(t){ const p=cur().p; p.tasks=p.tasks||[]; p.tasks=p.tasks.includes(t)?p.tasks.filter(x=>x!==t):[...p.tasks,t]; render(false); }
 function saveVisit(){
   const p=cur().p, place=val('kp'), tasks=p.tasks?.length?p.tasks:['Kunjungan'];
   if(p.spv){ back(); toast('Penugasan terkirim, anggota tim dapat notifikasi'); return; }
-  if(p.kind==='rencana'){ S.plans.unshift({place,date:'28 Okt 2026',status:'Menunggu approval'}); back(); toast('Rencana kunjungan dikirim ke supervisor'); return; }
-  const list=S.visits[role()]; list.push({id:'v'+(list.length+1)+Date.now()%1000,place,time:'13:00',tasks,status:'Belum',photos:{}});
+  const list=S.visits[role()];
+  if(p.kind==='berkala'){ back(); toast('Jadwal berkala '+(p.per||'Mingguan').toLowerCase()+' tersimpan'); return; }
+  if(list.length){ toast('Hari ini sudah ada jadwal ke '+list[0].place,'alert'); return; } list.push({id:'v'+(list.length+1)+Date.now()%1000,place,time:'13:00',tasks,status:'Belum',photos:{}});
   back(); toast('Kunjungan ditambahkan ke jadwal hari ini');
 }
 
@@ -1543,7 +1562,7 @@ SCR.assign = p => {
 };
 function toggleSel(id){ const p=cur().p; p.sel=p.sel||[]; p.sel=p.sel.includes(id)?p.sel.filter(x=>x!==id):[...p.sel,id]; render(false,true); }
 function assignSheet(){
-  const members=[['sales.andi','Andi Wijaya',S.leads.filter(l=>l.owner==='sales.andi'&&!leadClosed(l)).length]];
+  const members=[['sales.andi','Andi Wijaya'],['cbd.tono','Tono Hidayat'],['rea.nina','Nina Safitri']].map(([u,n])=>[u,n,S.leads.filter(l=>l.owner===u&&!leadClosed(l)).length]);
   sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Assign ke</h3>
   <div class="list">${members.map(m=>`<button class="li" onclick="doAssign('${m[0]}')"><div class="av blue">${USERS[m[0]].init}</div><div class="grow"><div class="t">${m[1]}</div><div class="s">${m[2]} leads aktif</div></div>${I('right',20)}</button>`).join('')}</div>`);
 }
@@ -1577,6 +1596,16 @@ SCR.target = () => {
   html:`${appbar('Target & pencapaian')}<main class="content">${main}${achv}
   </main>`};
 };
+
+SCR.aktivitas = () => ({tab:'aktivitas', note:'Promotor FMCG dan MD tidak mencatat penjualan (MOM 10). Alur cek stok, price promo, facing display, dan support task menyusul di Tahap 3.',
+  html:`${appbar('Aktivitas toko',{backBtn:false})}<main class="content">
+    <div class="list">
+      <button class="li" onclick="go('sku')"><div class="ico-tile">${I('grid',20)}</div><div class="grow"><div class="t">SKU display</div><div class="s">Input harian di toko</div></div>${I('right',18)}</button>
+      <button class="li" onclick="go('share')"><div class="ico-tile">${I('pie',20)}</div><div class="grow"><div class="t">Market share</div><div class="s">Input harian, bisa draft</div></div>${I('right',18)}</button>
+      <button class="li" onclick="tab('kunjungan')"><div class="ico-tile">${I('route',20)}</div><div class="grow"><div class="t">Jadwal kunjungan</div><div class="s">Kamu bisa membuat jadwal sendiri</div></div>${I('right',18)}</button>
+    </div>
+    <p class="hint" style="margin-top:14px">Cek stok, price promo, facing display, dan support task menyusul di revisi berikutnya.</p>
+  </main>`});
 
 /* ---------- SKU display & Market share (SPG) ---------- */
 SCR.sku = p => {
