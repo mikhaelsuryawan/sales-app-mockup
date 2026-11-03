@@ -753,7 +753,8 @@ function attCard(){
 }
 SCR.home = () => {
   const u=U(), r=role(), locked=isLocked();
-  const menus=MENUS[u.menu||r];
+  let menus=MENUS[u.menu||r];
+  if(r==='fmcg') menus=[[fmAktLabel(),'grid',"tab('aktivitas')"],...menus]; else if(hasAkt()) menus=[[aktLabel(),'grid',"tab('akt')"],...menus];
   let extra='';
   if(r==='spv') extra = spvDash();
   else extra = fieldDash();
@@ -1016,7 +1017,7 @@ SCR['kunjungan-detail'] = p => {
   html:`${appbar('Detail kunjungan',{right:!x.cin&&x.status!=='Selesai'&&(role()!=='fmcg'||x.own)&&canSchedule(role())?`<button class="ib" onclick="act(()=>delVisitSheet('${x.id}'))" aria-label="Hapus kunjungan">${I('trash',20)}</button>`:''})}<main class="content">
     <div class="card"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t" style="font-weight:800;font-size:16px">${x.place}</div><div class="small muted">Sen, 26 Okt 2026 · ${x.time}</div></div>${chip(x.status,x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':'')}</div>
       ${x.cin?`<div class="kv" style="margin-top:8px"><span>Check-in</span><span class="num">${x.cin} · 24 m dari titik toko</span></div>${x.cout?`<div class="kv"><span>Check-out</span><span class="num">${x.cout} · durasi ${x.dur}${x.remoteOut?' · dari luar radius':''}</span></div>`:''}`
-      :noCheckin()?`<div class="banner blue" style="margin-top:12px">${I('alert',18)}<span>Multi Finance tidak memakai check-in dan check-out ke nasabah. Isi hasil kunjungan lalu tandai selesai.</span></div>`:`<div class="banner blue" style="margin-top:12px">${I('pin',18)}<span>Check-in saat sudah sampai. Lokasi kamu dicocokkan dengan titik toko (radius 100 m).</span></div>`}</div>
+      :noCheckin()?`<div class="banner blue" style="margin-top:12px">${I('alert',18)}<span>Multi Finance, REA, dan CBD tidak memakai check-in dan check-out ke nasabah. Isi hasil kunjungan lalu tandai selesai.</span></div>`:`<div class="banner blue" style="margin-top:12px">${I('pin',18)}<span>Check-in saat sudah sampai. Lokasi kamu dicocokkan dengan titik toko (radius 100 m).</span></div>`}</div>
     <div class="sec-title">Tugas${x.sesi>1?' · sesi ke-'+x.sesi:''}</div>
     ${role()==='fmcg'?fmTaskSummary(x):`<div class="list">${x.tasks.map(t=>/^(Quiz|Survey)$/.test(t)?`<button class="li" onclick="go('${t.toLowerCase()}')"><div class="ico-tile tan">${I(t==='Quiz'?'quiz':'survey',18,2)}</div><div class="grow"><div class="t">${t}</div><div class="s">Dikerjakan di dalam kunjungan</div></div>${I('right',18)}</button>`:`<div class="li"><div class="ico-tile">${I('check',18,2.2)}</div><div class="grow"><div class="t">${t}</div></div></div>`).join('')}</div>`}
     ${x.cin?`<div class="sec-title">Foto check-in</div><div class="thumbs">${visitPhotos(x,'in')}</div>`:''}
@@ -1969,7 +1970,7 @@ SCR['notif-absen'] = () => ({note:'Push notifikasi sebelum check-in dan check-ou
 
 const hasAkt = () => { const u=U(); return !!u&&(u.role==='canvas'||u.role==='order'||u.role==='leads'); };
 const aktStores = () => S.visits[vk()]||[];
-const noCheckin = () => U()?.roleLabel==='Multi Finance';
+const noCheckin = () => ['Multi Finance','REA / SPG Multi Finance','CBD / Mediator'].includes(U()?.roleLabel);
 const aktLabel = () => aktStores().length>1&&!noCheckin()?'Aktivitas Toko':'Aktivitas Saya';
 function aktMark(k){ const v=visitOpen(); if(v){ v.done=v.done||{}; v.done[k]=true; } }
 function aktGate(fn){ act(()=>{ if(!visitOpen()){ sheet(`<h3 style="font-size:18px;font-weight:800">Check-in dulu</h3><p class="muted small" style="margin:6px 0 16px;line-height:1.5">Pilih toko yang kamu kunjungi, lalu check-in di lokasi. Setelah itu pekerjaan di toko tersebut bisa dilanjutkan.</p>
