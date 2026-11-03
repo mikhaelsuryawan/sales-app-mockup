@@ -1723,24 +1723,24 @@ function rejectSheet(id){
   <button class="btn danger" onclick="if(!val('rr')){$('#rerr').innerHTML='<div class=err>Alasan wajib diisi.</div>';return;}S.approvals=S.approvals.filter(a=>a.id!=='${id}');closeSheet();render(false);toast('Pengajuan ditolak')">Tolak pengajuan</button>`);
 }
 SCR.assign = p => {
-  const sel=p.sel||[], list=S.leads.filter(l=>!l.owner&&leadCab(l)===S.cabang);
-  return {note:'Arco dan Team Leader meng-assign leads berdasarkan cabang, hanya ke promotor yang ada di cabang itu, satu per satu atau lewat import (MOM 12.5).',
+  const sel=p.sel||[], list=S.leads.filter(l=>!l.owner&&leadCab(l)===S.cabang), u=p.u, members=mfUsers();
+  const note='Arco dan Team Leader meng-assign leads berdasarkan cabang: pilih user REA atau CBD di cabang itu, lalu pilih satu leads atau lebih (MOM 12.5).';
+  if(!u) return {note,
   html:`${appbar('Assign leads')}<main class="content">
-    <div class="banner blue" style="margin-bottom:14px">${I('file',18)}<span>${list.length} leads baru di cabang ${S.cabang}. Leads melekat ke cabang.</span></div>
-    ${list.length?`<button class="btn ghost sm" style="margin-bottom:12px" onclick="act(()=>importAssign())">${I('file',18)} Import assign dari file</button>`:''}
+    <div class="banner blue" style="margin-bottom:14px">${I('file',18)}<span>${list.length} leads baru di cabang ${S.cabang}. Pilih user yang menerima leads.</span></div>
+    <div class="sec-title" style="margin-top:0">Pilih user REA atau CBD</div>
+    ${members.length?`<div class="list">${members.map(m=>`<button class="li" onclick="setP({u:'${m}',sel:[]})"><div class="av blue">${USERS[m].init}</div><div class="grow"><div class="t">${USERS[m].name}</div><div class="s">${USERS[m].roleLabel} · ${S.leads.filter(l=>l.owner===m&&!leadClosed(l)).length} leads aktif</div></div>${I('right',20)}</button>`).join('')}</div>`:`<div class="empty">Belum ada user REA atau CBD di cabang ${S.cabang}.</div>`}
+  </main>`};
+  return {note,
+  html:`${appbar('Pilih leads')}<main class="content">
+    <div class="card" style="margin-bottom:14px"><div class="row"><div class="av blue">${USERS[u].init}</div><div class="grow"><div class="small muted">Assign ke</div><div class="t" style="font-weight:800">${USERS[u].name}</div><div class="small muted">${USERS[u].roleLabel}</div></div><button class="btn ghost sm" style="width:auto" onclick="setP({u:'',sel:[]})">Ganti</button></div></div>
     ${list.length?`<div class="list">${list.map(l=>`<button class="li" onclick="toggleSel('${l.id}')"><span class="check ${sel.includes(l.id)?'on':''}">${sel.includes(l.id)?I('check',14,3):''}</span><div class="grow"><div class="t">${l.name}</div><div class="s">${l.prod} · ${rp(l.amount)} · ${l.addr}</div></div></button>`).join('')}</div>
     <button class="link" style="margin-top:12px;display:block" onclick="setP({sel:${sel.length===list.length?'[]':'['+list.map(l=>`'${l.id}'`).join(',')+']'}})">${sel.length===list.length?'Batal pilih semua':'Pilih semua'}</button>`:`<div class="empty"><div class="ico-tile green">${I('check',24)}</div>Semua leads sudah di-assign.</div>`}
-  </main>${list.length?`<footer class="actions"><button class="btn" ${sel.length?'':'disabled'} onclick="act(()=>assignSheet())">Assign ${sel.length||''} leads</button></footer>`:''}`};
+  </main>${list.length?`<footer class="actions"><button class="btn" ${sel.length?'':'disabled'} onclick="act(()=>doAssign('${u}'))">Assign ${sel.length||''} leads</button></footer>`:''}`};
 };
-const mfUsers=()=>Object.keys(USERS).filter(u=>USERS[u].role==='leads'&&USERS[u].unit.includes(S.cabang));
-function importAssign(){ const us=mfUsers(); let n=0; S.leads.forEach(l=>{ if(!l.owner&&leadCab(l)===S.cabang&&us.length){ l.owner=us[n++%us.length]; } }); render(false); toast(n+' leads cabang '+S.cabang+' di-assign dari file'); }
+const mfUsers=()=>Object.keys(USERS).filter(u=>/^(REA|CBD)/.test(USERS[u].roleLabel)&&USERS[u].unit.includes(S.cabang));
 function toggleSel(id){ const p=cur().p; p.sel=p.sel||[]; p.sel=p.sel.includes(id)?p.sel.filter(x=>x!==id):[...p.sel,id]; render(false,true); }
-function assignSheet(){
-  const members=mfUsers().map(u=>[u,USERS[u].name,S.leads.filter(l=>l.owner===u&&!leadClosed(l)).length]);
-  sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Assign ke</h3>
-  <div class="list">${members.map(m=>`<button class="li" onclick="doAssign('${m[0]}')"><div class="av blue">${USERS[m[0]].init}</div><div class="grow"><div class="t">${m[1]}</div><div class="s">${m[2]} leads aktif</div></div>${I('right',20)}</button>`).join('')}</div>`);
-}
-function doAssign(u){ const sel=cur().p.sel||[]; S.leads.forEach(l=>{ if(sel.includes(l.id)) l.owner=u; }); cur().p.sel=[]; closeSheet(); render(false); toast(sel.length+' leads di-assign ke '+USERS[u].name.split(' ')[0]); }
+function doAssign(u){ const sel=cur().p.sel||[]; S.leads.forEach(l=>{ if(sel.includes(l.id)) l.owner=u; }); cur().p.sel=[]; render(false); toast(sel.length+' leads di-assign ke '+USERS[u].name.split(' ')[0]); }
 SCR.overdue = () => ({note:'Data keterlambatan pembayaran untuk tim collection (URD FR-017). Reminder dan penagihan dilakukan manual di luar sistem; aplikasi hanya sumber data.',
   html:`${appbar('Data overdue')}<main class="content">
     <div class="card"><div class="row between"><div><div class="small muted">Total angsuran tertunggak</div><div class="big-num num">${rp(S.overdue.reduce((s,o)=>s+o.ang,0))}</div></div>${chip(S.overdue.length+' nasabah','red')}</div></div>
