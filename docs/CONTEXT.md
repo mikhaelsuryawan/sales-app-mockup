@@ -104,6 +104,8 @@ Semua data dummy. CRUD bekerja di memori dan hilang saat reload, kecuali data ya
 | Harga per toko | Dashboard (Produk dan harga, tab Harga) | Mobile (harga di penjualan) |
 | Produk price promo | Dashboard (Produk dan harga) | Mobile (Price promo FMCG) |
 | Mapping produk per outlet | Dashboard (Produk dan harga) | Mobile (Cek stok) |
+| Pertanyaan monitoring mitra (teks bebas) | Dashboard (Mitra, tab Pertanyaan monitoring) | Mobile (CBD, detail Mitra saya) |
+| Jawaban monitoring mitra | Mobile (CBD) | Dashboard (Mitra, tab Jawaban) |
 | Item facing display (Rak Utama, Boot, Gudang) | Dashboard (Produk dan harga, tab Facing display) | Mobile (Facing display) |
 | Harga sebelum promo | Dashboard (Produk dan harga, tab Price promo) | Mobile (Price promo; harga promo diinput promotor) |
 | Jadwal kunjungan Promotor FMCG dan MD | Dashboard (Kunjungan) | Mobile (Kunjungan) |

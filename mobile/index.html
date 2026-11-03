@@ -1936,14 +1936,25 @@ function saveNewLead(){
 const MITRA=[{id:'mt1',name:'Agen Sejahtera Fatmawati',area:'Fatmawati',phone:'0812-7000-2201',leads:6},{id:'mt2',name:'Agen Berkah Cilandak',area:'Cilandak',phone:'0812-7000-2202',leads:3}];
 SCR.mitra = () => ({note:'Mitra adalah agent di luar SIM. Datanya dari client, hanya berupa data, dan melekat pada CBD (MOM 12.2).',
   html:`${appbar('Mitra saya')}<main class="content"><div class="list">${MITRA.map(m=>`<button class="li" onclick="go('mitra-detail',{id:'${m.id}'})"><div class="ico-tile">${I('users',20)}</div><div class="grow"><div class="t">${m.name}</div><div class="s">${m.area} · ${m.leads} leads</div></div>${S.mitraLog[m.id]?chip('Dipantau','green'):chip('Belum','amber')}</button>`).join('')}</div></main>`});
+const MITRAQ_DEFAULT=[{id:'mq1',q:'Bagaimana kondisi usaha atau kegiatan mitra bulan ini?'},{id:'mq2',q:'Kendala apa yang dihadapi mitra dalam mencari nasabah?'},{id:'mq3',q:'Dukungan apa yang dibutuhkan mitra dari tim bulan depan?'}];
+const mitraQ = () => shRead('mitraQ',MITRAQ_DEFAULT).filter(x=>!x.del&&x.status!=='Nonaktif');
+const mitraAns = id => (shRead('mitraAns',{})[id]||{}).a||{};
+function mitraSave(id){
+  const m=MITRA.find(x=>x.id===id), Q=mitraQ(), a={}, q={};
+  for(const x of Q){ const v=val('mq_'+x.id).replace(/['"\\<>`]/g,'').trim(); if(!v){ toast('Isi semua jawaban','alert'); return; } a[x.id]=v; q[x.id]=x.q; }
+  const all=shRead('mitraAns',{}); all[id]={name:m.name,by:U().name,tgl:'26 Okt',a,q}; shSet('mitraAns',all);
+  S.mitraLog[id]=true; back(); toast('Monitoring mitra tersimpan');
+}
 SCR['mitra-detail'] = p => {
-  const m=MITRA.find(x=>x.id===p.id);
-  return {note:'CBD memonitor mitra. Data KPI CBD berupa foto dan catatan (MOM 12.2).',
+  const m=MITRA.find(x=>x.id===p.id), Q=mitraQ(), saved=mitraAns(m.id);
+  return {note:'CBD memonitor mitra. Data KPI CBD berupa foto dan catatan (MOM 12.2). Pertanyaan monitoring dengan jawaban teks bebas diatur admin di dashboard (menu Mitra).',
   html:`${appbar(m.name)}<main class="content">
     <div class="card"><div class="kv"><span>Area</span><span>${m.area}</span></div><div class="kv"><span>Telepon</span><span class="num">${m.phone}</span></div><div class="kv"><span>Leads</span><span>${m.leads}</span></div></div>
     <div class="thumbs" style="margin-top:12px">${photoSlot('Foto monitoring',p.f,'setP({f:1})')}</div>
+    <div class="sec-title">Pertanyaan monitoring</div>
+    ${Q.length?Q.map(x=>`<label class="field"><span>${esc(x.q)}</span><textarea class="input" id="mq_${x.id}" placeholder="Tulis jawaban">${esc(saved[x.id]||'')}</textarea></label>`).join(''):`<div class="empty">Admin belum menyiapkan pertanyaan monitoring.</div>`}
     <label class="field" style="margin-top:14px"><span>Catatan</span><textarea class="input" id="mt_n"></textarea></label>
-  </main><footer class="actions"><button class="btn" ${p.f?'':'disabled'} onclick="act(()=>{S.mitraLog['${m.id}']=true;back();toast('Monitoring mitra tersimpan')})">Simpan monitoring</button></footer>`};
+  </main><footer class="actions"><button class="btn" ${p.f?'':'disabled'} onclick="act(()=>mitraSave('${m.id}'))">Simpan monitoring</button></footer>`};
 };
 SCR['cbd-task'] = p => {
   const L=cbdTasks(), pend=L.find(x=>x.st==='Menunggu jawaban'), x=pend||L[0], done=!pend;
