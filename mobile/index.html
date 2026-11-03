@@ -752,7 +752,8 @@ function attCard(){
 SCR.home = () => {
   const u=U(), r=role(), locked=isLocked();
   let menus=MENUS[u.menu||r];
-  if(r==='fmcg') menus=[[fmAktLabel(),'grid',"act(()=>tab('aktivitas'))",1],['Cek stok','box',"fmGate(()=>go('fm-stok'))",1],['Price promo','tag',"fmGate(()=>go('fm-promo'))",1],['Facing display','grid',"fmGate(()=>go('fm-facing'))",1],['Support task','check',"fmGate(()=>go('fm-task'))",1],['Market share','pie',"fmGate(()=>go('share'))",1],...menus];
+  if(r==='fmcg'&&isMd()) menus=[[fmAktLabel(),'grid',"act(()=>tab('aktivitas'))",1],...menus];
+  else if(r==='fmcg') menus=[[fmAktLabel(),'grid',"act(()=>tab('aktivitas'))",1],['Cek stok','box',"fmGate(()=>go('fm-stok'))",1],['Price promo','tag',"fmGate(()=>go('fm-promo'))",1],['Facing display','grid',"fmGate(()=>go('fm-facing'))",1],['Support task','check',"fmGate(()=>go('fm-task'))",1],['Market share','pie',"fmGate(()=>go('share'))",1],...menus];
   else if(hasAkt()) menus=[[aktLabel(),'grid',"act(()=>tab('akt'))",1],...aktTasks(null).map(t=>[t.t,t.ic,t.lock?`aktGate(()=>${t.go})`:`act(()=>${t.go})`,1]),...menus];
   let extra='';
   if(r==='spv') extra = spvDash();
@@ -777,7 +778,7 @@ SCR.home = () => {
 function fieldDash(){
   const r=role();
   if(r==='trainer') return `<div class="sec-title">Kunjungan pelatihan</div><div class="banner blue">${I('quiz',18)}<span>Trainer mendukung tim lewat quiz, survey, dan kunjungan. Tanpa penjualan dan leads.</span></div>${todayVisits()}`;
-  if(r==='fmcg') return `<div class="banner blue">${I('grid',18)}<span>Check-in di tab ${fmAktLabel()}, lalu kerjakan tugas dari menu di bawah. Tanpa penjualan.</span></div>
+  if(r==='fmcg') return `<div class="banner blue">${I('grid',18)}<span>${isMd()?`Check-in di tab ${fmAktLabel()}, lalu kerjakan pekerjaan di halaman yang sama. Tanpa penjualan.`:`Check-in di tab ${fmAktLabel()}, lalu kerjakan tugas dari menu di bawah. Tanpa penjualan.`}</span></div>
     ${todayVisits()}`;
   if(r==='leads'){
     const mine=S.leads.filter(l=>l.owner===S.user), c=k=>mine.filter(l=>l.status===k).length;
@@ -1998,11 +1999,11 @@ function aktTasks(v){
 }
 SCR.akt = () => {
   const L=aktStores(), o=visitOpen(), multi=L.length>1, nas=role()==='leads';
-  const storeRow=v=>{ const open=v.cin&&!v.cout, fin=v.status==='Selesai', lab=open?(role()==='canvas'?'Submit':'Check-out'):fin?'Selesai':'Check-in';
+  const storeRow=v=>{ const open=v.cin&&!v.cout, fin=v.status==='Selesai', lab=open?'Check-out':fin?'Selesai':'Check-in';
     return `<div class="li"><div class="ico-tile ${fin?'green':''}">${I(fin?'check':'pin',20,fin?2.2:2)}</div><div class="grow"><div class="t">${esc(v.place)}</div><div class="s">${v.time}${v.cin?' · check-in '+v.cin:''}${v.cout?' · check-out '+v.cout:''}</div></div><button class="btn sm ${open?'sec':''}" style="width:auto" ${fin?'disabled':''} onclick="act(()=>visitAction('${v.id}'))">${lab}</button></div>`; };
   const head = o
     ? `<div class="card" style="margin-bottom:14px"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="small muted">Sedang di ${nas?'lokasi':'toko'}</div><div class="t" style="font-weight:800">${esc(o.place)}</div><div class="small muted">Check-in ${o.cin}</div></div>${chip('Berjalan','blue')}</div>
-      <button class="btn sm" style="margin-top:12px" onclick="act(()=>visitAction('${o.id}'))">${I('check',18,2.2)} ${role()==='canvas'?'Submit kunjungan':'Check-out & selesai'}</button></div>`
+      <button class="btn sm" style="margin-top:12px" onclick="act(()=>visitAction('${o.id}'))">${I('check',18,2.2)} Check-out & selesai</button></div>`
     : !L.length ? `<div class="empty">Belum ada jadwal kunjungan. Team Leader membuat jadwalnya.</div>`
     : multi ? `<div class="sec-title" style="margin-top:0">Pilih ${nas?'tujuan':'toko'}</div><div class="list" style="margin-bottom:14px">${L.map(storeRow).join('')}</div><p class="hint" style="margin:-6px 0 14px">Kamu punya ${L.length} tujuan hari ini. Pilih satu, check-in, kerjakan tugas, lalu check-out.</p>`
     : `<div class="list" style="margin-bottom:14px">${storeRow(L[0])}</div><p class="hint" style="margin:-6px 0 14px">Kamu punya 1 tujuan hari ini. Check-in, kerjakan tugas, lalu check-out.</p>`;
@@ -2013,6 +2014,12 @@ SCR.akt = () => {
     ${others}${aktHint(o)}</main>`};
 };
 const fmStores = () => S.visits.fmcg||[];
+const isMd = () => U()?.roleLabel.startsWith('Merchandising');
+function mdTasks(o){
+  const rows=[...FM_TASKS,['support','Support task','check','fm-task']].map(t=>{ const ok=o&&(o.done||{})[t[0]], st=o&&t[0]!=='support'?stChip(fmStatus(t[0],o)):'';
+    return `<button class="li" onclick="fmGate(()=>go('${t[3]}'))"><div class="ico-tile ${ok?'green':''}">${I(ok?'check':t[2],18,2.2)}</div><div class="grow"><div class="t">${t[1]}</div>${o?'':'<div class="s">Terbuka setelah check-in</div>'}</div>${st}${o?I('right',18):I('lock',16)}</button>`; }).join('');
+  return `<div class="sec-title">Pekerjaan</div><div class="list">${rows}</div><p class="hint" style="margin-top:10px">Semua task wajib selesai sebelum check-out. Support task tidak wajib.</p>`;
+}
 const fmAktLabel = () => fmStores().length>1?'Aktivitas Toko':'Aktivitas Saya';
 SCR.aktivitas = () => {
   const L=fmStores(), o=visitOpen(), multi=L.length>1;
@@ -2025,10 +2032,10 @@ SCR.aktivitas = () => {
     : multi ? `<div class="sec-title" style="margin-top:0">Pilih toko</div><div class="list" style="margin-bottom:14px">${L.map(storeRow).join('')}</div><p class="hint" style="margin:-6px 0 14px">Kamu ditugaskan di ${L.length} toko. Pilih toko, check-in, kerjakan aktivitas, lalu check-out.</p>`
     : `<div class="list" style="margin-bottom:14px">${storeRow(L[0])}</div><p class="hint" style="margin:-6px 0 14px">Kamu ditugaskan di 1 toko. Check-in, kerjakan aktivitas, lalu check-out.</p>`;
   const others = o&&multi ? `<div class="sec-title">Toko lainnya</div><div class="list" style="margin-bottom:14px">${L.filter(v=>v.id!==o.id).map(storeRow).join('')}</div>` : '';
-  return {tab:'aktivitas', note:'Halaman Aktivitas Promotor FMCG dan MD untuk pilih toko, check-in, dan check-out. Menu tugas ada di Beranda: pilih toko (jika ditugaskan di lebih dari satu), check-in, kerjakan tugas, lalu check-out. Judul halaman: Aktivitas Saya jika hanya 1 toko, Aktivitas Toko jika lebih dari 1 toko. Beranda memuat menu tugasnya. Lupa check-out: muncul informasi saat check-in di toko berikutnya, lalu toko sebelumnya ditutup otomatis.',
+  return {tab:'aktivitas', note:'Halaman Aktivitas Promotor FMCG dan MD untuk pilih toko, check-in, dan check-out. Menu tugas ada di Beranda: pilih toko (jika ditugaskan di lebih dari satu), check-in, kerjakan tugas, lalu check-out. Judul halaman: Aktivitas Saya jika hanya 1 toko, Aktivitas Toko jika lebih dari 1 toko. Untuk MD, menu pekerjaan (Cek stok, Price promo, Facing display, Market share, Support task) digabung di halaman ini; Promotor FMCG tetap memakai menu di Beranda. Lupa check-out: muncul informasi saat check-in di toko berikutnya, lalu toko sebelumnya ditutup otomatis.',
   html:`${appbar(fmAktLabel(),{backBtn:false})}<main class="content">
     ${head}
-    ${others}${aktHint(o)}</main>`};
+    ${others}${isMd()?mdTasks(o):aktHint(o)}</main>`};
 };
 
 /* ---------- SPG / Sales Promotor: Aktivitas saya ---------- */
