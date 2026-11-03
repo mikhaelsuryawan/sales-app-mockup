@@ -413,7 +413,7 @@ const USERS = {
   'rea.nina':  {name:'Nina Safitri', init:'NS', role:'leads', roleLabel:'REA / SPG Multi Finance', nip:'SIM-24-01322', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'leads',label:'Leads',icon:'users'}},
   'fmcg.tari': {name:'Lestari Putri', init:'LP', role:'fmcg', roleLabel:'Promotor FMCG', nip:'SIM-24-01355', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
   'md.rangga': {name:'Rangga Saputra', init:'RS', role:'fmcg', roleLabel:'Merchandising (MD)', nip:'SIM-23-01102', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
-  'mobile.fikri':{name:'Fikri Ramadhan', init:'FR', role:'spg', roleLabel:'Mobile Promotor', nip:'SIM-24-01377', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Beberapa toko dan event', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
+  'mobile.fikri':{name:'Fikri Ramadhan', init:'FR', role:'spg', menu:'mobile', roleLabel:'Mobile Promotor', nip:'SIM-24-01377', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Beberapa toko dan event', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
   'trainer.joko':{name:'Joko Susilo', init:'JS', role:'trainer', roleLabel:'Trainer', nip:'SIM-20-00412', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Kelas pelatihan Jakarta Selatan', sched:'WFO', main:{key:'quiz',label:'Quiz',icon:'quiz'}},
   'sales.rudi':{name:'Rudi Hartono', init:'RH', role:'leads', roleLabel:'Multi Finance', nip:'SIM-24-01410', client:'BPR Mitra Usaha', unit:'Kantor Cabang Cilandak', place:'BPR Mitra Usaha Cilandak', sched:'WFO', main:{key:'leads',label:'Leads',icon:'users'}},
   'bantuan.eko':{name:'Eko Prabowo', init:'EP', role:'spg', menu:'bantuan', roleLabel:'Promotor Bantuan', nip:'BTN-0007', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
@@ -522,7 +522,8 @@ function freshState(){
       {id:'a3',type:'Hapus penjualan',u:'spg.rina',detail:'TRX-2510-0087 · Kulkas 2 Pintu · Rp4.084.050',reason:'Salah pilih produk, seharusnya Mesin Cuci',when:'Kemarin'}
     ],
     visits:{
-      spg:[{id:'v1',place:'Electronic City Kemang',time:'08:00 – 13:00',tasks:['Cek SKU display','Penjualan'],status:'Berjalan',photos:{},cin:'08:03'},{id:'v2',place:'Best Denki Senayan City',time:'14:00 – 17:00',tasks:['Survey toko','Cek SKU display','Quiz'],status:'Belum',photos:{}}],
+      spg:[{id:'v1',place:'Electronic City Kemang',time:'08:00 – 17:00',tasks:['Aktivitas saya'],status:'Belum',photos:{}}],
+      mobile:[{id:'v1',place:'Electronic City Kemang',time:'08:00 – 13:00',tasks:['Cek SKU display','Penjualan'],status:'Berjalan',photos:{},cin:'08:03'},{id:'v2',place:'Best Denki Senayan City',time:'14:00 – 17:00',tasks:['Survey toko','Cek SKU display','Quiz'],status:'Belum',photos:{}}],
       canvas:[{id:'v1',place:'Toko Sinar Jaya Elektronik',time:'09:00',tasks:['Penjualan','Ambil retur'],status:'Selesai',photos:{0:1,1:1},cin:'09:02',cout:'09:31',dur:'29 mnt'},{id:'v2',place:'Toko Makmur Abadi',time:'10:30',tasks:['Penjualan'],status:'Belum',photos:{}},{id:'v3',place:'Toko Berkah Elektronik',time:'13:00',tasks:['Penjualan','Cek display'],status:'Belum',photos:{}},{id:'v4',place:'Toko Cahaya Baru',time:'15:00',tasks:['Penjualan'],status:'Belum',photos:{}}],
       order:[{id:'v1',place:'Toko Mega Elektronik',time:'10:00',tasks:['Ambil pesanan'],status:'Selesai',photos:{0:1},cin:'10:04',cout:'10:30',dur:'26 mnt'},{id:'v2',place:'CV Sumber Rejeki Elektronik',time:'13:30',tasks:['Ambil pesanan','Penagihan'],status:'Belum',photos:{}},{id:'v3',place:'Toko Abadi Jaya',time:'15:30',tasks:['Ambil pesanan'],status:'Belum',photos:{}}],
       leads:[{id:'v1',place:'Ahmad Fauzi (nasabah)',time:'10:00',tasks:['Survey usaha'],status:'Belum',photos:{}},{id:'v2',place:'Yuliana Putri (nasabah)',time:'14:00',tasks:['Verifikasi dokumen'],status:'Belum',photos:{}}],
@@ -532,10 +533,10 @@ function freshState(){
     },
     plans:[{place:'Rudi Hartanto (nasabah)',date:'28 Okt 2026',status:'Menunggu approval'}],
     canvasArea:{'sales.budi':'Rute Pasar Minggu – Cilandak'}, cabang:'Fatmawati', sharePrice:{}, vform:{}, skuFoto:{},
-    sku:{t1:null,t2:null}, 
+    sku:{t1:null,t2:null}, disp:[], dispDone:false, dispDraft:false, sf:null, 
     fm:{stok:{},extra:[],stokDone:false,foto:{},facing:0,tasks:[{t:'Bersihkan etalase depan',from:'Dari Team Leader',done:false}]}, posm:{}, mitraLog:{}, cbdDone:false, notifOn:{in:true,out:true}, sound:'Bawaan',
     bawa:{rc18:8,bl11:6,st3:9,kp16:5,ds72:2}, kembali:{}, muatInv:[], receipt:false,
-    shareClient:{tv50:6,tv43:12}, shareComp:[{brand:'Samsung',kat:'TV',sub:'Smart TV',nama:'Samsung Crystal 55"',qty:14,harga:0},{brand:'LG',kat:'TV',sub:'Smart TV',nama:'LG UHD 50"',qty:10,harga:0}], shareCat:'TV', shareState:null,
+    shareClient:{tv50:6,tv43:12}, shareComp:[{cb:'ARUNIKA',brand:'Samsung',path:'TV/Smart TV',nama:'Samsung Crystal 55"',qty:14,harga:0},{cb:'ARUNIKA',brand:'LG',path:'TV/Smart TV/Google TV',nama:'LG UHD 50"',qty:10,harga:0},{cb:'ARUNIKA',brand:'Samsung',path:'Kulkas/2 Pintu/Inverter',nama:'Samsung 2 Pintu 300 L',qty:5,harga:0}], shareBrand:'ARUNIKA', sharePath:['TV'], shareState:null,
     quizDone:false, quizScore:null, surveyDone:false,
     myRequests:[], newToko:[],
     cart:null, ord:null
@@ -551,6 +552,8 @@ const rp = n => 'Rp' + Math.round(n).toLocaleString('id-ID');
 const rpShort = n => n>=1e6 ? 'Rp'+(n/1e6).toLocaleString('id-ID',{maximumFractionDigits:1})+' jt' : rp(n);
 const U = () => USERS[S.user];
 const role = () => U()?.role;
+// Kunci data kunjungan: Mobile Promotor punya jadwal sendiri, terpisah dari SPG yang diam di satu lokasi
+const vk = () => U()?.menu==='mobile'?'mobile':role();
 const att = () => S.att[S.user] || (S.att[S.user] = {in:null,out:null});
 const isLocked = () => !att().in || !!att().out;
 const mode = () => S.demo.mode || U()?.sched || 'WFO';
@@ -725,7 +728,8 @@ SCR['enroll-done'] = () => { S.enrolled[S.user]=true; return {note:'Wajah refere
 
 /* ---------- Home ---------- */
 const MENUS = {
-  spg:[['Catat penjualan','bag',"act(()=>startSale())",1],['Riwayat penjualan','file',"tab('penjualan')"],['SKU display','grid',"go('sku')"],['Market share','pie',"go('share')"],['Stock opname','box',"go('fm-stok')"],['Campaign & POSM','image',"go('posm')"],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  spg:[['Aktivitas saya','grid',"go('spg-akt')"],['Riwayat penjualan','file',"tab('penjualan')"],['Stock opname','box',"spgGate(()=>go('fm-stok'))"],['Campaign & POSM','image',"go('posm')"],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  mobile:[['Catat penjualan','bag',"act(()=>startSale())",1],['Riwayat penjualan','file',"tab('penjualan')"],['SKU display','grid',"go('sku')"],['Market share','pie',"go('share')"],['Stock opname','box',"go('fm-stok')"],['Campaign & POSM','image',"go('posm')"],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   canvas:[['Jual dari stok','bag',"act(()=>startSale())",1],['Stok bawaan','box',"go('stok')"],['Catat retur','retur',"act(()=>go('stok-form',{kind:'retur'}))",1],['Usulkan toko','plus',"act(()=>go('toko-baru'))",1],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   order:[['Buat pesanan','order',"act(()=>startOrder())",1],['Daftar pesanan','file',"tab('pesanan')"],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Usulkan toko','plus',"act(()=>go('toko-baru'))",1],['Ajukan izin','file',"go('izin')"]],
   leads:[['Leads saya','users',"tab('leads')"],['Buat leads','plus',"act(()=>go('lead-baru'))",1],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
@@ -793,6 +797,13 @@ function fieldDash(){
   }
   const list = (r==='canvas'?S.canvasSales:S.sales).filter(x=>!x.d);
   const today=list.reduce((s,x)=>s+x.total,0);
+  if(isSpg()){ const q=list.reduce((s,x)=>s+x.items.reduce((a,i)=>a+i.q,0),0), o=visitOpen();
+    return `${o?'':`<button class="banner amber" style="margin-top:12px;width:100%;text-align:left;font:inherit" onclick="go('spg-akt')">${I('pin',18)}<span>Belum check-in di ${esc(U().place)}. Buka <b>Aktivitas saya</b> untuk check-in.</span></button>`}
+  <div class="sec-title">Penjualan hari ini <a onclick="go('target')">Target</a></div>
+  <div class="card"><div class="row between"><div><div class="small muted">Terjual</div><div class="big-num num">${q} unit</div></div><div style="text-align:right"><div class="small muted">Target hari ini</div><b class="num">4 unit</b></div></div>
+  <div class="bar" style="margin:12px 0 6px"><i style="width:${Math.min(100,Math.max(3,q/4*100))}%"></i></div>
+  <div class="small muted">${Math.round(q/4*100)}% tercapai · ${list.length} transaksi · ${rpShort(today)}</div></div>
+  ${todayVisits()}`; }
   const target = r==='canvas'?3500000:12000000;
   return `<div class="sec-title">Penjualan hari ini <a onclick="go('target')">Target</a></div>
   <div class="card"><div class="row between"><div><div class="small muted">Terjual</div><div class="big-num num">${rpShort(today)}</div></div><div style="text-align:right"><div class="small muted">Target hari ini</div><b class="num">${rpShort(target)}</b></div></div>
@@ -802,7 +813,7 @@ function fieldDash(){
   ${todayVisits()}`;
 }
 function todayVisits(){
-  const v=S.visits[role()]||[];
+  const v=S.visits[vk()]||[];
   return `<div class="sec-title">Kunjungan hari ini <a onclick="tab('kunjungan')">Semua</a></div>
   <div class="list">${v.slice(0,3).map(x=>visitRow(x)).join('')}</div>`;
 }
@@ -960,7 +971,7 @@ SCR.izin = p => {
 };
 
 function daySummary(){
-  const r=role(), v=S.visits[r]||[], done=v.filter(x=>x.status==='Selesai').length;
+  const r=role(), v=S.visits[vk()]||[], done=v.filter(x=>x.status==='Selesai').length;
   let rows=`<div class="kv"><span>Kunjungan selesai</span><span>${done} dari ${v.length}</span></div>`;
   if(r==='spg'||r==='canvas'){ const l=(r==='canvas'?S.canvasSales:S.sales).filter(x=>!x.d); rows+=`<div class="kv"><span>Penjualan</span><span class="num">${rp(l.reduce((s,x)=>s+x.total,0))} · ${l.length} trx</span></div>`; }
   if(r==='order') rows+=`<div class="kv"><span>Pesanan dibuat hari ini</span><span>${S.orders.filter(o=>o.date==='26 Okt 2026').length}</span></div>`;
@@ -980,7 +991,7 @@ const canSchedule = () => shRead('roleJadwal',JADWAL_DEFAULT)[RID[S.user]]==='Ya
 const apprChain = u => { const r=RID[u]; if(['r6','r8','r10'].includes(r)) return 'Arco → Team Leader'; if(['r3','r4','r5','r13'].includes(r)) return 'Team Leader → FFOR'; return 'Team Leader'; };
 SCR.kunjungan = p => {
   const seg=p.seg||'hari', r=role();
-  const v=S.visits[r]||[];
+  const v=S.visits[vk()]||[];
   const teamV = r==='spv' ? `<div class="sec-title">Kunjungan tim hari ini</div><div class="list">${[['Rina Marlina','Electronic City Kemang','Berjalan','blue'],['Budi Santoso','4 toko · 1 selesai','Berjalan','blue'],['Andi Wijaya','2 nasabah','Belum','']].map(x=>`<div class="li"><div class="av blue">${x[0].split(' ').map(s=>s[0]).join('')}</div><div class="grow"><div class="t">${x[0]}</div><div class="s">${x[1]}</div></div>${chip(x[2],x[3])}</div>`).join('')}</div>`:'';
   return {tab:'kunjungan', note:'Penugasan/kunjungan (MOM 5.1). Check-in dan check-out lewat satu tombol untuk semua role: jika ada lebih dari satu toko di jadwal, pilih toko dulu; jika hanya satu, langsung diproses. Jadwal dibuat Team Leader/Supervisor, sales cukup mengikutinya. Hak membuat jadwal diatur per role di dashboard (IAM); bawaannya hanya Promotor FMCG dan MD yang boleh membuat sendiri.',
   html:`${appbar('Kunjungan',{backBtn:false,right:canSchedule(r)?`<button class="ib" onclick="act(()=>go('kunjungan-form',{spv:${r==='spv'?1:0}}))" aria-label="${r==='spv'?'Tugaskan ke tim':'Tambah kunjungan'}">${I('plus',24,2)}</button>`:''})}<main class="content">
@@ -993,7 +1004,7 @@ SCR.kunjungan = p => {
   </main>`};
 };
 SCR['kunjungan-detail'] = p => {
-  const x=(S.visits[role()]||[]).find(v=>v.id===p.id);
+  const x=(S.visits[vk()]||[]).find(v=>v.id===p.id);
   if(!x) return SCR.kunjungan({});
   const lk=isLocked();
   let foot;
@@ -1034,7 +1045,7 @@ function visitAction(id){
   else go('kunjungan-foto',{id,mode:'out'});
 }
 function visitEntry(){ act(()=>{
-  const L=S.visits[role()]||[];
+  const L=S.visits[vk()]||[];
   if(!L.length){ toast('Belum ada kunjungan terjadwal','alert'); return; }
   if(L.length===1){ visitAction(L[0].id); return; }
   sheet(`<h3 style="font-size:18px;font-weight:800">Pilih toko</h3><p class="muted small" style="margin:6px 0 12px;line-height:1.5">Pilih toko yang mau di-check-in atau di-check-out.</p>
@@ -1042,9 +1053,9 @@ function visitEntry(){ act(()=>{
     return `<button class="li" ${done?'disabled':''} onclick="closeSheet();visitAction('${v.id}')"><div class="ico-tile ${v.status==='Selesai'?'green':''}">${I('pin',20)}</div><div class="grow"><div class="t">${v.place}</div><div class="s">${v.time}</div></div>${chip(open?'Check-out':v.status==='Selesai'?(role()==='fmcg'?'Check-in lagi':'Selesai'):'Check-in',open?'blue':v.status==='Selesai'?'green':'')}</button>`; }).join('')}</div>`);
 }); }
 function repeatVisit(id){ const v=visitById(id); v.sesi=(v.sesi||1)+1; v.cin=null; v.cout=null; v.dur=null; v.status='Belum'; render(false,true); toast('Sesi ke-'+v.sesi+' siap, check-in di lokasi yang sama','pin'); }
-const visitById = id => (S.visits[role()]||[]).find(v=>v.id===id);
+const visitById = id => (S.visits[vk()]||[]).find(v=>v.id===id);
 const VISIT_NOW = {in:'10:02',out:'10:41'};
-const visitOpen = () => (S.visits[role()]||[]).find(v=>v.cin&&!v.cout);
+const visitOpen = () => (S.visits[vk()]||[]).find(v=>v.cin&&!v.cout);
 const FM_TASKS=[['stok','Cek stok','box','fm-stok'],['promo','Price promo','tag','fm-promo'],['facing','Facing display','grid','fm-facing'],['posm','Campaign, POSM & planogram','image','posm'],['sku','SKU display','grid','sku'],['share','Market share','pie','share']];
 const fmPending = v => FM_TASKS.filter(t=>!(v.done||{})[t[0]]);
 const ST_TONE={'Belum Selesai':'red','Draft':'amber','Selesai':'green'};
@@ -1108,7 +1119,7 @@ function saveVisitPhotos(){
 }
 function delVisitSheet(id){
   sheet(`<h3 style="font-size:18px;font-weight:800">Hapus kunjungan ini?</h3><p class="muted small" style="margin:6px 0 16px;line-height:1.5">Kunjungan yang belum dimulai bisa dihapus selama belum lewat hari.</p>
-  <button class="btn danger" onclick="S.visits[role()]=S.visits[role()].filter(v=>v.id!=='${id}');closeSheet();back();toast('Kunjungan dihapus')">Hapus kunjungan</button>`);
+  <button class="btn danger" onclick="S.visits[vk()]=S.visits[vk()].filter(v=>v.id!=='${id}');closeSheet();back();toast('Kunjungan dihapus')">Hapus kunjungan</button>`);
 }
 SCR['kunjungan-form'] = p => {
   const spv=!!p.spv, kind=p.kind||'adhoc', tasks=p.tasks||[];
@@ -1132,21 +1143,21 @@ function toggleTask(t){ const p=cur().p; p.tasks=p.tasks||[]; p.tasks=p.tasks.in
 function saveVisit(){
   const p=cur().p, place=val('kp'), tasks=role()==='fmcg'&&!p.spv?['Semua aktivitas toko']:p.tasks?.length?p.tasks:['Kunjungan'];
   if(p.spv){ back(); toast('Penugasan terkirim, anggota tim dapat notifikasi'); return; }
-  const list=S.visits[role()];
+  const list=S.visits[vk()];
   if(p.kind==='berkala'){ back(); toast('Jadwal berkala '+(p.per||'Mingguan').toLowerCase()+' tersimpan'); return; }
   if(list.length){ toast('Hari ini sudah ada jadwal ke '+list[0].place,'alert'); return; } list.push({id:'v'+(list.length+1)+Date.now()%1000,place,time:'13:00',tasks,status:'Belum',photos:{}});
   back(); toast('Kunjungan ditambahkan ke jadwal hari ini');
 }
 
 /* ---------- Penjualan (SPG & Canvasing) ---------- */
-function startSale(){ S.cart={toko:null,items:{},cust:{}}; go('jual-toko'); }
+function startSale(){ if(isSpg()){ spgGate(()=>go('spg-jual')); return; } S.cart={toko:null,items:{},cust:{}}; go('jual-toko'); }
 SCR.penjualan = p => {
   const r=role(), f=p.f||'0', all=r==='canvas'?S.canvasSales:S.sales;
   const tabs=[['0','Hari ini'],['1','Kemarin'],['7','7 hari'],['30','Bulan ini']];
   const list=all.filter(x=>{const d=x.d||0; return f==='0'?d===0:f==='1'?d===1:f==='7'?d<=6:true;});
   const tot=list.reduce((s,x)=>s+x.total,0);
   const groups=[...new Set(list.map(x=>x.d||0))].sort((a,b)=>a-b);
-  const row=x=>`<button class="li" onclick="go('jual-detail',{id:'${x.id}'})"><div class="grow"><div class="t">${x.items.map(i=>prodById(i.id).name+(i.q>1?' ×'+i.q:'')).join(', ')}</div><div class="s">${esc(x.toko)} · ${x.time}</div></div><div class="r"><b class="num">${rpShort(x.total)}</b><div style="margin-top:4px">${chip(x.status,x.status==='Terkirim'?'green':'amber')}${x.inv?.flag?' '+chip(x.inv.none?'Tanpa invoice':'Selisih besar','amber'):''}</div></div></button>`;
+  const row=x=>`<button class="li" onclick="go('jual-detail',{id:'${x.id}'})"><div class="grow"><div class="t">${esc(x.items.map(i=>(i.name||prodById(i.id).name)+(i.q>1?' ×'+i.q:'')).join(', '))}</div><div class="s">${esc(x.toko)} · ${x.time}</div></div><div class="r"><b class="num">${rpShort(x.total)}</b><div style="margin-top:4px">${chip(x.status,x.status==='Terkirim'?'green':'amber')}${x.inv?.flag?' '+chip(x.inv.none?'Tanpa invoice':'Selisih besar','amber'):''}</div></div></button>`;
   return {tab:'penjualan', note:(r==='canvas'?'Penjualan canvasing mengurangi stok bawaan secara otomatis (BRD 2.16.10).':'Riwayat penjualan SPG/promotor, terkirim ke sistem klien lewat API.')+' Riwayat penjualan sendiri bisa difilter per tanggal (BRD 2.14.8, 2.16.11). Hapus transaksi butuh approval supervisor (BRD 2.14.4–2.14.5).',
   html:`${appbar('Penjualan',{backBtn:false})}<main class="content">
     <div class="segtabs">${tabs.map(t=>`<button class="${f===t[0]?'on':''}" onclick="setP({f:'${t[0]}'})">${t[1]}</button>`).join('')}</div>
@@ -1160,8 +1171,8 @@ SCR['jual-detail'] = p => {
   const list=role()==='canvas'?S.canvasSales:S.sales, x=list.find(s=>s.id===p.id);
   return {note:'Detail transaksi. Kalau salah input, sales mengajukan penghapusan yang perlu disetujui supervisor.',
   html:`${appbar(x.id)}<main class="content">
-    <div class="card"><div class="kv"><span>Toko</span><span>${x.toko}</span></div><div class="kv"><span>Waktu</span><span>${dayLabel(x.d)}, ${x.time}</span></div><div class="kv"><span>Pelanggan</span><span>${x.cust||'–'}</span></div><div class="kv"><span>Status</span><span>${x.status==='Terkirim'?'Terkirim ke sistem ARUNIKA':x.status}</span></div></div>
-    ${x.inv?invCard(x.inv):''}<div class="sec-title">Produk</div><div class="list">${x.items.map(i=>{const pr=prodById(i.id);return `<div class="li"><div class="grow"><div class="t">${pr.name}</div><div class="s">${pr.sku} · ${i.q} × ${rp(unitOf(i,pr))}</div></div><b class="num">${rp(unitOf(i,pr)*i.q)}</b></div>`}).join('')}</div>
+    <div class="card"><div class="kv"><span>Toko</span><span>${x.toko}</span></div><div class="kv"><span>Waktu</span><span>${dayLabel(x.d)}, ${x.time}</span></div><div class="kv"><span>Pelanggan</span><span>${esc(x.cust||'–')}</span></div>${x.tel?`<div class="kv"><span>Telepon</span><span>${esc(x.tel)}</span></div>`:''}${x.addr?`<div class="kv"><span>Alamat</span><span>${esc(x.addr)}</span></div>`:''}${x.st?`<div class="kv"><span>Status produk</span><span>${esc(x.st)}</span></div>`:''}${x.disc?`<div class="kv"><span>Diskon per unit</span><span class="num">${rp(x.disc)}</span></div>`:''}<div class="kv"><span>Status</span><span>${x.status==='Terkirim'?'Terkirim ke sistem ARUNIKA':x.status}</span></div></div>
+    ${x.inv?invCard(x.inv):''}<div class="sec-title">Produk</div><div class="list">${x.items.map(i=>{const pr=prodById(i.id)||{name:i.name,sku:'–',price:i.price};return `<div class="li"><div class="grow"><div class="t">${pr.name}</div><div class="s">${pr.sku} · ${i.q} × ${rp(unitOf(i,pr))}</div></div><b class="num">${rp(unitOf(i,pr)*i.q)}</b></div>`}).join('')}</div>
     <div class="kv" style="margin-top:10px;font-size:16px"><span>Total</span><span class="num">${rp(x.total)}</span></div>
   </main><footer class="actions">${x.status==='Menunggu hapus'?`<button class="btn" disabled>Menunggu approval hapus</button>`:`<button class="btn danger" onclick="act(()=>delSaleSheet('${x.id}'))">${I('trash',20)} Ajukan hapus transaksi</button>`}</footer>`};
 };
@@ -1194,14 +1205,14 @@ function invDoc(w=200,h=260,scan=false){
     <rect x="18" y="206" width="162" height="1.5" fill="#D5DEE6"/><rect x="108" y="216" width="72" height="10" rx="3" fill="#0A6FE0" opacity=".85"/><rect x="18" y="234" width="50" height="6" rx="3" fill="#C6D2DC"/>
     ${scan?'<rect x="6" y="6" width="188" height="3" fill="#FF5A5F"><animate attributeName="y" values="8;248;8" dur="1.6s" repeatCount="indefinite"/></rect>':''}</svg>`;
 }
-function docCam({title,hint,phase,onShoot}){
+function docCam({title,hint,phase,onShoot,onManual='manualInvoiceSheet()'}){
   const scan=phase==='scan';
   return `<div class="cam"><div class="topbar"><button class="ib" onclick="back()" aria-label="Kembali">${I('left',24,2)}</button><h1>${title}</h1></div>
     <div class="hint-top">${scan?'Membaca invoice (OCR)…':hint}</div>
     <div style="position:relative;width:260px;height:336px;display:grid;place-items:center">
       <div style="position:absolute;inset:0;border-radius:18px;border:2px solid ${scan?'#21CFF7':'rgba(255,255,255,.9)'};box-shadow:0 0 0 2000px rgba(0,0,0,.35)"></div>
       <div style="transform:rotate(${phase==='ready'?'0':'-1.5'}deg)">${invDoc(220,286,scan)}</div></div>
-    <div class="bottom">${scan?`<div style="font-size:14px;font-weight:600;opacity:.9">Mengenali no. invoice, tanggal, barang, qty, dan harga…</div>`:`<button class="b-ghost" style="color:#fff;font-size:13px;font-weight:600;width:80px" onclick="manualInvoiceSheet()">Input manual</button><button class="shutter" onclick="${onShoot}" aria-label="Ambil foto invoice"><i></i></button><button class="b-ghost" style="color:#fff;font-size:13px;font-weight:600;width:80px" onclick="toast('Memilih dari galeri…','image')">Galeri</button>`}</div></div>`;
+    <div class="bottom">${scan?`<div style="font-size:14px;font-weight:600;opacity:.9">Mengenali no. invoice, tanggal, barang, qty, dan harga…</div>`:`<button class="b-ghost" style="color:#fff;font-size:13px;font-weight:600;width:80px" onclick="${onManual}">Input manual</button><button class="shutter" onclick="${onShoot}" aria-label="Ambil foto invoice"><i></i></button><button class="b-ghost" style="color:#fff;font-size:13px;font-weight:600;width:80px" onclick="toast('Memilih dari galeri…','image')">Galeri</button>`}</div></div>`;
 }
 SCR['jual-invoice'] = p => {
   const ph=p.phase||'ready';
@@ -1382,7 +1393,7 @@ SCR['jual-sukses'] = p => ({note:p.off?'<span class="tagx">Usulan</span><b>Mode 
   <footer class="actions stack"><button class="btn" onclick="S.stack.pop();startSale()">Catat penjualan lain</button><button class="btn ghost" onclick="back()">Selesai</button></footer>`});
 
 SCR.scan = p => ({dark:true, note:'Scan QR atau barcode produk di rak. Nama produk dan SKU otomatis masuk ke SKU Display (MOM 7).',
-  after:()=>setTimeout(()=>{ if(cur().name!=='scan') return; const n=skuAdd(p.t); back(); if(n) toast(n.name+' masuk ke SKU display','barcode'); },1600),
+  after:()=>setTimeout(()=>{ if(cur().name!=='scan') return; if(p.mode==='spgsku'){ spgScanItem(p.d); return; } const n=skuAdd(p.t); back(); if(n) toast(n.name+' masuk ke SKU display','barcode'); },1600),
   html:`<div class="cam"><div class="topbar"><button class="ib" onclick="back()" aria-label="Kembali">${I('left',24,2)}</button><h1>Scan barcode</h1></div>
     <div class="hint-top">Arahkan kamera ke barcode kemasan</div>
     <div style="width:270px;height:160px;position:relative;border-radius:20px;box-shadow:0 0 0 2000px rgba(0,0,0,.4);border:2px solid rgba(255,255,255,.9)">
@@ -1696,6 +1707,13 @@ SCR.target = () => {
   let main;
   if(r==='leads') main=`<div class="card"><div class="small muted">Goal pencairan Oktober</div><div class="big-num num">Rp5 jt <span class="muted" style="font-size:15px;font-weight:600">/ Rp150 jt</span></div><div class="bar tan" style="margin:10px 0"><i style="width:4%"></i></div><div class="kv"><span>Jumlah deal</span><span>1 / 12</span></div><div class="kv"><span>Leads dihubungi</span><span>3 / 6</span></div><div class="kv"><span>KPI</span><span>72 / 100</span></div></div>`;
   else if(r==='order') main=`<div class="card"><div class="small muted">Nilai pesanan Oktober</div><div class="big-num num">Rp110,5 jt <span class="muted" style="font-size:15px;font-weight:600">/ Rp150 jt</span></div><div class="bar" style="margin:10px 0"><i style="width:74%"></i></div><div class="kv"><span>Toko aktif memesan</span><span>14 / 20</span></div></div>`;
+  else if(r==='spg'){ const qd=S.sales.filter(x=>!x.d).reduce((s,x)=>s+x.items.reduce((a,i)=>a+i.q,0),0), bar=(n,t,tone='')=>`<div class="bar ${tone}" style="margin-top:6px"><i style="width:${Math.min(100,Math.max(3,n/t*100))}%"></i></div>`;
+    main=`<div class="card"><div class="row between"><div class="small muted">Pencapaian Oktober</div>${chip('73% dari target','blue')}</div><div class="big-num num">58 <span class="muted" style="font-size:15px;font-weight:600">/ 80 unit terjual</span></div>${bar(58,80)}
+    <p class="hint">Pencapaian dihitung dari jumlah unit produk yang terjual.</p></div>
+    <div class="card"><b>Quantity per kategori</b>${[['TV',26,34],['Kulkas',12,18],['Mesin Cuci',9,14],['AC',6,8],['Air Purifier',5,6]].map(([k,n,t])=>`<div style="margin-top:12px"><div class="row between small"><span>${k}</span><span class="num"><b>${n}</b> / ${t} unit</span></div>${bar(n,t,n/t<.7?'tan':'')}</div>`).join('')}</div>
+    <div class="card"><b>Target hari ini</b><div class="kv" style="margin-top:6px"><span>Target harian (prorata)</span><span class="num">3 unit</span></div><div class="kv"><span>Sisa kemarin (carry forward)</span><span class="num">1 unit</span></div><div class="kv"><span>Total target hari ini</span><span class="num">4 unit</span></div>
+    <div class="row between small" style="margin-top:8px"><span>Terjual hari ini</span><span class="num"><b>${qd}</b> / 4 unit</span></div>${bar(qd,4)}
+    <p class="hint">Target harian dihitung dari target unit bulanan dibagi hari kerja. Kekurangan hari sebelumnya ditambahkan ke hari berikutnya.</p></div>`; }
   else if(r==='spv') main=`<div class="card"><div class="small muted">Sell-out tim Oktober</div><div class="big-num num">Rp286 jt <span class="muted" style="font-size:15px;font-weight:600">/ Rp400 jt</span></div><div class="bar" style="margin:10px 0"><i style="width:71%"></i></div></div>`;
   else { const isC=r==='canvas'; main=`<div class="card"><div class="small muted">Penjualan Oktober</div><div class="big-num num">${isC?'Rp48,2 jt':'Rp214 jt'} <span class="muted" style="font-size:15px;font-weight:600">/ ${isC?'Rp80 jt':'Rp300 jt'}</span></div><div class="bar" style="margin:10px 0"><i style="width:${isC?60:71}%"></i></div>
     <div class="kv"><span>Quantity</span><span>${isC?'131 / 220 unit':'58 / 80 unit'}</span></div><div class="kv"><span>Akuisisi pelanggan baru</span><span>${isC?'3 / 5 toko':'41 / 60'}</span></div></div>
@@ -1705,7 +1723,7 @@ SCR.target = () => {
     <div class="stat3" style="margin-top:12px"><div><small>Peringkat cabang</small><b>#3<span class="muted small">/12</span></b></div><div><small>Tepat waktu</small><b>9 hari</b></div><div><small>Kunjungan</small><b>96%</b></div></div>
     <div class="row" style="flex-wrap:wrap;gap:6px;margin-top:12px">${chip(I('star',12,2.2)+' Top 3 cabang','tan')}${chip(I('clock',12,2.2)+' Rajin 9 hari','green')}${chip(I('trophy',12,2.2)+' Quiz 95','blue')}</div>
     <p class="hint">Grade final tetap dihitung di sistem (BRD Grading).</p></div>`;
-  return {note:'Target diset admin di Web. Di mobile sales melihat pencapaian, target harian prorata, dan carry forward (BRD 2.9.10–2.9.11). Estimasi insentif dan target per toko dihapus dari tampilan promotor (MOM 9.1). <span class="tagx">Usulan</span>Kartu <b>Pencapaian kamu</b> (peringkat, streak, badge).',
+  return {note:(r==='spg'?'Untuk SPG, pencapaian dilihat dari quantity produk yang terjual, lengkap dengan progress bar per kategori. Akuisisi pelanggan baru tidak dipakai. ':'')+'Target diset admin di Web. Di mobile sales melihat pencapaian, target harian prorata, dan carry forward (BRD 2.9.10–2.9.11). Estimasi insentif dan target per toko dihapus dari tampilan promotor (MOM 9.1). <span class="tagx">Usulan</span>Kartu <b>Pencapaian kamu</b> (peringkat, streak, badge).',
   html:`${appbar('Target & pencapaian')}<main class="content">${main}${achv}${r==='spg'?`<div class="card"><b>Pergantian promotor</b><p class="hint" style="margin-top:6px">Jika promotor diganti di tengah bulan, target promotor baru mengikuti target toko yang sudah diinput, bukan sisa target setelah dikurangi capaian promotor sebelumnya (MOM 9.1).</p></div>`:''}
   </main>`};
 };
@@ -1738,7 +1756,7 @@ function fmSubmit(){
 SCR['fm-stok'] = () => {
   const list=fmSkus(), done=list.filter(x=>fmFull(x.id)).length;
   return {note:'Stock opname (MOM 10.2). Barang sudah dipetakan per outlet. Kotak stok default kosong. Tidak ada tombol simpan per item; submit wajib terisi semua. Tanpa foto, stok diisi manual. Tiap item punya centang Barang tidak tersedia, yang menggantikan isian stok. Sales bisa menambah SKU, ditandai di luar planned product, dan hanya SKU tambahan sendiri itu yang bisa dihapus; barang dari admin tidak bisa dihapus.',
-  html:`${appbar('Cek stok')}<main class="content">
+  html:`${appbar(isSpg()?'Stock opname':'Cek stok')}<main class="content">
     <div class="row between" style="margin:0 2px 12px"><b id="fmCount">${done} dari ${list.length} terisi</b>${stChip(S.fm.stokDone?'Selesai':(S.fm.draft||{}).stok?'Draft':'Belum Selesai')}</div>
     ${list.map(x=>{const v=fmRow(x.id), dis=v.na?'disabled':'';return `<div class="card" style="margin-bottom:10px"><div class="row between"><div class="grow"><b>${esc(x.name)}</b><div class="small muted">${esc(x.sku)}</div></div>${x.off?chip('Di luar planned','amber'):''}</div>
       <div class="row" style="gap:8px;margin-top:10px"><label class="field grow" style="margin:0"><span>Display</span><input class="input num" inputmode="numeric" ${dis} value="${v.d}" oninput="fmSet('${x.id}','d',this.value)"></label><label class="field grow" style="margin:0"><span>Gudang</span><input class="input num" inputmode="numeric" ${dis} value="${v.g}" oninput="fmSet('${x.id}','g',this.value)"></label></div>
@@ -1910,7 +1928,175 @@ SCR.aktivitas = () => {
   </div></main>`};
 };
 
-/* ---------- SKU display & Market share (SPG) ---------- */
+/* ---------- SPG / Sales Promotor: Aktivitas saya ---------- */
+// SPG diam di satu lokasi yang di-assign admin lewat dashboard (penempatan user), jadi tanpa pilih toko
+const isSpg = () => role()==='spg' && !U()?.menu;
+const spgVisit = () => (S.visits.spg||[]).find(v=>v.place===U().place)||S.visits.spg[0];
+const spgToko = () => TOKO.spg.find(t=>t.name===U().place)||{name:U().place,addr:'–'};
+const spgTrx = () => S.sales.filter(x=>x.ci&&!x.d);
+function spgCheckin(){ act(()=>{ const v=spgVisit(); if(v.status==='Selesai'){ toast('Kamu sudah check-out dari '+v.place+' hari ini'); return; } startCheckin(v.id); }); }
+function spgGate(fn){ act(()=>{ if(isSpg()&&!visitOpen()){ const v=spgVisit();
+  if(v.status==='Selesai'){ toast('Kamu sudah check-out dari '+v.place+' hari ini','alert'); return; }
+  sheet(`<h3 style="font-size:18px;font-weight:800">Check-in dulu</h3><p class="muted small" style="margin:6px 0 16px;line-height:1.5">Kamu ditugaskan di ${esc(v.place)}. Check-in sekali di lokasi, lalu semua aktivitas bisa dikerjakan.</p>
+    <button class="btn" onclick="closeSheet();spgCheckin()">${I('pin',18)} Check-in di lokasi</button><button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Nanti</button>`); return; } fn(); }); }
+SCR['spg-akt'] = () => {
+  const v=spgVisit(), o=visitOpen(), t=spgToko(), trx=spgTrx(), lk=isLocked();
+  const skuSt=S.dispDone?'Selesai':S.dispDraft?'Draft':'Belum Selesai';
+  const shareSt=S.shareState==='kirim'?'Selesai':S.shareState==='draft'?'Draft':'Belum Selesai';
+  const row=(ic,tt,sub,fn,st)=>`<button class="li" onclick="spgGate(()=>${fn})"><div class="ico-tile">${I(ic,20)}</div><div class="grow"><div class="t">${tt}</div><div class="s">${sub}</div></div>${o?(st+I('right',18)):I('lock',18)}</button>`;
+  const head = o
+    ? `<div class="card" style="margin-bottom:14px"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="small muted">Sedang di lokasi</div><div class="t" style="font-weight:800">${esc(o.place)}</div><div class="small muted">Check-in ${o.cin}</div></div>${chip('Berjalan','blue')}</div>
+      <button class="btn sec sm" style="margin-top:12px" onclick="act(()=>go('kunjungan-foto',{id:'${o.id}',mode:'out'}))">${I('check',18,2.2)} Check-out & selesai</button></div>`
+    : v.status==='Selesai'
+    ? `<div class="card" style="margin-bottom:14px"><div class="row"><div class="ico-tile green">${I('check',20,2.2)}</div><div class="grow"><div class="small muted">Kunjungan hari ini selesai</div><div class="t" style="font-weight:800">${esc(v.place)}</div><div class="small muted num">Check-in ${v.cin} · Check-out ${v.cout}</div></div>${chip('Selesai','green')}</div></div>`
+    : `<div class="card" style="margin-bottom:14px"><div class="row"><div class="ico-tile tan">${I('pin',20)}</div><div class="grow"><div class="small muted">Lokasi penempatan</div><div class="t" style="font-weight:800">${esc(t.name)}</div><div class="small muted">${esc(t.addr)} · ${v.time}</div></div></div>
+      <div class="banner blue" style="margin-top:12px">${I('alert',18)}<span>Lokasi ditetapkan admin lewat dashboard. Check-in sekali di sini, lalu semua aktivitas di bawah terbuka.</span></div>
+      <button class="btn ${lk?'locked':''}" style="margin-top:12px" onclick="spgCheckin()">${I(lk?'lock':'pin',18)} Check-in di lokasi</button></div>`;
+  return {note:'Aktivitas saya untuk SPG / Sales Promotor. SPG hanya berada di satu lokasi yang di-assign admin lewat dashboard (penempatan user), jadi tidak ada pilihan toko. Saat menu dibuka, SPG langsung diarahkan check-in di lokasi itu. Check-in cukup sekali, lalu Catat penjualan, SKU display, dan Market share terbuka. Pola mengikuti Aktivitas toko Promotor FMCG.',
+  html:`${appbar('Aktivitas saya')}<main class="content">${head}
+    <div class="sec-title">Aktivitas</div>
+    <div class="list">
+      ${row('bag','Catat penjualan',trx.length?trx.length+' transaksi sejak check-in':'Foto invoice atau input manual',"go('spg-jual')",chip(trx.length+' trx',trx.length?'green':''))}
+      ${row('grid','SKU display',S.disp.length?S.disp.length+' display · '+S.disp.reduce((s,d)=>s+d.items.length,0)+' produk':'Tambah display, pilih kategori, lalu produk',"go('spg-sku')",stChip(skuSt))}
+      ${row('pie','Market share','Pilih brand dan kategori, bisa draft',"go('share')",stChip(shareSt))}
+    </div>
+    ${o?'':`<p class="hint" style="margin-top:12px">Semua aktivitas terkunci sampai kamu check-in di lokasi penempatan.</p>`}
+  </main>`};
+};
+
+/* Catat penjualan SPG: check-in sekali, lalu banyak transaksi. Satu transaksi satu produk. */
+const STATUS_PRODUK = () => shRead('statprod',['Unit baru','Unit display','Cuci gudang','Bundling']);
+const sfBlank = () => ({cat:'',st:'',name:'',pid:null,price:0,disc:0,date:'2026-10-26',q:1,ph:0,cust:'',addr:'',tel:'',ocr:null});
+function spgNew(swap){ S.sf=sfBlank(); swap?replace('spg-jual-form'):go('spg-jual-form'); }
+SCR['spg-jual'] = () => {
+  const o=visitOpen(), trx=spgTrx(), tot=trx.reduce((s,x)=>s+x.total,0), lk=isLocked();
+  return {note:'Catat penjualan SPG. Check-in sudah dilakukan di Aktivitas saya dan berlaku untuk semua transaksi, jadi tidak perlu check-in tiap transaksi. Pilih Foto invoice (data produk terisi otomatis dari OCR) atau Input manual. Bisa menambah banyak transaksi.',
+  html:`${appbar('Catat penjualan')}<main class="content">
+    <div class="card"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="small muted">Sudah check-in</div><div class="t" style="font-weight:800">${esc(o?o.place:U().place)}</div><div class="small muted">Check-in ${o?.cin||'–'} · berlaku untuk semua transaksi</div></div>${chip('Berjalan','blue')}</div></div>
+    <div class="sec-title">Tambah transaksi</div>
+    <div class="row" style="gap:10px">
+      <button class="btn grow ${lk?'locked':''}" onclick="spgGate(()=>go('spg-invoice'))">${I('camera',20)} Foto invoice</button>
+      <button class="btn sec grow ${lk?'locked':''}" onclick="spgGate(()=>spgNew())">${I('edit',20)} Input manual</button>
+    </div>
+    <div class="sec-title">Transaksi sejak check-in<span class="small muted num">${rpShort(tot)}</span></div>
+    ${trx.length?`<div class="list">${trx.map(x=>`<button class="li" onclick="go('jual-detail',{id:'${x.id}'})"><div class="grow"><div class="t">${esc(x.items.map(i=>(i.name||prodById(i.id).name)+(i.q>1?' ×'+i.q:'')).join(', '))}</div><div class="s">${esc(x.cust||'–')} · ${x.time}</div></div><div class="r"><b class="num">${rpShort(x.total)}</b><div style="margin-top:4px">${chip(x.status,x.status==='Terkirim'?'green':'amber')}</div></div></button>`).join('')}</div>`
+      :`<div class="card"><div class="empty" style="padding:16px">Belum ada transaksi. Mulai dari Foto invoice atau Input manual.</div></div>`}
+  </main>`};
+};
+SCR['spg-invoice'] = p => {
+  const ph=p.phase||'ready';
+  if(ph==='fail') return {note:'<span class="tagx">Usulan</span><b>OCR gagal.</b> SPG bisa foto ulang atau lanjut input manual.',
+    html:`<div class="result" style="padding-top:var(--sb)">${bigRing('#C93C33','x')}<h2>Invoice tidak terbaca</h2><p>Foto buram atau ada bagian yang terpotong. Pastikan seluruh invoice masuk bingkai, lalu foto ulang.</p></div>
+    <footer class="actions stack"><button class="btn" onclick="setP({phase:'ready'})">${I('camera',20)} Foto ulang</button><button class="btn ghost" onclick="spgNew(1)">Input manual</button></footer>`};
+  return {dark:true,note:'Foto invoice. OCR membaca kategori, status produk, nama produk, harga, diskon, tanggal, dan jumlah, lalu membuka form yang sama dengan input manual. Data pembeli tetap diisi SPG.',
+    html:docCam({title:'Foto invoice',hint:'Masukkan seluruh invoice ke dalam bingkai',phase:ph,onShoot:'spgShoot()',onManual:'spgNew(1)'})};
+};
+function spgShoot(){
+  setP({phase:'scan'});
+  setTimeout(()=>{ if(cur().name!=='spg-invoice') return; if(S.demo.ocr==='bad'){ setP({phase:'fail'}); return; }
+    S.sf={...sfBlank(),cat:'TV/Smart TV/Google TV',st:STATUS_PRODUK()[0],name:prodById('tv50').name,pid:'tv50',price:6499000,disc:650000,q:1,ocr:{no:'INV/EC/2610/04571',conf:96}};
+    replace('spg-jual-form'); },1900);
+}
+const sfAfter = () => Math.max(0,(S.sf.price||0)-(S.sf.disc||0));
+function sfSet(k,v){ S.sf[k]=v;
+  if(k==='name'){ const pr=PRODUCTS.find(x=>x.name===v); S.sf.pid=pr?.id||null; if(pr&&!S.sf.price){ S.sf.price=pr.price; const e=$('#sf_price'); if(e) e.value=pr.price.toLocaleString('id-ID'); } }
+  const a=$('#sf_after'), t=$('#sf_tot'); if(a) a.value=sfAfter()?sfAfter().toLocaleString('id-ID'):''; if(t) t.textContent=rp(sfAfter()*(parseInt(S.sf.q)||0)); }
+const moneyIn = k => `inputmode="numeric" oninput="const d=this.value.replace(/\\D/g,'');this.value=d?(+d).toLocaleString('id-ID'):'';sfSet('${k}',+d||0)"`;
+SCR['spg-jual-form'] = () => {
+  const f=S.sf, cats=katFlat('ARUNIKA'), names=PRODUCTS.filter(x=>!f.cat||(PROD_PATH[x.id]||'').startsWith(f.cat));
+  return {note:f.ocr?'Hasil foto invoice. Kategori, status produk, nama produk, harga, diskon, tanggal, dan jumlah terisi otomatis dari OCR. SPG memeriksa, menambah foto produk, lalu mengisi data pembeli.':'Input manual satu transaksi. Kategori produk diambil dari brand klien, status produk dari master data Status produk di dashboard. Harga setelah diskon dihitung otomatis. Alamat pembeli opsional.',
+  html:`${appbar(f.ocr?'Periksa hasil invoice':'Input manual')}<main class="content">
+    ${f.ocr?`<div class="card" style="margin-bottom:14px"><div class="row"><div style="width:46px;height:60px;flex:none;border-radius:8px;overflow:hidden;box-shadow:0 4px 14px -6px rgba(0,40,120,.4)">${invDoc(46,60)}</div><div class="grow"><div class="small muted">Invoice terbaca · keyakinan ${f.ocr.conf}%</div><b class="mono" style="font-size:12.5px">${f.ocr.no}</b></div>${chip('Terisi otomatis','green')}</div>
+      <p class="hint" style="margin-bottom:0">Periksa data produk di bawah, lalu isi data pembeli.</p></div>`:''}
+    <div class="sec-title" style="margin-top:0">Produk</div>
+    <label class="field"><span>Kategori produk *</span><select class="input" onchange="sfSet('cat',this.value);render(false,true)"><option value="">Pilih kategori ARUNIKA</option>${cats.map(c=>`<option value="${c}" ${f.cat===c?'selected':''}>${katLabel(c)}</option>`).join('')}</select></label>
+    <label class="field"><span>Status produk *</span><select class="input" onchange="sfSet('st',this.value)"><option value="">Pilih status</option>${STATUS_PRODUK().map(s=>`<option ${f.st===s?'selected':''}>${esc(s)}</option>`).join('')}</select></label>
+    <label class="field"><span>Nama produk *</span><input class="input" list="sf_names" value="${esc(f.name)}" placeholder="Ketik atau pilih produk" oninput="sfSet('name',this.value)"><datalist id="sf_names">${names.map(x=>`<option value="${esc(x.name)}">`).join('')}</datalist></label>
+    <div class="row" style="gap:10px"><label class="field grow"><span>Harga *</span><input class="input num" id="sf_price" value="${f.price?f.price.toLocaleString('id-ID'):''}" placeholder="Rp" ${moneyIn('price')}></label><label class="field grow"><span>Diskon</span><input class="input num" value="${f.disc?f.disc.toLocaleString('id-ID'):''}" placeholder="Rp" ${moneyIn('disc')}></label></div>
+    <label class="field"><span>Harga setelah diskon</span><input class="input num" id="sf_after" disabled value="${sfAfter()?sfAfter().toLocaleString('id-ID'):''}" placeholder="Terhitung otomatis"></label>
+    <div class="row" style="gap:10px"><label class="field grow"><span>Tanggal pembelian *</span><input class="input" type="date" value="${f.date}" max="2026-10-26" onchange="sfSet('date',this.value)"></label><label class="field" style="width:96px"><span>Jumlah *</span><input class="input num" inputmode="numeric" value="${f.q}" oninput="sfSet('q',this.value.replace(/\\D/g,''))"></label></div>
+    <div class="field"><span>Foto produk *</span><div class="thumbs">${Array.from({length:f.ph}).map(()=>`<div class="thumb">${I('image',22)}</div>`).join('')}<button class="thumb add" onclick="S.sf.ph++;render(false,true);toast('Foto produk tersimpan','camera')" aria-label="Ambil foto produk">${I('camera',22)}</button></div></div>
+    <div class="kv" style="font-size:15px"><span style="color:var(--ink);font-weight:700">Total transaksi</span><span class="num" id="sf_tot">${rp(sfAfter()*(parseInt(f.q)||0))}</span></div>
+    <div class="sec-title">Data pembeli</div>
+    <label class="field"><span>Nama pembeli *</span><input class="input" value="${esc(f.cust)}" placeholder="Nama lengkap" oninput="sfSet('cust',this.value)"></label>
+    <label class="field"><span>Alamat pembeli (opsional)</span><input class="input" value="${esc(f.addr)}" placeholder="Alamat" oninput="sfSet('addr',this.value)"></label>
+    <label class="field"><span>Telepon pembeli *</span><input class="input" inputmode="tel" value="${esc(f.tel)}" placeholder="08xx-xxxx-xxxx" oninput="sfSet('tel',this.value)"></label>
+    <div id="sferr"></div>
+  </main><footer class="actions"><button class="btn" onclick="spgSave()">Simpan transaksi</button></footer>`};
+};
+function spgSave(){
+  const f=S.sf, q=parseInt(f.q)||0, miss=[];
+  if(!f.cat) miss.push('kategori'); if(!f.st) miss.push('status produk'); if(!f.name.trim()) miss.push('nama produk'); if(!f.price) miss.push('harga');
+  if(!f.date) miss.push('tanggal'); if(q<1) miss.push('jumlah'); if(!f.ph) miss.push('foto produk'); if(!f.cust.trim()) miss.push('nama pembeli'); if(!f.tel.trim()) miss.push('telepon pembeli');
+  if(f.disc>f.price){ $('#sferr').innerHTML='<div class="err">Diskon tidak boleh lebih besar dari harga.</div>'; return; }
+  if(miss.length){ $('#sferr').innerHTML=`<div class="err">Lengkapi ${miss.join(', ')}.</div>`; return; }
+  const id='TRX-2610-0'+(100+S.sales.length), o=visitOpen();
+  S.sales.unshift({id,toko:o?o.place:U().place,items:[{id:f.pid,name:f.name.trim(),q,price:sfAfter()}],total:sfAfter()*q,time:'10:'+String(15+spgTrx().length*7).padStart(2,'0'),cust:f.cust.trim(),tel:f.tel.trim(),addr:f.addr.trim(),st:f.st,disc:f.disc,status:S.demo.offline?'Menunggu sinkron':'Terkirim',d:0,ci:true,
+    inv:f.ocr?{no:f.ocr.no,total:sfAfter()*q,sys:(prodById(f.pid)?.price||f.price)*q,flag:false}:null});
+  S.stack=S.stack.filter(e=>!['spg-jual-form','spg-invoice'].includes(e.name)); render(true);
+  toast(id+' tersimpan'+(S.demo.offline?', menunggu sinkron':''));
+}
+
+/* SKU display SPG: multi display, tiap display punya kategori, produk lewat scan QR atau input manual */
+function dispAddSheet(){
+  sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Tambah display</h3>
+  <label class="field"><span>Nama display</span><input class="input" id="dd_n" value="Display ${S.disp.length+1}" placeholder="Contoh: End gondola depan"></label>
+  <button class="btn" onclick="dispAdd()">Tambah display</button>`);
+}
+function dispAdd(){ const n=val('dd_n').replace(/['"\\<>`]/g,'').trim()||'Display '+(S.disp.length+1); S.disp.push({id:'d'+Date.now()%100000,name:n,cat:'',items:[]}); S.dispDone=false; closeSheet(); render(false,true); toast(n+' ditambahkan, pilih kategorinya'); }
+function dispCat(i,v){ S.disp[i].cat=v; S.dispDone=false; render(false,true); }
+function dispDelSheet(i){ const d=S.disp[i];
+  sheet(`<h3 style="font-size:18px;font-weight:800">Hapus ${esc(d.name)}?</h3><p class="muted small" style="margin:6px 0 16px;line-height:1.5">Display ini belum disimpan. ${d.items.length} produk di dalamnya ikut terhapus dari isian hari ini.</p>
+  <button class="btn danger" onclick="S.disp.splice(${i},1);closeSheet();render(false,true);toast('Display dihapus')">Hapus display</button><button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Batal</button>`); }
+SCR['spg-sku'] = () => {
+  const L=S.disp, cats=katFlat('ARUNIKA'), st=S.dispDone?'Selesai':S.dispDraft?'Draft':'Belum Selesai';
+  return {note:'SKU display SPG (MOM 7). Tambah display dulu supaya bisa lebih dari satu display, pilih kategori, lalu tambah produk lewat Scan QR atau Input manual. Input manual berisi nama produk dan minimal 2 foto produk. Scan QR mengisi nama produk otomatis.',
+  html:`${appbar('SKU display')}<main class="content">
+    <div class="row between" style="margin:0 2px 12px"><b>Hari ini · 26 Okt 2026</b>${stChip(st)}</div>
+    ${!L.length?`<div class="card" style="text-align:center;padding:24px 18px"><div class="ico-tile tan" style="margin:0 auto 12px;width:52px;height:52px">${I('grid',24)}</div><b>Belum ada display</b><p class="small muted" style="margin:6px 0 16px;line-height:1.5">Tambah display, pilih kategorinya, lalu masukkan produk yang dipajang.</p>
+      <button class="btn" onclick="dispAddSheet()">${I('plus',20)} Tambah display</button></div>`
+    :L.map((d,i)=>`<div class="card" style="margin-bottom:12px"><div class="row between"><b>${esc(d.name)}</b><button class="btn danger sm" style="width:auto" onclick="dispDelSheet(${i})" aria-label="Hapus display">${I('trash',18)}</button></div>
+      <label class="field" style="margin:10px 0 0"><span>Kategori</span><select class="input" ${d.items.length?'disabled':''} onchange="dispCat(${i},this.value)"><option value="">Pilih kategori</option>${cats.map(c=>`<option value="${c}" ${d.cat===c?'selected':''}>${katLabel(c)}</option>`).join('')}</select></label>
+      ${d.items.length?`<p class="hint" style="margin:6px 0 0">Kategori terkunci karena sudah ada produk.</p>`:''}
+      ${!d.cat?`<p class="hint" style="margin:8px 0 0">Pilih kategori dulu untuk menambah produk.</p>`:`
+      ${d.items.length?`<div class="list" style="margin-top:12px">${d.items.map((x,j)=>`<button class="li" onclick="go('spg-sku-item',{d:${i},i:${j},ph:${x.ph},qr:${x.qr?1:0}})"><div class="ico-tile ${x.qr?'':'tan'}">${I(x.qr?'barcode':'edit',18)}</div><div class="grow"><div class="t">${esc(x.name)}</div><div class="s">${x.ph} foto · ${x.qr?'dari scan QR':'input manual'}</div></div>${I('right',18)}</button>`).join('')}</div>`:''}
+      <div class="row" style="gap:8px;margin-top:12px"><button class="btn sec sm grow" onclick="act(()=>go('scan',{mode:'spgsku',d:${i}}))">${I('barcode',18)} Scan QR</button><button class="btn ghost sm grow" onclick="act(()=>go('spg-sku-item',{d:${i},ph:0}))">${I('edit',18)} Input manual</button></div>`}
+    </div>`).join('')+`<button class="btn ghost" onclick="dispAddSheet()">${I('plus',20)} Tambah display</button>`}
+  </main>${L.length?`<footer class="actions"><button class="btn ghost" style="width:auto" onclick="act(()=>{S.dispDraft=true;back();toast('Disimpan sementara, status Draft')})">Simpan sementara</button><button class="btn" onclick="act(()=>dispSave())">Simpan SKU display</button></footer>`:''}`};
+};
+SCR['spg-sku-item'] = p => {
+  const d=S.disp[p.d], edit=p.i!=null, ph=p.ph||0;
+  if(p.name==null) p.name=edit?d.items[p.i].name:'';
+  return {note:'Produk di display. Input manual: nama produk dan minimal 2 foto produk. Scan QR mengisi nama produk otomatis, foto tetap diambil SPG.',
+  html:`${appbar(edit?'Ubah produk':p.qr?'Hasil scan QR':'Input manual')}<main class="content">
+    <p class="small muted" style="margin:0 2px 12px">${esc(d.name)} · ${katLabel(d.cat)}</p>
+    ${p.qr?`<div class="banner blue" style="margin-bottom:14px">${I('barcode',18)}<span>Nama produk terisi otomatis dari scan QR${p.sku?' ('+p.sku+')':''}. Ambil minimal 2 foto produk.</span></div>`:''}
+    <label class="field"><span>Nama produk *</span><input class="input" id="si_n" value="${esc(p.name||'')}" placeholder="Merek dan tipe produk"></label>
+    <div class="field"><span>Foto produk * (minimal 2)</span><div class="thumbs">${Array.from({length:ph}).map(()=>`<div class="thumb">${I('image',22)}</div>`).join('')}<button class="thumb add" onclick="setP({name:val('si_n'),ph:${ph+1}});toast('Foto produk tersimpan','camera')" aria-label="Ambil foto produk">${I('camera',22)}</button></div><div class="hint">${ph<2?'Masih perlu '+(2-ph)+' foto.':ph+' foto siap.'}</div></div>
+    <div id="sierr"></div>
+  </main><footer class="actions">${edit?`<button class="btn danger" style="width:auto" onclick="skuItemDelSheet()" aria-label="Hapus produk">${I('trash',18)}</button>`:''}<button class="btn" onclick="skuItemSave()">Simpan produk</button></footer>`};
+};
+function skuItemSave(){
+  const p=cur().p, n=val('si_n').trim();
+  if(!n||(p.ph||0)<2){ $('#sierr').innerHTML=`<div class="err">${!n?'Isi nama produk.':'Ambil minimal 2 foto produk.'}</div>`; return; }
+  const it={name:n,ph:p.ph,qr:!!p.qr}, L=S.disp[p.d].items;
+  if(p.i!=null) L[p.i]=it; else L.push(it);
+  S.dispDone=false; back(); toast(n+' tersimpan di '+S.disp[p.d].name);
+}
+function skuItemDelSheet(){ const p=cur().p;
+  sheet(`<h3 style="font-size:18px;font-weight:800">Hapus produk ini?</h3><p class="muted small" style="margin:6px 0 16px;line-height:1.5">Produk dihapus dari isian display hari ini yang belum disimpan.</p>
+  <button class="btn danger" onclick="S.disp[${p.d}].items.splice(${p.i},1);closeSheet();back();toast('Produk dihapus dari display')">Hapus produk</button><button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Batal</button>`); }
+function dispSave(){
+  if(S.disp.some(d=>!d.cat||!d.items.length)){ toast('Setiap display wajib punya kategori dan minimal 1 produk','alert'); return; }
+  S.dispDone=true; back(); toast('SKU display tersimpan, '+S.disp.length+' display');
+}
+function spgScanItem(d){
+  const D=S.disp[d], pr=PRODUCTS.find(x=>(PROD_PATH[x.id]||'').startsWith(D.cat)&&!D.items.some(it=>it.name===x.name))||PRODUCTS.find(x=>(PROD_PATH[x.id]||'').startsWith(D.cat));
+  if(!pr){ back(); toast('QR tidak cocok dengan kategori '+katLabel(D.cat),'alert'); return; }
+  replace('spg-sku-item',{d,ph:0,qr:1,name:pr.name,sku:pr.sku});
+}
+
+/* ---------- SKU display & Market share (Mobile Promotor, FMCG) ---------- */
 SCR.sku = p => {
   const t=p.t||'t1', data=S.sku[t], toko=TOKO.spg.find(x=>x.id===t);
   const addBtns=`<button class="btn" onclick="act(()=>go('scan',{mode:'sku',t:'${t}'}))">${I('barcode',20)} Scan QR / barcode</button>
@@ -1945,42 +2131,58 @@ function saveSku(t){
   bad.forEach(d=>{ const L=skuTasks().map(x=>({...x})); if(!L.some(k=>k.toko===toko.name&&k.prod===d.id&&k.st!=='Closed')){ L.unshift({id:'T-'+(20+L.length),prod:d.id,toko:toko.name,by:U().name,st:'Menunggu assign'}); shSet('skuTasks',L); } });
   back(); toast(bad.length?`SKU display tersimpan, ${bad.length} task perbaikan dibuat`:`SKU display ${toko.name} tersimpan`);
 }
-const SUBK_M={tv50:'Smart TV',tv43:'LED TV',kl2p:'2 Pintu',mc85:'Top Load',ac1:'Inverter',ap30:'Standar'};
+// Pohon kategori per brand klien, sub kategori tanpa batas level (sinkron dengan master Kategori produk di dashboard)
+const KAT_TREE={
+  ARUNIKA:[{n:'TV',c:[{n:'Smart TV',c:[{n:'Google TV'},{n:'Android TV'}]},{n:'LED TV'}]},{n:'Kulkas',c:[{n:'2 Pintu',c:[{n:'Inverter'},{n:'Non inverter'}]},{n:'1 Pintu'}]},{n:'Mesin Cuci',c:[{n:'Top Load'},{n:'Front Load'}]},{n:'AC',c:[{n:'AC Inverter'},{n:'AC Standar'}]},{n:'Air Purifier'}],
+  KIRANA:[{n:'Peralatan Dapur',c:[{n:'Rice Cooker'},{n:'Blender'},{n:'Dispenser'}]},{n:'Perawatan Rumah',c:[{n:'Setrika'},{n:'Kipas Angin'}]}]
+};
+const PROD_PATH={tv50:'TV/Smart TV/Google TV',tv43:'TV/LED TV',kl2p:'Kulkas/2 Pintu/Inverter',mc85:'Mesin Cuci/Top Load',ac1:'AC/AC Inverter',ap30:'Air Purifier',rc18:'Peralatan Dapur/Rice Cooker',bl11:'Peralatan Dapur/Blender',ds72:'Peralatan Dapur/Dispenser',st3:'Perawatan Rumah/Setrika',kp16:'Perawatan Rumah/Kipas Angin'};
+const prodBrand = id => PRODUCTS.some(p=>p.id===id)?'ARUNIKA':'KIRANA';
+const katFlat = b => { const out=[]; const walk=(L,pre)=>L.forEach(x=>{ const p=pre?pre+'/'+x.n:x.n; out.push(p); if(x.c) walk(x.c,p); }); walk(KAT_TREE[b]||[],''); return out; };
+const katLabel = p => (p||'').split('/').join(' › ');
+const katKids = (b,path) => { let L=KAT_TREE[b]||[]; for(const n of path){ L=L.find(y=>y.n===n)?.c||[]; } return L; };
 const SHARE_BRAND=['Samsung','LG','Polytron'];
+function shareBrand(v){ S.shareBrand=v; S.sharePath=[]; render(false,true); }
+function sharePath(d,v){ S.sharePath=S.sharePath.slice(0,d); if(v) S.sharePath.push(v); render(false,true); }
 SCR.share = () => {
-  const cat=S.shareCat, cats=['TV','Kulkas','Mesin Cuci'], cl=PRODUCTS.filter(p=>p.cat===cat), comp=S.shareComp.map((c,i)=>({...c,i})).filter(c=>c.kat===cat);
+  const b=S.shareBrand, path=S.sharePath, key=path.join('/'), inPath=x=>!key||x===key||x.startsWith(key+'/');
+  const cl=[...PRODUCTS,...CANVAS_PRODUCTS].filter(p=>prodBrand(p.id)===b&&inPath(PROD_PATH[p.id]||'')), comp=S.shareComp.map((c,i)=>({...c,i})).filter(c=>c.cb===b&&inPath(c.path));
   const byBrand={}; comp.forEach(c=>{ byBrand[c.brand]=(byBrand[c.brand]||0)+c.qty; });
-  const parts=[['ARUNIKA',cl.reduce((s,p)=>s+(S.shareClient[p.id]||0),0)],...Object.entries(byBrand)], tot=parts.reduce((s,x)=>s+x[1],0)||1;
-  const colors={ARUNIKA:'#0AA5EE',Samsung:'#123F75',LG:'#F09A66',Polytron:'#8FB8D8'}, st=S.shareState;
-  return {note:'Market share diinput harian per toko (MOM 8). Data klien sesuai sistem, data kompetitor diinput manual dengan kategori, sub kategori, nama produk, dan qty. Harga opsional. Draft tidak masuk laporan; hanya data yang sudah check-out yang ditarik ke report. Satu toko bisa diinput lebih dari satu orang, report mengambil rata-rata.',
+  const parts=[[b,cl.reduce((s,p)=>s+(S.shareClient[p.id]||0),0)],...Object.entries(byBrand)], tot=parts.reduce((s,x)=>s+x[1],0)||1;
+  const colors={ARUNIKA:'#0AA5EE',KIRANA:'#0AA5EE',Samsung:'#123F75',LG:'#F09A66',Polytron:'#8FB8D8'}, st=S.shareState;
+  const levels=[]; for(let d=0;;d++){ const kids=katKids(b,path.slice(0,d)); if(!kids.length) break; levels.push({d,kids,v:path[d]||''}); if(!path[d]) break; }
+  const sel=(label,opts,v,on,all)=>`<label class="field" style="margin:0;min-width:0"><span>${label}</span><select class="input" onchange="${on}">${all?`<option value="">${all}</option>`:''}${opts.map(o=>`<option ${o===v?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`;
+  return {note:'Market share diinput harian per toko (MOM 8). Filter di atas berupa dropdown: pilih brand klien dulu, lalu kategori dalam brand itu. Kategori punya sub kategori tanpa batas level; dropdown berikutnya muncul selama masih ada sub kategori. Data klien sesuai sistem, data kompetitor diinput manual. Harga opsional. Draft tidak masuk laporan; hanya data yang sudah check-out yang ditarik ke report.',
   html:`${appbar('Market share')}<main class="content">
-    <div class="segtabs">${cats.map(c=>`<button class="${cat===c?'on':''}" onclick="S.shareCat='${c}';render(false,true)">${c}</button>`).join('')}</div>
+    <div class="card" style="margin-bottom:14px"><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+      ${sel('Brand',Object.keys(KAT_TREE),b,'shareBrand(this.value)')}
+      ${levels.map(l=>sel(l.d?'Sub kategori'+(l.d>1?' '+l.d:''):'Kategori',l.kids.map(k=>k.n),l.v,`sharePath(${l.d},this.value)`,l.d?'Semua sub kategori':'Semua kategori')).join('')}
+    </div></div>
     <div class="row between" style="margin:0 2px 12px"><b>Hari ini · 26 Okt 2026</b>${stChip(st==='draft'?'Draft':st==='kirim'?'Selesai':'Belum Selesai')}</div>
-    <div class="card"><div class="small muted">Komposisi unit terjual · ${cat}</div>
+    <div class="card"><div class="small muted">Komposisi unit terjual · ${esc(b)}${key?' › '+esc(katLabel(key)):''}</div>
       <div style="display:flex;height:16px;border-radius:99px;overflow:hidden;margin:12px 0">${parts.map(([k,v])=>`<i style="width:${v/tot*100}%;background:${colors[k]||'#9AA9BC'}"></i>`).join('')}</div>
       <div class="row" style="flex-wrap:wrap;gap:6px 14px">${parts.map(([k,v])=>`<span class="small"><i style="display:inline-block;width:9px;height:9px;border-radius:3px;background:${colors[k]||'#9AA9BC'};margin-right:5px"></i>${esc(k)} <b class="num">${Math.round(v/tot*100)}%</b></span>`).join('')}</div></div>
     <div class="sec-title">Produk klien (sesuai sistem)</div>
-    <div class="list">${cl.map(p=>`<div class="li"><div class="grow"><div class="t">${p.name}</div><div class="s">${p.cat} · ${SUBK_M[p.id]||'–'}</div></div><div class="stepper"><button onclick="act(()=>{S.shareClient['${p.id}']=Math.max(0,(S.shareClient['${p.id}']||0)-1);render(false,true)})" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${S.shareClient[p.id]||0}</span><button onclick="act(()=>{S.shareClient['${p.id}']=(S.shareClient['${p.id}']||0)+1;render(false,true)})" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>`).join('')||`<div class="empty">Belum ada produk klien di kategori ini.</div>`}</div>
+    <div class="list">${cl.map(p=>`<div class="li"><div class="grow"><div class="t">${p.name}</div><div class="s">${katLabel(PROD_PATH[p.id])}</div></div><div class="stepper"><button onclick="act(()=>{S.shareClient['${p.id}']=Math.max(0,(S.shareClient['${p.id}']||0)-1);render(false,true)})" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${S.shareClient[p.id]||0}</span><button onclick="act(()=>{S.shareClient['${p.id}']=(S.shareClient['${p.id}']||0)+1;render(false,true)})" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>`).join('')||`<div class="empty">Belum ada produk klien di kategori ini.</div>`}</div>
     <div class="sec-title">Produk kompetitor <a onclick="shareAddSheet()">+ Tambah</a></div>
-    <div class="list">${comp.map(c=>`<div class="li"><div class="grow"><div class="t">${esc(c.nama)}</div><div class="s">${esc(c.brand)} · ${esc(c.kat)} · ${esc(c.sub)}${c.harga?' · '+rp(c.harga):''}</div></div><div class="stepper"><button onclick="act(()=>{S.shareComp[${c.i}].qty=Math.max(0,S.shareComp[${c.i}].qty-1);render(false,true)})" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${c.qty}</span><button onclick="act(()=>{S.shareComp[${c.i}].qty++;render(false,true)})" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>`).join('')||`<div class="empty">Belum ada produk kompetitor. Tambah dari tombol di atas.</div>`}</div>
+    <div class="list">${comp.map(c=>`<div class="li"><div class="grow"><div class="t">${esc(c.nama)}</div><div class="s">${esc(c.brand)} · ${esc(katLabel(c.path))}${c.harga?' · '+rp(c.harga):''}</div></div><div class="stepper"><button onclick="act(()=>{S.shareComp[${c.i}].qty=Math.max(0,S.shareComp[${c.i}].qty-1);render(false,true)})" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${c.qty}</span><button onclick="act(()=>{S.shareComp[${c.i}].qty++;render(false,true)})" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>`).join('')||`<div class="empty">Belum ada produk kompetitor. Tambah dari tombol di atas.</div>`}</div>
     <p class="hint" style="margin-top:12px">Draft tidak masuk laporan. Data masuk laporan setelah kamu check-out dari toko.</p>
   </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="act(()=>{S.shareState='draft';fmDraftSave('share',1);render(false,true)})">Simpan sementara</button><button class="btn" onclick="act(()=>{S.shareState='kirim';fmMark('share');back();toast('Market share tersimpan')})">Simpan</button></footer>`};
 };
 function shareAddSheet(){
+  const key=S.sharePath.join('/');
   sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Tambah produk kompetitor</h3>
-  <label class="field"><span>Brand</span><select class="input" id="sa_b">${SHARE_BRAND.map(b=>`<option>${b}</option>`).join('')}</select></label>
-  <label class="field"><span>Kategori</span><input class="input" id="sa_c" value="${esc(S.shareCat)}"></label>
-  <label class="field"><span>Sub kategori</span><input class="input" id="sa_s" placeholder="Contoh: Smart TV"></label>
+  <label class="field"><span>Brand kompetitor</span><select class="input" id="sa_b">${SHARE_BRAND.map(b=>`<option>${b}</option>`).join('')}</select></label>
+  <label class="field"><span>Kategori</span><select class="input" id="sa_c">${katFlat(S.shareBrand).map(p=>`<option value="${p}" ${p===key?'selected':''}>${katLabel(p)}</option>`).join('')}</select></label>
   <label class="field"><span>Nama produk</span><input class="input" id="sa_n" placeholder="Merek dan tipe"></label>
   <div class="row" style="gap:10px"><label class="field grow"><span>Qty</span><input class="input num" id="sa_q" inputmode="numeric" value="1"></label><label class="field grow"><span>Harga (opsional)</span><input class="input num" id="sa_h" inputmode="numeric"></label></div>
   <button class="btn" onclick="shareAdd()">Tambah</button>`);
 }
 function shareAdd(){
-  const cl=s=>val(s).replace(/['"\\<>`]/g,'').trim(), q=parseInt(val('sa_q'))||0;
-  if(!cl('sa_c')||!cl('sa_s')||!cl('sa_n')||q<1){ toast('Isi kategori, sub kategori, nama produk, dan qty','alert'); return; }
-  S.shareComp.push({brand:val('sa_b'),kat:cl('sa_c'),sub:cl('sa_s'),nama:cl('sa_n'),qty:q,harga:parseInt(val('sa_h').replace(/\D/g,''))||0});
-  if(!['TV','Kulkas','Mesin Cuci'].includes(cl('sa_c'))) S.shareCat=cl('sa_c');
-  closeSheet(); render(false,true); toast(cl('sa_n')+' ditambahkan');
+  const n=val('sa_n').replace(/['"\\<>`]/g,'').trim(), q=parseInt(val('sa_q'))||0;
+  if(!n||q<1){ toast('Isi nama produk dan qty','alert'); return; }
+  S.shareComp.push({cb:S.shareBrand,brand:val('sa_b'),path:val('sa_c'),nama:n,qty:q,harga:parseInt(val('sa_h').replace(/\D/g,''))||0});
+  closeSheet(); render(false,true); toast(n+' ditambahkan');
 }
 
 /* ---------- Quiz, Leaderboard, Survey ---------- */
