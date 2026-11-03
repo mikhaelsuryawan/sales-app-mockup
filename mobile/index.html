@@ -1000,7 +1000,7 @@ SCR['kunjungan-detail'] = p => {
   if(x.status==='Selesai') foot=role()==='fmcg'?`<button class="btn ${lk?'locked':''}" onclick="act(()=>repeatVisit('${x.id}'))">${I(lk?'lock':'pin',18)} Check-in lagi di lokasi ini</button>`:`<button class="btn" disabled>Kunjungan selesai</button>`;
   else if(!x.cin) foot=`<button class="btn ghost" style="width:auto" onclick="toast('Membuka Google Maps…','route')">${I('route',18)} Rute</button><button class="btn ${lk?'locked':''}" onclick="act(()=>startCheckin('${x.id}'))">${I(lk?'lock':'pin',18)} Check-in di lokasi</button>`;
   else foot=`<button class="btn ${lk?'locked':''}" onclick="act(()=>${role()==='fmcg'?`fmOut('${x.id}')`:`go('kunjungan-foto',{id:'${x.id}',mode:'out'})`})">${I(lk?'lock':'check',18,2.2)} ${role()==='canvas'?'Submit kunjungan':'Check-out & selesai'}</button>`;
-  return {note:'Check-in dan check-out wajib 2–3 foto ber-watermark, catatan opsional (MOM 5.2). Untuk Promotor FMCG dan MD, tugas selalu semua aktivitas toko kecuali support task, dan check-out baru bisa setelah semua tugas hijau. Check-in dan check-out harus di lokasi yang sama, dan Promotor FMCG boleh berulang kali dalam sehari. Lupa check-out ditutup otomatis saat check-in di toko berikutnya atau saat absen pulang. Canvassing cukup submit kunjungan, lalu check-out otomatis (MOM 5.1, 10.1).',
+  return {note:'Check-in dan check-out wajib 1 foto ber-watermark, catatan opsional (MOM 5.2). Untuk Promotor FMCG dan MD, tugas selalu semua aktivitas toko kecuali support task, dan check-out baru bisa setelah semua tugas hijau. Check-in dan check-out harus di lokasi yang sama, dan Promotor FMCG boleh berulang kali dalam sehari. Lupa check-out ditutup otomatis saat check-in di toko berikutnya atau saat absen pulang. Canvassing cukup submit kunjungan, lalu check-out otomatis (MOM 5.1, 10.1).',
   html:`${appbar('Detail kunjungan',{right:!x.cin&&x.status!=='Selesai'&&role()!=='fmcg'&&canSchedule(role())?`<button class="ib" onclick="act(()=>delVisitSheet('${x.id}'))" aria-label="Hapus kunjungan">${I('trash',20)}</button>`:''})}<main class="content">
     <div class="card"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t" style="font-weight:800;font-size:16px">${x.place}</div><div class="small muted">Sen, 26 Okt 2026 · ${x.time}</div></div>${chip(x.status,x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':'')}</div>
       ${x.cin?`<div class="kv" style="margin-top:8px"><span>Check-in</span><span class="num">${x.cin} · 24 m dari titik toko</span></div>${x.cout?`<div class="kv"><span>Check-out</span><span class="num">${x.cout} · durasi ${x.dur}</span></div>`:''}`
@@ -1080,20 +1080,20 @@ function wmPhoto(place,time){
   return `<div class="wm-photo">${I('image',26)}<div class="wm"><b>${u.nip} · ${u.name}</b><span>${time} · ${place}</span><span>-6.2615, 106.8106</span></div></div>`;
 }
 function visitPhotos(x,mode){
-  const n=mode==='in'?(x.pIn??2):(x.pOut??2), time=mode==='in'?x.cin:x.cout;
+  const n=mode==='in'?(x.pIn??1):(x.pOut??1), time=mode==='in'?x.cin:x.cout;
   if(!n) return `<p class="hint" style="margin:0">Check-out otomatis, tanpa foto.</p>`;
   return Array.from({length:n}).map(()=>wmPhoto(x.place,time)).join('');
 }
 SCR['kunjungan-foto'] = p => {
   const x=visitById(p.id), isIn=p.mode==='in', n=p.n||0, canv=role()==='canvas'&&!isIn, time=VISIT_NOW[isIn?'in':'out'];
   const title=isIn?'Foto check-in':canv?'Submit kunjungan':'Foto check-out';
-  return {note:'Minimal 2, maksimal 3 foto. Watermark berisi ID user, nama user, jam, lokasi, longitude dan latitude (MOM 5.2).',
+  return {note:'Cukup 1 foto. Watermark berisi ID user, nama user, jam, lokasi, longitude dan latitude (MOM 5.2).',
   html:`${appbar(title)}<main class="content">
-    <div class="banner blue" style="margin-bottom:14px">${I('camera',18)}<span>Ambil 2 sampai 3 foto di ${x.place}. Watermark terpasang otomatis.</span></div>
+    <div class="banner blue" style="margin-bottom:14px">${I('camera',18)}<span>Ambil 1 foto di ${x.place}. Watermark terpasang otomatis.</span></div>
     <div class="banner ${S.demo.inRadius?'blue':'red'}" style="margin-bottom:14px">${I('pin',18)}<span>${S.demo.inRadius?'Check-in dan check-out harus di lokasi yang sama. Posisi kamu sesuai.':'Posisi kamu di luar lokasi toko. Check-in dan check-out harus di lokasi yang sama.'}</span></div>
-    <div class="thumbs" style="margin-top:0">${Array.from({length:n}).map(()=>wmPhoto(x.place,time)).join('')}${n<3?`<button class="wm-photo add" onclick="setP({n:${n+1}})" aria-label="Ambil foto">${I('camera',26)}<span class="small">Foto ${n+1} dari 3</span></button>`:''}</div>
-    <p class="hint" style="margin-top:12px">${n<2?`Masih perlu ${2-n} foto lagi.`:`${n} foto siap dikirim.`}</p>
-  </main><footer class="actions"><button class="btn" ${n<2?'disabled':''} onclick="saveVisitPhotos()">${isIn?'Simpan check-in':canv?'Submit & check-out otomatis':'Simpan check-out'}</button></footer>`};
+    <div class="thumbs" style="margin-top:0">${Array.from({length:n}).map(()=>wmPhoto(x.place,time)).join('')}${n<1?`<button class="wm-photo add" onclick="setP({n:${n+1}})" aria-label="Ambil foto">${I('camera',26)}<span class="small">Ambil foto</span></button>`:''}</div>
+    <p class="hint" style="margin-top:12px">${n<1?'Masih perlu 1 foto.':'Foto siap dikirim.'}</p>
+  </main><footer class="actions"><button class="btn" ${n<1?'disabled':''} onclick="saveVisitPhotos()">${isIn?'Simpan check-in':canv?'Submit & check-out otomatis':'Simpan check-out'}</button></footer>`};
 };
 function saveVisitPhotos(){
   const {id,mode,n}=cur().p, v=visitById(id);
