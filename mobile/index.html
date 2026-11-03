@@ -1731,7 +1731,7 @@ SCR['fm-stok'] = () => {
   const list=fmSkus(), done=list.filter(x=>fmRow(x.id).saved).length;
   return {note:'Stock opname (MOM 10.2). Barang sudah dipetakan per outlet. Kotak stok default kosong. Simpan per item boleh, tetapi submit wajib terisi semua. Tanpa foto, stok diisi manual. Sales bisa menambah SKU, ditandai di luar planned product.',
   html:`${appbar('Cek stok')}<main class="content">
-    <div class="row between" style="margin:0 2px 12px"><b>${done} dari ${list.length} tersimpan</b>${S.fm.stokDone?chip('Terkirim','green'):chip('Belum dikirim','amber')}</div>
+    <div class="row between" style="margin:0 2px 12px"><b>${done} dari ${list.length} tersimpan</b>${S.fm.stokDone?chip('Selesai','green'):chip('Belum selesai','amber')}</div>
     ${list.map(x=>{const v=fmRow(x.id);return `<div class="card" style="margin-bottom:10px"><div class="row between"><div class="grow"><b>${esc(x.name)}</b><div class="small muted">${esc(x.sku)}</div></div>${x.off?chip('Di luar planned','amber'):v.saved?chip('Tersimpan','green'):''}</div>
       <div class="row" style="gap:8px;margin-top:10px"><label class="field grow" style="margin:0"><span>Display</span><input class="input num" inputmode="numeric" value="${v.d}" oninput="fmSet('${x.id}','d',this.value)"></label><label class="field grow" style="margin:0"><span>Gudang</span><input class="input num" inputmode="numeric" value="${v.g}" oninput="fmSet('${x.id}','g',this.value)"></label></div>
       <div class="row" style="gap:8px;margin-top:8px"><label class="field grow" style="margin:0"><span>Satuan</span><select class="input" onchange="fmSet('${x.id}','u',this.value)">${['Pcs','Dus'].map(u=>`<option ${v.u===u?'selected':''}>${u}</option>`).join('')}</select></label><label class="field grow" style="margin:0"><span>Stok kompetitor</span><input class="input num" inputmode="numeric" value="${v.k}" oninput="fmSet('${x.id}','k',this.value)"></label></div>
@@ -1883,7 +1883,7 @@ SCR['notif-absen'] = () => ({note:'Push notifikasi sebelum check-in dan check-ou
 
 SCR.aktivitas = () => {
   const o=visitOpen();
-  const row=(ic,tt,sub,go2,st)=>`<button class="li" onclick="fmGate(()=>${go2})"><div class="ico-tile">${I(ic,20)}</div><div class="grow"><div class="t">${tt}</div><div class="s">${sub}</div></div>${o?(st||I('right',18)):I('lock',18)}</button>`;
+  const row=(ic,tt,sub,go2,key)=>{ const st=key&&(o.done||{})[key]?chip('Selesai','green'):''; return `<button class="li" onclick="fmGate(()=>${go2})"><div class="ico-tile">${I(ic,20)}</div><div class="grow"><div class="t">${tt}</div><div class="s">${sub}</div></div>${o?(st||I('right',18)):I('lock',18)}</button>`; };
   return {tab:'aktivitas', note:'Promotor FMCG dan MD memilih toko di Kunjungan, check-in di lokasi, lalu mengerjakan aktivitas toko tanpa pencatatan penjualan (MOM 10). Selesai di toko itu, check-out. Lupa check-out: muncul informasi saat check-in di toko berikutnya, lalu toko sebelumnya ditutup otomatis. Check-in dan check-out di lokasi yang sama, bisa berulang dalam sehari.',
   html:`${appbar('Aktivitas toko',{backBtn:false})}<main class="content">
     ${o?`<div class="card" style="margin-bottom:14px"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="small muted">Sedang di toko</div><div class="t" style="font-weight:800">${o.place}</div><div class="small muted">Check-in ${o.cin}</div></div>${chip('Berjalan','blue')}</div>
@@ -1891,13 +1891,13 @@ SCR.aktivitas = () => {
     :`<div class="banner amber" style="margin-bottom:14px">${I('pin',18)}<span>Belum check-in. Pilih toko, lalu check-in di lokasi sebelum mengerjakan aktivitas.</span></div>
       <button class="btn" style="margin-bottom:14px" onclick="visitEntry()">${I('pin',18)} Pilih toko & check-in</button>`}
     <div class="list">
-    ${row('box','Cek stok','Stok display, gudang, dan kompetitor',"go('fm-stok')",S.fm.stokDone?chip('Terkirim','green'):'')}
-    ${row('tag','Price promo','Foto display dan price tag promo',"go('fm-promo')")}
-    ${row('grid','Facing display','Foto dan plan tata letak',"go('fm-facing')")}
+    ${row('box','Cek stok','Stok display, gudang, dan kompetitor',"go('fm-stok')","stok")}
+    ${row('tag','Price promo','Foto display dan price tag promo',"go('fm-promo')","promo")}
+    ${row('grid','Facing display','Foto dan plan tata letak',"go('fm-facing')","facing")}
     ${row('check','Support task','Foto before, after, dan catatan',"go('fm-task')")}
-    ${row('image','Campaign, POSM & planogram','Foto dinilai AI',"go('posm')")}
-    ${row('grid','SKU display','Input harian di toko',"go('sku')")}
-    ${row('pie','Market share','Input harian, bisa draft',"go('share')")}
+    ${row('image','Campaign, POSM & planogram','Foto dinilai AI',"go('posm')","posm")}
+    ${row('grid','SKU display','Input harian di toko',"go('sku')","sku")}
+    ${row('pie','Market share','Input harian, bisa draft',"go('share')","share")}
   </div></main>`};
 };
 
