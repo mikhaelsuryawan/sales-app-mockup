@@ -1713,9 +1713,14 @@ const photoSlot = (label,on,click) => `<button class="thumb ${on?'':'add'}" styl
 const FMCG_SKU=[{id:'f1',name:'Sabun Cair Segar 500 ml',sku:'FM-SC500'},{id:'f2',name:'Mi Instan Rasa Soto',sku:'FM-MI75'},{id:'f3',name:'Teh Melati Botol 350 ml',sku:'FM-TM350'},{id:'f4',name:'Kopi Sachet Susu',sku:'FM-KS25'},{id:'f5',name:'Biskuit Kelapa 120 g',sku:'FM-BK120'}];
 const fmSkus = () => { const base=role()==='spg'?PRODUCTS.slice(0,6).map(p=>({id:p.id,name:p.name,sku:p.sku})):FMCG_SKU, m=shRead('outlet',{})[U()?.place]; return [...(m?base.filter(x=>m.includes(x.id)):base),...S.fm.extra]; };
 const fmRow = id => S.fm.stok[id]||(S.fm.stok[id]={d:'',g:'',u:'Pcs',k:'',saved:false});
-const fmFull = id => { const x=fmRow(id); return x.d!==''&&x.g!==''; };
+const fmFull = id => { const x=fmRow(id); return !!x.na||(x.d!==''&&x.g!==''); };
+function fmNa(id){ const x=fmRow(id); x.na=!x.na; if(x.na) Object.assign(x,{d:'',g:'',k:''}); x.saved=false; render(false,true); }
+function fmDel(id){ const x=S.fm.extra.find(a=>a.id===id); if(!x) return;
+  sheet(`<h3 style="font-size:18px;font-weight:800">Hapus barang ini?</h3><p class="muted small" style="margin:6px 0 16px;line-height:1.5">${esc(x.name)} ditambahkan sendiri di luar planned product, jadi bisa dihapus. Isian stoknya ikut hilang.</p>
+  <button class="btn danger" onclick="fmDelDo('${id}')">Hapus barang</button><button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Batal</button>`); }
+function fmDelDo(id){ const i=S.fm.extra.findIndex(x=>x.id===id); if(i<0) return; S.fm.extra.splice(i,1); delete S.fm.stok[id]; closeSheet(); render(false,true); toast('Barang dihapus dari daftar'); }
 function fmSet(id,k,v){ const x=fmRow(id); x[k]=v; x.saved=false; }
-function fmSave(id){ if(!fmFull(id)){ toast('Isi stok display dan gudang','alert'); return; } fmRow(id).saved=true; render(false,true); toast('Item tersimpan'); }
+function fmSave(id){ if(!fmFull(id)){ toast('Isi stok display dan gudang, atau tandai barang tidak tersedia','alert'); return; } fmRow(id).saved=true; render(false,true); toast('Item tersimpan'); }
 function fmAddSheet(){
   sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Tambah SKU</h3><p class="small muted" style="margin:-6px 0 12px">Ditandai sebagai barang di luar planned product.</p>
   <label class="field"><span>Nama barang</span><input class="input" id="fa_n"></label><label class="field"><span>Kode SKU</span><input class="input" id="fa_s"></label>
@@ -1729,13 +1734,14 @@ function fmSubmit(){
 }
 SCR['fm-stok'] = () => {
   const list=fmSkus(), done=list.filter(x=>fmRow(x.id).saved).length;
-  return {note:'Stock opname (MOM 10.2). Barang sudah dipetakan per outlet. Kotak stok default kosong. Simpan per item boleh, tetapi submit wajib terisi semua. Tanpa foto, stok diisi manual. Sales bisa menambah SKU, ditandai di luar planned product.',
+  return {note:'Stock opname (MOM 10.2). Barang sudah dipetakan per outlet. Kotak stok default kosong. Simpan per item boleh, tetapi submit wajib terisi semua. Tanpa foto, stok diisi manual. Tiap item punya centang Barang tidak tersedia, yang menggantikan isian stok. Sales bisa menambah SKU, ditandai di luar planned product, dan hanya SKU tambahan sendiri itu yang bisa dihapus; barang dari admin tidak bisa dihapus.',
   html:`${appbar('Cek stok')}<main class="content">
     <div class="row between" style="margin:0 2px 12px"><b>${done} dari ${list.length} tersimpan</b>${S.fm.stokDone?chip('Selesai','green'):chip('Belum selesai','amber')}</div>
-    ${list.map(x=>{const v=fmRow(x.id);return `<div class="card" style="margin-bottom:10px"><div class="row between"><div class="grow"><b>${esc(x.name)}</b><div class="small muted">${esc(x.sku)}</div></div>${x.off?chip('Di luar planned','amber'):v.saved?chip('Tersimpan','green'):''}</div>
-      <div class="row" style="gap:8px;margin-top:10px"><label class="field grow" style="margin:0"><span>Display</span><input class="input num" inputmode="numeric" value="${v.d}" oninput="fmSet('${x.id}','d',this.value)"></label><label class="field grow" style="margin:0"><span>Gudang</span><input class="input num" inputmode="numeric" value="${v.g}" oninput="fmSet('${x.id}','g',this.value)"></label></div>
-      <div class="row" style="gap:8px;margin-top:8px"><label class="field grow" style="margin:0"><span>Satuan</span><select class="input" onchange="fmSet('${x.id}','u',this.value)">${['Pcs','Dus'].map(u=>`<option ${v.u===u?'selected':''}>${u}</option>`).join('')}</select></label><label class="field grow" style="margin:0"><span>Stok kompetitor</span><input class="input num" inputmode="numeric" value="${v.k}" oninput="fmSet('${x.id}','k',this.value)"></label></div>
-      <div class="row" style="margin-top:10px"><button class="btn sec sm grow" onclick="fmSave('${x.id}')">Simpan item</button></div></div>`}).join('')}
+    ${list.map(x=>{const v=fmRow(x.id), dis=v.na?'disabled':'';return `<div class="card" style="margin-bottom:10px"><div class="row between"><div class="grow"><b>${esc(x.name)}</b><div class="small muted">${esc(x.sku)}</div></div>${x.off?chip('Di luar planned','amber'):''}${v.saved?chip('Tersimpan','green'):''}</div>
+      <div class="row" style="gap:8px;margin-top:10px"><label class="field grow" style="margin:0"><span>Display</span><input class="input num" inputmode="numeric" ${dis} value="${v.d}" oninput="fmSet('${x.id}','d',this.value)"></label><label class="field grow" style="margin:0"><span>Gudang</span><input class="input num" inputmode="numeric" ${dis} value="${v.g}" oninput="fmSet('${x.id}','g',this.value)"></label></div>
+      <div class="row" style="gap:8px;margin-top:8px"><label class="field grow" style="margin:0"><span>Satuan</span><select class="input" ${dis} onchange="fmSet('${x.id}','u',this.value)">${['Pcs','Dus'].map(u=>`<option ${v.u===u?'selected':''}>${u}</option>`).join('')}</select></label><label class="field grow" style="margin:0"><span>Stok kompetitor</span><input class="input num" inputmode="numeric" ${dis} value="${v.k}" oninput="fmSet('${x.id}','k',this.value)"></label></div>
+      <button class="row" style="gap:10px;margin-top:12px;background:none;border:0;padding:0;text-align:left;font:inherit;color:inherit" onclick="fmNa('${x.id}')" role="checkbox" aria-checked="${!!v.na}"><span class="check ${v.na?'on':''}">${v.na?I('check',14,3):''}</span><span>Barang tidak tersedia</span></button>
+      <div class="row" style="gap:8px;margin-top:10px">${x.off?`<button class="btn danger sm grow" onclick="fmDel('${x.id}')">${I('trash',18)} Hapus</button>`:''}<button class="btn sec sm grow" onclick="fmSave('${x.id}')">Simpan item</button></div></div>`}).join('')}
     <button class="btn ghost" onclick="fmAddSheet()">${I('plus',20)} Tambah SKU</button>
   </main><footer class="actions"><button class="btn" onclick="fmSubmit()">Submit stock opname</button></footer>`};
 };
