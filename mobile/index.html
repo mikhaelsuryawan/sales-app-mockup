@@ -527,7 +527,7 @@ function freshState(){
       order:[{id:'v1',place:'Toko Mega Elektronik',time:'10:00',tasks:['Ambil pesanan'],status:'Selesai',photos:{0:1},cin:'10:04',cout:'10:30',dur:'26 mnt'},{id:'v2',place:'CV Sumber Rejeki Elektronik',time:'13:30',tasks:['Ambil pesanan','Penagihan'],status:'Belum',photos:{}},{id:'v3',place:'Toko Abadi Jaya',time:'15:30',tasks:['Ambil pesanan'],status:'Belum',photos:{}}],
       leads:[{id:'v1',place:'Ahmad Fauzi (nasabah)',time:'10:00',tasks:['Survey usaha'],status:'Belum',photos:{}},{id:'v2',place:'Yuliana Putri (nasabah)',time:'14:00',tasks:['Verifikasi dokumen'],status:'Belum',photos:{}}],
       trainer:[{id:'v1',place:'Kelas pelatihan Jakarta Selatan',time:'10:00',tasks:['Quiz','Survey'],status:'Belum',photos:{}}],
-      fmcg:[{id:'v1',place:'Electronic City Kemang',time:'09:00',tasks:['Cek stok','Facing display'],status:'Belum',photos:{}},{id:'v2',place:'Best Denki Senayan City',time:'13:00',tasks:['Cek stok','Price promo'],status:'Belum',photos:{}}],
+      fmcg:[{id:'v1',place:'Electronic City Kemang',time:'09:00',tasks:['Semua aktivitas toko'],status:'Belum',photos:{}},{id:'v2',place:'Best Denki Senayan City',time:'13:00',tasks:['Semua aktivitas toko'],status:'Belum',photos:{}}],
       spv:[{id:'v1',place:'Electronic City Kemang',time:'11:00',tasks:['Supervisi SPG'],status:'Belum',photos:{}}]
     },
     plans:[{place:'Rudi Hartanto (nasabah)',date:'28 Okt 2026',status:'Menunggu approval'}],
@@ -998,14 +998,14 @@ SCR['kunjungan-detail'] = p => {
   let foot;
   if(x.status==='Selesai') foot=role()==='fmcg'?`<button class="btn ${lk?'locked':''}" onclick="act(()=>repeatVisit('${x.id}'))">${I(lk?'lock':'pin',18)} Check-in lagi di lokasi ini</button>`:`<button class="btn" disabled>Kunjungan selesai</button>`;
   else if(!x.cin) foot=`<button class="btn ghost" style="width:auto" onclick="toast('Membuka Google Maps…','route')">${I('route',18)} Rute</button><button class="btn ${lk?'locked':''}" onclick="act(()=>startCheckin('${x.id}'))">${I(lk?'lock':'pin',18)} Check-in di lokasi</button>`;
-  else foot=`<button class="btn ${lk?'locked':''}" onclick="act(()=>go('kunjungan-foto',{id:'${x.id}',mode:'out'}))">${I(lk?'lock':'check',18,2.2)} ${role()==='canvas'?'Submit kunjungan':'Check-out & selesai'}</button>`;
-  return {note:'Check-in dan check-out wajib 2–3 foto ber-watermark, catatan opsional (MOM 5.2). Check-in dan check-out harus di lokasi yang sama, dan Promotor FMCG boleh berulang kali dalam sehari. Lupa check-out ditutup otomatis saat check-in di toko berikutnya atau saat absen pulang. Canvassing cukup submit kunjungan, lalu check-out otomatis (MOM 5.1, 10.1).',
+  else foot=`<button class="btn ${lk?'locked':''}" onclick="act(()=>${role()==='fmcg'?`fmOut('${x.id}')`:`go('kunjungan-foto',{id:'${x.id}',mode:'out'})`})">${I(lk?'lock':'check',18,2.2)} ${role()==='canvas'?'Submit kunjungan':'Check-out & selesai'}</button>`;
+  return {note:'Check-in dan check-out wajib 2–3 foto ber-watermark, catatan opsional (MOM 5.2). Untuk Promotor FMCG dan MD, tugas selalu semua aktivitas toko kecuali support task, dan check-out baru bisa setelah semua tugas hijau. Check-in dan check-out harus di lokasi yang sama, dan Promotor FMCG boleh berulang kali dalam sehari. Lupa check-out ditutup otomatis saat check-in di toko berikutnya atau saat absen pulang. Canvassing cukup submit kunjungan, lalu check-out otomatis (MOM 5.1, 10.1).',
   html:`${appbar('Detail kunjungan',{right:!x.cin&&x.status!=='Selesai'&&role()!=='fmcg'&&canSchedule(role())?`<button class="ib" onclick="act(()=>delVisitSheet('${x.id}'))" aria-label="Hapus kunjungan">${I('trash',20)}</button>`:''})}<main class="content">
     <div class="card"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t" style="font-weight:800;font-size:16px">${x.place}</div><div class="small muted">Sen, 26 Okt 2026 · ${x.time}</div></div>${chip(x.status,x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':'')}</div>
       ${x.cin?`<div class="kv" style="margin-top:8px"><span>Check-in</span><span class="num">${x.cin} · 24 m dari titik toko</span></div>${x.cout?`<div class="kv"><span>Check-out</span><span class="num">${x.cout} · durasi ${x.dur}</span></div>`:''}`
       :`<div class="banner blue" style="margin-top:12px">${I('pin',18)}<span>Check-in saat sudah sampai. Lokasi kamu dicocokkan dengan titik toko (radius 100 m).</span></div>`}</div>
     <div class="sec-title">Tugas${x.sesi>1?' · sesi ke-'+x.sesi:''}</div>
-    <div class="list">${x.tasks.map(t=>/^(Quiz|Survey)$/.test(t)?`<button class="li" onclick="go('${t.toLowerCase()}')"><div class="ico-tile tan">${I(t==='Quiz'?'quiz':'survey',18,2)}</div><div class="grow"><div class="t">${t}</div><div class="s">Dikerjakan di dalam kunjungan</div></div>${I('right',18)}</button>`:`<div class="li"><div class="ico-tile">${I('check',18,2.2)}</div><div class="grow"><div class="t">${t}</div></div></div>`).join('')}</div>
+    ${role()==='fmcg'?fmTaskRows(x):`<div class="list">${x.tasks.map(t=>/^(Quiz|Survey)$/.test(t)?`<button class="li" onclick="go('${t.toLowerCase()}')"><div class="ico-tile tan">${I(t==='Quiz'?'quiz':'survey',18,2)}</div><div class="grow"><div class="t">${t}</div><div class="s">Dikerjakan di dalam kunjungan</div></div>${I('right',18)}</button>`:`<div class="li"><div class="ico-tile">${I('check',18,2.2)}</div><div class="grow"><div class="t">${t}</div></div></div>`).join('')}</div>`}
     ${x.cin?`<div class="sec-title">Foto check-in</div><div class="thumbs">${visitPhotos(x,'in')}</div>`:''}
     ${x.cout?`<div class="sec-title">Foto check-out</div><div class="thumbs">${visitPhotos(x,'out')}</div>`:''}
     ${visitFormHTML(x)}
@@ -1029,6 +1029,23 @@ function repeatVisit(id){ const v=visitById(id); v.sesi=(v.sesi||1)+1; v.cin=nul
 const visitById = id => (S.visits[role()]||[]).find(v=>v.id===id);
 const VISIT_NOW = {in:'10:02',out:'10:41'};
 const visitOpen = () => (S.visits[role()]||[]).find(v=>v.cin&&!v.cout);
+const FM_TASKS=[['stok','Cek stok','box','fm-stok'],['promo','Price promo','tag','fm-promo'],['facing','Facing display','grid','fm-facing'],['posm','Campaign, POSM & planogram','image','posm'],['sku','SKU display','grid','sku'],['share','Market share','pie','share']];
+const fmPending = v => FM_TASKS.filter(t=>!(v.done||{})[t[0]]);
+function fmMark(k){ const v=visitOpen(); if(v&&role()==='fmcg'){ v.done=v.done||{}; v.done[k]=true; } }
+function fmOut(id){
+  const v=visitById(id), p=fmPending(v);
+  if(!p.length){ go('kunjungan-foto',{id,mode:'out'}); return; }
+  sheet(`<h3 style="font-size:18px;font-weight:800">Selesaikan task dulu</h3><p class="muted small" style="margin:6px 0 12px;line-height:1.5">Check-out baru bisa setelah semua task selesai. Masih ada ${p.length} task yang belum selesai di ${v.place}.</p>
+  <div class="list">${p.map(t=>`<div class="li"><div class="ico-tile">${I(t[2],18)}</div><div class="grow"><div class="t">${t[1]}</div></div>${chip('Belum','red')}</div>`).join('')}</div>
+  <button class="btn" style="margin-top:14px" onclick="closeSheet()">Kerjakan sekarang</button>`);
+}
+function fmTaskRows(x){
+  const on=x.cin&&!x.cout;
+  const rows=FM_TASKS.map(t=>{ const ok=(x.done||{})[t[0]], st=x.cin?chip(ok?'Selesai':'Belum',ok?'green':'red'):'';
+    return on?`<button class="li" onclick="fmGate(()=>go('${t[3]}'))"><div class="ico-tile ${ok?'green':''}">${I(ok?'check':t[2],18,2.2)}</div><div class="grow"><div class="t">${t[1]}</div></div>${st}${I('right',18)}</button>`
+    :`<div class="li"><div class="ico-tile ${ok?'green':''}">${I(ok?'check':t[2],18,2.2)}</div><div class="grow"><div class="t">${t[1]}</div></div>${st}</div>`; }).join('');
+  return `<div class="list">${rows}</div><p class="hint" style="margin-top:10px">${x.cout?'Support task dikerjakan terpisah dan tidak wajib.':'Semua task wajib selesai (hijau) sebelum check-out. Support task dikerjakan terpisah dan tidak wajib.'}</p>`;
+}
 function fmGate(fn){ act(()=>{ if(role()==='fmcg'&&!visitOpen()){ sheet(`<h3 style="font-size:18px;font-weight:800">Check-in dulu</h3><p class="muted small" style="margin:6px 0 16px;line-height:1.5">Pilih toko yang kamu kunjungi, lalu check-in di lokasi. Setelah itu pekerjaan di toko tersebut bisa dilanjutkan.</p>
     <button class="btn" onclick="closeSheet();tab('kunjungan')">Pilih toko</button><button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Nanti</button>`); return; } fn(); }); }
 function closeVisit(v,time,dur){ v.cout=time; v.dur=dur; v.status='Selesai'; v.auto=true; v.pOut=v.pOut||0; }
@@ -1065,7 +1082,7 @@ SCR['kunjungan-foto'] = p => {
 function saveVisitPhotos(){
   const {id,mode,n}=cur().p, v=visitById(id);
   if(!S.demo.inRadius){ toast(mode==='in'?'Kamu belum berada di lokasi toko (radius 100 m)':'Check-out harus di lokasi yang sama dengan check-in','alert'); return; }
-  if(mode==='in'){ v.cin=VISIT_NOW.in; v.pIn=n; v.status='Berjalan'; back(); toast('Check-in tercatat di '+v.place,'pin'); return; }
+  if(mode==='in'){ if(role()==='fmcg'){ v.done={}; S.fm={...S.fm,stok:{},extra:[],stokDone:false,foto:{},fac:{}}; S.posm={}; S.shareState=null; S.sku={t1:null,t2:null}; S.skuFoto={}; } v.cin=VISIT_NOW.in; v.pIn=n; v.status='Berjalan'; back(); toast('Check-in tercatat di '+v.place,'pin'); return; }
   v.cout=VISIT_NOW.out; v.dur='39 mnt'; v.pOut=n; v.status='Selesai';
   back(); toast(role()==='canvas'?'Kunjungan tersubmit, check-out otomatis':'Kunjungan selesai, durasi 39 mnt');
 }
@@ -1088,12 +1105,12 @@ SCR['kunjungan-form'] = p => {
       <div class="field"><span>Ulangi setiap</span><div class="opts">${['Sen','Sel','Rab','Kam','Jum','Sab'].map((d,i)=>`<button class="opt ${i===0||i===3?'on':''}" onclick="this.classList.toggle('on')">${d}</button>`).join('')}</div></div>
       <div class="row" style="gap:10px"><label class="field grow"><span>Mulai</span><input class="input" type="date" value="2026-10-27"></label><label class="field grow"><span>Berakhir</span><input class="input" type="date" value="2026-12-31"></label></div>`
     :`<div class="row" style="gap:10px"><label class="field grow"><span>Tanggal</span><input class="input" type="date" value="${kind==='adhoc'?'2026-10-26':'2026-10-28'}"></label><label class="field grow"><span>Jam</span><input class="input" type="time" value="13:00"></label></div>`}
-    <div class="field"><span>Jenis tugas</span><div class="opts">${taskOpts.map(t=>`<button class="opt ${tasks.includes(t)?'on':''}" onclick="toggleTask('${t}')">${t}</button>`).join('')}</div></div>
+    ${r==='fmcg'&&!spv?`<p class="hint">Tugas kunjungan otomatis semua aktivitas toko, kecuali support task.</p>`:`<div class="field"><span>Jenis tugas</span><div class="opts">${taskOpts.map(t=>`<button class="opt ${tasks.includes(t)?'on':''}" onclick="toggleTask('${t}')">${t}</button>`).join('')}</div></div>`}
   </main><footer class="actions"><button class="btn" onclick="saveVisit()">${spv?'Kirim penugasan':'Simpan kunjungan'}</button></footer>`};
 };
 function toggleTask(t){ const p=cur().p; p.tasks=p.tasks||[]; p.tasks=p.tasks.includes(t)?p.tasks.filter(x=>x!==t):[...p.tasks,t]; render(false); }
 function saveVisit(){
-  const p=cur().p, place=val('kp'), tasks=p.tasks?.length?p.tasks:['Kunjungan'];
+  const p=cur().p, place=val('kp'), tasks=role()==='fmcg'&&!p.spv?['Semua aktivitas toko']:p.tasks?.length?p.tasks:['Kunjungan'];
   if(p.spv){ back(); toast('Penugasan terkirim, anggota tim dapat notifikasi'); return; }
   const list=S.visits[role()];
   if(p.kind==='berkala'){ back(); toast('Jadwal berkala '+(p.per||'Mingguan').toLowerCase()+' tersimpan'); return; }
@@ -1692,7 +1709,7 @@ function fmAdd(){ const n=val('fa_n'); if(!n){ toast('Isi nama barang','alert');
 function fmSubmit(){
   const miss=fmSkus().filter(x=>!fmFull(x.id)).length;
   if(miss){ toast(miss+' item belum terisi','alert'); return; }
-  S.fm.stokDone=true; fmSkus().forEach(x=>fmRow(x.id).saved=true); back(); toast('Stock opname terkirim');
+  fmMark('stok'); S.fm.stokDone=true; fmSkus().forEach(x=>fmRow(x.id).saved=true); back(); toast('Stock opname terkirim');
 }
 SCR['fm-stok'] = () => {
   const list=fmSkus(), done=list.filter(x=>fmRow(x.id).saved).length;
@@ -1713,7 +1730,7 @@ SCR['fm-promo'] = () => {
   const ok=promoCek().length>0&&promoCek().every(x=>S.fm.foto[x.id+'d']&&S.fm.foto[x.id+'t']);
   return {note:'Price promo (MOM 10.2). Produk yang dicek sesuai setup admin di dashboard. Foto display beserta foto price tag promo.',
   html:`${appbar('Price promo')}<main class="content">${promoCek().length?'':`<div class="empty">Admin belum menetapkan produk price promo untuk outlet ini.</div>`}${promoCek().map(x=>`<div class="card" style="margin-bottom:10px"><div class="row between"><b>${x.name}</b><b class="num">${x.price}</b></div><div class="thumbs">${photoSlot('Foto display',S.fm.foto[x.id+'d'],`fmPhoto('${x.id}d')`)}${photoSlot('Price tag',S.fm.foto[x.id+'t'],`fmPhoto('${x.id}t')`)}</div></div>`).join('')}
-  </main><footer class="actions"><button class="btn" ${ok?'':'disabled'} onclick="back();toast('Price promo terkirim')">Kirim price promo</button></footer>`};
+  </main><footer class="actions"><button class="btn" ${ok?'':'disabled'} onclick="fmMark('promo');back();toast('Price promo terkirim')">Kirim price promo</button></footer>`};
 };
 SCR['fm-facing'] = () => {
   const ok=S.fm.foto.fc&&S.fm.foto.ft;
@@ -1722,7 +1739,7 @@ SCR['fm-facing'] = () => {
     <div class="field" style="margin-top:14px"><span>Phasing SKU display</span><div class="opts">${['Minggu 1','Minggu 2','Minggu 3','Minggu 4'].map(w=>`<button class="opt ${(S.fm.phase||'Minggu 4')===w?'on':''}" onclick="S.fm.phase='${w}';render(false,true)">${w}</button>`).join('')}</div><div class="hint">SKU display bisa diatur sendiri per tahap (MOM 10.2).</div></div>
     ${(()=>{ const ph=S.fm.phase||'Minggu 4', pl=shRead('plan',PLAN_DEFAULT)[ph]||[]; S.fm.fac=S.fm.fac||{}; const tot=pl.reduce((s,r)=>s+r[1],0), act=pl.reduce((s,r)=>s+(S.fm.fac[r[0]]||0),0); return `<div class="card" style="margin-top:14px"><div class="row between"><b>Plan tata letak · ${ph}</b>${chip(act+' dari '+tot+' facing',act>=tot?'green':'amber')}</div>${pl.map(r=>`<div class="row between" style="margin-top:10px"><div><div class="t" style="font-weight:700">${r[0]}</div><div class="small muted">Plan ${r[1]} facing</div></div><div class="stepper"><button onclick="S.fm.fac['${r[0]}']=Math.max(0,(S.fm.fac['${r[0]}']||0)-1);render(false,true)" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${S.fm.fac[r[0]]||0}</span><button onclick="S.fm.fac['${r[0]}']=(S.fm.fac['${r[0]}']||0)+1;render(false,true)" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>`).join('')}</div>`})()}
     <div class="thumbs">${photoSlot('Foto display',S.fm.foto.fc,"fmPhoto('fc')")}${photoSlot('Price tag',S.fm.foto.ft,"fmPhoto('ft')")}</div>
-  </main><footer class="actions"><button class="btn" ${ok?'':'disabled'} onclick="back();toast('Facing display terkirim')">Kirim facing display</button></footer>`};
+  </main><footer class="actions"><button class="btn" ${ok?'':'disabled'} onclick="fmMark('facing');back();toast('Facing display terkirim')">Kirim facing display</button></footer>`};
 };
 SCR['fm-task'] = () => ({note:'Support task (MOM 10.2). Sales membuat task sendiri, atau task di-assign outlet atau Team Leader. Team Leader melihat hasilnya tanpa approval.',
   html:`${appbar('Support task',{right:`<button class="ib" onclick="act(()=>go('fm-task-form',{}))" aria-label="Buat task">${I('plus',24,2)}</button>`})}<main class="content">
@@ -1757,7 +1774,7 @@ SCR['posm-detail'] = p => {
     <div class="sec-title">Foto kamu</div>${n?`<div class="wm-photo">${I('image',26)}</div><div class="card" style="margin-top:12px"><div class="row between"><div class="small muted">Nilai AI</div>${n>=80?chip('Lulus','green'):n>=70?chip('Ditinjau Team Leader','amber'):chip('Foto ulang','red')}</div><div class="big-num num">${n}</div><p class="hint">Dicocokkan dengan foto brief.</p></div>`:`<button class="wm-photo add" onclick="act(()=>posmShoot('${x.id}'))" aria-label="Ambil foto">${I('camera',26)}<span class="small">Ambil foto</span></button>`}
   </main>`};
 };
-function posmShoot(id){ S.posm[id]=86; render(false,true); toast('Foto dinilai AI: 86','camera'); }
+function posmShoot(id){ S.posm[id]=86; if(POSM.every(a=>S.posm[a.id])) fmMark('posm'); render(false,true); toast('Foto dinilai AI: 86','camera'); }
 
 /* ---------- Task Pending (Team Leader) ---------- */
 const TASK_FLOW=['Menunggu assign','Sedang diperbaiki','Sudah selesai diperbaiki','Closed'];
@@ -1854,7 +1871,7 @@ SCR.aktivitas = () => {
   return {tab:'aktivitas', note:'Promotor FMCG dan MD memilih toko di Kunjungan, check-in di lokasi, lalu mengerjakan aktivitas toko tanpa pencatatan penjualan (MOM 10). Selesai di toko itu, check-out. Lupa check-out: muncul informasi saat check-in di toko berikutnya, lalu toko sebelumnya ditutup otomatis. Check-in dan check-out di lokasi yang sama, bisa berulang dalam sehari.',
   html:`${appbar('Aktivitas toko',{backBtn:false})}<main class="content">
     ${o?`<div class="card" style="margin-bottom:14px"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="small muted">Sedang di toko</div><div class="t" style="font-weight:800">${o.place}</div><div class="small muted">Check-in ${o.cin}</div></div>${chip('Berjalan','blue')}</div>
-      <button class="btn sm" style="margin-top:12px" onclick="go('kunjungan-foto',{id:'${o.id}',mode:'out'})">${I('check',18,2.2)} Check-out & selesai</button></div>`
+      <button class="btn sm" style="margin-top:12px" onclick="fmOut('${o.id}')">${I('check',18,2.2)} Check-out & selesai</button></div>`
     :`<div class="banner amber" style="margin-bottom:14px">${I('pin',18)}<span>Belum check-in. Pilih toko di Kunjungan, lalu check-in di lokasi sebelum mengerjakan aktivitas.</span></div>
       <button class="btn" style="margin-bottom:14px" onclick="act(()=>tab('kunjungan'))">${I('route',18)} Pilih toko</button>`}
     <div class="list">
@@ -1898,6 +1915,7 @@ function skuPhoto(t){ const n=skuAdd(t); render(false,true); if(n) toast(n.name+
 function saveSku(t){
   const miss=S.sku[t].filter(d=>PFOTO().includes(d.id)&&!S.skuFoto[t+d.id]);
   if(miss.length){ toast(miss.length+' produk wajib difoto sesuai setup admin','alert'); return; }
+  fmMark('sku');
   const toko=TOKO.spg.find(x=>x.id===t), bad=S.sku[t].filter(d=>d.cond==='Rusak');
   bad.forEach(d=>{ const L=skuTasks().map(x=>({...x})); if(!L.some(k=>k.toko===toko.name&&k.prod===d.id&&k.st!=='Closed')){ L.unshift({id:'T-'+(20+L.length),prod:d.id,toko:toko.name,by:U().name,st:'Menunggu assign'}); shSet('skuTasks',L); } });
   back(); toast(bad.length?`SKU display tersimpan, ${bad.length} task perbaikan dibuat`:`SKU display ${toko.name} tersimpan`);
@@ -1921,7 +1939,7 @@ SCR.share = () => {
     <div class="sec-title">Produk kompetitor <a onclick="shareAddSheet()">+ Tambah</a></div>
     <div class="list">${comp.map(c=>`<div class="li"><div class="grow"><div class="t">${esc(c.nama)}</div><div class="s">${esc(c.brand)} · ${esc(c.kat)} · ${esc(c.sub)}${c.harga?' · '+rp(c.harga):''}</div></div><div class="stepper"><button onclick="act(()=>{S.shareComp[${c.i}].qty=Math.max(0,S.shareComp[${c.i}].qty-1);render(false,true)})" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${c.qty}</span><button onclick="act(()=>{S.shareComp[${c.i}].qty++;render(false,true)})" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>`).join('')||`<div class="empty">Belum ada produk kompetitor. Tambah dari tombol di atas.</div>`}</div>
     <p class="hint" style="margin-top:12px">Draft tidak masuk laporan. Data masuk laporan setelah kamu check-out dari toko.</p>
-  </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="act(()=>{S.shareState='draft';render(false,true);toast('Draft tersimpan, belum masuk laporan')})">Simpan draft</button><button class="btn" onclick="act(()=>{S.shareState='kirim';back();toast('Market share tersimpan')})">Simpan</button></footer>`};
+  </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="act(()=>{S.shareState='draft';render(false,true);toast('Draft tersimpan, belum masuk laporan')})">Simpan draft</button><button class="btn" onclick="act(()=>{S.shareState='kirim';fmMark('share');back();toast('Market share tersimpan')})">Simpan</button></footer>`};
 };
 function shareAddSheet(){
   sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Tambah produk kompetitor</h3>
