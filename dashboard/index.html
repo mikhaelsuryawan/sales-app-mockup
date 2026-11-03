@@ -542,7 +542,6 @@ const D={
     {u:'budi',place:'Toko Makmur Abadi',plan:'10:30',cin:'10:36',cout:'',dur:'',tasks:'Penjualan',photos:1,status:'Berjalan',left:true},
     {u:'budi',place:'Toko Berkah Elektronik',plan:'13:00',cin:'',cout:'',dur:'',tasks:'Penjualan, Cek display',photos:0,status:'Belum'},
     {u:'dimas',place:'Toko Mega Elektronik',plan:'10:00',cin:'10:04',cout:'10:30',dur:'26 mnt',tasks:'Ambil pesanan',photos:2,status:'Selesai'},
-    {u:'andi',place:'Ahmad Fauzi (nasabah)',plan:'10:00',cin:'',cout:'',dur:'',tasks:'Survey usaha',photos:0,status:'Belum'},
     {u:'kevin',place:'Toko Jaya Abadi Kembangan',plan:'09:30',cin:'09:41',cout:'10:20',dur:'39 mnt',tasks:'Penjualan',photos:2,status:'Selesai',remote:true},
     {u:'tari',place:'Electronic City Kemang',plan:'09:00',cin:'',cout:'',dur:'',tasks:FM_TASKS_LABEL,photos:0,status:'Belum'},
     {u:'tari',place:'Best Denki Senayan City',plan:'13:00',cin:'',cout:'',dur:'',tasks:FM_TASKS_LABEL,photos:0,status:'Belum'},
@@ -1080,7 +1079,7 @@ function pageTarget(q){
   ${card('Oktober 2026',`${utabs([['toko','Target toko'],['user','Target user'],['mf','Multi Finance'],['sellin','Sell-in dealer']],tab,'tgTab')}
     ${tab==='toko'?dataTable('tgt',{rows:tToko,rowClick:r=>`toast('Edit target ${esc(r.n)}','Ubah nominal target bulan ini.')`,cols:[{label:'Toko',k:'n',prim:true},{label:'Aktual',render:r=>rp(r.a),align:'r'},{label:'Target',render:r=>rp(r.t),align:'r'},{label:'Pencapaian',render:ach}]}):''}
     ${tab==='user'?dataTable('tgu',{rows:tUser,rowClick:r=>`go('/grading?u=${r._id}')`,cols:[{label:'Sales',render:r=>r.s.name,prim:true},{label:'Tipe',render:r=>r.s.job,hide:true},{label:'Nominal',render:r=>r.t?jt(r.a)+' / '+jt(r.t):'–',align:'r'},{label:'Quantity',render:r=>r.qt?r.qa+' / '+r.qt:'–',align:'r',hide:true},{label:'Pencapaian',render:r=>r.t?ach(r):'<span class="muted">Target pinjaman di Leads</span>'}]}):''}
-    ${tab==='mf'?dataTable('tgm',{rows:[['Andi Wijaya','Rp35 jt / Rp150 jt','3 / 12','8 / 20',72],['Tono Hidayat','Rp20 jt / Rp100 jt','2 / 8','12 / 15',81],['Nina Safitri','Rp12 jt / Rp100 jt','1 / 8','9 / 15',64]].map(([n,a,d,l,k])=>({_id:n,n,a,d,l,k})),rowClick:r=>`toast('${r.n}','KPI ${r.k} dari 100.')`,cols:[{label:'Sales',k:'n',prim:true},{label:'Amount',k:'a',align:'r'},{label:'Deal',k:'d',align:'r',hide:true},{label:'Leads dihubungi',k:'l',align:'r',hide:true},{label:'KPI',k:'k',align:'r'}]}):''}
+    ${tab==='mf'?dataTable('tgm',{rows:[['Andi Wijaya','Rp35 jt / Rp150 jt','3 / 12','8 / 20',72],['Tono Hidayat','Rp20 jt / Rp100 jt','2 / 8','12 / 15',81],['Nina Safitri','Rp12 jt / Rp100 jt','1 / 8','9 / 15',64]].map(([n,a,d,l,k])=>({_id:n,n,a,d,l,k})),rowClick:r=>`toast('${r.n}','Amount ${r.a}, deal ${r.d}.')`,cols:[{label:'Sales',k:'n',prim:true},{label:'Amount',k:'a',align:'r'},{label:'Deal',k:'d',align:'r'},{label:'Leads dihubungi',k:'l',align:'r',hide:true}]}):''}
     ${tab==='sellin'?dataTable('tgs',{rows:tSell,rowClick:r=>`go('/insentif')`,cols:[{label:'Dealer',k:'n',prim:true},{label:'Sell-in',render:r=>rp(r.a),align:'r'},{label:'Target',render:r=>rp(r.t),align:'r'},{label:'Pencapaian',render:ach}]}):''}`,
     {acts:`${btn('Template',{v:'soft',size:'sm',icon:'down',on:"toast('Template diunduh','template_target_okt2026.xlsx')"})}${btn('Upload bulk',{v:'soft',size:'sm',icon:'up',on:"uploadModal('Target')"})}${btn('Tambah',{v:'accent',size:'sm',icon:'plus',on:"toast('Form target dibuka','Isi toko/user, bulan, dan nominal.')"})}`})}
   ${card('Aturan target',`<div class="rows">
@@ -1235,7 +1234,7 @@ function genPerm(kind){
     let a=[false,false,false,false,false];
     if(kind==='admin') a=[true,true,true,true,true];
     else if(kind==='spv') a=[!['Master data','IAM'].includes(m), ['Kunjungan','Leads'].includes(m), ['Kunjungan','Leads','Grading'].includes(m), m==='Kunjungan', ['Approval','Absensi','Penjualan','Pesanan','Kunjungan'].includes(m)];
-    else { const own={spg:['Absensi','Kunjungan','Penjualan','Target'],canvas:['Absensi','Kunjungan','Penjualan','Target'],order:['Absensi','Kunjungan','Pesanan','Target'],leads:['Absensi','Kunjungan','Leads','Target'],fmcg:['Absensi','Kunjungan'],arco:['Absensi','Leads'],bantuan:['Absensi','Kunjungan','Penjualan'],trainer:['Absensi','Kunjungan']}[kind]||[]; const on=own.includes(m); a=[on, on&&m!=='Target', on&&m!=='Target', on&&['Kunjungan','Penjualan','Pesanan'].includes(m), false]; }
+    else { const own={spg:['Absensi','Kunjungan','Penjualan','Target'],canvas:['Absensi','Kunjungan','Penjualan','Target'],order:['Absensi','Kunjungan','Pesanan','Target'],leads:['Absensi','Leads','Target'],fmcg:['Absensi','Kunjungan'],arco:['Absensi','Leads'],bantuan:['Absensi','Kunjungan','Penjualan'],trainer:['Absensi','Kunjungan']}[kind]||[]; const on=own.includes(m); a=[on, on&&m!=='Target', on&&m!=='Target', on&&['Kunjungan','Penjualan','Pesanan'].includes(m), false]; }
     p[m]=a; }); return p;
 }
 const MD={
