@@ -1000,7 +1000,7 @@ SCR['kunjungan-detail'] = p => {
   else if(!x.cin) foot=`<button class="btn ghost" style="width:auto" onclick="toast('Membuka Google Maps…','route')">${I('route',18)} Rute</button><button class="btn ${lk?'locked':''}" onclick="act(()=>startCheckin('${x.id}'))">${I(lk?'lock':'pin',18)} Check-in di lokasi</button>`;
   else foot=`<button class="btn ${lk?'locked':''}" onclick="act(()=>go('kunjungan-foto',{id:'${x.id}',mode:'out'}))">${I(lk?'lock':'check',18,2.2)} ${role()==='canvas'?'Submit kunjungan':'Check-out & selesai'}</button>`;
   return {note:'Check-in dan check-out wajib 2–3 foto ber-watermark, catatan opsional (MOM 5.2). Check-in dan check-out harus di lokasi yang sama, dan Promotor FMCG boleh berulang kali dalam sehari. Lupa check-out ditutup otomatis saat check-in di toko berikutnya atau saat absen pulang. Canvassing cukup submit kunjungan, lalu check-out otomatis (MOM 5.1, 10.1).',
-  html:`${appbar('Detail kunjungan',{right:!x.cin&&x.status!=='Selesai'&&canSchedule(role())?`<button class="ib" onclick="act(()=>delVisitSheet('${x.id}'))" aria-label="Hapus kunjungan">${I('trash',20)}</button>`:''})}<main class="content">
+  html:`${appbar('Detail kunjungan',{right:!x.cin&&x.status!=='Selesai'&&role()!=='fmcg'&&canSchedule(role())?`<button class="ib" onclick="act(()=>delVisitSheet('${x.id}'))" aria-label="Hapus kunjungan">${I('trash',20)}</button>`:''})}<main class="content">
     <div class="card"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t" style="font-weight:800;font-size:16px">${x.place}</div><div class="small muted">Sen, 26 Okt 2026 · ${x.time}</div></div>${chip(x.status,x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':'')}</div>
       ${x.cin?`<div class="kv" style="margin-top:8px"><span>Check-in</span><span class="num">${x.cin} · 24 m dari titik toko</span></div>${x.cout?`<div class="kv"><span>Check-out</span><span class="num">${x.cout} · durasi ${x.dur}</span></div>`:''}`
       :`<div class="banner blue" style="margin-top:12px">${I('pin',18)}<span>Check-in saat sudah sampai. Lokasi kamu dicocokkan dengan titik toko (radius 100 m).</span></div>`}</div>
@@ -1017,7 +1017,6 @@ const VISIT_FORM={
   canvas:[['Kondisi toko','opt',['Buka','Tutup','Sepi']],['Minat order berikutnya','opt',['Tinggi','Sedang','Rendah']],['Retur diambil','opt',['Ya','Tidak']]],
   order:[['Status pesanan','opt',['Baru','Follow up','Menunggu bayar']],['Janji bayar','text']],
   leads:[['Hasil kontak','opt',['Tersambung','Tidak diangkat','Bertemu langsung']],['Dokumen','opt',['Lengkap','Kurang','Belum']]],
-  fmcg:[['Kondisi outlet','opt',['Normal','Ramai','Sepi']],['Aktivitas dilakukan','text']],
   trainer:[['Peserta hadir','text'],['Topik pelatihan','text']]
 };
 function vfSet(id,k,v){ S.vform[id]=S.vform[id]||{}; S.vform[id][k]=v; render(false,true); }
