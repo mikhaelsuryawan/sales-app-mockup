@@ -1113,7 +1113,7 @@ SCR['kunjungan-foto'] = p => {
 function saveVisitPhotos(){
   const {id,mode,n}=cur().p, v=visitById(id);
   if(!S.demo.inRadius){ toast(mode==='in'?'Kamu belum berada di lokasi toko (radius 100 m)':'Check-out harus di lokasi yang sama dengan check-in','alert'); return; }
-  if(mode==='in'){ if(role()==='fmcg'){ v.done={}; S.fm={...S.fm,stok:{},extra:[],stokDone:false,foto:{},fac:{},draft:{}}; S.posm={}; S.facing={}; S.facingSaved={}; S.shareState=null; S.sku={t1:null,t2:null}; S.skuFoto={}; S.skuDone={}; } v.cin=VISIT_NOW.in; v.pIn=n; v.status='Berjalan'; back(); toast('Check-in tercatat di '+v.place,'pin'); return; }
+  if(mode==='in'){ if(role()==='fmcg'){ v.done={}; S.fm={...S.fm,stok:{},extra:[],stokDone:false,foto:{},fac:{},draft:{},promo:{}}; S.posm={}; S.facing={}; S.facingSaved={}; S.shareState=null; S.sku={t1:null,t2:null}; S.skuFoto={}; S.skuDone={}; } v.cin=VISIT_NOW.in; v.pIn=n; v.status='Berjalan'; back(); toast('Check-in tercatat di '+v.place,'pin'); return; }
   v.cout=VISIT_NOW.out; v.dur='39 mnt'; v.pOut=n; v.status='Selesai';
   back(); toast(role()==='canvas'?'Kunjungan tersubmit, check-out otomatis':'Kunjungan selesai, durasi 39 mnt');
 }
@@ -1766,15 +1766,20 @@ SCR['fm-stok'] = () => {
     <button class="btn ghost" onclick="fmAddSheet()">${I('plus',20)} Tambah SKU</button>
   </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="fmDraftSave('stok')">Simpan sementara</button><button class="btn" onclick="fmSubmit()">Submit stock opname</button></footer>`};
 };
-const FM_PRICE={f1:{b:'Rp29.900',a:'Rp24.900',pct:17},f2:{b:'Rp4.000',a:'Rp3.500',pct:13},f3:{b:'Rp6.500',a:'Rp5.500'},f4:{b:'Rp2.000',a:'Rp1.500',pct:25},f5:{b:'Rp11.900',a:'Rp9.900',pct:17}};
+const FM_PRICE={f1:{b:29900},f2:{b:4000},f3:{b:6500},f4:{b:2000},f5:{b:11900}};
+const fmPromoPct = (b,v) => { const n=+v; if(!n||n<=0) return ''; if(n>=b) return 'Harga promo harus di bawah harga sebelum promo'; return 'Diskon '+(Math.round((b-n)/b*1000)/10).toString().replace('.',',')+'%'; };
+const fmPromoOk = () => promoCek().length>0&&promoCek().every(x=>+(S.fm.promo||{})[x.id]>0&&+S.fm.promo[x.id]<x.b&&S.fm.foto[x.id+'d']&&S.fm.foto[x.id+'t']);
+function fmPromoSet(id,b,v){ S.fm.promo=S.fm.promo||{}; S.fm.promo[id]=v.replace(/\D/g,''); const e=document.getElementById('pp_'+id); if(e){ const t=fmPromoPct(b,S.fm.promo[id]); e.textContent=t; e.style.color=t.startsWith('Harga')?'var(--red)':'var(--green)'; } const k=document.getElementById('ppKirim'); if(k) k.disabled=!fmPromoOk(); }
 const promoCek=()=>shRead('pcek',['f1','f3']).filter(id=>FMCG_SKU.some(s=>s.id===id)).map(id=>({id,name:FMCG_SKU.find(s=>s.id===id).name,...FM_PRICE[id]}));
 function fmPhoto(k){ S.fm.foto[k]=true; render(false,true); toast('Foto tersimpan','camera'); }
 SCR['fm-promo'] = () => {
-  const ok=promoCek().length>0&&promoCek().every(x=>S.fm.foto[x.id+'d']&&S.fm.foto[x.id+'t']);
-  return {note:'Price promo (MOM 10.2). Produk yang dicek sesuai setup admin di dashboard. Foto display beserta foto price tag promo. Harga sebelum dan setelah diskon tampil per produk, persen diskon tampil jika tersedia.',
-  html:`${appbar('Price promo')}<main class="content">${promoCek().length?'':`<div class="empty">Admin belum menetapkan produk price promo untuk outlet ini.</div>`}${promoCek().map(x=>`<div class="card" style="margin-bottom:10px"><div class="row between"><b>${x.name}</b>${x.pct?chip('Diskon '+x.pct+'%','green'):''}</div>
-    <div class="row" style="gap:8px;margin-top:10px"><div class="grow"><div class="small muted">Harga sebelum diskon</div><div class="num" style="text-decoration:line-through;color:var(--muted,#6B7C93)">${x.b}</div></div><div class="grow"><div class="small muted">Harga setelah diskon</div><b class="num">${x.a}</b></div></div><div class="thumbs">${photoSlot('Foto display',S.fm.foto[x.id+'d'],`fmPhoto('${x.id}d')`)}${photoSlot('Price tag',S.fm.foto[x.id+'t'],`fmPhoto('${x.id}t')`)}</div></div>`).join('')}
-  </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="fmDraftSave('promo')">Simpan sementara</button><button class="btn" ${ok?'':'disabled'} onclick="fmMark('promo');back();toast('Price promo terkirim')">Kirim price promo</button></footer>`};
+  const ok=fmPromoOk();
+  return {note:'Price promo (MOM 10.2). Produk yang dicek sesuai setup admin di dashboard. Harga sebelum promo dari sistem, harga promo diinput sendiri oleh promotor, persen diskon dihitung otomatis. Lalu foto display dan foto price tag promo.',
+  html:`${appbar('Price promo')}<main class="content">${promoCek().length?'':`<div class="empty">Admin belum menetapkan produk price promo untuk outlet ini.</div>`}${promoCek().map(x=>{ const v=(S.fm.promo||{})[x.id]||'', t=fmPromoPct(x.b,v); return `<div class="card" style="margin-bottom:10px"><b>${x.name}</b>
+    <div class="row" style="gap:8px;margin-top:10px;align-items:flex-end"><div class="grow"><div class="small muted">Harga sebelum promo</div><div class="num" style="font-weight:700;padding:10px 0">${rp(x.b)}</div></div><label class="field grow" style="margin:0"><span>Harga promo (Rp)</span><input class="input num" inputmode="numeric" value="${v}" placeholder="0" oninput="fmPromoSet('${x.id}',${x.b},this.value)"></label></div>
+    <div id="pp_${x.id}" class="small" style="margin-top:6px;font-weight:700;min-height:18px;color:${t.startsWith('Harga')?'var(--red)':'var(--green)'}">${t}</div>
+    <div class="thumbs">${photoSlot('Foto display',S.fm.foto[x.id+'d'],`fmPhoto('${x.id}d')`)}${photoSlot('Price tag',S.fm.foto[x.id+'t'],`fmPhoto('${x.id}t')`)}</div></div>`}).join('')}
+  </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="fmDraftSave('promo')">Simpan sementara</button><button class="btn" id="ppKirim" ${ok?'':'disabled'} onclick="fmMark('promo');back();toast('Price promo terkirim')">Kirim price promo</button></footer>`};
 };
 const facingChip = id => { const v=visitOpen(); return v&&(v.done||{}).facing?stChip('Selesai'):(S.facingSaved||{})[id]?stChip('Draft'):(S.facing||{})[id]?chip('Nilai '+S.facing[id],'green'):stChip('Belum Selesai'); };
 const FACING=[{id:'fc1',name:'Rak Utama',kind:'Facing display',acuan:'Susunan facing di rak utama sesuai brief'},{id:'fc2',name:'Boot',kind:'Facing display',acuan:'Susunan facing di boot sesuai brief'},{id:'fc3',name:'Gudang',kind:'Facing display',acuan:'Susunan barang di gudang sesuai brief'}];
