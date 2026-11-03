@@ -459,11 +459,11 @@ const CBD_DEFAULT=[{id:'CT-3',t:'Alasan leads tidak goal',to:'Tono Hidayat',qs:[
 const PFOTO_DEFAULT=['tv50','tv43','kl2p','mc85'];
 const SALES=[
   {u:'rina',name:'Rina Marlina',job:'SPG / Promotor',cabang:'Jakarta Selatan',toko:'Electronic City Kemang',nip:'SIM-24-01187'},
-  {u:'budi',name:'Budi Santoso',job:'Canvasing',cabang:'Jakarta Selatan',toko:'Rute Pasar Minggu – Cilandak',nip:'SIM-23-00912'},
-  {u:'dimas',name:'Dimas Prasetyo',job:'Taking Order',cabang:'Jakarta Selatan',toko:'Area Fatmawati – Bintaro',nip:'SIM-24-00455'},
+  {u:'budi',name:'Budi Santoso',job:'Canvasing',cabang:'Jakarta Selatan',nip:'SIM-23-00912'},
+  {u:'dimas',name:'Dimas Prasetyo',job:'Taking Order',cabang:'Jakarta Selatan',nip:'SIM-24-00455'},
   {u:'sinta',name:'Sinta Dewi',job:'SPG / Promotor',cabang:'Jakarta Selatan',toko:'Best Denki Senayan City',nip:'SIM-24-01301'},
   {u:'putri',name:'Putri Ayuningtyas',job:'SPG / Promotor',cabang:'Jakarta Barat',toko:'Electronic Solution Puri',nip:'SIM-23-01044'},
-  {u:'kevin',name:'Kevin Halim',job:'Canvasing',cabang:'Jakarta Barat',toko:'Rute Kebon Jeruk – Kembangan',nip:'SIM-23-00988'},
+  {u:'kevin',name:'Kevin Halim',job:'Canvasing',cabang:'Jakarta Barat',nip:'SIM-23-00988'},
   {u:'fajar',name:'Fajar Nugroho',job:'SPG / Promotor',cabang:'Tangerang',toko:'Best Denki Alam Sutera',nip:'SIM-22-00615'}
 ];
 const FMCG_USERS=[{u:'tari',name:'Lestari Putri',job:'Promotor FMCG',cabang:'Jakarta Selatan',toko:'Electronic City Kemang',nip:'SIM-24-01355'},{u:'rangga',name:'Rangga Saputra',job:'Merchandising (MD)',cabang:'Jakarta Selatan',toko:'Best Denki Senayan City',nip:'SIM-23-01102'}];
@@ -492,8 +492,15 @@ const TOKO=[
   {id:'o2',name:'CV Sumber Rejeki Elektronik',cat:'Semi grosir',cabang:'Jakarta Selatan',dealer:'PT Sinar Elektronik',sales:['dimas'],addr:'Ciputat'},
   {id:'p1',name:'Electronic Solution Puri',cat:'Modern Retail',cabang:'Jakarta Barat',dealer:'PT Global Distribusi',sales:['putri'],addr:'Puri Indah Mall'},
   {id:'c4',name:'Toko Jaya Abadi Kembangan',cat:'Retail',cabang:'Jakarta Barat',dealer:'CV Mitra Elektrindo',sales:['kevin'],addr:'Kembangan'},
-  {id:'p2',name:'Best Denki Alam Sutera',cat:'Modern Retail',cabang:'Tangerang',dealer:'PT Global Distribusi',sales:['fajar'],addr:'Mal Alam Sutera'}
+  {id:'p2',name:'Best Denki Alam Sutera',cat:'Modern Retail',cabang:'Tangerang',dealer:'PT Global Distribusi',sales:['fajar'],addr:'Mal Alam Sutera'},
+  {id:'c5',name:'Toko Cahaya Baru',cat:'Retail',cabang:'Jakarta Selatan',dealer:'CV Mitra Elektrindo',sales:['budi'],addr:'Cilandak'},
+  {id:'o3',name:'Toko Abadi Jaya',cat:'Retail',cabang:'Jakarta Selatan',dealer:'PT Sinar Elektronik',sales:['dimas'],addr:'Bintaro Sektor 3'}
 ];
+/* Canvasser dan Taking Order di-assign ke satu toko atau lebih (sama dengan mobile), jadi label penempatan dihitung dari master toko. */
+const ASSIGN_JOBS=['Canvasing','Taking Order'];
+const tokoOfU=u=>TOKO.filter(t=>!t.del&&t.sales.includes(u));
+const tokoLabel=u=>{ const a=tokoOfU(u); return !a.length?'Belum di-assign':a.length===1?a[0].name:a.length+' toko · '+a[0].name+' +'+(a.length-1); };
+SALES.filter(s=>ASSIGN_JOBS.includes(s.job)).forEach(s=>Object.defineProperty(s,'toko',{get:()=>tokoLabel(s.u),enumerable:true}));
 const FM_TASKS_LABEL='Semua aktivitas toko, kecuali support task';
 const FM_TASK_KEYS=[['stok','Cek stok'],['promo','Price promo'],['facing','Facing display'],['share','Market share']];
 const D={
@@ -507,19 +514,19 @@ const D={
     {id:'a7',type:'Promo baru',u:null,by:'Dewi Kartika (Admin)',detail:'Bundling AC + Air Purifier diskon 7% · 1–30 Nov',reason:'Program akhir tahun ARUNIKA',when:'26 Okt, 10:05'}
   ],
   leads:[
-    {id:'L-2610-031',name:'Ahmad Fauzi',prod:'Kredit Modal Kerja',amount:10e6,tenor:12,status:'Baru',owner:'nina',date:'26 Okt',sync:''},
-    {id:'L-2610-029',name:'Yuliana Putri',prod:'Kredit Multiguna',amount:25e6,tenor:24,status:'Baru',owner:'nina',date:'26 Okt',sync:''},
-    {id:'L-2510-022',name:'Rudi Hartanto',prod:'Kredit Modal Kerja',amount:15e6,tenor:18,status:'Prospect',owner:'nina',date:'25 Okt',sync:''},
-    {id:'L-2410-017',name:'Lina Kusuma',prod:'Kredit Multiguna',amount:8e6,tenor:12,status:'Prospect',owner:'nina',date:'24 Okt',sync:''},
-    {id:'L-2310-011',name:'Hendra Saputra',prod:'Kredit Modal Kerja',amount:10e6,tenor:12,status:'Deal',goal:5e6,owner:'nina',date:'23 Okt',sync:'Terkirim'},
-    {id:'L-2210-008',name:'Wawan Gunadi',prod:'Kredit Multiguna',amount:30e6,tenor:36,status:'Belum Tertarik',sub:'Rejected',owner:'nina',date:'22 Okt',sync:''},
-    {id:'L-2110-006',name:'Siti Aminah',prod:'Kredit Modal Kerja',amount:20e6,tenor:24,status:'Deal',goal:18e6,owner:'nina',date:'21 Okt',sync:'Terkirim'},
-    {id:'L-2010-004',name:'Bambang Irawan',prod:'Kredit Multiguna',amount:12e6,tenor:12,status:'Deal',goal:12e6,owner:'nina',date:'20 Okt',sync:'Terkirim'},
-    {id:'L-1910-002',name:'Dian Permata',prod:'Kredit Modal Kerja',amount:5e6,tenor:6,status:'Belum Tertarik',sub:'Rejected',owner:'nina',date:'19 Okt',sync:''},
-    {id:'L-2610-033',name:'Maria Situmorang',prod:'Kredit Modal Kerja',amount:20e6,tenor:24,status:'Baru',owner:null,date:'26 Okt',sync:''},
-    {id:'L-2610-034',name:'Bayu Ramadhan',prod:'Kredit Multiguna',amount:12e6,tenor:12,status:'Baru',owner:null,date:'26 Okt',sync:''},
-    {id:'L-2610-035',name:'Nurul Hidayah',prod:'Kredit Modal Kerja',amount:7.5e6,tenor:12,status:'Baru',owner:null,date:'26 Okt',sync:''},
-    {id:'L-2610-036',name:'Teguh Prakoso',prod:'Kredit Modal Kerja',amount:35e6,tenor:36,status:'Baru',owner:null,date:'26 Okt',sync:''}
+    {id:'L-2610-031',name:'Ahmad Fauzi',prod:'Kredit Modal Kerja',amount:10e6,tenor:12,status:'Baru',owner:'nina',cab:'Fatmawati',date:'26 Okt',sync:''},
+    {id:'L-2610-029',name:'Yuliana Putri',prod:'Kredit Multiguna',amount:25e6,tenor:24,status:'Baru',owner:'nina',cab:'Fatmawati',date:'26 Okt',sync:''},
+    {id:'L-2510-022',name:'Rudi Hartanto',prod:'Kredit Modal Kerja',amount:15e6,tenor:18,status:'Prospect',owner:'nina',cab:'Fatmawati',date:'25 Okt',sync:''},
+    {id:'L-2410-017',name:'Lina Kusuma',prod:'Kredit Multiguna',amount:8e6,tenor:12,status:'Prospect',owner:'nina',cab:'Fatmawati',date:'24 Okt',sync:''},
+    {id:'L-2310-011',name:'Hendra Saputra',prod:'Kredit Modal Kerja',amount:10e6,tenor:12,status:'Deal',goal:5e6,owner:'nina',cab:'Fatmawati',date:'23 Okt',sync:'Terkirim'},
+    {id:'L-2210-008',name:'Wawan Gunadi',prod:'Kredit Multiguna',amount:30e6,tenor:36,status:'Belum Tertarik',sub:'Rejected',owner:'nina',cab:'Fatmawati',date:'22 Okt',sync:''},
+    {id:'L-2110-006',name:'Siti Aminah',prod:'Kredit Modal Kerja',amount:20e6,tenor:24,status:'Deal',goal:18e6,owner:'nina',cab:'Fatmawati',date:'21 Okt',sync:'Terkirim'},
+    {id:'L-2010-004',name:'Bambang Irawan',prod:'Kredit Multiguna',amount:12e6,tenor:12,status:'Deal',goal:12e6,owner:'nina',cab:'Fatmawati',date:'20 Okt',sync:'Terkirim'},
+    {id:'L-1910-002',name:'Dian Permata',prod:'Kredit Modal Kerja',amount:5e6,tenor:6,status:'Belum Tertarik',sub:'Rejected',owner:'nina',cab:'Fatmawati',date:'19 Okt',sync:''},
+    {id:'L-2610-033',cab:'Fatmawati',name:'Maria Situmorang',prod:'Kredit Modal Kerja',amount:20e6,tenor:24,status:'Baru',owner:null,date:'26 Okt',sync:''},
+    {id:'L-2610-034',cab:'Fatmawati',name:'Bayu Ramadhan',prod:'Kredit Multiguna',amount:12e6,tenor:12,status:'Baru',owner:null,date:'26 Okt',sync:''},
+    {id:'L-2610-035',cab:'Cilandak',name:'Nurul Hidayah',prod:'Kredit Modal Kerja',amount:7.5e6,tenor:12,status:'Baru',owner:null,date:'26 Okt',sync:''},
+    {id:'L-2610-036',cab:'Cilandak',name:'Teguh Prakoso',prod:'Kredit Modal Kerja',amount:35e6,tenor:36,status:'Baru',owner:null,date:'26 Okt',sync:''}
   ],
   overdue:[
     {name:'Slamet Riyadi',no:'PJ-0921-0412',ang:1250000,due:'05 Okt 2026',days:21,phone:'0812-3301-7781',addr:'Jl. Cilandak KKO No. 3',sisa:9},
@@ -889,14 +896,14 @@ function ovPer(p){ ST.ovPeriod=p; ST.ovSel=p==='d'?13:p==='w'?3:5; render(false)
 function penSel(i){ ST.penSel=i; render(false); }
 const DRILL={
   root:[['Jakarta Selatan',128e6],['Jakarta Barat',96e6],['Tangerang',62e6]],
-  'Jakarta Selatan':[['Electronic City Kemang',72e6],['Best Denki Senayan City',41e6],['Rute canvasing Pasar Minggu',15e6]],
-  'Jakarta Barat':[['Electronic Solution Puri',71e6],['Rute canvasing Kebon Jeruk',25e6]],
+  'Jakarta Selatan':[['Electronic City Kemang',72e6],['Best Denki Senayan City',41e6],['Toko canvasing Jakarta Selatan',15e6]],
+  'Jakarta Barat':[['Electronic Solution Puri',71e6],['Toko canvasing Jakarta Barat',25e6]],
   'Tangerang':[['Best Denki Alam Sutera',62e6]],
   'Electronic City Kemang':[['Rina Marlina',52e6],['Lia Kurnia (shift 2)',20e6]],
   'Best Denki Senayan City':[['Sinta Dewi',30e6],['Rina Marlina',11e6]],
-  'Rute canvasing Pasar Minggu':[['Budi Santoso',15e6]],
+  'Toko canvasing Jakarta Selatan':[['Budi Santoso',15e6]],
   'Electronic Solution Puri':[['Putri Ayuningtyas',71e6]],
-  'Rute canvasing Kebon Jeruk':[['Kevin Halim',25e6]],
+  'Toko canvasing Jakarta Barat':[['Kevin Halim',25e6]],
   'Best Denki Alam Sutera':[['Fajar Nugroho',62e6]]
 };
 const LEVELS=['Seluruh cabang','Cabang','Toko','Sales'];
@@ -1194,22 +1201,43 @@ function pageLeads(q){
   </div>
   ${card('Daftar leads',`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px"><form style="flex:1;min-width:220px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari nasabah</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari nama nasabah"></label></form>
       <div class="chips">${[['','Semua'],['Baru','Baru'],['Prospect','Prospect'],['Deal','Deal'],['Belum Tertarik','Belum Tertarik']].map(([k,l])=>`<button class="fchip ${f===k?'on':''}" onclick="setQ({f:'${k}'})">${l}</button>`).join('')}</div></div>
-    ${S.size?`<div class="bulk"><span style="flex:1">${S.size} leads dipilih</span>${sel([['','Assign ke…'],['nina','Nina Safitri (REA)'],['tono','Tono Hidayat (CBD)']],'',"assignLeads(this.value)",{cls:'sm',label:'Assign ke'})}</div>`:''}
+    ${S.size?`<div class="bulk"><span style="flex:1">${S.size} leads dipilih</span>${btn('Assign '+S.size+' leads',{v:'accent',size:'sm',icon:'users',on:"assignModal('',[...ST.sel.lds])"})}</div>`:''}
     ${dataTable('lds',{rows,select:true,rowClick:r=>`leadPanel('${r.id}')`,empty:'Tidak ada leads dengan filter ini.',cols:[
       {label:'Nasabah',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="mono muted" style="display:block">${r.id}</span>`,prim:true},{label:'Produk',k:'prod',hide:true},
-      {label:'Pengajuan',render:r=>rp(r.amount),align:'r'},{label:'Goal',render:r=>r.goal?`<b class="fg tabular">${rp(r.goal)}</b>`:'–',align:'r',hide:true},
+      {label:'Cabang',render:r=>leadCab(r),hide:true},{label:'Pengajuan',render:r=>rp(r.amount),align:'r'},{label:'Goal',render:r=>r.goal?`<b class="fg tabular">${rp(r.goal)}</b>`:'–',align:'r',hide:true},
       {label:'Ditangani',render:r=>r.owner?(r.owner==='sari'?'Sari W. (manager)':byU(r.owner).name):tag('Belum di-assign','accent')},
       {label:'Status',render:r=>spill(r.sub?r.status+' · '+r.sub:r.status,{Baru:'accent',Prospect:'warning',Deal:'success','Belum Tertarik':'danger'}[r.status])},{label:'SIM',render:r=>r.sync?tag('Terkirim','success'):'–',hide:true}]})}`,
-    {acts:`${btn('Template',{v:'soft',size:'sm',icon:'down',on:"toast('Template diunduh','template_leads_crm.xlsx. Kolom wajib: ID sumber, nama, nomor HP, produk, cabang.')"})}${btn('Import assign',{v:'soft',size:'sm',icon:'up',on:"uploadModal('Assign leads')"})}${btn('Upload pengajuan',{v:'accent',size:'sm',icon:'up',on:"uploadModal('Data pengajuan')"})}`})}`};
+    {acts:`${btn('Template',{v:'soft',size:'sm',icon:'down',on:"toast('Template diunduh','template_leads_crm.xlsx. Kolom wajib: ID sumber, nama, nomor HP, produk, cabang.')"})}${btn('Assign leads',{v:'soft',size:'sm',icon:'users',on:"assignModal()"})}${btn('Import assign',{v:'soft',size:'sm',icon:'up',on:"uploadModal('Assign leads')"})}${btn('Upload pengajuan',{v:'accent',size:'sm',icon:'up',on:"uploadModal('Data pengajuan')"})}`})}`};
 }
 function leadPer(){ toast('Periode diubah','Data mockup tetap sama.'); }
-function assignLeads(u){ if(!u) return; const S=ST.sel.lds; let n=0; D.leads.forEach(l=>{ if(S.has(l.id)){ l.owner=u; n++; } }); S.clear(); render(false); toast(n+' leads di-assign','Penerima leads mendapat notifikasi di aplikasi.'); }
+/* Assign leads mengikuti mobile: pilih user REA atau CBD dulu, lalu pilih satu leads atau lebih di cabang user itu (MOM 12.5).
+   Penerima diambil dari role, bukan daftar tetap, jadi user REA atau CBD baru langsung muncul. */
+const leadCab=l=>l.cab||'Fatmawati';
+const userCab=x=>x.cabang.replace(/^BPR /,'');
+const leadClosed=l=>l.status==='Deal'||l.sub==='Rejected';
+const leadReceivers=cab=>LEADS_USERS.filter(x=>/^(REA|CBD)/.test(x.job)&&(!cab||userCab(x)===cab));
+function assignModal(u='',pre=[]){ ST.asg={u,sel:new Set(pre)}; assignRender(); }
+function assignPickUser(u){ const cab=userCab(byU(u)); ST.asg.u=u; ST.asg.sel=new Set([...ST.asg.sel].filter(id=>leadCab(D.leads.find(l=>l.id===id))===cab)); assignRender(); }
+function assignToggle(id){ const S=ST.asg.sel; S.has(id)?S.delete(id):S.add(id); assignRender(); }
+function assignRender(){ const {u,sel:S}=ST.asg;
+  if(!u){ const cabs=[...new Set([...S].map(id=>leadCab(D.leads.find(l=>l.id===id))))], mixed=cabs.length>1, list=leadReceivers(cabs.length===1?cabs[0]:'');
+    openModal(`<h2 class="pt" style="font-size:22px">Assign leads<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Pilih user REA atau CBD yang menerima leads. Leads melekat ke cabang, jadi hanya bisa di-assign ke user di cabang yang sama.</p>
+    ${mixed?`<div style="margin-bottom:12px">${callout('Leads yang dipilih berasal dari '+cabs.length+' cabang. Setelah memilih user, hanya leads di cabang user itu yang tetap terpilih.')}</div>`:''}
+    ${list.length?`<div class="rows">${list.map(x=>`<button class="rowlink" onclick="assignPickUser('${x.u}')">${av(x.name)}<span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${esc(x.name)}</b><span class="xs muted">${esc(x.job)} · ${esc(x.cabang)} · ${D.leads.filter(l=>l.owner===x.u&&!leadClosed(l)).length} leads aktif</span></span>${I('right',16)}</button>`).join('')}</div>`:`<p class="sm muted">Belum ada user REA atau CBD di cabang ${esc(cabs[0]||'')}.</p>`}
+    <div style="display:flex;justify-content:flex-end;margin-top:20px">${btn('Batal',{v:'card',on:'closeLayer()'})}</div>`); return; }
+  const x=byU(u), cab=userCab(x), list=D.leads.filter(l=>leadCab(l)===cab&&(!l.owner||S.has(l.id)));
+  openModal(`<h2 class="pt" style="font-size:22px">Pilih leads<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Pilih satu leads atau lebih di cabang ${esc(cab)}.</p>
+  <div class="tile" style="display:flex;gap:10px;align-items:center;margin-bottom:12px">${av(x.name)}<span style="flex:1;min-width:0"><span class="xs muted" style="display:block">Assign ke</span><b class="fg sm">${esc(x.name)}</b><span class="xs muted" style="display:block">${esc(x.job)}</span></span>${btn('Ganti',{v:'soft',size:'sm',on:"ST.asg.u='';assignRender()"})}</div>
+  ${list.length?`<div class="rows" style="max-height:44vh;overflow:auto">${list.map(l=>`<button class="rowlink" role="checkbox" aria-checked="${S.has(l.id)}" onclick="assignToggle('${l.id}')"><span class="cb ${S.has(l.id)?'on':''}">${S.has(l.id)?I('check',12,3):''}</span><span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${esc(l.name)}</b><span class="xs muted">${l.id} · ${esc(l.prod)} · ${rp(l.amount)}${l.owner?' · sekarang '+esc(byU(l.owner).name):''}</span></span></button>`).join('')}</div>`:`<p class="sm muted">Semua leads di cabang ${esc(cab)} sudah di-assign.</p>`}
+  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Assign '+(S.size||'')+' leads',{v:'accent',on:'assignSave()',dis:!S.size})}</div>`); }
+function assignSave(){ const {u,sel:S}=ST.asg; if(!u||!S.size) return; D.leads.forEach(l=>{ if(S.has(l.id)) l.owner=u; }); const n=S.size, who=byU(u).name;
+  ST.sel.lds?.clear(); audit('Meng-assign '+n+' leads ke '+who); closeLayer(); render(false); toast(n+' leads di-assign ke '+who.split(' ')[0],'Penerima leads mendapat notifikasi di aplikasi.'); }
 function leadPanel(id){ const l=D.leads.find(x=>x.id===id);
   openPanel(l.name,`<div class="kv" style="margin-bottom:14px"><div><dt>Pengajuan</dt><dd>${rp(l.amount)}</dd></div><div><dt>Tenor</dt><dd>${l.tenor} bulan</dd></div><div><dt>Goal</dt><dd>${l.goal?rp(l.goal):'–'}</dd></div></div>
   <div class="tile" style="margin-bottom:12px"><div class="xs muted">Produk</div><b class="fg">${l.prod}</b></div>
   ${l.status==='Deal'?`<div class="tile" style="margin-bottom:12px"><div class="xs muted">Dokumen Deal</div><b class="fg">Bukti approve terunggah · Persetujuan pencairan ${l.owner==='nina'&&l.goal>10e6?'terunggah':'belum'} · Serah terima dana ${l.owner==='nina'&&l.goal>10e6?'terunggah':'belum'}</b></div>`:''}
   <div class="steps">${[['Upload backend',l.date+' 2026 · 06:00','done'],['Assign ke sales',l.owner?byU(l.owner).name:'Belum',l.owner?'done':'cur'],['Verifikasi (telepon / WA)',l.status==='Baru'?'Belum':'Selesai',l.status==='Baru'?(l.owner?'cur':'up'):'done'],['Hasil: '+(l.sub?l.status+' · '+l.sub:l.status),l.status==='Deal'?'Goal '+rp(l.goal):l.status==='Prospect'?'Follow up 29 Okt':l.sub==='Rejected'?'Tidak memenuhi syarat':'Belum',l.status==='Deal'||l.sub==='Rejected'?'done':l.status==='Prospect'?'cur':'up'],['Kirim ke SIM',l.sync?'Terkirim':'—',l.sync?'done':'up']].map(([t,s,k])=>`<div class="step"><span class="sd ${k}">${k==='done'?I('check',14,2.6):''}</span><div><b>${t}</b><small>${s}</small></div></div>`).join('')}</div>`,
-  !l.owner?`${btn('Tutup',{v:'card',on:'closeLayer()'})}${btn('Assign ke Nina',{v:'accent',on:`closeLayer();ST.sel.lds=new Set(['${id}']);assignLeads('nina')`})}`:btn('Tutup',{v:'card',on:'closeLayer()'}),{sub:l.id}); }
+  !l.owner?`${btn('Tutup',{v:'card',on:'closeLayer()'})}${btn('Assign',{v:'accent',on:`closeLayer();assignModal('',['${id}'])`})}`:btn('Tutup',{v:'card',on:'closeLayer()'}),{sub:l.id}); }
 
 /* ---------- Overdue ---------- */
 function pageOverdue(q){
@@ -1254,14 +1282,14 @@ const MD={
     {id:'r1',name:'Admin SIM',desc:'Kelola semua klien, master data, parameter, dan IAM',scope:'Semua klien',platform:'Web',appr:'Tanpa approval',perm:genPerm('admin'),status:'Aktif'},
     {id:'r2',name:'Team Leader (SPV 1)',desc:'User client (SPV 1 / CRH). Pantau tim, approval, assign leads dan penugasan',scope:'Tim sendiri',platform:'Web & Mobile',appr:'1 tingkat',perm:genPerm('spv'),status:'Aktif'},
     {id:'r3',name:'SPG / Promotor',desc:'Penjualan di toko, SKU display, market share',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('spg'),status:'Aktif'},
-    {id:'r4',name:'Canvasing',desc:'Stok bawaan, penjualan keliling, usulan toko. Aktivitas toko: pilih toko, check-in, check-out',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('canvas'),status:'Aktif'},
-    {id:'r5',name:'Taking Order',desc:'Pesanan dan follow up, usulan toko. Aktivitas toko: pilih toko, check-in, check-out',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('order'),status:'Aktif'},
+    {id:'r4',name:'Canvasing',desc:'Di-assign ke satu toko atau lebih. Halaman Aktivitas: pilih toko, check-in, kerjakan pekerjaan (jual dari stok, stok bawaan, catat retur), lalu check-out. Usulan toko',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('canvas'),status:'Aktif'},
+    {id:'r5',name:'Taking Order',desc:'Di-assign ke satu toko atau lebih. Halaman Aktivitas: pilih toko, check-in, kerjakan pekerjaan (buat pesanan, follow up), lalu check-out. Usulan toko',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('order'),status:'Aktif'},
     {id:'r7',name:'FFOR (SPV 2)',desc:'Atasan Team Leader, approval tingkat 2',scope:'Tim sendiri',platform:'Web & Mobile',appr:'2 tingkat',perm:genPerm('spv'),status:'Aktif'},
     {id:'r8',name:'Arco (Leader SPG)',desc:'User client di luar BPR. Assign leads ke promotor di cabangnya',scope:'Tim sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('arco'),status:'Aktif'},
     {id:'r9',name:'CBD / Mediator',desc:'Memonitor mitra lewat pertanyaan monitoring dan boleh menjual. Tanpa check-in dan Kunjungan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('leads'),status:'Aktif'},
     {id:'r10',name:'REA / SPG Multi Finance',desc:'Call dan Visit menghasilkan Booking. Hasil dihitung sebagai insentif. Tanpa check-in dan Kunjungan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('leads'),status:'Aktif'},
-    {id:'r11',name:'Promotor FMCG',desc:'Pilih toko, check-in, kerjakan aktivitas toko, lalu check-out. Tanpa penjualan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('fmcg'),status:'Aktif'},
-    {id:'r12',name:'Merchandising (MD)',desc:'Pilih toko, check-in, kerjakan aktivitas toko, lalu check-out. Tanpa penjualan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('fmcg'),status:'Aktif'},
+    {id:'r11',name:'Promotor FMCG',desc:'Halaman Aktivitas: pilih toko, check-in, kerjakan pekerjaan (cek stok, price promo, facing display, market share, support task), lalu check-out. Tanpa penjualan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('fmcg'),status:'Aktif'},
+    {id:'r12',name:'Merchandising (MD)',desc:'Halaman Aktivitas: pilih toko, check-in, kerjakan pekerjaan (cek stok, price promo, facing display, market share, support task), lalu check-out. Tanpa penjualan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('fmcg'),status:'Aktif'},
     {id:'r13',name:'Mobile Promotor',desc:'Seperti promotor, berpindah toko dan event',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('spg'),status:'Aktif'},
     {id:'r14',name:'Promotor Bantuan',desc:'Non SIM dan non client. Bisa pindah client dan cabang, akses terbatas',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('bantuan'),status:'Aktif'},
     {id:'r15',name:'Reliever',desc:'User di luar BPR, manpower support tambahan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('bantuan'),status:'Aktif'},
@@ -1480,6 +1508,9 @@ function saveForm(mode){
   let rec;
   if(id){ rec=E.store().find(x=>x.id===id); if(E.onRename&&rec.name!==vals.name) E.onRename(rec.name,vals.name); Object.assign(rec,vals); audit(`Mengubah ${lc(E)} ${E.title(rec)}`); }
   else { rec={status:'Aktif',...(E.blank?E.blank():{}),...(prefill||{}),...vals,id:E.prefix+(Date.now()%1e6)}; E.store().push(rec); audit(`Menambahkan ${lc(E)} ${E.title(rec)}`); }
+  // Penugasan toko disimpan dua arah (User SIM.toko dan Toko.sales); samakan supaya Assign toko canvasser tetap benar.
+  if(ent==='user') TOKO.forEach(t=>{ const on=(rec.toko||[]).includes(t.id); if(on&&!t.sales.includes(rec.id)) t.sales.push(rec.id); if(!on) t.sales=t.sales.filter(v=>v!==rec.id); });
+  if(ent==='toko') MD.user.forEach(u=>{ const on=(rec.sales||[]).includes(u.id), has=(u.toko||[]).includes(rec.id); if(on&&!has) u.toko=[...(u.toko||[]),rec.id]; if(!on&&has) u.toko=u.toko.filter(v=>v!==rec.id); });
   if(mode==='publish'){ rec.status='Terbit'; E.onPublish?.(rec); audit(`Menerbitkan ${lc(E)} ${E.title(rec)}`); }
   const tl=E.toastLabel?E.toastLabel(rec):E.label;
   closeLayer(); render(false); toast(`${tl} ${mode==='publish'?'diterbitkan':id?'diperbarui':'ditambahkan'}`,E.title(rec));
@@ -1588,8 +1619,27 @@ const CV_PARAM={limit:shRead('canvasLimit',5000000)};
 function pageCanvassing(){
   return {title:'Canvassing',html:`<p class="purpose">Barang dibawa per hari dibatasi nominal dan harus dari master produk. Penjualan dihitung dari retur: stok yang tidak dibawa pulang dianggap terjual (MOM 11.1).</p>
   <div class="grid g-side">${card('Rekap hari ini',dataTable('cvr',{rows:CV_REP,rowClick:r=>`toast('${byU(r.u).name}','Tanda terima: ${r.tt}.')`,cols:[{label:'Sales',render:r=>byU(r.u).name,prim:true},{label:'Dibawa',render:r=>rp(r.bawa),align:'r'},{label:'Retur',render:r=>rp(r.retur),align:'r',hide:true},{label:'Terjual',render:r=>rp(r.jual),align:'r'},{label:'Tanda terima',render:r=>tag(r.tt,r.tt==='Ada'?'success':'warning'),hide:true}]}))}
-  ${card('Limit per hari',`<b class="tabular fg">${rp(CV_PARAM.limit)}</b><p class="xs muted" style="margin-top:6px">Berlaku untuk semua canvasser.</p>`,{acts:btn('Ubah',{v:'soft',size:'sm',on:'cvLimitModal()'})})}</div>`};
+  ${card('Limit per hari',`<b class="tabular fg">${rp(CV_PARAM.limit)}</b><p class="xs muted" style="margin-top:6px">Berlaku untuk semua canvasser.</p>`,{acts:btn('Ubah',{v:'soft',size:'sm',on:'cvLimitModal()'})})}</div>
+  <div style="margin-top:16px">${card('Assign toko canvasser',`<p class="xs muted" style="margin:-4px 2px 12px">Team Leader meng-assign satu toko atau lebih ke canvasser, sales taking order, dan mobile promotor. Toko yang di-assign muncul di halaman Aktivitas mobile. SPG yang diam di satu toko diatur lewat User SIM (MOM 11.1).</p>
+  ${dataTable('cva',{rows:cvAssignees().map(x=>({...x,_id:x.id})),rowClick:r=>`cvAssignModal('${r.id}')`,cols:[
+    {label:'Sales',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(r.name)}<span><span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${esc(roleName(r.role))}</span></span></span>`,prim:true},
+    {label:'Cabang',k:'cabang',hide:true},{label:'Toko di-assign',render:r=>{ const a=tokoOfU(r.id); return a.length?`<span class="tabular fg">${a.length} toko</span><span class="xs muted" style="display:block">${esc(a.slice(0,2).map(t=>t.name).join(', '))}${a.length>2?' +'+(a.length-2):''}</span>`:tag('Belum di-assign','accent'); }}],
+    acts:r=>btn('Ubah',{v:'soft',size:'sm',on:`cvAssignModal('${r.id}')`})})}`)}</div>`};
 }
+/* Role yang di-assign ke toko diambil dari IAM; tambah id role di sini bila role baru juga bergerak antar toko. */
+const CV_ASSIGN_ROLES=['r4','r5','r13'];
+const cvAssignees=()=>live('user').filter(u=>CV_ASSIGN_ROLES.includes(u.role)&&u.status==='Aktif');
+function cvAssignModal(u){ ST.cvPick={u,sel:new Set(tokoOfU(u).map(t=>t.id))}; cvAssignRender(); }
+function cvAssignToggle(id){ const S=ST.cvPick.sel; S.has(id)?S.delete(id):S.add(id); cvAssignRender(); }
+function cvAssignRender(){ const {u,sel:S}=ST.cvPick, x=live('user').find(r=>r.id===u);
+  const list=live('toko').filter(t=>t.status==='Aktif'&&t.cat!=='Modern Retail').sort((a,b)=>(a.cabang!==x.cabang)-(b.cabang!==x.cabang)||a.name.localeCompare(b.name));
+  openModal(`<h2 class="pt" style="font-size:22px">Assign ${esc(x.name.split(' ')[0])} ke toko<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Pilih satu toko atau lebih. Toko di cabang ${esc(x.cabang)} tampil lebih dulu.</p>
+  <div class="rows" style="max-height:46vh;overflow:auto">${list.map(t=>`<button class="rowlink" role="checkbox" aria-checked="${S.has(t.id)}" onclick="cvAssignToggle('${t.id}')"><span class="cb ${S.has(t.id)?'on':''}">${S.has(t.id)?I('check',12,3):''}</span><span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${esc(t.name)}</b><span class="xs muted">${esc(t.addr)} · ${esc(t.cat)} · ${esc(t.cabang)}</span></span></button>`).join('')}</div>
+  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Simpan'+(S.size?' '+S.size+' toko':''),{v:'accent',on:'cvAssignSave()',dis:!S.size})}</div>`); }
+function cvAssignSave(){ const {u,sel:S}=ST.cvPick; if(!S.size) return;
+  TOKO.forEach(t=>{ const on=S.has(t.id), has=t.sales.includes(u); if(on&&!has) t.sales.push(u); if(!on&&has) t.sales=t.sales.filter(v=>v!==u); });
+  const rec=MD.user.find(r=>r.id===u); rec.toko=[...S];
+  audit('Meng-assign '+S.size+' toko ke '+rec.name); closeLayer(); render(false); toast(S.size+' toko di-assign ke '+rec.name.split(' ')[0],'Daftar toko di aplikasi mobile ikut berubah.'); }
 function cvLimitModal(){ openModal(`<h2 class="pt" style="font-size:22px">Ubah limit<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Nilai barang maksimal per hari.</p><label class="field"><span>Limit (Rp)</span><span class="inp"><input id="cv_l" inputmode="numeric" value="${CV_PARAM.limit}"></span></label>
   <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Simpan',{v:'accent',on:'cvLimitSave()'})}</div>`); }
 function cvLimitSave(){ const v=parseInt(document.getElementById('cv_l').value.replace(/\D/g,''))||0; if(v<1){ toast('Periksa isian','Isi nominal limit.','danger'); return; } CV_PARAM.limit=v; shSet('canvasLimit',v); audit('Mengubah limit canvassing'); closeLayer(); render(false); toast('Limit tersimpan',rp(v)); }
