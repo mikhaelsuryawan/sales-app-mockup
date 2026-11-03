@@ -1990,7 +1990,6 @@ function aktTasks(v){
   const n=S.leads.filter(l=>l.owner===S.user).length, vals=has?(S.vform[v.id]||{}):{}, f=(VISIT_FORM.leads||[]).filter(x=>vals[x[0]]).length;
   return [
     {ic:'users',t:'Leads saya',sub:n+' leads di-assign ke kamu',go:"tab('leads')"},
-    {ic:'plus',t:'Buat leads',sub:'Tambah leads dari lapangan',go:"go('lead-baru')"},
     ...(S.user==='cbd.tono'?[{ic:'user',t:'Mitra saya',sub:'Agent mitra dan datanya',go:"go('mitra')"},{ic:'check',t:'Task Team Leader',sub:'Pertanyaan dari Team Leader untuk konsumen',go:"go('cbd-task')",always:1,st:cbdTasks().some(x=>x.st==='Menunggu jawaban')?'Belum Selesai':'Selesai'}]:[]),
     ...(noCheckin()?[]:[{ic:'check',t:'Hasil kunjungan nasabah',sub:'Hasil kontak dan dokumen',go:has?`go('kunjungan-detail',{id:'${v.id}'})`:"",lock:1,st:has?(f>=(VISIT_FORM.leads||[]).length?'Selesai':f?'Draft':'Belum Selesai'):''}])];
 }
