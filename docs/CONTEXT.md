@@ -135,6 +135,7 @@ Catatan: klien sudah mengesahkan MOM pertama. MOM hasil review di meeting beriku
 
 - Tiap mockup satu file HTML mandiri (CSS dan JS inline, logo base64). Tidak ada build step.
 - Mobile: router tumpukan (`go`, `back`, `reset`), layar didefinisikan sebagai `SCR['nama'] = props => ({html, note, tab, dark})`. `S` adalah state, `USERS`, `PRODUCTS`, `TOKO` adalah data dummy. `renderPanel()` membuat panel demo.
+- Dashboard, animasi muat data: karena tidak ada backend, `render()` mensimulasikan fetch. Pindah halaman memuat penuh dengan skeleton yang mengikuti bentuk komponen; ganti query (filter, tab) memuat ulang bagian data saja (tabel dan grafik meredup, garis progres di header). Setelah data siap, tiap komponen punya animasi masuk sendiri: kartu naik bergantian, angka statistik menghitung naik, batang kolom tumbuh, garis tergambar, donut menyapu, baris tabel berurutan, progress bar terisi. Render karena state lokal (pilih baris, hover) tidak memicu animasi. Semua dimatikan bila `prefers-reduced-motion` aktif. Kode di `FX`, `fxBegin`, `fxAnimate`, `countUp`.
 - Dashboard: router hash (`#/penjualan?tab=klien`), `ROUTES`, `ENT` (definisi CRUD generik: `openForm`, `saveForm`, `delAsk`), `dataTable`, `openPanel`, `card`, chart SVG buatan sendiri (`columnChart`, `donut`, `lineChart`).
 - Preview di browser pane Claude memakai snapshot file sehingga navigasi hash tidak jalan; gunakan server lokal.
 - Skill WIT (`wit-code-agent-2`) berasal dari `wit-skills.zip` milik tim dan tidak disertakan di sini.
