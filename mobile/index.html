@@ -2156,7 +2156,7 @@ function shareBrand(v){ S.shareBrand=v; S.sharePath=[]; render(false,true); }
 function sharePath(d,v){ S.sharePath=S.sharePath.slice(0,d); if(v) S.sharePath.push(v); render(false,true); }
 SCR.share = () => {
   const b=S.shareBrand, path=S.sharePath, key=path.join('/'), inPath=x=>!key||x===key||x.startsWith(key+'/');
-  const cl=[...PRODUCTS,...CANVAS_PRODUCTS].filter(p=>prodBrand(p.id)===b&&inPath(PROD_PATH[p.id]||'')), comp=S.shareComp.map((c,i)=>({...c,i})).filter(c=>c.cb===b&&inPath(c.path));
+  const cl=[...PRODUCTS,...CANVAS_PRODUCTS].filter(p=>prodBrand(p.id)===b&&inPath(PROD_PATH[p.id]||'')), comp=S.shareComp.map((c,i)=>({...c,i})).filter(c=>c.cb===b&&(c.free||inPath(c.path)));
   const byBrand={}; comp.forEach(c=>{ byBrand[c.brand]=(byBrand[c.brand]||0)+c.qty; });
   const parts=[[b,cl.reduce((s,p)=>s+(S.shareClient[p.id]||0),0)],...Object.entries(byBrand)], tot=parts.reduce((s,x)=>s+x[1],0)||1;
   const colors={ARUNIKA:'#0AA5EE',KIRANA:'#0AA5EE',Samsung:'#123F75',LG:'#F09A66',Polytron:'#8FB8D8'}, st=S.shareState;
@@ -2182,16 +2182,16 @@ SCR.share = () => {
 function shareAddSheet(){
   const key=S.sharePath.join('/');
   sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Tambah produk kompetitor</h3>
-  <label class="field"><span>Brand kompetitor</span><select class="input" id="sa_b">${SHARE_BRAND.map(b=>`<option>${b}</option>`).join('')}</select></label>
-  <label class="field"><span>Kategori</span><select class="input" id="sa_c">${katFlat(S.shareBrand).map(p=>`<option value="${p}" ${p===key?'selected':''}>${katLabel(p)}</option>`).join('')}</select></label>
+  <label class="field"><span>Brand kompetitor</span><input class="input" id="sa_b" placeholder="Contoh: Samsung" maxlength="60"></label>
+  <label class="field"><span>Kategori</span><input class="input" id="sa_c" value="${esc(katLabel(key))}" placeholder="Contoh: Peralatan Dapur › Blender" maxlength="80"></label>
   <label class="field"><span>Nama produk</span><input class="input" id="sa_n" placeholder="Merek dan tipe"></label>
   <div class="row" style="gap:10px"><label class="field grow"><span>Qty</span><input class="input num" id="sa_q" inputmode="numeric" value="1"></label><label class="field grow"><span>Harga (opsional)</span><input class="input num" id="sa_h" inputmode="numeric"></label></div>
   <button class="btn" onclick="shareAdd()">Tambah</button>`);
 }
 function shareAdd(){
-  const n=val('sa_n').replace(/['"\\<>`]/g,'').trim(), q=parseInt(val('sa_q'))||0;
-  if(!n||q<1){ toast('Isi nama produk dan qty','alert'); return; }
-  S.shareComp.push({cb:S.shareBrand,brand:val('sa_b'),path:val('sa_c'),nama:n,qty:q,harga:parseInt(val('sa_h').replace(/\D/g,''))||0});
+  const cl=v=>v.replace(/['"\\<>`]/g,'').trim(), n=cl(val('sa_n')), br=cl(val('sa_b')), ct=cl(val('sa_c')), q=parseInt(val('sa_q'))||0;
+  if(!br||!ct||!n||q<1){ toast('Isi brand, kategori, nama produk, dan qty','alert'); return; }
+  S.shareComp.push({cb:S.shareBrand,brand:br,path:ct,free:true,nama:n,qty:q,harga:parseInt(val('sa_h').replace(/\D/g,''))||0});
   closeSheet(); render(false,true); toast(n+' ditambahkan');
 }
 
