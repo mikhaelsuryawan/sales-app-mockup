@@ -530,7 +530,7 @@ function freshState(){
       spv:[{id:'v1',place:'Electronic City Kemang',time:'11:00',tasks:['Supervisi SPG'],status:'Belum',photos:{}}]
     },
     plans:[{place:'Rudi Hartanto (nasabah)',date:'28 Okt 2026',status:'Menunggu approval'}],
-    canvasArea:{'sales.budi':'Rute Pasar Minggu – Cilandak'}, cabang:'Fatmawati', sharePrice:{}, vform:{}, skuFoto:{},
+    canvasArea:{'sales.budi':['c1','c2','c3','c4']}, cabang:'Fatmawati', sharePrice:{}, vform:{}, skuFoto:{},
     sku:{t1:null,t2:null}, disp:[], dispDone:false, dispDraft:false, sf:null, 
     fm:{stok:{},extra:[],stokDone:false,foto:{},facing:0,tasks:[{t:'Bersihkan etalase depan',from:'Dari Team Leader',done:false}]}, posm:{}, mitraLog:{}, cbdDone:false, notifOn:{in:true,out:true}, sound:'Bawaan',
     bawa:{rc18:8,bl11:6,st3:9,kp16:5,ds72:2}, kembali:{}, muatInv:[], receipt:false,
@@ -979,10 +979,17 @@ function daySummary(){
 }
 
 /* ---------- Kunjungan / Penugasan ---------- */
-const AREA_CANVAS=['Rute Pasar Minggu – Cilandak','Rute Kebon Jeruk – Kembangan','Area Fatmawati – Bintaro'];
-SCR['assign-canvas'] = () => ({note:'Jika promotor adalah canvasser, Team Leader meng-assign area atau toko ke promotor itu. Promotor elektronik yang stay di toko tidak perlu di-assign (MOM 11.1).',
-  html:`${appbar('Assign canvasser')}<main class="content"><div class="list">${[['sales.budi','Budi Santoso',1],['sales.dimas','Dimas Prasetyo',1],['mobile.fikri','Fikri Ramadhan',1],['spg.rina','Rina Marlina',0]].map(([u,n,c])=>`<button class="li" ${c?`onclick="act(()=>canvasSheet('${u}'))"`:'disabled'}><div class="av blue">${USERS[u].init}</div><div class="grow"><div class="t">${n}</div><div class="s">${c?(S.canvasArea[u]||'Belum di-assign'):'Stay di toko, tidak perlu assign'}</div></div>${c?I('right',18):''}</button>`).join('')}</div></main>`});
-function canvasSheet(u){ sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Assign ${USERS[u].name.split(' ')[0]} ke</h3><div class="list">${AREA_CANVAS.map(a=>`<button class="li" onclick="S.canvasArea['${u}']='${a}';closeSheet();render(false,true);toast('Area di-assign')"><div class="grow"><div class="t">${a}</div></div></button>`).join('')}</div>`); }
+const ASSIGN_TOKO=()=>[...TOKO.canvas,...TOKO.order];
+const assignText=u=>{ const a=(S.canvasArea[u]||[]).map(id=>ASSIGN_TOKO().find(t=>t.id===id)?.name).filter(Boolean); return a.length?a.length+' toko · '+a.slice(0,2).join(', ')+(a.length>2?' +'+(a.length-2):''):'Belum di-assign'; };
+SCR['assign-canvas'] = () => ({note:'Jika promotor adalah canvasser, Team Leader meng-assign satu toko atau lebih ke promotor itu. Promotor elektronik yang stay di toko tidak perlu di-assign (MOM 11.1).',
+  html:`${appbar('Assign canvasser')}<main class="content"><div class="list">${[['sales.budi','Budi Santoso',1],['sales.dimas','Dimas Prasetyo',1],['mobile.fikri','Fikri Ramadhan',1],['spg.rina','Rina Marlina',0]].map(([u,n,c])=>`<button class="li" ${c?`onclick="act(()=>canvasSheet('${u}'))"`:'disabled'}><div class="av blue">${USERS[u].init}</div><div class="grow"><div class="t">${n}</div><div class="s">${c?assignText(u):'Stay di toko, tidak perlu assign'}</div></div>${c?I('right',18):''}</button>`).join('')}</div></main>`});
+function canvasSheet(u){ S.assignPick=[...(S.canvasArea[u]||[])]; S.assignUser=u; assignSheetRender(); }
+function assignSheetRender(){ const u=S.assignUser, pick=S.assignPick;
+  sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:4px">Assign ${USERS[u].name.split(' ')[0]} ke toko</h3><p class="muted small" style="margin:0 0 12px">Pilih satu toko atau lebih.</p>
+  <div class="list" style="max-height:46vh;overflow:auto">${ASSIGN_TOKO().map(t=>{ const on=pick.includes(t.id); return `<button class="li" role="checkbox" aria-checked="${on}" onclick="assignToggle('${t.id}')"><div class="ico-tile ${on?'green':''}">${I(on?'check':'pin',18,2.2)}</div><div class="grow"><div class="t">${esc(t.name)}</div><div class="s">${esc(t.addr)} · ${t.cat}</div></div></button>`; }).join('')}</div>
+  <button class="btn" style="margin-top:14px" ${pick.length?'':'disabled'} onclick="assignSave()">Simpan ${pick.length?pick.length+' toko':''}</button>`); }
+function assignToggle(id){ const p=S.assignPick; S.assignPick=p.includes(id)?p.filter(x=>x!==id):[...p,id]; assignSheetRender(); }
+function assignSave(){ S.canvasArea[S.assignUser]=S.assignPick; closeSheet(); render(false,true); toast(S.assignPick.length+' toko di-assign'); }
 const RID={'spg.rina':'r3','sales.budi':'r4','sales.dimas':'r5','spv.sari':'r2','ffor.yoga':'r7','arco.maya':'r8','cbd.tono':'r9','rea.nina':'r10','fmcg.tari':'r11','md.rangga':'r12','mobile.fikri':'r13','bantuan.eko':'r14','reliever.gita':'r15','trainer.joko':'r16'};
 const JADWAL_DEFAULT={r1:'Ya',r2:'Ya',r7:'Ya',r11:'Ya',r12:'Ya'};
 const canSchedule = () => shRead('roleJadwal',JADWAL_DEFAULT)[RID[S.user]]==='Ya';
