@@ -730,10 +730,10 @@ const MENUS = {
   mobile:[['Catat penjualan','bag',"act(()=>startSale())",1],['Riwayat penjualan','file',"tab('penjualan')"],['SKU display','grid',"go('sku')"],['Market share','pie',"go('share')"],['Stock opname','box',"go('fm-stok')"],['Campaign & POSM','image',"go('posm')"],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   canvas:[['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   order:[['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
-  leads:[['Leads','users',"tab('leads')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
+  leads:[['Leads','users',"act(()=>tab('leads'))",1],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   fmcg:[['Buat jadwal','route',"act(()=>go('kunjungan-form'))",1],['Kunjungan','route',"tab('kunjungan')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
   trainer:[['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Kunjungan','route',"tab('kunjungan')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
-  cbd:[['Leads','users',"tab('leads')"],['Mitra saya','user',"go('mitra')"],['Task Team Leader','check',"go('cbd-task')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  cbd:[['Leads','users',"act(()=>tab('leads'))",1],['Mitra saya','user',"act(()=>go('mitra'))",1],['Task Team Leader','check',"act(()=>go('cbd-task'))",1],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   arco:[['Assign leads','users',"go('assign')"],['Semua leads','file',"go('leads-all')"],['Tim saya','user',"tab('tim')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   bantuan:[['Catat penjualan','bag',"act(()=>startSale())",1],['Riwayat penjualan','file',"tab('penjualan')"],['Kunjungan','route',"tab('kunjungan')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   spv:[['Approval','check',"go('approval')"],['Assign canvasser','route',"go('assign-canvas')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tugaskan tim','route',"act(()=>go('kunjungan-form',{spv:1}))",1],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Kunjungan','calendar',"tab('kunjungan')"],['Quiz','quiz',"go('quiz')"]]
@@ -752,8 +752,8 @@ function attCard(){
 SCR.home = () => {
   const u=U(), r=role(), locked=isLocked();
   let menus=MENUS[u.menu||r];
-  if(r==='fmcg') menus=[[fmAktLabel(),'grid',"tab('aktivitas')"],['Cek stok','box',"fmGate(()=>go('fm-stok'))"],['Price promo','tag',"fmGate(()=>go('fm-promo'))"],['Facing display','grid',"fmGate(()=>go('fm-facing'))"],['Support task','check',"fmGate(()=>go('fm-task'))"],['Market share','pie',"fmGate(()=>go('share'))"],...menus];
-  else if(hasAkt()) menus=[[aktLabel(),'grid',"tab('akt')"],...aktTasks(null).map(t=>[t.t,t.ic,t.lock?`aktGate(()=>${t.go})`:`act(()=>${t.go})`]),...menus];
+  if(r==='fmcg') menus=[[fmAktLabel(),'grid',"act(()=>tab('aktivitas'))",1],['Cek stok','box',"fmGate(()=>go('fm-stok'))",1],['Price promo','tag',"fmGate(()=>go('fm-promo'))",1],['Facing display','grid',"fmGate(()=>go('fm-facing'))",1],['Support task','check',"fmGate(()=>go('fm-task'))",1],['Market share','pie',"fmGate(()=>go('share'))",1],...menus];
+  else if(hasAkt()) menus=[[aktLabel(),'grid',"act(()=>tab('akt'))",1],...aktTasks(null).map(t=>[t.t,t.ic,t.lock?`aktGate(()=>${t.go})`:`act(()=>${t.go})`,1]),...menus];
   let extra='';
   if(r==='spv') extra = spvDash();
   else extra = fieldDash();
@@ -1988,10 +1988,10 @@ function aktTasks(v){
 SCR.akt = () => {
   const L=aktStores(), o=visitOpen(), multi=L.length>1, nas=role()==='leads';
   const storeRow=v=>{ const open=v.cin&&!v.cout, fin=v.status==='Selesai', lab=open?(role()==='canvas'?'Submit':'Check-out'):fin?'Selesai':'Check-in';
-    return `<div class="li"><div class="ico-tile ${fin?'green':''}">${I(fin?'check':'pin',20,fin?2.2:2)}</div><div class="grow"><div class="t">${esc(v.place)}</div><div class="s">${v.time}${v.cin?' · check-in '+v.cin:''}${v.cout?' · check-out '+v.cout:''}</div></div><button class="btn sm ${open?'sec':''}" style="width:auto" ${fin?'disabled':''} onclick="visitAction('${v.id}')">${lab}</button></div>`; };
+    return `<div class="li"><div class="ico-tile ${fin?'green':''}">${I(fin?'check':'pin',20,fin?2.2:2)}</div><div class="grow"><div class="t">${esc(v.place)}</div><div class="s">${v.time}${v.cin?' · check-in '+v.cin:''}${v.cout?' · check-out '+v.cout:''}</div></div><button class="btn sm ${open?'sec':''}" style="width:auto" ${fin?'disabled':''} onclick="act(()=>visitAction('${v.id}'))">${lab}</button></div>`; };
   const head = o
     ? `<div class="card" style="margin-bottom:14px"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="small muted">Sedang di ${nas?'lokasi':'toko'}</div><div class="t" style="font-weight:800">${esc(o.place)}</div><div class="small muted">Check-in ${o.cin}</div></div>${chip('Berjalan','blue')}</div>
-      <button class="btn sm" style="margin-top:12px" onclick="visitAction('${o.id}')">${I('check',18,2.2)} ${role()==='canvas'?'Submit kunjungan':'Check-out & selesai'}</button></div>`
+      <button class="btn sm" style="margin-top:12px" onclick="act(()=>visitAction('${o.id}'))">${I('check',18,2.2)} ${role()==='canvas'?'Submit kunjungan':'Check-out & selesai'}</button></div>`
     : !L.length ? `<div class="empty">Belum ada jadwal kunjungan. Team Leader membuat jadwalnya.</div>`
     : multi ? `<div class="sec-title" style="margin-top:0">Pilih ${nas?'tujuan':'toko'}</div><div class="list" style="margin-bottom:14px">${L.map(storeRow).join('')}</div><p class="hint" style="margin:-6px 0 14px">Kamu punya ${L.length} tujuan hari ini. Pilih satu, check-in, kerjakan tugas, lalu check-out.</p>`
     : `<div class="list" style="margin-bottom:14px">${storeRow(L[0])}</div><p class="hint" style="margin:-6px 0 14px">Kamu punya 1 tujuan hari ini. Check-in, kerjakan tugas, lalu check-out.</p>`;
@@ -2006,10 +2006,10 @@ const fmAktLabel = () => fmStores().length>1?'Aktivitas Toko':'Aktivitas Saya';
 SCR.aktivitas = () => {
   const L=fmStores(), o=visitOpen(), multi=L.length>1;
   const storeRow=v=>{ const open=v.cin&&!v.cout, fin=v.status==='Selesai', lab=open?'Check-out':fin?'Check-in lagi':'Check-in';
-    return `<div class="li"><div class="ico-tile ${fin?'green':''}">${I(fin?'check':'pin',20,fin?2.2:2)}</div><div class="grow"><div class="t">${esc(v.place)}</div><div class="s">${v.time}${v.cin?' · check-in '+v.cin:''}${v.cout?' · check-out '+v.cout:''}</div></div><button class="btn sm ${open?'sec':''}" style="width:auto" onclick="visitAction('${v.id}')">${lab}</button></div>`; };
+    return `<div class="li"><div class="ico-tile ${fin?'green':''}">${I(fin?'check':'pin',20,fin?2.2:2)}</div><div class="grow"><div class="t">${esc(v.place)}</div><div class="s">${v.time}${v.cin?' · check-in '+v.cin:''}${v.cout?' · check-out '+v.cout:''}</div></div><button class="btn sm ${open?'sec':''}" style="width:auto" onclick="act(()=>visitAction('${v.id}'))">${lab}</button></div>`; };
   const head = o
     ? `<div class="card" style="margin-bottom:14px"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="small muted">Sedang di toko</div><div class="t" style="font-weight:800">${esc(o.place)}</div><div class="small muted">Check-in ${o.cin}</div></div>${chip('Berjalan','blue')}</div>
-      <button class="btn sm" style="margin-top:12px" onclick="fmOut('${o.id}')">${I('check',18,2.2)} Check-out & selesai</button></div>`
+      <button class="btn sm" style="margin-top:12px" onclick="act(()=>fmOut('${o.id}'))">${I('check',18,2.2)} Check-out & selesai</button></div>`
     : !L.length ? `<div class="empty">Belum ada jadwal kunjungan. Admin atau Team Leader membuat jadwalnya.</div>`
     : multi ? `<div class="sec-title" style="margin-top:0">Pilih toko</div><div class="list" style="margin-bottom:14px">${L.map(storeRow).join('')}</div><p class="hint" style="margin:-6px 0 14px">Kamu ditugaskan di ${L.length} toko. Pilih toko, check-in, kerjakan aktivitas, lalu check-out.</p>`
     : `<div class="list" style="margin-bottom:14px">${storeRow(L[0])}</div><p class="hint" style="margin:-6px 0 14px">Kamu ditugaskan di 1 toko. Check-in, kerjakan aktivitas, lalu check-out.</p>`;
