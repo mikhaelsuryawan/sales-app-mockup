@@ -1914,14 +1914,11 @@ function saleFreeGo(){ const n=val('ft_o'); if(!n){ toast('Isi nama outlet','ale
 
 /* ---------- Multi Finance ---------- */
 const isCbd = () => S.user==='cbd.tono';
-const CBD_FLOW=['Follow Up','Input Order','Verify Dokumen','Scoring','Survey'];
-function leadStep(id){ const l=S.leads.find(x=>x.id===id); l.step=(l.step||0)+1; l.log.unshift({t:CBD_FLOW[l.step-1],s:'26 Okt · Selesai'}); render(false,true); toast('Tahap '+CBD_FLOW[l.step-1]+' selesai'); }
 function leadDoc(id){ const l=S.leads.find(x=>x.id===id); l.docCair=true; l.log.unshift({t:'Persetujuan pencairan dana',s:'26 Okt · Terunggah'}); render(false,true); toast('Persetujuan pencairan dana terunggah'); }
 function leadSerah(id){ const l=S.leads.find(x=>x.id===id); l.docSerah=true; l.log.unshift({t:'Dokumen serah terima dana dengan nasabah',s:'26 Okt · Terunggah'}); render(false,true); toast('Dokumen serah terima dana terunggah'); }
 function leadExtra(l){
-  const cbd=isCbd()?`<div class="sec-title">Alur CBD</div><div class="card"><div class="timeline">${CBD_FLOW.map((x,i)=>`<div class="ti ${i>(l.step||0)?'dim':''}"><b>${x}</b><small>${i<(l.step||0)?'Selesai':i===(l.step||0)?'Tahap saat ini':'Belum'}</small></div>`).join('')}</div>${(l.step||0)<CBD_FLOW.length?`<button class="btn sec sm" style="margin-top:10px" onclick="act(()=>leadStep('${l.id}'))">Selesaikan ${CBD_FLOW[l.step||0]}</button>`:''}</div>`:'';
   const doc=l.status==='Deal'&&l.docOk?`<div class="sec-title">Dokumen</div><div class="card"><div class="kv"><span>Bukti sudah approve</span><span style="color:var(--green)">Terunggah</span></div><div class="kv"><span>Persetujuan pencairan dana</span><span style="color:${l.docCair?'var(--green)':'var(--amber)'}">${l.docCair?'Terunggah':'Belum'}</span></div><div class="kv"><span>Dokumen serah terima dana dengan nasabah</span><span style="color:${l.docSerah?'var(--green)':'var(--amber)'}">${l.docSerah?'Terunggah':'Belum'}</span></div>${S.user==='rea.nina'&&!l.docCair?`<p class="hint">Insentif cair setelah foto dokumen pencairan diunggah.</p>`:''}${!l.docCair?`<button class="btn sec sm" style="margin-top:10px" onclick="act(()=>leadDoc('${l.id}'))">${I('camera',18)} Unggah persetujuan pencairan dana</button>`:!l.docSerah?`<button class="btn sec sm" style="margin-top:10px" onclick="act(()=>leadSerah('${l.id}'))">${I('camera',18)} Unggah dokumen serah terima dana</button>`:''}</div>`:'';
-  return cbd+doc;
+  return doc;
 }
 SCR['lead-baru'] = () => ({note:'CBD dan REA/SPG boleh membuat leads sendiri. Customer yang sudah terdaftar di REA lain tetap boleh dibuat; duplikat tidak masalah (MOM 12.4).',
   html:`${appbar('Buat leads')}<main class="content">
