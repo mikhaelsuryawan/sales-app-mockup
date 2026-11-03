@@ -571,7 +571,7 @@ const shReset=()=>{try{localStorage.removeItem(SHARE_KEY)}catch(e){}};
 const SKU_TASK_DEFAULT=[{id:'T-11',prod:'kl2p',toko:'Electronic City Kemang',by:'Rina Marlina',st:'Sedang diperbaiki'},{id:'T-12',prod:'ap30',toko:'Best Denki Alam Sutera',by:'Fajar Nugroho',st:'Menunggu assign'},{id:'T-09',prod:'tv43',toko:'Electronic Solution Puri',by:'Putri Ayuningtyas',st:'Closed'}];
 const skuTasks=()=>shRead('skuTasks',SKU_TASK_DEFAULT);
 const CBD_DEFAULT=[{id:'CT-3',t:'Alasan leads tidak goal',to:'Tono Hidayat',qs:['Kenapa nasabah menolak?','Produk apa yang lebih diminati?'],st:'Menunggu jawaban'},{id:'CT-2',t:'Minat produk Dana Tunai',to:'Tono Hidayat',qs:['Produk apa yang paling diminati?','Berapa nominal yang dibutuhkan?','Kapan dibutuhkan?'],st:'Terjawab'}];
-const cbdTasks=()=>shRead('cbdTasks',CBD_DEFAULT);
+const cbdTasks=()=>shRead('cbdTasks',CBD_DEFAULT).filter(x=>!x.del);
 const EVENT_DEFAULT=[{id:'ev1',name:'Pameran Elektronik Kota Kasablanka',lokasi:'Atrium Lt. 1',start:'2026-10-24',end:'2026-10-26',client:'cl1',cabang:'Jakarta Selatan',status:'Aktif'},{id:'ev2',name:'Bazar Akhir Tahun Alam Sutera',lokasi:'Plaza Utama',start:'2026-12-05',end:'2026-12-07',client:'cl1',cabang:'Tangerang',status:'Aktif'}];
 const TODAY_ISO='2026-10-26';
 const eventToko=()=>shRead('events',EVENT_DEFAULT).filter(e=>!e.del&&e.status==='Aktif'&&e.start<=TODAY_ISO&&TODAY_ISO<=e.end).map(e=>({id:e.id,name:'Event '+e.name,addr:e.lokasi+' · '+e.start.slice(8)+'–'+e.end.slice(8)+' Okt',cat:'Event',event:true}));
@@ -669,7 +669,7 @@ function doLogin(){
   },900);
 }
 function loginAs(u){
-  S.user=u; S.demo.mode=null;
+  S.user=u; S.demo.mode=null; fmSyncVisits();
   if(!S.enrolled[u]) reset('enroll-intro'); else reset('home');
   renderPanel();
 }
@@ -1012,7 +1012,7 @@ SCR['kunjungan-detail'] = p => {
   else if(!x.cin) foot=`<button class="btn ghost" style="width:auto" onclick="toast('Membuka Google Maps…','route')">${I('route',18)} Rute</button><button class="btn ${lk?'locked':''}" onclick="act(()=>startCheckin('${x.id}'))">${I(lk?'lock':'pin',18)} Check-in di lokasi</button>`;
   else foot=`<button class="btn ${lk?'locked':''}" onclick="act(()=>${role()==='fmcg'?`fmOut('${x.id}')`:`go('kunjungan-foto',{id:'${x.id}',mode:'out'})`})">${I(lk?'lock':'check',18,2.2)} ${role()==='canvas'?'Submit kunjungan':'Check-out & selesai'}</button>`;
   return {note:'Check-in dan check-out wajib 1 foto ber-watermark, catatan opsional (MOM 5.2). Untuk Promotor FMCG dan MD, tugas selalu semua aktivitas toko kecuali support task, dan check-out baru bisa setelah semua tugas hijau. Check-in dan check-out harus di lokasi yang sama, dan Promotor FMCG boleh berulang kali dalam sehari. Lupa check-out ditutup otomatis saat check-in di toko berikutnya atau saat absen pulang. Canvassing cukup submit kunjungan, lalu check-out otomatis (MOM 5.1, 10.1).',
-  html:`${appbar('Detail kunjungan',{right:!x.cin&&x.status!=='Selesai'&&role()!=='fmcg'&&canSchedule(role())?`<button class="ib" onclick="act(()=>delVisitSheet('${x.id}'))" aria-label="Hapus kunjungan">${I('trash',20)}</button>`:''})}<main class="content">
+  html:`${appbar('Detail kunjungan',{right:!x.cin&&x.status!=='Selesai'&&(role()!=='fmcg'||x.own)&&canSchedule(role())?`<button class="ib" onclick="act(()=>delVisitSheet('${x.id}'))" aria-label="Hapus kunjungan">${I('trash',20)}</button>`:''})}<main class="content">
     <div class="card"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t" style="font-weight:800;font-size:16px">${x.place}</div><div class="small muted">Sen, 26 Okt 2026 · ${x.time}</div></div>${chip(x.status,x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':'')}</div>
       ${x.cin?`<div class="kv" style="margin-top:8px"><span>Check-in</span><span class="num">${x.cin} · 24 m dari titik toko</span></div>${x.cout?`<div class="kv"><span>Check-out</span><span class="num">${x.cout} · durasi ${x.dur}</span></div>`:''}`
       :`<div class="banner blue" style="margin-top:12px">${I('pin',18)}<span>Check-in saat sudah sampai. Lokasi kamu dicocokkan dengan titik toko (radius 100 m).</span></div>`}</div>
@@ -1060,9 +1060,9 @@ const FM_TASKS=[['stok','Cek stok','box','fm-stok'],['promo','Price promo','tag'
 const fmPending = v => FM_TASKS.filter(t=>!(v.done||{})[t[0]]);
 const ST_TONE={'Belum Selesai':'red','Draft':'amber','Selesai':'green'};
 const stChip = st => chip(st,ST_TONE[st]);
-function fmDraftSave(k,keep){ S.fm.draft=S.fm.draft||{}; S.fm.draft[k]=true; if(!keep) back(); toast('Disimpan sementara, status Draft'); }
+function fmDraftSave(k,keep){ S.fm.draft=S.fm.draft||{}; S.fm.draft[k]=true; fmLogPush(k,'Draft'); if(!keep) back(); toast('Disimpan sementara, status Draft'); }
 const fmStatus = (k,x) => (x.done||{})[k]?'Selesai':(S.fm.draft||{})[k]?'Draft':'Belum Selesai';
-function fmMark(k){ const v=visitOpen(); if(v&&role()==='fmcg'){ v.done=v.done||{}; v.done[k]=true; } }
+function fmMark(k){ const v=visitOpen(); if(v&&role()==='fmcg'){ v.done=v.done||{}; v.done[k]=true; fmLogPush(k,'Selesai'); } }
 function fmOut(id){
   const v=visitById(id), p=fmPending(v);
   if(!p.length){ go('kunjungan-foto',{id,mode:'out'}); return; }
@@ -1076,6 +1076,35 @@ function fmTaskRows(x){
     return on?`<button class="li" onclick="fmGate(()=>go('${t[3]}'))"><div class="ico-tile ${ok?'green':''}">${I(ok?'check':t[2],18,2.2)}</div><div class="grow"><div class="t">${t[1]}</div></div>${st}${I('right',18)}</button>`
     :`<div class="li"><div class="ico-tile ${ok?'green':''}">${I(ok?'check':t[2],18,2.2)}</div><div class="grow"><div class="t">${t[1]}</div></div>${st}</div>`; }).join('');
   return `<div class="list">${rows}</div><p class="hint" style="margin-top:10px">${x.cout?'Support task dikerjakan terpisah dan tidak wajib.':'Semua task wajib selesai (hijau) sebelum check-out. Support task dikerjakan terpisah dan tidak wajib.'}</p>`;
+}
+const FM_VISITS_DEFAULT=[{id:'kv9',u:'tari',place:'Electronic City Kemang',time:'09:00'},{id:'kv10',u:'tari',place:'Best Denki Senayan City',time:'13:00'},{id:'kv11',u:'rangga',place:'Best Denki Senayan City',time:'09:00'}];
+const fmUk = () => (S.user||'').split('.')[1]||'';
+function fmSyncVisits(){
+  if(role()!=='fmcg') return;
+  S.fmv=S.fmv||{}; const L=S.fmv[S.user]||(S.fmv[S.user]=[]); S.visits.fmcg=L;
+  const sh=shRead('fmVisits',FM_VISITS_DEFAULT).filter(v=>v.u===fmUk());
+  sh.forEach(v=>{ const c=L.find(x=>x.id===v.id); if(c){ if(!c.cin){ c.place=v.place; c.time=v.time; } } else L.push({id:v.id,place:v.place,time:v.time,tasks:['Semua aktivitas toko'],status:'Belum',photos:{}}); });
+  for(let i=L.length-1;i>=0;i--){ const x=L[i]; if(!x.own&&!x.cin&&!sh.some(v=>v.id===x.id)) L.splice(i,1); }
+}
+function fmPushState(){
+  if(role()!=='fmcg') return;
+  const all=shRead('fmState',{}), k=fmUk();
+  S.visits.fmcg.forEach(v=>{ const key=k+':'+v.id; if(!v.cin){ delete all[key]; return; }
+    all[key]={cin:v.cin,cout:v.cout||'',dur:v.dur||'',status:v.status,photos:(v.pIn?1:0)+(v.pOut?1:0),tk:Object.fromEntries(FM_TASKS.map(t=>[t[0],v.cout?((v.done||{})[t[0]]?'Selesai':'Belum Selesai'):fmStatus(t[0],v)]))}; });
+  shSet('fmState',all);
+}
+function fmLogDetail(k){
+  if(k==='stok'){ const L=fmSkus(), na=L.filter(x=>fmRow(x.id).na).length; return `${L.length} SKU · ${na} barang tidak tersedia · ${S.fm.extra.length} di luar planned product`; }
+  if(k==='promo') return promoCek().map(x=>{ const v=+(S.fm.promo||{})[x.id]; return x.name+': '+rp(x.b)+' → '+(v?rp(v)+' ('+fmPromoPct(x.b,v).replace('Diskon ','')+')':'belum diisi'); }).join('; ');
+  if(k==='facing') return facingList().map(x=>x.name+' '+((S.facing||{})[x.id]||'–')).join(', ');
+  if(k==='share') return 'Input market share tersimpan';
+  return S.fm.tasks.map(t=>t.t+(t.done?' (selesai)':t.draft?' (draft)':'')).join('; ');
+}
+const FM_JENIS={stok:'Cek stok',promo:'Price promo',facing:'Facing display',share:'Market share',support:'Support task'};
+function fmLogPush(k,status){
+  const v=visitOpen(); if(!v||role()!=='fmcg'||!FM_JENIS[k]) return;
+  const L=shRead('fmLog',[]), id=S.user+':'+v.id+':'+k, e={id,tgl:'26 Okt',who:U().name,toko:v.place,jenis:FM_JENIS[k],status,isi:fmLogDetail(k)}, i=L.findIndex(x=>x.id===id);
+  if(i>=0) L[i]=e; else L.unshift(e); shSet('fmLog',L);
 }
 function fmGate(fn){ act(()=>{ if(role()==='fmcg'&&!visitOpen()){ sheet(`<h3 style="font-size:18px;font-weight:800">Check-in dulu</h3><p class="muted small" style="margin:6px 0 16px;line-height:1.5">Pilih toko yang kamu kunjungi, lalu check-in di lokasi. Setelah itu pekerjaan di toko tersebut bisa dilanjutkan.</p>
     <button class="btn" onclick="closeSheet();visitEntry()">Pilih toko</button><button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Nanti</button>`); return; } fn(); }); }
@@ -1145,7 +1174,7 @@ function saveVisit(){
   if(p.spv){ back(); toast('Penugasan terkirim, anggota tim dapat notifikasi'); return; }
   const list=S.visits[vk()];
   if(p.kind==='berkala'){ back(); toast('Jadwal berkala '+(p.per||'Mingguan').toLowerCase()+' tersimpan'); return; }
-  if(list.length){ toast('Hari ini sudah ada jadwal ke '+list[0].place,'alert'); return; } list.push({id:'v'+(list.length+1)+Date.now()%1000,place,time:'13:00',tasks,status:'Belum',photos:{}});
+  if(list.length){ toast('Hari ini sudah ada jadwal ke '+list[0].place,'alert'); return; } list.push({id:'v'+(list.length+1)+Date.now()%1000,place,time:'13:00',tasks,status:'Belum',photos:{},own:role()==='fmcg'});
   back(); toast('Kunjungan ditambahkan ke jadwal hari ini');
 }
 
@@ -1766,11 +1795,12 @@ SCR['fm-stok'] = () => {
     <button class="btn ghost" onclick="fmAddSheet()">${I('plus',20)} Tambah SKU</button>
   </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="fmDraftSave('stok')">Simpan sementara</button><button class="btn" onclick="fmSubmit()">Submit stock opname</button></footer>`};
 };
-const FM_PRICE={f1:{b:29900},f2:{b:4000},f3:{b:6500},f4:{b:2000},f5:{b:11900}};
+const FM_PRICE_DEFAULT={f1:29900,f2:4000,f3:6500,f4:2000,f5:11900};
+const fmPriceB = id => shRead('fmPrice',FM_PRICE_DEFAULT)[id]||0;
 const fmPromoPct = (b,v) => { const n=+v; if(!n||n<=0) return ''; if(n>=b) return 'Harga promo harus di bawah harga sebelum promo'; return 'Diskon '+(Math.round((b-n)/b*1000)/10).toString().replace('.',',')+'%'; };
 const fmPromoOk = () => promoCek().length>0&&promoCek().every(x=>+(S.fm.promo||{})[x.id]>0&&+S.fm.promo[x.id]<x.b&&S.fm.foto[x.id+'d']&&S.fm.foto[x.id+'t']);
 function fmPromoSet(id,b,v){ S.fm.promo=S.fm.promo||{}; S.fm.promo[id]=v.replace(/\D/g,''); const e=document.getElementById('pp_'+id); if(e){ const t=fmPromoPct(b,S.fm.promo[id]); e.textContent=t; e.style.color=t.startsWith('Harga')?'var(--red)':'var(--green)'; } const k=document.getElementById('ppKirim'); if(k) k.disabled=!fmPromoOk(); }
-const promoCek=()=>shRead('pcek',['f1','f3']).filter(id=>FMCG_SKU.some(s=>s.id===id)).map(id=>({id,name:FMCG_SKU.find(s=>s.id===id).name,...FM_PRICE[id]}));
+const promoCek=()=>shRead('pcek',['f1','f3']).filter(id=>FMCG_SKU.some(s=>s.id===id)).map(id=>({id,name:FMCG_SKU.find(s=>s.id===id).name,b:fmPriceB(id)}));
 function fmPhoto(k){ S.fm.foto[k]=true; render(false,true); toast('Foto tersimpan','camera'); }
 SCR['fm-promo'] = () => {
   const ok=fmPromoOk();
@@ -1782,11 +1812,12 @@ SCR['fm-promo'] = () => {
   </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="fmDraftSave('promo')">Simpan sementara</button><button class="btn" id="ppKirim" ${ok?'':'disabled'} onclick="fmMark('promo');back();toast('Price promo terkirim')">Kirim price promo</button></footer>`};
 };
 const facingChip = id => { const v=visitOpen(); return v&&(v.done||{}).facing?stChip('Selesai'):(S.facingSaved||{})[id]?stChip('Draft'):(S.facing||{})[id]?chip('Nilai '+S.facing[id],'green'):stChip('Belum Selesai'); };
-const FACING=[{id:'fc1',name:'Rak Utama',kind:'Facing display',acuan:'Susunan facing di rak utama sesuai brief'},{id:'fc2',name:'Boot',kind:'Facing display',acuan:'Susunan facing di boot sesuai brief'},{id:'fc3',name:'Gudang',kind:'Facing display',acuan:'Susunan barang di gudang sesuai brief'}];
+const FACING_DEFAULT=[{id:'fc1',name:'Rak Utama',kind:'Facing display',acuan:'Susunan facing di rak utama sesuai brief'},{id:'fc2',name:'Boot',kind:'Facing display',acuan:'Susunan facing di boot sesuai brief'},{id:'fc3',name:'Gudang',kind:'Facing display',acuan:'Susunan barang di gudang sesuai brief'}];
+const facingList = () => shRead('facing',FACING_DEFAULT).filter(x=>!x.del&&x.status!=='Nonaktif');
 SCR['fm-facing'] = () => ({note:'Facing display (MOM 10.2). Isi menu sama dengan Campaign, POSM & planogram: pilih item, foto lokasi, lalu dinilai dan dicocokkan dengan foto brief (simulasi). Tiap item disimpan ke draft dengan tombol Simpan di detail item; Simpan di daftar baru aktif setelah semua item selesai. Pilihan item: Rak Utama, Boot, Gudang.',
-  html:`${appbar('Facing display')}<main class="content"><div class="list">${FACING.map(x=>`<button class="li" onclick="go('facing-detail',{id:'${x.id}'})"><div class="ico-tile">${I('image',20)}</div><div class="grow"><div class="t">${x.name}</div><div class="s">${x.kind}</div></div>${facingChip(x.id)}</button>`).join('')}</div>${(()=>{ const ok=FACING.every(a=>(S.facingSaved||{})[a.id]), v=visitOpen(), fin=v&&(v.done||{}).facing; return fin?'':`<p class="hint" style="margin-top:12px">${ok?'Semua item sudah selesai. Tekan Simpan untuk menyelesaikan facing display.':'Selesaikan semua item (Rak Utama, Boot, Gudang) sebelum Simpan.'}</p>`; })()}</main><footer class="actions"><button class="btn" ${FACING.every(a=>(S.facingSaved||{})[a.id])?'':'disabled'} onclick="fmMark('facing');back();toast('Facing display tersimpan')">Simpan</button></footer>`});
+  html:`${appbar('Facing display')}<main class="content"><div class="list">${facingList().map(x=>`<button class="li" onclick="go('facing-detail',{id:'${x.id}'})"><div class="ico-tile">${I('image',20)}</div><div class="grow"><div class="t">${x.name}</div><div class="s">${x.kind}</div></div>${facingChip(x.id)}</button>`).join('')}</div>${(()=>{ const ok=facingList().every(a=>(S.facingSaved||{})[a.id]), v=visitOpen(), fin=v&&(v.done||{}).facing; return fin?'':`<p class="hint" style="margin-top:12px">${ok?'Semua item sudah selesai. Tekan Simpan untuk menyelesaikan facing display.':'Selesaikan semua item (Rak Utama, Boot, Gudang) sebelum Simpan.'}</p>`; })()}</main><footer class="actions"><button class="btn" ${facingList().every(a=>(S.facingSaved||{})[a.id])?'':'disabled'} onclick="fmMark('facing');back();toast('Facing display tersimpan')">Simpan</button></footer>`});
 SCR['facing-detail'] = p => {
-  const x=FACING.find(a=>a.id===p.id), n=(S.facing||{})[x.id];
+  const x=facingList().find(a=>a.id===p.id), n=(S.facing||{})[x.id];
   return {note:'Nilai AI di sini simulasi. Rekomendasi ambang: 80 atau lebih lulus, 70 sampai 79 ditinjau Team Leader, di bawah 70 foto ulang. Acuan final menunggu klien.',
   html:`${appbar(x.name)}<main class="content">
     <div class="card"><b>${x.name}</b><div class="small muted" style="margin-top:2px">Acuan: ${x.acuan}</div></div>
@@ -1795,7 +1826,7 @@ SCR['facing-detail'] = p => {
   </main>${(()=>{ const v=visitOpen(); return v&&(v.done||{}).facing?'':`<footer class="actions"><button class="btn" ${n?'':'disabled'} onclick="facingSave('${x.id}')">Simpan</button></footer>`; })()}`};
 };
 function facingShoot(id){ S.facing=S.facing||{}; S.facing[id]=86; render(false,true); toast('Foto dinilai: 86','camera'); }
-function facingSave(id){ S.facingSaved=S.facingSaved||{}; S.facingSaved[id]=true; S.fm.draft=S.fm.draft||{}; S.fm.draft.facing=true; back(); toast('Item disimpan ke draft'); }
+function facingSave(id){ S.facingSaved=S.facingSaved||{}; S.facingSaved[id]=true; S.fm.draft=S.fm.draft||{}; S.fm.draft.facing=true; fmLogPush('facing','Draft'); back(); toast('Item disimpan ke draft'); }
 SCR['fm-task'] = () => ({note:'Support task (MOM 10.2). Sales membuat task sendiri, atau task di-assign outlet atau Team Leader. Team Leader melihat hasilnya tanpa approval.',
   html:`${appbar('Support task',{right:`<button class="ib" onclick="act(()=>go('fm-task-form',{}))" aria-label="Buat task">${I('plus',24,2)}</button>`})}<main class="content">
     <div class="list">${S.fm.tasks.map((x,i)=>`<button class="li" onclick="act(()=>go('fm-task-form',{i:${i}}))"><div class="ico-tile ${x.done?'green':'tan'}">${I(x.done?'check':'clock',20,2)}</div><div class="grow"><div class="t">${esc(x.t)}</div><div class="s">${x.from}</div></div>${stChip(x.done?'Selesai':x.draft?'Draft':'Belum Selesai')}</button>`).join('')}</div>
@@ -1813,7 +1844,7 @@ function fmTaskSave(draft){
   const p=cur().p;
   if(p.i!=null){ const x=S.fm.tasks[p.i]; if(draft) x.draft=true; else { x.done=true; x.draft=false; } }
   else { const t=val('ft_t'); if(!t){ toast('Isi nama task','alert'); return; } S.fm.tasks.unshift({t,from:'Dibuat sendiri',done:!draft,draft:!!draft}); }
-  back(); toast(draft?'Disimpan sementara, status Draft':'Task tersimpan, Team Leader bisa melihatnya');
+  fmLogPush('support',draft?'Draft':'Selesai'); back(); toast(draft?'Disimpan sementara, status Draft':'Task tersimpan, Team Leader bisa melihatnya');
 }
 
 /* ---------- POSM & planogram ---------- */
@@ -2292,6 +2323,7 @@ function tabbar(active){
 }
 function render(scrollTop=true, keepScroll=false){
   const c=cur(); if(!c) return;
+  if(S.user&&role()==='fmcg'){ fmSyncVisits(); fmPushState(); }
   const content=$('#view .content'); const st=keepScroll&&content?content.scrollTop:0;
   const def=SCR[c.name](c.p);
   $('#view').innerHTML=def.html;

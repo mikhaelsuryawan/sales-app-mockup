@@ -83,13 +83,14 @@ Acuan revisi: `../docs/00-sources/extracted/S5-mom-workshop-27-28-okt-2026.md`. 
 
 ### Dashboard (`dashboard/index.html`)
 
-- **Operasional:** Absensi, Kunjungan (Team Leader membuat jadwal), Approval, Task pending (produk rusak dan task CBD), Aktivitas lapangan (log FMCG dan MD, kinerja Reliever dan Promotor Bantuan).
+- **Operasional:** Absensi, Kunjungan (jadwal dibuat, diedit, dan dihapus di sini; jadwal Promotor FMCG dan MD tampil di mobile dan tidak bisa dihapus promotor; panel kunjungan FMCG menampilkan status tugas Belum Selesai, Draft, Selesai dari mobile), Approval, Task pending (produk rusak dan task CBD), Aktivitas lapangan (log FMCG dan MD dengan status tugas, langsung dari mobile; kinerja Reliever dan Promotor Bantuan).
 - **Penjualan:** Laporan penjualan, Target dan sell-in (termasuk Multi Finance), Canvassing, laporan SKU display, laporan market share (hanya data check-out, rata-rata antar penginput), Promo, Insentif, Grading (dengan formula per klien dan role).
 - **Sales automation:** Leads pinjaman (import assign), Overdue.
+- **Tabel CRUD:** semua tabel CRUD punya kolom Aksi dengan tombol Edit dan Hapus (hapus selalu soft delete dengan konfirmasi, data yang dipakai tidak bisa dihapus): master data, Kunjungan, Task CBD, Brief POSM, Promo (hapus perlu approval), Quiz dan Survey, Item facing display, Harga per toko, dan Price promo.
 - **Master data dengan CRUD:** Client, Region, Kategori toko, Toko, Brand, Kategori produk, Produk dan harga (harga per toko dan cabang yang bisa diatur sendiri, mapping outlet untuk produk elektronik dan FMCG, produk price promo, produk difoto, plan display, produk Multi Finance), Satuan, Event, Mitra (dengan kode dan alamat), User SIM (jadwal off dan NPO dari BPR), IAM (16 role dengan segmen dan tipe, struktur approval, matrix approval, log), Parameter.
 - **Konten:** Campaign, POSM, dan planogram, Quiz, Survey (jadwal berkala, tanpa opsi anonim).
 
-Semua data dummy. CRUD bekerja di memori dan hilang saat reload, kecuali sepuluh data yang dibagi antara mobile dan dashboard lewat `localStorage` browser yang sama (kunci `salesapp.shared.v1`, satu domain di Vercel):
+Semua data dummy. CRUD bekerja di memori dan hilang saat reload, kecuali data yang dibagi antara mobile dan dashboard lewat `localStorage` browser yang sama (kunci `salesapp.shared.v1`, satu domain di Vercel):
 
 | Data | Dibuat di | Dipakai di |
 |---|---|---|
@@ -102,7 +103,11 @@ Semua data dummy. CRUD bekerja di memori dan hilang saat reload, kecuali sepuluh
 | Harga per toko | Dashboard (Produk dan harga, tab Harga) | Mobile (harga di penjualan) |
 | Produk price promo | Dashboard (Produk dan harga) | Mobile (Price promo FMCG) |
 | Mapping produk per outlet | Dashboard (Produk dan harga) | Mobile (Cek stok) |
-| Plan tata letak display | Dashboard (Produk dan harga) | Mobile (Facing display) |
+| Item facing display (Rak Utama, Boot, Gudang) | Dashboard (Produk dan harga, tab Facing display) | Mobile (Facing display) |
+| Harga sebelum promo | Dashboard (Produk dan harga, tab Price promo) | Mobile (Price promo; harga promo diinput promotor) |
+| Jadwal kunjungan Promotor FMCG dan MD | Dashboard (Kunjungan) | Mobile (Kunjungan) |
+| Status kunjungan dan tugas FMCG | Mobile (check-in, tugas) | Dashboard (Kunjungan) |
+| Log aktivitas FMCG | Mobile (simpan sementara atau selesai) | Dashboard (Aktivitas lapangan) |
 
 Datanya tersimpan di browser tiap pengguna, bukan di server. Tombol reset ada di panel demo mobile dan di Pengaturan dashboard. Menu per role di IAM (Lihat, Buat, Ubah, Hapus, Approve) tetap hanya tampilan.
 

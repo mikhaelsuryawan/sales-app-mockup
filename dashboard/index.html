@@ -129,6 +129,9 @@ main{flex:1;min-height:0;overflow-y:auto;padding:0 32px 40px;outline:none}
 .b-ink{background:var(--ink);color:#fff} .b-ink:hover{opacity:.85}
 .b-onpop{background:#fff;color:var(--ink)}
 .b-danger{background:var(--danger-soft);color:var(--danger)}
+.row-acts{display:flex;gap:6px;justify-content:flex-end;flex-wrap:nowrap}
+.tbl td.acts-c{width:1%;white-space:nowrap}
+.tbl .b-danger.sm:hover{background:var(--danger);color:#fff}
 .bell{position:relative}
 .bell i{position:absolute;top:12px;right:13px;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--card)}
 
@@ -338,6 +341,9 @@ textarea.ta:focus{outline:2px solid var(--accent);outline-offset:2px}
   .tbl.resp td[data-l]:not(.prim)::before{content:attr(data-l) ": ";color:var(--subtle);font-size:11.5px}
   .tbl.resp td.prim{grid-column:1/-1;color:var(--fg);font-weight:600}
   .tbl.resp td.hide-m{display:none}
+  .tbl.resp td.acts-c{grid-column:1/-1;width:auto;white-space:normal;text-align:left;padding-top:8px}
+  .tbl.resp td.acts-c::before{display:none}
+  .tbl.resp td.acts-c .row-acts{justify-content:flex-start;flex-wrap:wrap}
   .cc-plot,.cc-labels{gap:4px} .cc-axis{display:none} .cc-col .val{display:none}
   .toasts{left:16px;right:16px;align-items:stretch}
   .login{grid-template-columns:1fr} .login-art{display:none}
@@ -417,8 +423,9 @@ const spill=(t,tone='neutral')=>`<span class="spill"><i class="dotc" style="back
 const delta=(v,goodUp=true)=>{const good=goodUp?v>=0:v<0;return `<span class="delta ${good?'t-success':'t-danger'}" aria-label="${v>=0?'naik':'turun'} ${Math.abs(v)}%">${I(v>=0?'arrowup':'arrowdown',14,2.4)}${pct(Math.abs(v))}</span>`};
 const btn=(label,{v='card',size='',icon=null,on='',attrs='',dis=false}={})=>`<button class="btn b-${v} ${size}" ${on?`onclick="${on}"`:''} ${attrs} ${dis?'disabled':''}>${icon?I(icon,size==='sm'?15:18):''}${label}</button>`;
 const ibtn=(icon,label,on,{v='ghost',size='icon',attrs=''}={})=>`<button class="btn b-${v} ${size}" aria-label="${label}" title="${label}" onclick="${on}" ${attrs}>${I(icon,size==='icon-sm'?16:18)}</button>`;
-const sel=(opts,val,on,{cls='',label=''}={})=>`<label class="sel ${cls}"><span class="sr-only">${label}</span><select onchange="${on}">${opts.map(o=>{const [v,l]=Array.isArray(o)?o:[o,o];return `<option value="${esc(v)}" ${String(v)===String(val)?'selected':''}>${esc(l)}</option>`}).join('')}</select>${I('chev',16)}</label>`;
+const sel=(opts,val,on,{cls='',label='',id=''}={})=>`<label class="sel ${cls}"><span class="sr-only">${label}</span><select ${id?`id="${id}"`:''} onchange="${on}">${opts.map(o=>{const [v,l]=Array.isArray(o)?o:[o,o];return `<option value="${esc(v)}" ${String(v)===String(val)?'selected':''}>${esc(l)}</option>`}).join('')}</select>${I('chev',16)}</label>`;
 const pills=(items,active,fn)=>`<div class="pills" role="tablist">${items.map(([k,l])=>`<button role="tab" aria-selected="${k===active}" class="${k===active?'on':''}" onclick="${fn}('${k}')">${l}</button>`).join('')}</div>`;
+const rowActs=(editOn,delOn,{del=true,edit=true}={})=>`${edit?btn('Edit',{v:'soft',size:'sm',icon:'edit',on:editOn}):''}${del?btn('Hapus',{v:'danger',size:'sm',icon:'trash',on:delOn}):''}`;
 const utabs=(items,active,fn)=>`<div class="utabs" role="tablist">${items.map(([k,l,n])=>`<button role="tab" aria-selected="${k===active}" class="${k===active?'on':''}" onclick="${fn}('${k}')">${l}${n!=null?`<span class="n">${n}</span>`:''}</button>`).join('')}</div>`;
 const card=(title,body,{acts='',cls='',icon=''}={})=>`<section class="card ${cls}">${title?`<div class="ch"><h2>${icon?I(icon,18):''}${title}</h2>${acts?`<div class="acts">${acts}</div>`:''}</div>`:''}${body}</section>`;
 const callout=(html,cls='')=>`<div class="callout ${cls}">${I('bulb',18)}<span>${html}</span></div>`;
@@ -450,7 +457,6 @@ const shReset=()=>{try{localStorage.removeItem(SHARE_KEY)}catch(e){}};
 const SKU_TASK_DEFAULT=[{id:'T-11',prod:'kl2p',toko:'Electronic City Kemang',by:'Rina Marlina',st:'Sedang diperbaiki'},{id:'T-12',prod:'ap30',toko:'Best Denki Alam Sutera',by:'Fajar Nugroho',st:'Menunggu assign'},{id:'T-09',prod:'tv43',toko:'Electronic Solution Puri',by:'Putri Ayuningtyas',st:'Closed'}];
 const CBD_DEFAULT=[{id:'CT-3',t:'Alasan leads tidak goal',to:'Tono Hidayat',qs:['Kenapa nasabah menolak?','Produk apa yang lebih diminati?'],st:'Menunggu jawaban'},{id:'CT-2',t:'Minat produk Dana Tunai',to:'Tono Hidayat',qs:['Produk apa yang paling diminati?','Berapa nominal yang dibutuhkan?','Kapan dibutuhkan?'],st:'Terjawab'}];
 const PFOTO_DEFAULT=['tv50','tv43','kl2p','mc85'];
-const PLAN_DEFAULT={'Minggu 1':[['Rak utama',4],['End gondola',2]],'Minggu 2':[['Rak utama',5],['End gondola',3]],'Minggu 3':[['Rak utama',5],['End gondola',4]],'Minggu 4':[['Rak utama',6],['End gondola',4]]};
 const SALES=[
   {u:'rina',name:'Rina Marlina',job:'SPG / Promotor',cabang:'Jakarta Selatan',toko:'Electronic City Kemang',nip:'SIM-24-01187'},
   {u:'budi',name:'Budi Santoso',job:'Canvasing',cabang:'Jakarta Selatan',toko:'Rute Pasar Minggu – Cilandak',nip:'SIM-23-00912'},
@@ -461,7 +467,9 @@ const SALES=[
   {u:'kevin',name:'Kevin Halim',job:'Canvasing',cabang:'Jakarta Barat',toko:'Rute Kebon Jeruk – Kembangan',nip:'SIM-23-00988'},
   {u:'fajar',name:'Fajar Nugroho',job:'SPG / Promotor',cabang:'Tangerang',toko:'Best Denki Alam Sutera',nip:'SIM-22-00615'}
 ];
-const byU=u=>SALES.find(s=>s.u===u);
+const FMCG_USERS=[{u:'tari',name:'Lestari Putri',job:'Promotor FMCG',cabang:'Jakarta Selatan',toko:'Electronic City Kemang',nip:'SIM-24-01355'},{u:'rangga',name:'Rangga Saputra',job:'Merchandising (MD)',cabang:'Jakarta Selatan',toko:'Best Denki Senayan City',nip:'SIM-23-01102'}];
+const isFm=u=>FMCG_USERS.some(x=>x.u===u);
+const byU=u=>SALES.find(s=>s.u===u)||FMCG_USERS.find(s=>s.u===u);
 const PRODUCTS=[
   {id:'tv50',name:'VISTARA 4K Google TV 50"',sku:'AR-TV50G',cat:'TV',price:6499000,lvl:'A',inc:75000},
   {id:'tv43',name:'VISTARA Full HD TV 43"',sku:'AR-TV43F',cat:'TV',price:3899000,lvl:'B',inc:50000},
@@ -486,6 +494,8 @@ const TOKO=[
   {id:'c4',name:'Toko Jaya Abadi Kembangan',cat:'Retail',cabang:'Jakarta Barat',dealer:'CV Mitra Elektrindo',sales:['kevin'],addr:'Kembangan'},
   {id:'p2',name:'Best Denki Alam Sutera',cat:'Modern Retail',cabang:'Tangerang',dealer:'PT Global Distribusi',sales:['fajar'],addr:'Mal Alam Sutera'}
 ];
+const FM_TASKS_LABEL='Semua aktivitas toko, kecuali support task';
+const FM_TASK_KEYS=[['stok','Cek stok'],['promo','Price promo'],['facing','Facing display'],['share','Market share']];
 const D={
   usulan:[{id:'u1',name:'Toko Sumber Makmur',by:'budi',owner:'Pak Hasan',phone:'0812-7781-2290',addr:'Jl. Moh. Kahfi I No. 21, Jagakarsa',cat:'Retail',when:'26 Okt, 13:20',status:'Menunggu verifikasi'}],
   approvals:[
@@ -526,14 +536,17 @@ const D={
     {id:'PR-06',name:'Free product setrika',type:'Free product',prod:'Rice Cooker 1,8 L',period:'Draft',scope:'Canvasing',combine:true,cust:false,status:'Draft',used:0}
   ],
   visits:[
-    {u:'rina',place:'Electronic City Kemang',plan:'08:00',cin:'08:03',cout:'',dur:'',tasks:'Cek SKU display, Penjualan',photos:2,status:'Berjalan'},
+    {u:'rina',place:'Electronic City Kemang',plan:'08:00',cin:'08:03',cout:'',dur:'',tasks:'Cek SKU display, Penjualan',photos:1,status:'Berjalan'},
     {u:'rina',place:'Best Denki Senayan City',plan:'14:00',cin:'',cout:'',dur:'',tasks:'Survey toko, Market share',photos:0,status:'Belum'},
     {u:'budi',place:'Toko Sinar Jaya Elektronik',plan:'09:00',cin:'09:02',cout:'09:31',dur:'29 mnt',tasks:'Penjualan, Ambil retur',photos:2,status:'Selesai'},
     {u:'budi',place:'Toko Makmur Abadi',plan:'10:30',cin:'10:36',cout:'',dur:'',tasks:'Penjualan',photos:1,status:'Berjalan'},
     {u:'budi',place:'Toko Berkah Elektronik',plan:'13:00',cin:'',cout:'',dur:'',tasks:'Penjualan, Cek display',photos:0,status:'Belum'},
-    {u:'dimas',place:'Toko Mega Elektronik',plan:'10:00',cin:'10:04',cout:'10:30',dur:'26 mnt',tasks:'Ambil pesanan',photos:1,status:'Selesai'},
+    {u:'dimas',place:'Toko Mega Elektronik',plan:'10:00',cin:'10:04',cout:'10:30',dur:'26 mnt',tasks:'Ambil pesanan',photos:2,status:'Selesai'},
     {u:'andi',place:'Ahmad Fauzi (nasabah)',plan:'10:00',cin:'',cout:'',dur:'',tasks:'Survey usaha',photos:0,status:'Belum'},
-    {u:'kevin',place:'Toko Jaya Abadi Kembangan',plan:'09:30',cin:'09:41',cout:'10:20',dur:'39 mnt',tasks:'Penjualan',photos:3,status:'Selesai'}
+    {u:'kevin',place:'Toko Jaya Abadi Kembangan',plan:'09:30',cin:'09:41',cout:'10:20',dur:'39 mnt',tasks:'Penjualan',photos:2,status:'Selesai'},
+    {u:'tari',place:'Electronic City Kemang',plan:'09:00',cin:'',cout:'',dur:'',tasks:FM_TASKS_LABEL,photos:0,status:'Belum'},
+    {u:'tari',place:'Best Denki Senayan City',plan:'13:00',cin:'',cout:'',dur:'',tasks:FM_TASKS_LABEL,photos:0,status:'Belum'},
+    {u:'rangga',place:'Best Denki Senayan City',plan:'09:00',cin:'',cout:'',dur:'',tasks:FM_TASKS_LABEL,photos:0,status:'Belum'}
   ],
   quizzes:[
     {id:'Q-07',name:'Product knowledge VISTARA & Puraklin',type:'Quiz',q:3,scope:'Semua cabang',status:'Terbit',done:41,of:58,avg:82},
@@ -715,13 +728,13 @@ function meter(score){ const n=36, f=Math.round(score/100*n), col=score>=85?'var
 /* =====================================================================
    TABLE
    ===================================================================== */
-function dataTable(key,{cols,rows,rowClick,select,empty='Belum ada data.',perOpts=[5,10,20,50,100]}){
+function dataTable(key,{cols,rows,rowClick,select,acts,empty='Belum ada data.',perOpts=[5,10,20,50,100]}){
   const t=ST.tb[key]||(ST.tb[key]={page:1,per:10}); const pages=Math.max(1,Math.ceil(rows.length/t.per)); if(t.page>pages) t.page=pages;
   const view=rows.slice((t.page-1)*t.per,t.page*t.per); const S=ST.sel[key]||(ST.sel[key]=new Set());
   const allOn=view.length&&view.every(r=>S.has(r._id));
-  return `<div class="tbl-wrap"><table class="tbl resp"><thead><tr>${select?`<th style="width:34px"><button class="cb ${allOn?'on':''}" aria-label="Pilih semua di halaman" onclick="tbAll('${key}',[${view.map(r=>`'${r._id}'`).join(',')}],${!allOn})">${allOn?I('check',12,3):''}</button></th>`:''}${cols.map(c=>`<th class="${c.align||''} ${c.hide?'hide-m':''}">${c.label}</th>`).join('')}</tr></thead>
-    <tbody>${view.length?view.map(r=>`<tr class="${rowClick?'click':''}" ${rowClick?`onclick="${rowClick(r)}"`:''}>${select?`<td onclick="event.stopPropagation()"><button class="cb ${S.has(r._id)?'on':''}" aria-label="Pilih ${esc(r._id)}" onclick="tbSel('${key}','${r._id}')">${S.has(r._id)?I('check',12,3):''}</button></td>`:''}${cols.map((c,ci)=>`<td data-l="${c.label}" class="${c.align||''} ${c.prim?'prim':''} ${c.hide?'hide-m':''} ${c.strong?'strong':''}">${c.render?c.render(r):esc(r[c.k])}</td>`).join('')}</tr>`).join('')
-      :`<tr><td colspan="${cols.length+(select?1:0)}"><div style="text-align:center;padding:28px;color:var(--muted)">${empty}</div></td></tr>`}</tbody></table></div>
+  return `<div class="tbl-wrap"><table class="tbl resp"><thead><tr>${select?`<th style="width:34px"><button class="cb ${allOn?'on':''}" aria-label="Pilih semua di halaman" onclick="tbAll('${key}',[${view.map(r=>`'${r._id}'`).join(',')}],${!allOn})">${allOn?I('check',12,3):''}</button></th>`:''}${cols.map(c=>`<th class="${c.align||''} ${c.hide?'hide-m':''}">${c.label}</th>`).join('')}${acts?'<th class="r">Aksi</th>':''}</tr></thead>
+    <tbody>${view.length?view.map(r=>`<tr class="${rowClick?'click':''}" ${rowClick?`onclick="${rowClick(r)}"`:''}>${select?`<td onclick="event.stopPropagation()"><button class="cb ${S.has(r._id)?'on':''}" aria-label="Pilih ${esc(r._id)}" onclick="tbSel('${key}','${r._id}')">${S.has(r._id)?I('check',12,3):''}</button></td>`:''}${cols.map((c,ci)=>`<td data-l="${c.label}" class="${c.align||''} ${c.prim?'prim':''} ${c.hide?'hide-m':''} ${c.strong?'strong':''}">${c.render?c.render(r):esc(r[c.k])}</td>`).join('')}${acts?`<td data-l="Aksi" class="r acts-c" onclick="event.stopPropagation()"><div class="row-acts">${acts(r)}</div></td>`:''}</tr>`).join('')
+      :`<tr><td colspan="${cols.length+(select?1:0)+(acts?1:0)}"><div style="text-align:center;padding:28px;color:var(--muted)">${empty}</div></td></tr>`}</tbody></table></div>
     <div class="pager"><span>${rows.length?`${(t.page-1)*t.per+1}–${Math.min(t.page*t.per,rows.length)} dari ${rows.length}`:'0 data'}</span>
       <div class="pg"><span>Baris</span>${sel(perOpts,t.per,`tbPer('${key}',this.value)`,{cls:'sm',label:'Baris per halaman'})}${ibtn('left','Halaman sebelumnya',`tbPage('${key}',-1)`,{v:'soft',size:'icon-sm',attrs:t.page<=1?'disabled':''})}<span class="tabular">${t.page}/${pages}</span>${ibtn('right','Halaman berikutnya',`tbPage('${key}',1)`,{v:'soft',size:'icon-sm',attrs:t.page>=pages?'disabled':''})}</div></div>`;
 }
@@ -983,26 +996,54 @@ function attPanel(u){ const t=TODAY.find(x=>x.u===u), s=byU(u);
   t.st==='Belum absen'?btn('Kirim pengingat',{v:'accent',icon:'bell',on:`closeLayer();toast('Pengingat terkirim','${s.name} menerima notifikasi untuk absen.')`}):t.st==='Terlambat'?btn('Buka approval',{v:'accent',on:"closeLayer();go('/approval?type=Absen terlambat')"}):btn('Tutup',{v:'card',on:'closeLayer()'}),{sub:s.job+' · '+s.cabang}); }
 
 /* ---------- Kunjungan ---------- */
+const visList=()=>D.visits.filter(v=>!v.del);
+const FM_ST_TONE={'Selesai':'success','Draft':'warning','Belum Selesai':'danger'};
+const fmStates=()=>shRead('fmState',{});
+const visLive=v=>{ if(!isFm(v.u)) return v; const st=fmStates()[v.u+':'+v.id]; return st?{...v,...st}:v; };
+const fmTaskSt=(v,k)=>(v.tk||{})[k]||'Belum Selesai';
+const fmDone=v=>FM_TASK_KEYS.filter(([k])=>fmTaskSt(v,k)==='Selesai').length;
+function fmVisitSync(){ shSet('fmVisits',D.visits.filter(v=>isFm(v.u)&&!v.del).map(v=>({id:v.id,u:v.u,place:v.place,time:v.plan}))); }
 function pageKunjungan(q){
-  const f=q.f||''; const rows=D.visits.filter(v=>!f||v.status===f).map((v,i)=>({...v,_id:'v'+i}));
-  const c=k=>D.visits.filter(v=>v.status===k).length;
-  return {title:'Kunjungan',html:`<p class="purpose">Jadwal dibuat Team Leader, sales mengikuti. Realisasi kunjungan dengan check-in/out di lokasi dan 2–3 foto ber-watermark (MOM 5.1, 5.2).</p>
-  <div class="stats">${[['','Semua',D.visits.length],['Selesai','Selesai',c('Selesai')],['Berjalan','Berjalan',c('Berjalan')],['Belum','Belum dimulai',c('Belum')]].map(([k,l,v])=>`<button class="stat ${f===k?'on':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${v}</b></button>`).join('')}</div>
-  ${card('Kunjungan hari ini',dataTable('vis',{rows,rowClick:r=>`visPanel(${r._id.slice(1)})`,cols:[
-    {label:'Sales',render:r=>byU(r.u).name,prim:true},{label:'Tujuan',k:'place'},{label:'Jadwal',k:'plan',hide:true},{label:'Check-in',render:r=>r.cin||'–'},{label:'Durasi',render:r=>r.dur||'–',hide:true},{label:'Foto',render:r=>r.photos,align:'r',hide:true},{label:'Status',render:r=>spill(r.status,r.status==='Selesai'?'success':r.status==='Berjalan'?'accent':'neutral')}]}),
-    {acts:`${btn('Buat jadwal',{v:'accent',size:'sm',icon:'plus',on:'assignVisitModal()'})}${btn('Unduh laporan',{v:'soft',size:'sm',icon:'down',on:"toast('Laporan penugasan diunduh','Lengkap dengan foto dokumentasi.')"})}`})}`};
+  const f=q.f||'', all=visList().map(visLive), rows=all.filter(v=>!f||v.status===f).map(v=>({...v,_id:v.id}));
+  const c=k=>all.filter(v=>v.status===k).length;
+  return {title:'Kunjungan',html:`<p class="purpose">Jadwal dibuat Team Leader atau admin, sales mengikuti. Kunjungan Promotor FMCG dan MD yang dibuat di sini tampil di aplikasi mobile dan tidak bisa dihapus oleh promotor. Check-in dan check-out di lokasi dengan 1 foto ber-watermark (MOM 5.1, 5.2).</p>
+  <div class="stats">${[['','Semua',all.length],['Selesai','Selesai',c('Selesai')],['Berjalan','Berjalan',c('Berjalan')],['Belum','Belum dimulai',c('Belum')]].map(([k,l,v])=>`<button class="stat ${f===k?'on':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${v}</b></button>`).join('')}</div>
+  ${card('Kunjungan hari ini',dataTable('vis',{rows,rowClick:r=>`visPanel('${r.id}')`,acts:r=>rowActs(`visForm('${r.id}')`,`visDelAsk('${r.id}')`),cols:[
+    {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${byU(r.u).name}</span><span class="xs muted" style="display:block">${byU(r.u).job}</span>`,prim:true},{label:'Tujuan',k:'place'},{label:'Jadwal',render:r=>`${r.plan}${r.period&&r.period!=='Sekali'?` <span class="xs muted">· ${r.period}</span>`:''}`,hide:true},{label:'Check-in',render:r=>r.cin||'–'},{label:'Tugas',render:r=>isFm(r.u)?`<span class="tabular">${fmDone(r)}/${FM_TASK_KEYS.length}</span> selesai`:'<span class="muted">–</span>',hide:true},{label:'Foto',render:r=>r.photos,align:'r',hide:true},{label:'Status',render:r=>spill(r.status,r.status==='Selesai'?'success':r.status==='Berjalan'?'accent':'neutral')}]}),
+    {acts:`${btn('Buat jadwal',{v:'accent',size:'sm',icon:'plus',on:"visForm()"})}${btn('Unduh laporan',{v:'soft',size:'sm',icon:'down',on:"toast('Laporan penugasan diunduh','Lengkap dengan foto dokumentasi.')"})}`})}`};
 }
-function visPanel(i){ const v=D.visits[i], s=byU(v.u);
+function visPanel(id){ const v=visLive(D.visits.find(x=>x.id===id)), s=byU(v.u), fm=isFm(v.u);
   openPanel(v.place,`<div class="kv" style="margin-bottom:14px"><div><dt>Jadwal</dt><dd>${v.plan}</dd></div><div><dt>Check-in</dt><dd>${v.cin||'–'}</dd></div><div><dt>Check-out</dt><dd>${v.cout||'–'}${v.dur?' · '+v.dur:''}</dd></div></div>
-  <div class="tile" style="margin-bottom:14px"><div class="xs muted">Tugas</div><b class="fg">${v.tasks}</b></div>
-  <div class="xs muted" style="margin-bottom:8px">Dokumentasi (${v.photos} foto)</div><div class="thumbs">${v.photos?Array.from({length:v.photos}).map(()=>`<div class="thumb">${I('image',22)}</div>`).join(''):'<span class="muted sm">Belum ada foto.</span>'}</div>`,
-  btn('Tutup',{v:'card',on:'closeLayer()'}),{sub:s.name+' · '+s.job}); }
+  ${fm?`<div class="xs muted" style="margin-bottom:8px">Status tugas · ${fmDone(v)} dari ${FM_TASK_KEYS.length} selesai</div><div class="rows" style="margin-bottom:14px">${FM_TASK_KEYS.map(([k,l])=>`<div class="rowlink" style="cursor:default"><span style="flex:1" class="sm fg">${l}</span>${spill(fmTaskSt(v,k),FM_ST_TONE[fmTaskSt(v,k)])}</div>`).join('')}</div>
+  ${callout('Check-out hanya bisa setelah semua tugas berstatus Selesai. Support task dikerjakan terpisah dan tidak wajib. Kalau lupa check-out, kunjungan ditutup otomatis saat check-in di toko berikutnya.')}<div style="height:14px"></div>`
+  :`<div class="tile" style="margin-bottom:14px"><div class="xs muted">Tugas</div><b class="fg">${v.tasks}</b></div>`}
+  <div class="xs muted" style="margin-bottom:8px">Dokumentasi (${v.photos} foto, 1 foto per check-in dan check-out)</div><div class="thumbs">${v.photos?Array.from({length:v.photos}).map(()=>`<div class="thumb">${I('image',22)}</div>`).join(''):'<span class="muted sm">Belum ada foto.</span>'}</div>`,
+  `${btn('Hapus',{v:'danger',icon:'trash',on:`visDelAsk('${id}')`})}<span style="flex:1"></span>${btn('Tutup',{v:'card',on:'closeLayer()'})}${btn('Edit',{v:'accent',icon:'edit',on:`closeLayer();visForm('${id}')`})}`,{sub:s.name+' · '+s.job}); }
 function modalPill(k){ document.querySelectorAll('.modal .pills button').forEach(b=>{ const on=b.getAttribute('onclick').includes(`'${k}'`); b.classList.toggle('on',on); b.setAttribute('aria-selected',on); }); }
-function assignVisitModal(){ openModal(`<h2 class="pt" style="font-size:22px">Buat jadwal kunjungan<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Sales mengikuti jadwal ini dan menerima notifikasi H-1.</p>
-  <div class="grid" style="gap:12px"><label class="field"><span>Sales</span>${sel(SALES.map(s=>[s.u,s.name+' – '+s.job]),'rina','',{label:'Sales'})}</label>
-  <label class="field"><span>Tujuan</span>${sel(TOKO.map(t=>t.name),'Electronic City Kemang','',{label:'Tujuan'})}</label>
-  <label class="field"><span>Periode</span>${sel(['Sekali','Harian','Mingguan','2 mingguan','Bulanan'],'Sekali','',{label:'Periode'})}</label></div>
-  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Simpan jadwal',{v:'accent',on:"closeLayer();toast('Jadwal tersimpan','Sales menerima notifikasi di aplikasi.')"})}</div>`); }
+function visForm(id){
+  const v=id?D.visits.find(x=>x.id===id):{u:'tari',place:'Electronic City Kemang',plan:'09:00',period:'Sekali',tasks:''};
+  if(id&&v.status!=='Belum'){ openModal(`<h2 class="pt" style="font-size:22px">Tidak bisa diubah<i>.</i></h2><p class="sm" style="margin:10px 0 18px;line-height:1.6">Kunjungan yang sudah berjalan atau selesai tidak bisa diubah lagi.</p><div style="display:flex;justify-content:flex-end">${btn('Tutup',{v:'card',on:'closeLayer()'})}</div>`); return; }
+  const people=[...SALES,...FMCG_USERS];
+  openModal(`<h2 class="pt" style="font-size:22px">${id?'Edit':'Buat'} jadwal kunjungan<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Sales mengikuti jadwal ini dan menerima notifikasi H-1.</p>
+  <div class="grid" style="gap:12px"><label class="field"><span>Pegawai</span>${sel(people.map(s=>[s.u,s.name+' – '+s.job]),v.u,"visTaskHint(this.value)",{label:'Pegawai',id:'vf_u'})}</label>
+  <label class="field"><span>Tujuan</span>${sel(TOKO.map(t=>t.name),v.place,'',{label:'Tujuan',id:'vf_p'})}</label>
+  <div class="grid g2" style="gap:10px"><label class="field"><span>Jam</span><span class="inp"><input id="vf_t" type="time" value="${v.plan}"></span></label><label class="field"><span>Periode</span>${sel(['Sekali','Harian','Mingguan','2 mingguan','Bulanan'],v.period||'Sekali','',{label:'Periode',id:'vf_r'})}</label></div>
+  <div id="vf_tk">${visTaskField(v.u,v.tasks)}</div></div>
+  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn(id?'Simpan perubahan':'Simpan jadwal',{v:'accent',on:`visSave('${id||''}')`})}</div>`); }
+function visTaskField(u,val){ return isFm(u)?`<div class="tile"><div class="xs muted">Tugas</div><b class="fg">${FM_TASKS_LABEL}</b><p class="xs muted" style="margin-top:6px">Tugas otomatis semua aktivitas toko. Promotor tidak bisa menghapus kunjungan yang dibuat admin.</p></div>`:`<label class="field"><span>Tugas</span><span class="inp"><input id="vf_k" value="${esc(val||'')}" placeholder="contoh: Penjualan, Cek display"></span></label>`; }
+function visTaskHint(u){ const e=document.getElementById('vf_tk'); if(e) e.innerHTML=visTaskField(u,''); }
+function visSave(id){
+  const u=document.getElementById('vf_u').value, place=document.getElementById('vf_p').value, plan=document.getElementById('vf_t').value, period=document.getElementById('vf_r').value;
+  const tasks=isFm(u)?FM_TASKS_LABEL:(document.getElementById('vf_k')?.value||'').replace(/['"<>`]/g,'').trim();
+  if(!plan||!tasks){ toast('Periksa isian','Isi jam dan tugas kunjungan.','danger'); return; }
+  if(id){ Object.assign(D.visits.find(x=>x.id===id),{u,place,plan,period,tasks}); audit('Mengubah jadwal kunjungan '+byU(u).name+' ke '+place); }
+  else { D.visits.push({id:'kv'+Date.now()%1e6,u,place,plan,period,tasks,cin:'',cout:'',dur:'',photos:0,status:'Belum'}); audit('Membuat jadwal kunjungan '+byU(u).name+' ke '+place); }
+  fmVisitSync(); closeLayer(); render(false); toast(id?'Jadwal diperbarui':'Jadwal tersimpan',isFm(u)?'Muncul di aplikasi mobile promotor.':'Sales menerima notifikasi di aplikasi.'); }
+function visDelAsk(id){ const v=D.visits.find(x=>x.id===id);
+  if(visLive(v).status!=='Belum') return openModal(`<h2 class="pt" style="font-size:22px">Tidak bisa dihapus<i>.</i></h2><p class="sm" style="margin:10px 0 18px;line-height:1.6">Kunjungan ke ${esc(v.place)} sudah berjalan atau selesai. Datanya dipakai di laporan, jadi tidak bisa dihapus.</p><div style="display:flex;justify-content:flex-end">${btn('Tutup',{v:'card',on:'closeLayer()'})}</div>`);
+  openModal(`<h2 class="pt" style="font-size:22px">Hapus jadwal ke ${esc(v.place)}?<i>.</i></h2><p class="sm muted" style="margin:10px 0 18px;line-height:1.6">${esc(byU(v.u).name)} tidak lagi melihat kunjungan ini. Data disembunyikan dari daftar dan tetap tersimpan untuk audit (soft delete).</p>
+  <div style="display:flex;gap:10px;justify-content:flex-end">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Hapus',{v:'danger',icon:'trash',on:`visDel('${id}')`})}</div>`); }
+function visDel(id){ const v=D.visits.find(x=>x.id===id); v.del=true; audit('Menghapus jadwal kunjungan '+byU(v.u).name+' ke '+v.place); fmVisitSync(); closeLayer(); render(false); toast('Jadwal dihapus',v.place); }
 
 /* ---------- Approval ---------- */
 function pageApproval(q){
@@ -1059,7 +1100,7 @@ function pagePromo(q){
   const f=q.f||''; const rows=D.promos.filter(p=>!f||p.status===f).map(p=>({...p,_id:p.id}));
   return {title:'Promo',html:`<p class="purpose">Paket promo per produk dengan aturan periode, toko/cabang yang berlaku, dan flag bisa digabung. Promo cashback e-wallet otomatis mewajibkan data pelanggan di aplikasi. Buat, ubah, dan hapus promo perlu approval (BRD III.2.9).</p>
   <div class="chips" style="margin-bottom:16px">${[['','Semua'],['Aktif','Aktif'],['Menunggu approval','Menunggu approval'],['Draft','Draft']].map(([k,l])=>`<button class="fchip ${f===k?'on':''}" onclick="setQ({f:'${k}'})">${l} <span class="n">${k?D.promos.filter(p=>p.status===k).length:D.promos.length}</span></button>`).join('')}</div>
-  ${card('Daftar promo',dataTable('prm',{rows,rowClick:r=>`promoPanel('${r.id}')`,cols:[
+  ${card('Daftar promo',dataTable('prm',{rows,rowClick:r=>`promoPanel('${r.id}')`,acts:r=>rowActs(`promoPanel('${r.id}')`,`promoDelAsk('${r.id}')`),cols:[
     {label:'Promo',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="xs muted" style="display:block">${r.id}</span>`,prim:true},{label:'Jenis',render:r=>tag(r.type,'info')},{label:'Produk',k:'prod',hide:true},{label:'Periode',k:'period',hide:true},
     {label:'Gabung',render:r=>r.combine?tag('Bisa','success'):tag('Tidak','warning')},{label:'Dipakai',render:r=>r.used+'×',align:'r',hide:true},{label:'Status',render:r=>spill(r.status,r.status==='Aktif'?'success':r.status==='Draft'?'neutral':'warning')}]}),
     {acts:`${btn('Upload',{v:'soft',size:'sm',icon:'up',on:"uploadModal('Promo')"})}${btn('Buat promo',{v:'accent',size:'sm',icon:'plus',on:'promoForm()'})}`})}`};
@@ -1070,6 +1111,9 @@ function promoPanel(id){ const p=D.promos.find(x=>x.id===id);
   ${callout(p.combine?'Promo ini <b>bisa digabung</b>: aplikasi menghitung semua promo yang berlaku sekaligus (BRD 7.1.8).':'Promo ini <b>tidak bisa digabung</b>: di aplikasi, sales memilih salah satu promo sesuai pilihan pelanggan (BRD 7.1.9).')}
   ${p.cust?`<div style="margin-top:10px">${callout('Cashback e-wallet: data pelanggan wajib diisi saat penjualan (BRD 7.1.6).','blue')}</div>`:''}`,
   p.status==='Menunggu approval'?btn('Buka approval',{v:'accent',on:"closeLayer();go('/approval?type=Promo baru')"}):`${btn('Ubah',{v:'card',icon:'edit',on:"closeLayer();toast('Perubahan diajukan','Perubahan promo menunggu approval.')"})}`,{sub:p.id}); }
+function promoDelAsk(id){ const p=D.promos.find(x=>x.id===id);
+  openModal(`<h2 class="pt" style="font-size:22px">Ajukan hapus ${esc(p.name)}?<i>.</i></h2><p class="sm muted" style="margin:10px 0 18px;line-height:1.6">Menghapus promo perlu approval (BRD III.2.9). Promo tetap aktif sampai disetujui, lalu disembunyikan dan tetap tersimpan untuk audit (soft delete).</p><div style="display:flex;gap:10px;justify-content:flex-end">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Ajukan hapus',{v:'danger',icon:'trash',on:`promoDel('${id}')`})}</div>`); }
+function promoDel(id){ const p=D.promos.find(x=>x.id===id); p.status='Menunggu approval'; audit('Mengajukan hapus promo '+p.name); closeLayer(); render(false); toast('Penghapusan diajukan','Menunggu approval sebelum promo dihapus.'); }
 function promoForm(){ openPanel('Buat promo',`<div class="grid" style="gap:14px">
   <label class="field"><span>Nama promo</span><span class="inp"><input placeholder="contoh: Diskon akhir tahun VISTARA"></span></label>
   <label class="field"><span>Jenis</span>${sel(['Diskon','Free gift','Free product','Cashback e-wallet'],'Diskon','',{label:'Jenis'})}</label>
@@ -1219,8 +1263,8 @@ const MD={
     {id:'r8',name:'Arco (Leader SPG)',desc:'User client di luar BPR. Assign leads ke promotor di cabangnya',scope:'Tim sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('arco'),status:'Aktif'},
     {id:'r9',name:'CBD / Mediator',desc:'Memonitor mitra dan boleh menjual. Hasil dihitung sebagai KPI',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('leads'),status:'Aktif'},
     {id:'r10',name:'REA / SPG Multi Finance',desc:'Call dan Visit menghasilkan Booking. Hasil dihitung sebagai insentif',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('leads'),status:'Aktif'},
-    {id:'r11',name:'Promotor FMCG',desc:'Logging aktivitas toko, tanpa penjualan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('fmcg'),status:'Aktif'},
-    {id:'r12',name:'Merchandising (MD)',desc:'Logging aktivitas toko, tanpa penjualan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('fmcg'),status:'Aktif'},
+    {id:'r11',name:'Promotor FMCG',desc:'Pilih toko, check-in, kerjakan aktivitas toko, lalu check-out. Tanpa penjualan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('fmcg'),status:'Aktif'},
+    {id:'r12',name:'Merchandising (MD)',desc:'Pilih toko, check-in, kerjakan aktivitas toko, lalu check-out. Tanpa penjualan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('fmcg'),status:'Aktif'},
     {id:'r13',name:'Mobile Promotor',desc:'Seperti promotor, berpindah toko dan event',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('spg'),status:'Aktif'},
     {id:'r14',name:'Promotor Bantuan',desc:'Non SIM dan non client. Bisa pindah client dan cabang, akses terbatas',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('bantuan'),status:'Aktif'},
     {id:'r15',name:'Reliever',desc:'User di luar BPR, manpower support tambahan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('bantuan'),status:'Aktif'},
@@ -1240,6 +1284,8 @@ const MD={
     {when:'24 Okt, 09:15',who:'Dewi Kartika',what:'Menonaktifkan client PT Maju Tekstil Indonesia'}
   ]
 };
+D.visits.forEach((v,i)=>{ v.id='kv'+(i+1); v.period=v.period||'Sekali'; });
+fmVisitSync();
 const ROLE_OF={'SPG / Promotor':'r3','Canvasing':'r4','Taking Order':'r5','Multi Finance':'r6'};
 MD.user=[
   ...SALES.map(s=>({id:s.u,nip:s.nip,name:s.name,email:s.u+'@sim.co.id',jabatan:s.job,role:ROLE_OF[s.job],clients:[s.u==='andi'?'cl2':'cl1'],cabang:s.cabang==='BPR Fatmawati'?'Jakarta Selatan':s.cabang,toko:TOKO.filter(t=>t.sales.includes(s.u)).map(t=>t.id),ap1:'sari',ap2:'',akses:'Mobile',face:s.u==='kevin'?'Minta rekam ulang':'Terekam',status:'Aktif'})),
@@ -1390,7 +1436,7 @@ function crudList(ent,q,{acts=''}={}){
   return card(E.plural,`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
       <form style="flex:1;min-width:220px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari ${lc(E)}"></label></form>
       <div class="chips">${[['','Semua'],['Aktif','Aktif'],['Nonaktif','Nonaktif']].map(([k,l])=>`<button class="fchip ${f===k?'on':''}" onclick="setQ({st:'${k}'})">${l} <span class="n">${k?all.filter(r=>r.status===k).length:all.length}</span></button>`).join('')}</div></div>
-    ${dataTable('md_'+ent,{rows,rowClick:r=>`openForm('${ent}','${r.id}')`,cols:E.cols,empty:qq||f?`Tidak ada ${lc(E)} yang cocok. <button style="color:var(--accent-text);font-weight:600" onclick="setQ({q:'',st:''})">Hapus filter</button>`:`Belum ada ${lc(E)}.`})}`,
+    ${dataTable('md_'+ent,{rows,rowClick:r=>`openForm('${ent}','${r.id}')`,acts:r=>rowActs(`openForm('${ent}','${r.id}')`,`delAsk('${ent}','${r.id}')`),cols:E.cols,empty:qq||f?`Tidak ada ${lc(E)} yang cocok. <button style="color:var(--accent-text);font-weight:600" onclick="setQ({q:'',st:''})">Hapus filter</button>`:`Belum ada ${lc(E)}.`})}`,
     {acts:`${acts}${btn(ent==='user'?'Tambah dari SIM':'Tambah '+lc(E),{v:'accent',size:'sm',icon:'plus',on:addAct})}`});
 }
 
@@ -1485,7 +1531,7 @@ function pageIAM(q){
   let body='';
   if(tab==='role') body=crudList('role',q);
   if(tab==='struct') body=crudList('struct',q)+`<div style="margin-top:12px">${callout('<b>Rekomendasi.</b> Urutan mengikuti hierarki di dokumen revisi FSD, dikonfirmasi klien di MOM review.')}</div>`;
-  if(tab==='matrix') body=card('Matrix approval',dataTable('apm',{rows:live('user').filter(u=>u.role!=='r1').map(u=>({...u,_id:u.id})),rowClick:r=>`openForm('user','${r.id}')`,cols:[
+  if(tab==='matrix') body=card('Matrix approval',dataTable('apm',{rows:live('user').filter(u=>u.role!=='r1').map(u=>({...u,_id:u.id})),rowClick:r=>`openForm('user','${r.id}')`,acts:r=>rowActs(`openForm('user','${r.id}')`,'',{del:false}),cols:[
       {label:'User',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(r.name)}${esc(r.name)}</span>`,prim:true},{label:'Role',render:r=>roleName(r.role)},
       {label:'Approver 1',render:r=>r.ap1?userName(r.ap1):tag('Belum diatur','warning')},{label:'Approver 2',render:r=>r.ap2?userName(r.ap2):'<span class="muted">–</span>'}]}))+`<div style="margin-top:12px">${callout('Approver diatur per user, maksimal 2 tingkat (BRD 0.9.5). Klik baris untuk mengubah.')}</div>`;
   if(tab==='audit') body=card('Log aktivitas',`<div class="rows">${MD.log.map(l=>`<div class="rowlink" style="cursor:default;align-items:flex-start">${I('file',16)}<span style="flex:1"><span class="sm fg">${esc(l.what)}</span><span class="xs muted" style="display:block">${l.who} · ${l.when}</span></span></div>`).join('')}</div>`,{acts:btn('Unduh',{v:'soft',size:'sm',icon:'down',on:"toast('Log aktivitas diunduh','audit_log_okt2026.xlsx')"})});
@@ -1497,7 +1543,7 @@ function iamTab(t){ setQ({tab:t,q:'',st:''}); }
 /* ---------- Task pending ---------- */
 const TASK_FLOW=['Menunggu assign','Sedang diperbaiki','Sudah selesai diperbaiki','Closed'];
 const taskList=()=>shRead('skuTasks',SKU_TASK_DEFAULT);
-const cbdTaskList=()=>shRead('cbdTasks',CBD_DEFAULT);
+const cbdTaskList=()=>shRead('cbdTasks',CBD_DEFAULT).filter(x=>!x.del);
 function taskNext(id){ const L=taskList().map(a=>({...a})), x=L.find(a=>a.id===id); x.st=TASK_FLOW[TASK_FLOW.indexOf(x.st)+1]; shSet('skuTasks',L); audit('Mengubah status task '+id+' menjadi '+x.st); closeLayer(); render(false); toast('Status task diperbarui',x.st); }
 function taskPanel(id){ const x=taskList().find(a=>a.id===id), p=PRODUCTS.find(a=>a.id===x.prod), d=x.st==='Closed';
   openPanel(p.name,`<div class="kv" style="margin-bottom:14px"><div><dt>Toko</dt><dd>${x.toko}</dd></div><div><dt>Pelapor</dt><dd>${x.by||byU(x.u)?.name||'–'}</dd></div><div><dt>Status</dt><dd>${x.st}</dd></div></div>${callout('Team Leader memegang kendali penuh atas kondisi produk sampai task closed (MOM 6.4).')}`,
@@ -1507,23 +1553,37 @@ function pageTaskPending(q){
   return {title:'Task pending',html:`<p class="purpose">Produk rusak dari SKU display otomatis menjadi task. Team Leader meng-assign dan menyelesaikannya sampai closed. Task CBD berisi daftar pertanyaan untuk konsumen (MOM 6.4, 7, 12.2).</p>
   <div style="margin-bottom:4px">${utabs([['produk','Produk rusak',taskList().filter(x=>x.st!=='Closed').length],['cbd','Task CBD',cbdTaskList().length]],tab,'prTab')}</div>
   ${tab==='produk'?card('Produk rusak',dataTable('tsk',{rows:taskList().map(x=>({...x,_id:x.id})),rowClick:r=>`taskPanel('${r.id}')`,cols:[{label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${PRODUCTS.find(p=>p.id===r.prod).name}</span><span class="xs muted" style="display:block">${r.toko}</span>`,prim:true},{label:'Pelapor',render:r=>r.by||byU(r.u)?.name||'–',hide:true},{label:'Status',render:r=>spill(r.st,r.st==='Closed'?'success':r.st==='Menunggu assign'?'warning':'accent')}]}))
-  :card('Task CBD',dataTable('tcb',{rows:cbdTaskList().map(x=>({...x,_id:x.id})),rowClick:r=>`toast('${r.t}','${r.qs.length} pertanyaan untuk ${r.to}.')`,cols:[{label:'Task',k:'t',prim:true},{label:'CBD',k:'to'},{label:'Pertanyaan',render:r=>r.qs.length,align:'r',hide:true},{label:'Status',render:r=>spill(r.st,r.st==='Terjawab'?'success':'warning')}]}),{acts:btn('Buat task',{v:'accent',size:'sm',icon:'plus',on:'cbdTaskModal()'})})}`};
+  :card('Task CBD',dataTable('tcb',{rows:cbdTaskList().map(x=>({...x,_id:x.id})),rowClick:r=>`cbdTaskModal('${r.id}')`,acts:r=>rowActs(`cbdTaskModal('${r.id}')`,`cbdDelAsk('${r.id}')`),cols:[{label:'Task',k:'t',prim:true},{label:'CBD',k:'to'},{label:'Pertanyaan',render:r=>r.qs.length,align:'r',hide:true},{label:'Status',render:r=>spill(r.st,r.st==='Terjawab'?'success':'warning')}]}),{acts:btn('Buat task',{v:'accent',size:'sm',icon:'plus',on:'cbdTaskModal()'})})}`};
 }
-function cbdTaskModal(){ openModal(`<h2 class="pt" style="font-size:22px">Buat task CBD<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">CBD menanyakan pertanyaan ini ke konsumen.</p>
-  <div class="grid" style="gap:12px"><label class="field"><span>Judul</span><span class="inp"><input id="ct_t"></span></label><label class="field"><span>Pertanyaan (satu per baris)</span><textarea class="ta" id="ct_q" style="min-height:90px"></textarea></label></div>
-  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Kirim task',{v:'accent',on:'cbdTaskSave()'})}</div>`); }
-function cbdTaskSave(){ const a=document.getElementById('ct_t').value.trim(), b=document.getElementById('ct_q').value.trim().split('\n').map(s=>s.trim().replace(/['"<>`]/g,'')).filter(Boolean); if(!a||!b.length){ toast('Periksa isian','Isi judul dan pertanyaan.','danger'); return; } const L=cbdTaskList().map(x=>({...x})); L.unshift({id:'CT-'+(L.length+2),t:a.replace(/['"<>`]/g,''),to:'Tono Hidayat',qs:b,st:'Menunggu jawaban'}); shSet('cbdTasks',L); closeLayer(); render(false); toast('Task terkirim','Tono Hidayat menerimanya di aplikasi mobile.'); }
+function cbdTaskModal(id){ const x=id?cbdTaskList().find(a=>a.id===id):{t:'',qs:[]};
+  if(id&&x.st==='Terjawab') return openModal(`<h2 class="pt" style="font-size:22px">Tidak bisa diubah<i>.</i></h2><p class="sm" style="margin:10px 0 18px;line-height:1.6">Task ini sudah dijawab CBD. Buat task baru kalau pertanyaannya perlu diganti.</p><div style="display:flex;justify-content:flex-end">${btn('Tutup',{v:'card',on:'closeLayer()'})}</div>`);
+  openModal(`<h2 class="pt" style="font-size:22px">${id?'Edit':'Buat'} task CBD<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">CBD menanyakan pertanyaan ini ke konsumen.</p>
+  <div class="grid" style="gap:12px"><label class="field"><span>Judul</span><span class="inp"><input id="ct_t" value="${esc(x.t)}"></span></label><label class="field"><span>Pertanyaan (satu per baris)</span><textarea class="ta" id="ct_q" style="min-height:90px">${esc(x.qs.join('\n'))}</textarea></label></div>
+  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn(id?'Simpan perubahan':'Kirim task',{v:'accent',on:`cbdTaskSave('${id||''}')`})}</div>`); }
+function cbdTaskSave(id){ const a=document.getElementById('ct_t').value.trim(), b=document.getElementById('ct_q').value.trim().split('\n').map(s=>s.trim().replace(/['"<>`]/g,'')).filter(Boolean); if(!a||!b.length){ toast('Periksa isian','Isi judul dan pertanyaan.','danger'); return; }
+  const L=shRead('cbdTasks',CBD_DEFAULT).map(x=>({...x}));
+  if(id){ Object.assign(L.find(x=>x.id===id),{t:a.replace(/['"<>`]/g,''),qs:b}); audit('Mengubah task CBD '+id); shSet('cbdTasks',L); closeLayer(); render(false); toast('Task diperbarui','Perubahan tampil di aplikasi CBD.'); return; }
+  L.unshift({id:'CT-'+(L.length+2),t:a.replace(/['"<>`]/g,''),to:'Tono Hidayat',qs:b,st:'Menunggu jawaban'}); shSet('cbdTasks',L); closeLayer(); render(false); toast('Task terkirim','Tono Hidayat menerimanya di aplikasi mobile.'); }
+function cbdDelAsk(id){ const x=cbdTaskList().find(a=>a.id===id);
+  if(x.st==='Terjawab') return openModal(`<h2 class="pt" style="font-size:22px">Tidak bisa dihapus<i>.</i></h2><p class="sm" style="margin:10px 0 18px;line-height:1.6">Task ini sudah dijawab CBD dan jawabannya masih dipakai. Data yang dipakai tidak bisa dihapus.</p><div style="display:flex;justify-content:flex-end">${btn('Tutup',{v:'card',on:'closeLayer()'})}</div>`);
+  openModal(`<h2 class="pt" style="font-size:22px">Hapus ${esc(x.t)}?<i>.</i></h2><p class="sm muted" style="margin:10px 0 18px;line-height:1.6">Task hilang dari aplikasi CBD. Data disembunyikan dari daftar dan tetap tersimpan untuk audit (soft delete).</p><div style="display:flex;gap:10px;justify-content:flex-end">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Hapus',{v:'danger',icon:'trash',on:`cbdDel('${id}')`})}</div>`); }
+function cbdDel(id){ const L=shRead('cbdTasks',CBD_DEFAULT).map(x=>({...x})), x=L.find(a=>a.id===id); x.del=true; shSet('cbdTasks',L); audit('Menghapus task CBD '+id); closeLayer(); render(false); toast('Task dihapus',x.t); }
 
 /* ---------- Aktivitas lapangan FMCG & MD ---------- */
-const FM_LOG=[['26 Okt','Lestari Putri','Electronic City Kemang','Stock opname','30 SKU · 1 di luar planned product'],['26 Okt','Lestari Putri','Electronic City Kemang','Price promo','2 produk'],['26 Okt','Rangga Saputra','Best Denki Senayan City','Facing display','9 dari 10 facing'],['26 Okt','Rangga Saputra','Best Denki Senayan City','Support task','Bersihkan freezer · foto before dan after'],['25 Okt','Lestari Putri','Electronic City Kemang','Support task','Rapikan etalase · foto before dan after']].map(([tgl,who,toko,jenis,isi],i)=>({_id:'f'+i,tgl,who,toko,jenis,isi}));
+const FM_LOG_STATIC=[['26 Okt','Lestari Putri','Electronic City Kemang','Cek stok','Selesai','30 SKU · 2 barang tidak tersedia · 1 di luar planned product'],['26 Okt','Lestari Putri','Electronic City Kemang','Price promo','Selesai','Sabun Cair Segar 500 ml: Rp29.900 → Rp24.900 (16,7%); Teh Melati Botol 350 ml: Rp6.500 → Rp5.500 (15,4%)'],['26 Okt','Rangga Saputra','Best Denki Senayan City','Facing display','Draft','Rak Utama 86, Boot 84, Gudang –'],['26 Okt','Rangga Saputra','Best Denki Senayan City','Support task','Selesai','Bersihkan freezer · foto before dan after'],['25 Okt','Lestari Putri','Electronic City Kemang','Support task','Selesai','Rapikan etalase · foto before dan after']].map(([tgl,who,toko,jenis,status,isi],i)=>({_id:'f'+i,tgl,who,toko,jenis,status,isi}));
+const FM_JENIS_LIST=['Cek stok','Price promo','Facing display','Market share','Support task'];
+const fmLogRows=()=>[...shRead('fmLog',[]).map(r=>({...r,_id:r.id})),...FM_LOG_STATIC];
 const BPO=[['Gita Puspita','Reliever','Best Denki Senayan City',18,20,'Rp14,2 jt'],['Eko Prabowo','Promotor Bantuan','Electronic City Kemang',16,20,'Rp9,8 jt']].map(([n,j,t,h,k,p])=>({_id:n,n,j,t,h,k,p}));
 function pageAktivitas(q){
-  const f=q.f||'', rows=FM_LOG.filter(r=>!f||r.jenis===f);
-  return {title:'Aktivitas lapangan',html:`<p class="purpose">Log harian Promotor FMCG dan MD: stock opname, price promo, facing display, dan support task. Team Leader melihat support task tanpa approval (MOM 10).</p>
-  <div class="chips" style="margin-bottom:12px">${['','Stock opname','Price promo','Facing display','Support task'].map(k=>`<button class="fchip ${f===k?'on':''}" onclick="setQ({f:'${k}'})">${k||'Semua'}</button>`).join('')}</div>
-  ${card('Log aktivitas',dataTable('fml',{rows,rowClick:r=>`toast('${r.jenis}','${r.isi}')`,cols:[{label:'Promotor',render:r=>`<span class="fg" style="font-weight:500">${r.who}</span><span class="xs muted" style="display:block">${r.tgl} · ${r.toko}</span>`,prim:true},{label:'Aktivitas',render:r=>tag(r.jenis,'accent')},{label:'Rincian',k:'isi',hide:true}]}),{acts:btn('Unduh laporan',{v:'soft',size:'sm',icon:'down',on:"toast('Laporan aktivitas diunduh','Sesuai filter yang aktif.')"})})}
+  const f=q.f||'', st=q.st||'', all=fmLogRows(), rows=all.filter(r=>(!f||r.jenis===f)&&(!st||r.status===st));
+  return {title:'Aktivitas lapangan',html:`<p class="purpose">Log aktivitas Promotor FMCG dan MD: cek stok, price promo, facing display, market share, dan support task. Tiap aktivitas berstatus Belum Selesai, Draft, atau Selesai. Data masuk saat promotor menyimpan di aplikasi mobile (MOM 10).</p>
+  <div class="chips" style="margin-bottom:8px">${['',...FM_JENIS_LIST].map(k=>`<button class="fchip ${f===k?'on':''}" onclick="setQ({f:'${k}'})">${k||'Semua'}</button>`).join('')}</div>
+  <div class="chips" style="margin-bottom:12px">${['','Selesai','Draft','Belum Selesai'].map(k=>`<button class="fchip ${st===k?'on':''}" onclick="setQ({st:'${k}'})">${k||'Semua status'} <span class="n">${k?all.filter(r=>r.status===k).length:all.length}</span></button>`).join('')}</div>
+  ${card('Log aktivitas',dataTable('fml',{rows,rowClick:r=>`fmLogPanel('${r._id}')`,empty:'Belum ada aktivitas yang cocok.',cols:[{label:'Promotor',render:r=>`<span class="fg" style="font-weight:500">${esc(r.who)}</span><span class="xs muted" style="display:block">${r.tgl} · ${esc(r.toko)}</span>`,prim:true},{label:'Aktivitas',render:r=>tag(r.jenis,'accent')},{label:'Status',render:r=>spill(r.status,FM_ST_TONE[r.status]||'neutral')},{label:'Rincian',render:r=>`<span class="xs">${esc(r.isi)}</span>`,hide:true}]}),{acts:btn('Unduh laporan',{v:'soft',size:'sm',icon:'down',on:"toast('Laporan aktivitas diunduh','Sesuai filter yang aktif.')"})})}
   <div style="margin-top:16px">${card('Kinerja Reliever dan Promotor Bantuan (BPO)',dataTable('bpo',{rows:BPO,rowClick:r=>`toast('${r.n}','Kinerja dipantau untuk BPO.')`,cols:[{label:'Nama',render:r=>`<span class="fg" style="font-weight:500">${r.n}</span><span class="xs muted" style="display:block">${r.j} · ${r.t}</span>`,prim:true},{label:'Kehadiran',render:r=>r.h+'/'+r.k,align:'r'},{label:'Penjualan',render:r=>r.p,align:'r',hide:true}]}))}</div>`};
 }
+function fmLogPanel(id){ const r=fmLogRows().find(x=>x._id===id);
+  openPanel(r.jenis,`<div class="kv" style="margin-bottom:14px"><div><dt>Promotor</dt><dd>${esc(r.who)}</dd></div><div><dt>Toko</dt><dd>${esc(r.toko)}</dd></div><div><dt>Status</dt><dd>${r.status}</dd></div></div><div class="tile"><div class="xs muted">Rincian</div><b class="fg" style="font-weight:500;line-height:1.6">${esc(r.isi)}</b></div>${r.jenis==='Cek stok'?`<div style="margin-top:12px">${callout('Cek stok tanpa foto. Item bisa ditandai Barang tidak tersedia. Barang tambahan promotor (di luar planned product) bisa dihapus promotor, barang dari admin tidak.')}</div>`:''}`,btn('Tutup',{v:'card',on:'closeLayer()'}),{sub:r.tgl}); }
 
 /* ---------- Canvassing ---------- */
 const CV_REP=[{_id:'budi',u:'budi',bawa:4800000,jual:2740000,retur:2060000,tt:'Ada'},{_id:'kevin',u:'kevin',bawa:5000000,jual:3120000,retur:1880000,tt:'Belum'}];
@@ -1538,12 +1598,28 @@ function cvLimitModal(){ openModal(`<h2 class="pt" style="font-size:22px">Ubah l
 function cvLimitSave(){ const v=parseInt(document.getElementById('cv_l').value.replace(/\D/g,''))||0; if(v<1){ toast('Periksa isian','Isi nominal limit.','danger'); return; } CV_PARAM.limit=v; shSet('canvasLimit',v); audit('Mengubah limit canvassing'); closeLayer(); render(false); toast('Limit tersimpan',rp(v)); }
 
 /* ---------- POSM & planogram ---------- */
-const POSM=[{id:'pm3',name:'Campaign: penempatan barang promo akhir tahun',kind:'Campaign',to:'SPG / Promotor, Promotor FMCG',done:9,of:25,avg:81},{id:'pm1',name:'Planogram rak utama',kind:'Planogram',to:'Promotor FMCG, SPG / Promotor',done:12,of:20,avg:84},{id:'pm2',name:'POSM wobbler promo akhir tahun',kind:'POSM',to:'SPG / Promotor',done:5,of:15,avg:78}];
+const POSM=[{id:'pm3',name:'Campaign: penempatan barang promo akhir tahun',kind:'Campaign',to:'SPG / Promotor',done:9,of:25,avg:81},{id:'pm1',name:'Planogram rak utama',kind:'Planogram',to:'SPG / Promotor',done:12,of:20,avg:84},{id:'pm2',name:'POSM wobbler promo akhir tahun',kind:'POSM',to:'SPG / Promotor',done:5,of:15,avg:78}];
+const POSM_TARGET=['SPG / Promotor','Mobile Promotor','SPG / Promotor, Mobile Promotor'];
 function pagePosm(){
-  return {title:'Campaign, POSM & planogram',html:`<p class="purpose">Penempatan barang promo (campaign), POSM, dan planogram. Admin meng-assign foto brief ke user. User mengirim foto, lalu AI memberi nilai berdasarkan acuan (MOM 13).</p>
-  ${card('Brief aktif',dataTable('psm',{rows:POSM.map(x=>({...x,_id:x.id})),rowClick:r=>`toast('${r.name}','${r.done} dari ${r.of} user sudah mengirim.')`,cols:[{label:'Brief',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="xs muted" style="display:block">${r.to}</span>`,prim:true},{label:'Jenis',render:r=>tag(r.kind,'accent'),hide:true},{label:'Terkirim',render:r=>r.done+'/'+r.of,align:'r'},{label:'Nilai AI',render:r=>r.avg,align:'r'}]}),{acts:btn('Upload brief',{v:'accent',size:'sm',icon:'up',on:"uploadModal('Foto brief')"})})}
-  <div style="margin-top:12px">${callout('<b>Rekomendasi.</b> Nilai AI simulasi. Ambang: 80 atau lebih lulus, 70 sampai 79 ditinjau Team Leader, di bawah 70 foto ulang.')}</div>`};
+  return {title:'Campaign, POSM & planogram',html:`<p class="purpose">Penempatan barang promo (campaign), POSM, dan planogram. Admin meng-assign foto brief ke user. User mengirim foto, lalu AI memberi nilai berdasarkan acuan (MOM 13). Menu ini tidak dipakai Promotor FMCG dan MD; mereka memakai Facing display.</p>
+  ${card('Brief aktif',dataTable('psm',{rows:POSM.filter(x=>!x.del).map(x=>({...x,_id:x.id})),rowClick:r=>`posmModal('${r.id}')`,acts:r=>rowActs(`posmModal('${r.id}')`,`posmDelAsk('${r.id}')`),cols:[{label:'Brief',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${r.to}</span>`,prim:true},{label:'Jenis',render:r=>tag(r.kind,'accent'),hide:true},{label:'Terkirim',render:r=>r.done+'/'+r.of,align:'r'},{label:'Nilai',render:r=>r.avg,align:'r'}]}),{acts:`${btn('Upload brief',{v:'soft',size:'sm',icon:'up',on:"uploadModal('Foto brief')"})}${btn('Buat brief',{v:'accent',size:'sm',icon:'plus',on:'posmModal()'})}`})}
+  <div style="margin-top:12px">${callout('<b>Rekomendasi.</b> Nilai simulasi. Ambang: 80 atau lebih lulus, 70 sampai 79 ditinjau Team Leader, di bawah 70 foto ulang.')}</div>`};
 }
+function posmModal(id){ const x=id?POSM.find(a=>a.id===id):{name:'',kind:'Campaign',to:'SPG / Promotor'};
+  openModal(`<h2 class="pt" style="font-size:22px">${id?'Edit':'Buat'} brief<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Foto brief di-assign ke user, lalu user mengirim foto untuk dinilai.</p>
+  <div class="grid" style="gap:12px"><label class="field"><span>Nama brief</span><span class="inp"><input id="pm_n" value="${esc(x.name)}" placeholder="contoh: POSM wobbler promo akhir tahun"></span></label>
+  <label class="field"><span>Jenis</span>${sel(['Campaign','POSM','Planogram'],x.kind,'',{label:'Jenis',id:'pm_k'})}</label>
+  <label class="field"><span>Di-assign ke</span>${sel(POSM_TARGET,x.to,'',{label:'Di-assign ke',id:'pm_t'})}</label></div>
+  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Simpan',{v:'accent',on:`posmSave('${id||''}')`})}</div>`); }
+function posmSave(id){ const n=document.getElementById('pm_n').value.replace(/['"<>`]/g,'').trim(), k=document.getElementById('pm_k').value, t=document.getElementById('pm_t').value;
+  if(!n){ toast('Periksa isian','Isi nama brief.','danger'); return; }
+  if(id){ Object.assign(POSM.find(a=>a.id===id),{name:n,kind:k,to:t}); audit('Mengubah brief '+n); }
+  else { POSM.push({id:'pm'+Date.now()%1e6,name:n,kind:k,to:t,done:0,of:25,avg:0}); audit('Membuat brief '+n); }
+  closeLayer(); render(false); toast(id?'Brief diperbarui':'Brief dibuat',n); }
+function posmDelAsk(id){ const x=POSM.find(a=>a.id===id);
+  if(x.done>0) return openModal(`<h2 class="pt" style="font-size:22px">Tidak bisa dihapus<i>.</i></h2><p class="sm" style="margin:10px 0 18px;line-height:1.6">${x.done} user sudah mengirim foto untuk brief ini. Data yang dipakai tidak bisa dihapus.</p><div style="display:flex;justify-content:flex-end">${btn('Tutup',{v:'card',on:'closeLayer()'})}</div>`);
+  openModal(`<h2 class="pt" style="font-size:22px">Hapus ${esc(x.name)}?<i>.</i></h2><p class="sm muted" style="margin:10px 0 18px;line-height:1.6">Data disembunyikan dari daftar dan tetap tersimpan untuk audit (soft delete).</p><div style="display:flex;gap:10px;justify-content:flex-end">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Hapus',{v:'danger',icon:'trash',on:`posmDel('${id}')`})}</div>`); }
+function posmDel(id){ const x=POSM.find(a=>a.id===id); x.del=true; audit('Menghapus brief '+x.name); closeLayer(); render(false); toast('Brief dihapus',x.name); }
 
 /* ---------- Master tambahan ---------- */
 const pageRegion=q=>({title:'Region',html:`<p class="purpose">Level customer: Client, Region, Cabang, lalu Toko (MOM 3).</p>${crudList('region',q)}`});
@@ -1558,7 +1634,7 @@ const pageMitra=q=>({title:'Mitra',html:`<p class="purpose">Agent di luar SIM ya
 const SKU_REP=[['26 Okt','Electronic City Kemang','rina','tv50',2,'Rak utama','Baik'],['26 Okt','Electronic City Kemang','rina','tv43',3,'End gondola','Baik'],['26 Okt','Electronic City Kemang','rina','kl2p',1,'Rak utama','Rusak'],['26 Okt','Best Denki Senayan City','sinta','mc85',2,'Rak utama','Baik'],['26 Okt','Best Denki Senayan City','sinta','ac1',0,'Gudang','Kosong'],['25 Okt','Electronic Solution Puri','putri','tv50',4,'Rak utama','Baik'],['25 Okt','Best Denki Alam Sutera','fajar','ap30',2,'End gondola','Rusak']].map(([tgl,toko,u,id,q,place,cond],i)=>({_id:'s'+i,tgl,toko,u,id,q,place,cond}));
 function pageSkuDisplay(q){
   const f=q.f||'', rows=SKU_REP.filter(r=>!f||r.cond===f), c=k=>SKU_REP.filter(r=>r.cond===k).length;
-  return {title:'Laporan SKU display',html:`<p class="purpose">Data diinput harian oleh promotor di lokasi, bukan lewat dashboard. SKU rusak otomatis membuat task perbaikan untuk Team Leader (MOM 7).</p>
+  return {title:'Laporan SKU display',html:`<p class="purpose">Data diinput harian oleh promotor di lokasi, bukan lewat dashboard. SKU rusak otomatis membuat task perbaikan untuk Team Leader (MOM 7). Dipakai SPG dan promotor elektronik, tidak dipakai Promotor FMCG dan MD.</p>
   <div class="stats">${[['','Semua',SKU_REP.length],['Baik','Baik',c('Baik')],['Rusak','Rusak',c('Rusak')],['Kosong','Kosong',c('Kosong')]].map(([k,l,v])=>`<button class="stat ${f===k?'on':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${v}</b></button>`).join('')}</div>
   ${card('SKU display harian',dataTable('skr',{rows,rowClick:r=>`skuPanel('${r._id}')`,cols:[{label:'Toko',render:r=>`<span class="fg" style="font-weight:500">${r.toko}</span><span class="xs muted" style="display:block">${r.tgl} · ${byU(r.u).name}</span>`,prim:true},{label:'Produk',render:r=>PRODUCTS.find(p=>p.id===r.id).name},{label:'Qty',k:'q',align:'r',hide:true},{label:'Penempatan',k:'place',hide:true},{label:'Kondisi',render:r=>tag(r.cond,r.cond==='Baik'?'success':r.cond==='Rusak'?'danger':'warning')}]}),{acts:btn('Unduh laporan',{v:'soft',size:'sm',icon:'down',on:"toast('Laporan SKU display diunduh','Sesuai filter yang aktif.')"})})}`};
 }
@@ -1567,7 +1643,7 @@ function skuPanel(id){ const r=SKU_REP.find(x=>x._id===id), p=PRODUCTS.find(x=>x
 const SHARE_REP=[['Electronic City Kemang','TV','ARUNIKA',[['rina',18,'Check-out'],['sinta',20,'Check-out']]],['Electronic City Kemang','TV','Samsung',[['rina',22,'Check-out'],['sinta',24,'Check-out']]],['Electronic City Kemang','TV','LG',[['rina',15,'Check-out'],['sinta',11,'Draft']]],['Best Denki Senayan City','TV','ARUNIKA',[['sinta',12,'Check-out']]],['Best Denki Senayan City','TV','Polytron',[['sinta',9,'Draft']]]].map(([toko,cat,brand,inp],i)=>{ const ok=inp.filter(x=>x[2]==='Check-out'); return {_id:'m'+i,toko,cat,brand,inp,ok:ok.length,avg:ok.length?ok.reduce((s,x)=>s+x[1],0)/ok.length:null}; });
 function pageMarketShare(){
   const rows=SHARE_REP.filter(r=>r.ok), draft=SHARE_REP.reduce((s,r)=>s+r.inp.filter(x=>x[2]==='Draft').length,0);
-  return {title:'Laporan market share',html:`<p class="purpose">Hanya data yang sudah check-out yang masuk laporan. Draft tidak dihitung. Satu toko bisa diinput lebih dari satu orang, laporan mengambil rata-rata (MOM 8).</p>
+  return {title:'Laporan market share',html:`<p class="purpose">Hanya data yang sudah check-out yang masuk laporan. Draft tidak dihitung. Satu toko bisa diinput lebih dari satu orang, laporan mengambil rata-rata (MOM 8). Brand dan kategori produk kompetitor diinput bebas (teks) oleh promotor. Untuk Promotor FMCG dan MD, market share adalah tugas kunjungan, bukan menu beranda.</p>
   ${card('Market share harian',dataTable('mrp',{rows,rowClick:r=>`sharePanel('${r._id}')`,cols:[{label:'Toko',render:r=>`<span class="fg" style="font-weight:500">${r.toko}</span><span class="xs muted" style="display:block">${r.cat}</span>`,prim:true},{label:'Brand',k:'brand'},{label:'Penginput',render:r=>r.ok,align:'r',hide:true},{label:'Rata-rata qty',render:r=>`<span class="tabular">${String(r.avg).replace('.',',')}</span>`,align:'r'}]}),{acts:btn('Unduh laporan',{v:'soft',size:'sm',icon:'down',on:"toast('Laporan market share diunduh','Data yang sudah check-out.')"})})}
   <div style="margin-top:12px">${callout(draft+' input masih draft dan tidak dihitung.')}</div>`};
 }
@@ -1579,18 +1655,18 @@ function pageProduk(q){
   const tab=q.tab||'produk', tokoList=live('toko'), toko=tokoList.find(x=>x.id===q.toko)||tokoList[0], fk=catF()[toko.cat]||1;
   const hov=shRead('hargaToko',{})[toko.name]||{}, prin=r=>Math.round(r.price*.9/1000)*1000, atToko=r=>hov[r.id]??Math.round(r.price*fk/1000)*1000;
   return {title:'Produk & harga',html:`<p class="purpose">Produk dan kategori dari sistem klien, harga per toko dan cabang (MOM 6.2), serta level produk untuk perhitungan insentif (BRD 2.11, 3.1).</p>
-  ${card(tab==='harga'?'Harga per toko dan cabang':tab==='mapping'?'Produk per outlet':tab==='promo'?'Produk price promo':tab==='foto'?'Produk yang wajib difoto':tab==='plan'?'Plan display per tahap':tab==='mf'?'Produk Multi Finance':'Daftar produk',`${utabs([['produk','Produk'],['harga','Harga per toko & cabang'],['mapping','Mapping outlet'],['promo','Produk price promo'],['foto','Produk difoto'],['plan','Plan display'],['mf','Produk Multi Finance']],tab,'prTab')}
+  ${card(tab==='harga'?'Harga per toko dan cabang':tab==='mapping'?'Produk per outlet':tab==='promo'?'Produk price promo':tab==='foto'?'Produk yang wajib difoto':tab==='facing'?'Item facing display':tab==='mf'?'Produk Multi Finance':'Daftar produk',`${utabs([['produk','Produk'],['harga','Harga per toko & cabang'],['mapping','Mapping outlet'],['promo','Produk price promo'],['foto','Produk difoto'],['facing','Facing display'],['mf','Produk Multi Finance']],tab,'prTab')}
     ${tab==='produk'?dataTable('prd',{rows:PRODUCTS.map(p=>({...p,_id:p.id})),rowClick:r=>`toast('${esc(r.name)}','${r.sku} · ${r.cat} · level ${r.lvl}')`,cols:[
       {label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="mono muted" style="display:block">${r.sku}</span>`,prim:true},{label:'Brand',render:()=>'ARUNIKA',hide:true},{label:'Kategori',k:'cat'},{label:'Sub kategori',render:r=>SUBK[r.id]||'<span class="muted">–</span>',hide:true},{label:'Level',render:r=>tag(r.lvl,r.lvl==='A'?'accent':r.lvl==='B'?'info':'neutral')},{label:'Harga dasar',render:r=>rp(r.price),align:'r'}]})
     :tab==='mf'?`<p class="xs muted" style="margin-bottom:10px">Master data produk Multi Finance sudah tersedia dari client dan dipakai di leads (MOM 3). Daftar ini hanya dibaca.</p>${dataTable('pmf',{rows:[['KMK','Kredit Modal Kerja','6 sampai 36 bulan'],['KMG','Kredit Multiguna','12 sampai 60 bulan'],['DTN','Dana Tunai (REA)','6 sampai 24 bulan']].map(([k,n,tn])=>({_id:k,k,n,tn})),rowClick:r=>`toast('${r.n}','Tenor ${r.tn}.')`,cols:[{label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${r.n}</span><span class="mono muted" style="display:block">${r.k}</span>`,prim:true},{label:'Tenor',k:'tn'},{label:'Sumber',render:()=>tag('Dari client','info'),hide:true}]})}`
     :tab==='foto'?`<p class="xs muted" style="margin-bottom:10px">Produk yang wajib difoto sales di toko. Admin menentukan daftarnya, sales menginput datanya di lokasi (MOM 6.2). Muncul di SKU display mobile.</p>${dataTable('pft',{rows:PRODUCTS.map(p=>({...p,_id:p.id})),rowClick:r=>`pfotoToggle('${r.id}')`,cols:[{label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="mono muted" style="display:block">${r.sku}</span>`,prim:true},{label:'Kategori',k:'cat',hide:true},{label:'Wajib difoto',render:r=>shRead('pfoto',PFOTO_DEFAULT).includes(r.id)?tag('Ya','success'):tag('Tidak','neutral')}]})}`
-    :tab==='plan'?`<p class="xs muted" style="margin-bottom:10px">Plan tata letak display per tahap (phasing). Promotor FMCG mengisi facing aktual terhadap plan ini (MOM 10.2).</p>${dataTable('pln',{rows:Object.entries(shRead('plan',PLAN_DEFAULT)).flatMap(([w,a])=>a.map(([n,v])=>({_id:w+'|'+n,w,n,v}))),rowClick:r=>`planModal('${r.w}','${r.n}')`,cols:[{label:'Tahap',k:'w',prim:true},{label:'Area',k:'n'},{label:'Facing plan',render:r=>`<span class="tabular">${r.v}</span>`,align:'r'}]})}`
-    :tab==='promo'?`<p class="xs muted" style="margin-bottom:10px">Produk yang dicek Promotor FMCG sesuai setup admin (MOM 10.2).</p>${dataTable('pcek',{rows:FM_PROD.map(p=>({...p,_id:p.id})),rowClick:r=>`pcekToggle('${r.id}')`,cols:[{label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="mono muted" style="display:block">${r.sku}</span>`,prim:true},{label:'Dicek di price promo',render:r=>MD.pcek.includes(r.id)?tag('Ya','success'):tag('Tidak','neutral')}]})}`
+    :tab==='facing'?`<p class="xs muted" style="margin-bottom:10px">Item yang difoto Promotor FMCG di Facing display. Isi menunya sama dengan Campaign, POSM & planogram: foto lokasi, lalu dinilai terhadap acuan (MOM 10.2). Perubahan tampil di aplikasi mobile.</p>${dataTable('fcg',{rows:facingAll().map(x=>({...x,_id:x.id})),rowClick:r=>`facingModal('${r.id}')`,acts:r=>rowActs(`facingModal('${r.id}')`,`facingDelAsk('${r.id}')`),empty:'Belum ada item facing display.',cols:[{label:'Item',k:'name',prim:true},{label:'Acuan penilaian',k:'acuan',hide:true},{label:'Status',render:r=>stPill(r.status||'Aktif')}]})}`
+    :tab==='promo'?`<p class="xs muted" style="margin-bottom:10px">Produk yang dicek Promotor FMCG sesuai setup admin (MOM 10.2). Admin mengisi harga sebelum promo. Harga promo diinput sendiri oleh promotor, persen diskon dihitung otomatis di aplikasi.</p>${dataTable('pcek',{rows:FM_PROD.map(p=>({...p,_id:p.id})),rowClick:r=>`pcekModal('${r.id}')`,acts:r=>rowActs(`pcekModal('${r.id}')`,`pcekToggle('${r.id}')`,{del:MD.pcek.includes(r.id)}),cols:[{label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="mono muted" style="display:block">${r.sku}</span>`,prim:true},{label:'Harga sebelum promo',render:r=>`<span class="tabular">${rp(fmPriceB(r.id))}</span>`,align:'r'},{label:'Dicek di price promo',render:r=>MD.pcek.includes(r.id)?tag('Ya','success'):tag('Tidak','neutral')}]})}`
     :tab==='mapping'?`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">${sel(tokoList.map(x=>[x.id,x.name]),toko.id,"setQ({toko:this.value})",{label:'Pilih toko'})}<span class="xs muted">${outletMap(toko.id).length} dari ${ALL_PROD().length} SKU dipetakan</span></div>
     ${dataTable('omap',{rows:ALL_PROD().map(p=>({...p,_id:p.id})),rowClick:r=>`outletToggle('${toko.id}','${r.id}')`,cols:[{label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="mono muted" style="display:block">${r.sku}</span>`,prim:true},{label:'Kategori',k:'cat',hide:true},{label:'Di outlet ini',render:r=>outletMap(toko.id).includes(r.id)?tag('Ada','success'):tag('Tidak ada','neutral')}]})}`
     :`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">${sel(tokoList.map(x=>[x.id,x.name]),toko.id,"setQ({toko:this.value})",{label:'Pilih toko'})}<span class="xs muted">Cabang ${esc(toko.cabang)}</span></div>
-    ${dataTable('hrg',{rows:PRODUCTS.map(p=>({...p,_id:p.id})),rowClick:r=>`hargaModal('${toko.id}','${r.id}')`,cols:[{label:'Produk',k:'name',prim:true},{label:'Harga principal',render:r=>`<span class="tabular">${rp(prin(r))}</span>`,align:'r'},{label:'Harga toko',render:r=>`<span class="tabular">${rp(atToko(r))}</span>`,align:'r'},{label:'Sumber',render:r=>hov[r.id]!=null?tag('Diatur per toko','accent'):'<span class="muted">Mengikuti kategori</span>',hide:true},{label:'Markup',render:r=>`<span class="tabular">${String(((atToko(r)/prin(r)-1)*100).toFixed(1)).replace('.',',')}%</span>`,align:'r',hide:true}]})}`}`,
-    {acts:`${btn('Import',{v:'soft',size:'sm',icon:'up',on:"uploadModal('Harga produk')"})}${btn('Export',{v:'soft',size:'sm',icon:'down',on:"toast('Harga produk diunduh','Per toko dan cabang.')"})}${btn('Sinkron dari klien',{v:'accent',size:'sm',icon:'refresh',on:"toast('Produk dan harga tersinkron','Terakhir 26 Okt, 13:40 dari sistem ARUNIKA.')"})}`})}`};
+    ${dataTable('hrg',{rows:PRODUCTS.map(p=>({...p,_id:p.id})),rowClick:r=>`hargaModal('${toko.id}','${r.id}')`,acts:r=>rowActs(`hargaModal('${toko.id}','${r.id}')`,`hargaSave('${toko.id}','${r.id}',true)`,{del:hov[r.id]!=null}),cols:[{label:'Produk',k:'name',prim:true},{label:'Harga principal',render:r=>`<span class="tabular">${rp(prin(r))}</span>`,align:'r'},{label:'Harga toko',render:r=>`<span class="tabular">${rp(atToko(r))}</span>`,align:'r'},{label:'Sumber',render:r=>hov[r.id]!=null?tag('Diatur per toko','accent'):'<span class="muted">Mengikuti kategori</span>',hide:true},{label:'Markup',render:r=>`<span class="tabular">${String(((atToko(r)/prin(r)-1)*100).toFixed(1)).replace('.',',')}%</span>`,align:'r',hide:true}]})}`}`,
+    {acts:`${tab==='facing'?btn('Tambah item',{v:'accent',size:'sm',icon:'plus',on:'facingModal()'}):''}${btn('Import',{v:'soft',size:'sm',icon:'up',on:"uploadModal('Harga produk')"})}${btn('Export',{v:'soft',size:'sm',icon:'down',on:"toast('Harga produk diunduh','Per toko dan cabang.')"})}${btn('Sinkron dari klien',{v:'accent',size:'sm',icon:'refresh',on:"toast('Produk dan harga tersinkron','Terakhir 26 Okt, 13:40 dari sistem ARUNIKA.')"})}`})}`};
 }
 function prTab(t){ setQ({tab:t}); }
 function hargaModal(tid,pid){ const tk=TOKO.find(x=>x.id===tid), p=PRODUCTS.find(x=>x.id===pid), cur=shRead('hargaToko',{})[tk.name]?.[pid]??Math.round(p.price*(catF()[tk.cat]||1)/1000)*1000;
@@ -1600,10 +1676,37 @@ function hargaSave(tid,pid,reset){ const tk=TOKO.find(x=>x.id===tid), all=shRead
   if(reset) delete all[tk.name][pid];
   else { const v=parseInt(document.getElementById('hg_v').value.replace(/\D/g,''),10); if(!(v>0)){ toast('Periksa isian','Isi harga lebih dari nol.','danger'); return; } all[tk.name][pid]=v; }
   shSet('hargaToko',all); audit('Mengubah harga '+PRODUCTS.find(x=>x.id===pid).name+' di '+tk.name); closeLayer(); render(false); toast(reset?'Harga mengikuti kategori':'Harga toko tersimpan',tk.name); }
+const FACING_DEFAULT=[{id:'fc1',name:'Rak Utama',kind:'Facing display',acuan:'Susunan facing di rak utama sesuai brief'},{id:'fc2',name:'Boot',kind:'Facing display',acuan:'Susunan facing di boot sesuai brief'},{id:'fc3',name:'Gudang',kind:'Facing display',acuan:'Susunan barang di gudang sesuai brief'}];
+const facingAll=()=>shRead('facing',FACING_DEFAULT).filter(x=>!x.del);
+function facingModal(id){ const x=id?facingAll().find(a=>a.id===id):{name:'',acuan:'',status:'Aktif'};
+  openModal(`<h2 class="pt" style="font-size:22px">${id?'Edit':'Tambah'} item facing display<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Item ini muncul di Facing display aplikasi mobile Promotor FMCG dan MD.</p>
+  <div class="grid" style="gap:12px"><label class="field"><span>Nama item</span><span class="inp"><input id="fc_n" value="${esc(x.name)}" placeholder="contoh: Rak Utama"></span></label><label class="field"><span>Acuan penilaian</span><span class="inp"><input id="fc_a" value="${esc(x.acuan)}" placeholder="contoh: Susunan facing sesuai brief"></span></label>
+  <label class="field"><span>Status</span>${sel(['Aktif','Nonaktif'],x.status||'Aktif','',{label:'Status',id:'fc_s'})}</label></div>
+  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Simpan',{v:'accent',on:`facingSave('${id||''}')`})}</div>`); }
+function facingSave(id){ const n=document.getElementById('fc_n').value.replace(/['"<>`]/g,'').trim(), a=document.getElementById('fc_a').value.replace(/['"<>`]/g,'').trim(), st=document.getElementById('fc_s').value;
+  if(!n){ toast('Periksa isian','Isi nama item.','danger'); return; }
+  const L=JSON.parse(JSON.stringify(shRead('facing',FACING_DEFAULT)));
+  if(L.some(x=>!x.del&&x.id!==id&&x.name.toLowerCase()===n.toLowerCase())){ toast('Periksa isian','Nama item sudah dipakai.','danger'); return; }
+  if(id){ Object.assign(L.find(x=>x.id===id),{name:n,acuan:a||'Sesuai brief',status:st}); audit('Mengubah item facing display '+n); }
+  else { L.push({id:'fc'+Date.now()%1e6,name:n,kind:'Facing display',acuan:a||'Sesuai brief',status:st}); audit('Menambahkan item facing display '+n); }
+  shSet('facing',L); closeLayer(); render(false); toast(id?'Item diperbarui':'Item ditambahkan',n); }
+function facingDelAsk(id){ const x=facingAll().find(a=>a.id===id), act=facingAll().filter(a=>(a.status||'Aktif')==='Aktif');
+  if(act.length<=1&&(x.status||'Aktif')==='Aktif') return openModal(`<h2 class="pt" style="font-size:22px">Tidak bisa dihapus<i>.</i></h2><p class="sm" style="margin:10px 0 18px;line-height:1.6">Ini satu-satunya item aktif. Facing display butuh minimal satu item. Tambah item lain dulu.</p><div style="display:flex;justify-content:flex-end">${btn('Tutup',{v:'card',on:'closeLayer()'})}</div>`);
+  openModal(`<h2 class="pt" style="font-size:22px">Hapus ${esc(x.name)}?<i>.</i></h2><p class="sm muted" style="margin:10px 0 18px;line-height:1.6">Item tidak lagi muncul di aplikasi mobile. Data disembunyikan dari daftar dan tetap tersimpan untuk audit (soft delete).</p><div style="display:flex;gap:10px;justify-content:flex-end">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Hapus',{v:'danger',icon:'trash',on:`facingDel('${id}')`})}</div>`); }
+function facingDel(id){ const L=JSON.parse(JSON.stringify(shRead('facing',FACING_DEFAULT))), x=L.find(a=>a.id===id); x.del=true; shSet('facing',L); audit('Menghapus item facing display '+x.name); closeLayer(); render(false); toast('Item dihapus',x.name); }
+const FM_PRICE_DEFAULT={f1:29900,f2:4000,f3:6500,f4:2000,f5:11900};
+const fmPriceB=id=>shRead('fmPrice',FM_PRICE_DEFAULT)[id]||0;
+function pcekModal(id){ const p=FM_PROD.find(x=>x.id===id), on=MD.pcek.includes(id);
+  openModal(`<h2 class="pt" style="font-size:22px">Edit price promo<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">${esc(p.name)} · ${p.sku}</p>
+  <div class="grid" style="gap:12px"><label class="field"><span>Harga sebelum promo (Rp)</span><span class="inp"><input id="pc_b" inputmode="numeric" value="${fmPriceB(id)}"></span></label>
+  <label class="field"><span>Dicek di price promo</span>${sel(['Ya','Tidak'],on?'Ya':'Tidak','',{label:'Dicek di price promo',id:'pc_s'})}</label></div>
+  <p class="xs muted" style="margin-top:10px">Harga promo diinput promotor di aplikasi. Persen diskon dihitung otomatis dari dua harga ini.</p>
+  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Simpan',{v:'accent',on:`pcekSave('${id}')`})}</div>`); }
+function pcekSave(id){ const b=parseInt(document.getElementById('pc_b').value.replace(/\D/g,''),10); if(!(b>0)){ toast('Periksa isian','Isi harga sebelum promo lebih dari nol.','danger'); return; }
+  const P={...shRead('fmPrice',FM_PRICE_DEFAULT),[id]:b}; shSet('fmPrice',P);
+  const on=document.getElementById('pc_s').value==='Ya'; MD.pcek=on?[...new Set([...MD.pcek,id])]:MD.pcek.filter(x=>x!==id); shSet('pcek',MD.pcek);
+  audit('Mengubah price promo '+FM_PROD.find(x=>x.id===id).name); closeLayer(); render(false); toast('Price promo tersimpan',FM_PROD.find(x=>x.id===id).name+' · '+rp(b)); }
 function pfotoToggle(id){ const L=shRead('pfoto',PFOTO_DEFAULT), on=L.includes(id); shSet('pfoto',on?L.filter(x=>x!==id):[...L,id]); audit('Mengubah produk wajib difoto'); render(false); toast(on?'Produk tidak lagi wajib difoto':'Produk wajib difoto',PRODUCTS.find(p=>p.id===id).name); }
-function planModal(w,n){ const v=shRead('plan',PLAN_DEFAULT)[w].find(r=>r[0]===n)[1]; openModal(`<h2 class="pt" style="font-size:22px">Ubah plan<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">${w} · ${n}</p><label class="field"><span>Facing plan</span><span class="inp"><input id="pl_v" inputmode="numeric" value="${v}"></span></label>
-  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Simpan',{v:'accent',on:`planSave('${w}','${n}')`})}</div>`); }
-function planSave(w,n){ const v=parseInt(document.getElementById('pl_v').value.replace(/\D/g,''),10); if(!(v>=0&&v<=30)){ toast('Periksa isian','Isi angka 0 sampai 30.','danger'); return; } const P=JSON.parse(JSON.stringify(shRead('plan',PLAN_DEFAULT))); P[w].find(r=>r[0]===n)[1]=v; shSet('plan',P); audit('Mengubah plan display '+w+' '+n); closeLayer(); render(false); toast('Plan tersimpan',w+' · '+n+': '+v+' facing'); }
 
 /* ---------- Parameter ---------- */
 function pageParameter(){
@@ -1709,7 +1812,7 @@ function pageKonten(q,kind){
       ${sel([['','Semua role'],...live('role').filter(r=>r.id!=='r1').map(r=>[r.id,r.name])],fR,"setQ({role:this.value})",{label:'Filter role'})}</div>
     <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px">
       <div class="chips">${[['','Semua status'],['Draft','Draft'],['Terbit','Terbit'],['Selesai','Selesai']].map(([k,l])=>`<button class="fchip ${fS===k?'on':''}" onclick="setQ({st:'${k}'})">${l}</button>`).join('')}</div></div>
-    ${dataTable('knt',{rows,rowClick:r=>`openForm('konten','${r.id}')`,empty:`Tidak ada konten yang cocok. <button style="color:var(--accent-text);font-weight:600" onclick="setQ({q:'',st:'',role:''})">Hapus filter</button>`,cols:[
+    ${dataTable('knt',{rows,rowClick:r=>`openForm('konten','${r.id}')`,acts:r=>rowActs(`openForm('konten','${r.id}')`,`delAsk('konten','${r.id}')`),empty:`Tidak ada konten yang cocok. <button style="color:var(--accent-text);font-weight:600" onclick="setQ({q:'',st:'',role:''})">Hapus filter</button>`,cols:[
       {label:'Judul',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${r.questions.length} pertanyaan</span>`,prim:true},
       {label:'Assign ke',render:r=>`<span class="xs">${r.roles.map(roleName).join(', ')}</span>`},{label:'Berlaku',render:r=>r.cabang.join(', '),hide:true},
       {label:'Periode',render:r=>`<span class="tabular xs">${fmtD(r.start)} – ${fmtD(r.end)}</span>`,hide:true},...(isQuiz?[]:[{label:'Jadwal',render:r=>r.jadwal||'Sekali'}]),
@@ -1726,7 +1829,7 @@ function pagePengaturan(){
   return {title:'Pengaturan',html:`<div class="grid g2">
     ${card('Profil',`<div style="display:flex;gap:14px;align-items:center;margin-bottom:16px">${av('Dewi Kartika','lg')}<div><b class="fg">Dewi Kartika</b><div class="xs muted">Admin SIM · Jakarta</div></div></div>
       <div class="grid" style="gap:12px"><label class="field"><span>Nama</span><span class="inp"><input value="Dewi Kartika"></span></label><label class="field"><span>Email</span><span class="inp"><input value="dewi.k@sim.co.id"></span></label></div>`)}
-    ${card('Data demo bersama',`<p class="sm muted">Task SKU, task CBD, limit canvassing, event, plan display, produk difoto, dan izin jadwal per role dibagi dengan aplikasi mobile lewat browser ini.</p>`,{acts:btn('Reset',{v:'soft',size:'sm',on:"shReset();toast('Data bersama direset','Muat ulang halaman untuk melihat data awal.')"})})}
+    ${card('Data demo bersama',`<p class="sm muted">Task SKU, task CBD, limit canvassing, event, item facing display, harga sebelum promo, jadwal kunjungan FMCG, status tugas dan log aktivitas FMCG, produk difoto, dan izin jadwal per role dibagi dengan aplikasi mobile lewat browser ini.</p>`,{acts:btn('Reset',{v:'soft',size:'sm',on:"shReset();toast('Data bersama direset','Muat ulang halaman untuk melihat data awal.')"})})}
     ${card('Tampilan',`<div class="field"><span>Tema</span>${pills([['light','Terang'],['dark','Gelap']],ST.theme,'setTheme')}</div><p class="xs muted" style="margin-top:10px">Pilihan tersimpan di browser ini.</p>`)}
     ${card('Notifikasi',`<div class="rows">${[['Approval baru','Kirim email saat ada pengajuan'],['Leads baru dari backend','Ringkasan setiap upload'],['Selisih rekonsiliasi','Saat file klien tidak cocok']].map(([l,h],i)=>`<div class="rowlink" style="cursor:default"><span style="flex:1"><b class="fg sm" style="display:block">${l}</b><span class="xs muted">${h}</span></span>${swc(i!==1,"this.setAttribute('aria-checked',this.getAttribute('aria-checked')!=='true')",l)}</div>`).join('')}</div>`)}
   </div>
