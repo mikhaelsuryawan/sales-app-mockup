@@ -753,7 +753,7 @@ SCR.home = () => {
   const u=U(), r=role(), locked=isLocked();
   let menus=MENUS[u.menu||r];
   if(r==='fmcg') menus=[[fmAktLabel(),'grid',"act(()=>tab('aktivitas'))",1],...menus];
-  else if(hasAkt()) menus=[[aktLabel(),'grid',"act(()=>tab('akt'))",1],...aktTasks(null).map(t=>[t.t,t.ic,t.lock?`aktGate(()=>${t.go})`:`act(()=>${t.go})`,1]),...menus];
+  else if(hasAkt()) menus=[[aktLabel(),'grid',"act(()=>tab('akt'))",1],...menus];
   let extra='';
   if(r==='spv') extra = spvDash();
   else extra = fieldDash();
@@ -1979,7 +1979,6 @@ const aktStores = () => S.visits[vk()]||[];
 const noCheckin = () => ['Multi Finance','REA / SPG Multi Finance','CBD / Mediator'].includes(U()?.roleLabel);
 const aktLabel = () => aktStores().length>1&&!noCheckin()?'Aktivitas Toko':'Aktivitas Saya';
 function aktMark(k){ const v=visitOpen(); if(v){ v.done=v.done||{}; v.done[k]=true; } }
-const aktHint = o => `<div class="card" style="margin-top:4px"><b>${o?'Kerjakan tugas dari Beranda':'Tugas dikerjakan setelah check-in'}</b><p class="small muted" style="margin:6px 0 ${o?'12px':'0'};line-height:1.5">Menu tugas ada di halaman Beranda${o?'.':' dan terkunci sampai kamu check-in di toko.'}</p>${o?`<button class="btn sm" onclick="tab('home')">${I('home',18)} Buka Beranda</button>`:''}</div>`;
 function aktGate(fn){ act(()=>{ if(!visitOpen()){ sheet(`<h3 style="font-size:18px;font-weight:800">Check-in dulu</h3><p class="muted small" style="margin:6px 0 16px;line-height:1.5">Pilih toko yang kamu kunjungi, lalu check-in di lokasi. Setelah itu pekerjaan di toko tersebut bisa dilanjutkan.</p>
     <button class="btn" onclick="closeSheet();visitEntry()">Pilih toko</button><button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Nanti</button>`); return; } fn(); }); }
 function aktTasks(v){
@@ -1996,6 +1995,11 @@ function aktTasks(v){
     {ic:'plus',t:'Usulkan toko',sub:'Toko baru untuk diverifikasi',go:"go('toko-baru')"}];
   return [];
 }
+function aktPekerjaan(o){
+  const rows=aktTasks(o).map(t=>{ const lk=t.lock&&!o, go=t.lock?`aktGate(()=>${t.go})`:`act(()=>${t.go})`;
+    return `<button class="li" onclick="${go}"><div class="ico-tile ${t.st==='Selesai'?'green':''}">${I(t.st==='Selesai'?'check':t.ic,18,2.2)}</div><div class="grow"><div class="t">${t.t}</div><div class="s">${lk?'Terbuka setelah check-in':t.sub}</div></div>${t.st?stChip(t.st):''}${lk?I('lock',16):I('right',18)}</button>`; }).join('');
+  return `<div class="sec-title">Pekerjaan</div><div class="list">${rows}</div>`;
+}
 SCR.akt = () => {
   const L=aktStores(), o=visitOpen(), multi=L.length>1, nas=role()==='leads';
   const storeRow=v=>{ const open=v.cin&&!v.cout, fin=v.status==='Selesai', lab=open?'Check-out':fin?'Selesai':'Check-in';
@@ -2007,10 +2011,10 @@ SCR.akt = () => {
     : multi ? `<div class="card" style="margin-bottom:14px"><b>Kamu punya ${L.length} ${nas?'tujuan':'toko'} hari ini</b><p class="small muted" style="margin:6px 0 12px;line-height:1.5">Pilih satu, check-in, kerjakan tugas, lalu check-out.</p><button class="btn sm" onclick="act(()=>visitEntry())">${I('pin',18)} Pilih ${nas?'tujuan':'toko'}</button></div>`
     : `<div class="list" style="margin-bottom:14px">${storeRow(L[0])}</div><p class="hint" style="margin:-6px 0 14px">Kamu punya 1 tujuan hari ini. Check-in, kerjakan tugas, lalu check-out.</p>`;
   const others = o&&multi ? `<button class="btn sm ghost" style="margin-bottom:14px" onclick="act(()=>visitEntry())">${I('pin',18)} Pilih ${nas?'tujuan':'toko'} lain</button>` : '';
-  return {tab:'akt', note:'Halaman Aktivitas untuk pilih toko, check-in, dan check-out, mengikuti pola Promotor FMCG. Menu tugas ada di Beranda: pilih toko jika lebih dari satu, check-in, kerjakan tugas, lalu check-out. Judul: Aktivitas Saya untuk 1 toko, Aktivitas Toko untuk lebih dari 1 toko. Beranda memuat menu tugasnya. Tugas yang terikat lokasi terkunci sampai check-in. Check-out tidak mewajibkan semua tugas selesai (aturan itu hanya untuk Promotor FMCG dan MD).',
+  return {tab:'akt', note:'Halaman Aktivitas untuk pilih toko, check-in, dan check-out, mengikuti pola Promotor FMCG. Menu pekerjaan ada di halaman ini, tidak di Beranda: pilih toko jika lebih dari satu, check-in, kerjakan pekerjaan, lalu check-out. Judul: Aktivitas Saya untuk 1 toko, Aktivitas Toko untuk lebih dari 1 toko. Pekerjaan yang terikat lokasi terkunci sampai check-in. Check-out tidak mewajibkan semua tugas selesai (aturan itu hanya untuk Promotor FMCG dan MD).',
   html:`${appbar(aktLabel(),{backBtn:false})}<main class="content">
     ${head}
-    ${others}${aktHint(o)}</main>`};
+    ${others}${aktPekerjaan(o)}</main>`};
 };
 const fmStores = () => S.visits.fmcg||[];
 function mdTasks(o){
