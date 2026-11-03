@@ -112,7 +112,7 @@ Semua data dummy. CRUD bekerja di memori dan hilang saat reload, kecuali data ya
 | Status kunjungan dan tugas FMCG | Mobile (check-in, tugas) | Dashboard (Kunjungan) |
 | Log aktivitas FMCG | Mobile (simpan sementara atau selesai) | Dashboard (Aktivitas lapangan) |
 
-Datanya tersimpan di browser tiap pengguna, bukan di server. Tombol reset ada di panel demo mobile dan di Pengaturan dashboard. Menu per role di IAM (Lihat, Buat, Ubah, Hapus, Approve) tetap hanya tampilan.
+Datanya tersimpan di browser tiap pengguna, bukan di server. Tombol reset ada di panel demo mobile dan di Pengaturan dashboard. Hak akses per role di IAM dipisah per platform: website memakai Lihat, Buat, Ubah, Hapus, Approve per menu dashboard; mobile cukup centang Aktif per menu aplikasi. Bagian yang tampil mengikuti isian Platform role. Keduanya tetap hanya tampilan.
 
 ## 5. Hal yang tidak ada di mockup
 

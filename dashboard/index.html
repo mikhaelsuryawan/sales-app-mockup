@@ -1256,6 +1256,24 @@ function pageOverdue(q){
    ===================================================================== */
 const MODULES=['Absensi','Kunjungan','Approval','Penjualan','Pesanan','Target','Promo','Insentif','Grading','Leads','Overdue','Master data','IAM'];
 const ACTS=['Lihat','Buat','Ubah','Hapus','Approve'];
+/* Menu aplikasi mobile (sama dengan menu Beranda dan tab bawah di mockup mobile). Hak akses mobile cukup aktif atau tidak per menu. */
+const MOBILE_MENUS=['Absen','Aktivitas','Kunjungan','Penjualan','Pesanan','Stok bawaan','SKU display','Market share','Stock opname','Campaign & POSM','Leads','Mitra saya','Task Team Leader','Assign leads','Assign canvasser','Approval','Task pending','Tim saya','Data overdue','Target','Quiz','Survey','Ajukan izin','Notifikasi'];
+const MOBILE_OWN={
+  spg:['Absen','Aktivitas','Kunjungan','Penjualan','SKU display','Market share','Stock opname','Campaign & POSM','Target','Quiz','Survey','Ajukan izin','Notifikasi'],
+  canvas:['Absen','Aktivitas','Kunjungan','Penjualan','Stok bawaan','Target','Quiz','Survey','Ajukan izin','Notifikasi'],
+  order:['Absen','Aktivitas','Kunjungan','Pesanan','Target','Quiz','Survey','Ajukan izin','Notifikasi'],
+  leads:['Absen','Leads','Target','Quiz','Survey','Ajukan izin','Notifikasi'],
+  cbd:['Absen','Leads','Mitra saya','Task Team Leader','Target','Quiz','Survey','Ajukan izin','Notifikasi'],
+  fmcg:['Absen','Aktivitas','Kunjungan','Quiz','Survey','Ajukan izin','Notifikasi'],
+  arco:['Absen','Assign leads','Leads','Tim saya','Ajukan izin','Notifikasi'],
+  bantuan:['Absen','Kunjungan','Penjualan','Ajukan izin','Notifikasi'],
+  trainer:['Absen','Kunjungan','Quiz','Survey','Ajukan izin','Notifikasi'],
+  spv:['Absen','Approval','Assign canvasser','Task pending','Assign leads','Leads','Tim saya','Data overdue','Kunjungan','Notifikasi']
+};
+const genMPerm=kind=>Object.fromEntries(MOBILE_MENUS.map(m=>[m,(MOBILE_OWN[kind]||[]).includes(m)]));
+const hasWeb=r=>/Web/.test(r.platform||''), hasMobile=r=>/Mobile/.test(r.platform||'');
+function permPlatSync(){ const v=document.getElementById('f_platform')?.value||''; const w=document.getElementById('perm_web'), m=document.getElementById('perm_mobile'); if(w) w.hidden=!/Web/.test(v); if(m) m.hidden=!/Mobile/.test(v); }
+document.addEventListener('change',e=>{ if(e.target.id==='f_platform') permPlatSync(); });
 function genPerm(kind){
   const p={}; MODULES.forEach(m=>{
     let a=[false,false,false,false,false];
@@ -1324,6 +1342,8 @@ TOKO.forEach((t,i)=>Object.assign(t,{client:'cl1',status:'Aktif',radius:100,coor
 MD.user.forEach(u=>{ if(['putri','kevin','fajar'].includes(u.id)) u.clients=['cl4']; });
 const SEG={r1:['Umum','Tim / pendukung'],r2:['Umum','Tim / pendukung'],r3:['Elektronik','Diam di lokasi'],r4:['FMCG','Bergerak'],r5:['FMCG','Bergerak'],r7:['Umum','Tim / pendukung'],r8:['Multi Finance','Tim / pendukung'],r9:['Multi Finance','Bergerak'],r10:['Multi Finance','Diam di lokasi'],r11:['FMCG','Diam di lokasi'],r12:['FMCG','Diam di lokasi'],r13:['Elektronik','Bergerak'],r14:['Umum','Diam di lokasi'],r15:['Umum','Diam di lokasi'],r16:['Umum','Tim / pendukung']};
 MD.role.forEach(r=>{ [r.segmen,r.tipe]=SEG[r.id]||['Umum','Diam di lokasi']; });
+const MKIND={r2:'spv',r3:'spg',r4:'canvas',r5:'order',r7:'spv',r8:'arco',r9:'cbd',r10:'leads',r11:'fmcg',r12:'fmcg',r13:'spg',r14:'bantuan',r15:'bantuan',r16:'trainer'};
+MD.role.forEach(r=>{ r.mperm=genMPerm(MKIND[r.id]); });
 const RJ=shRead('roleJadwal',{});
 MD.role.forEach(r=>{ r.jadwal=RJ[r.id]||(['r1','r2','r7','r11','r12'].includes(r.id)?'Ya':'Tidak'); });
 Object.assign(MD,{
@@ -1402,14 +1422,17 @@ const ENT={
     inUse:r=>r.id==='dewi'?'Akun yang sedang login tidak bisa dihapus.':'',
     delNote:'Akses aplikasi dicabut. Data pegawai tetap ada di SIM (BPR1) dan riwayat absensi/penjualannya tetap tersimpan.',
     extraTop:r=>['r14','r15'].includes(r.role)?callout('Promotor Bantuan dan Reliever bisa dipindah client dan cabang, dengan hak akses terbatas. Ubah lewat field Client dan Cabang, aktifkan atau nonaktifkan lewat status.'):r.face==='Minta rekam ulang'?`<div class="callout">${I('face',18)}<span><b>${esc(r.name)}</b> meminta rekam ulang wajah referensi. <button type="button" style="color:var(--accent-text);font-weight:600" onclick="MD.user.find(x=>x.id==='${r.id}').face='Terekam';audit('Mengizinkan rekam ulang wajah ${esc(r.name)}');this.closest('.callout').remove();toast('Rekam ulang diizinkan','Diminta saat login berikutnya.')">Izinkan</button></span></div>`:''},
-  role:{label:'Role',plural:'Role & hak akses',prefix:'r',store:()=>MD.role,title:r=>r.name,search:r=>r.name+r.desc,unique:'name',blank:()=>({scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',jadwal:'Tidak',perm:genPerm('none')}),
+  role:{label:'Role',plural:'Role & hak akses',prefix:'r',store:()=>MD.role,title:r=>r.name,search:r=>r.name+r.desc,unique:'name',blank:()=>({scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',jadwal:'Tidak',perm:genPerm('none'),mperm:genMPerm('none')}),
     fields:[{k:'name',label:'Nama role',req:true},{k:'desc',label:'Keterangan',type:'textarea'},
       {k:'scope',label:'Cakupan data',type:'select',req:true,opts:['Semua klien','Klien sendiri','Tim sendiri','Diri sendiri'],hint:'Segregation of duty: data yang boleh dilihat (BRD 0.5.7)'},
       {k:'segmen',label:'Segmen',type:'select',opts:['Umum','Multi Finance','Elektronik','FMCG'],hint:'Pengelompokan tipe sales per segmen (MOM 1)'},{k:'tipe',label:'Tipe sales',type:'select',opts:['Bergerak','Diam di lokasi','Tim / pendukung']},{k:'platform',label:'Platform',type:'select',opts:['Web','Mobile','Web & Mobile']},{k:'appr',label:'Approval pengajuan',type:'select',opts:['Tanpa approval','1 tingkat','2 tingkat'],hint:'Untuk cuti, hapus transaksi, dll.'},{k:'jadwal',label:'Boleh membuat jadwal kunjungan',type:'select',opts:['Tidak','Ya'],hint:'Diatur per role (MOM 5.1)'}],
-    extra:r=>`<div class="field"><span>Hak akses per menu</span><div class="tbl-wrap"><table class="tbl" id="permtbl"><thead><tr><th>Menu</th>${ACTS.map(a=>`<th class="c">${a}</th>`).join('')}</tr></thead><tbody>${MODULES.map(m=>`<tr><td class="fg">${m}</td>${ACTS.map((a,i)=>`<td class="c"><button type="button" class="cb ${r.perm[m][i]?'on':''}" style="margin:auto" data-m="${m}" data-i="${i}" aria-pressed="${r.perm[m][i]}" aria-label="${a} ${m}" onclick="cbT(this)">${r.perm[m][i]?I('check',12,3):''}</button></td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`,
-    readExtra:()=>{ const p={}; MODULES.forEach(m=>p[m]=[false,false,false,false,false]); document.querySelectorAll('#permtbl .cb').forEach(b=>{ p[b.dataset.m][+b.dataset.i]=b.classList.contains('on'); }); return {perm:p}; },
+    extra:r=>`<div class="field" id="perm_web" ${hasWeb(r)?'':'hidden'}><span>Hak akses website</span><p class="xs muted" style="margin:-2px 0 8px">Menu dashboard web. Atur Lihat, Buat, Ubah, Hapus, dan Approve per menu.</p><div class="tbl-wrap"><table class="tbl" id="permtbl"><thead><tr><th>Menu</th>${ACTS.map(a=>`<th class="c">${a}</th>`).join('')}</tr></thead><tbody>${MODULES.map(m=>`<tr><td class="fg">${m}</td>${ACTS.map((a,i)=>`<td class="c"><button type="button" class="cb ${r.perm[m][i]?'on':''}" style="margin:auto" data-m="${m}" data-i="${i}" aria-pressed="${r.perm[m][i]}" aria-label="${a} ${m}" onclick="cbT(this)">${r.perm[m][i]?I('check',12,3):''}</button></td>`).join('')}</tr>`).join('')}</tbody></table></div></div>
+    <div class="field" id="perm_mobile" ${hasMobile(r)?'':'hidden'}><span>Hak akses mobile</span><p class="xs muted" style="margin:-2px 0 8px">Menu aplikasi mobile. Centang menu yang aktif untuk role ini.</p><div class="tbl-wrap"><table class="tbl" id="mpermtbl"><thead><tr><th>Menu</th><th class="c">Aktif</th></tr></thead><tbody>${MOBILE_MENUS.map(m=>{ const on=!!(r.mperm||{})[m]; return `<tr><td class="fg">${m}</td><td class="c"><button type="button" class="cb ${on?'on':''}" style="margin:auto" data-m="${m}" aria-pressed="${on}" aria-label="Aktifkan ${m}" onclick="cbT(this)">${on?I('check',12,3):''}</button></td></tr>`; }).join('')}</tbody></table></div><span class="ferr" id="e___extra"></span></div>`,
+    readExtra:()=>{ const p={}; MODULES.forEach(m=>p[m]=[false,false,false,false,false]); document.querySelectorAll('#permtbl .cb').forEach(b=>{ p[b.dataset.m][+b.dataset.i]=b.classList.contains('on'); });
+      const mp={}; document.querySelectorAll('#mpermtbl .cb').forEach(b=>{ mp[b.dataset.m]=b.classList.contains('on'); }); return {perm:p,mperm:mp}; },
+    validateExtra:v=>/Mobile/.test(v.platform)&&!Object.values(v.mperm||{}).some(Boolean)?'Aktifkan minimal satu menu mobile.':'',
     cols:[{label:'Role',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${esc(r.desc||'')}</span>`,prim:true},{label:'Cakupan data',k:'scope'},{label:'Segmen',k:'segmen',hide:true},{label:'Tipe',k:'tipe',hide:true},{label:'Platform',k:'platform',hide:true},{label:'Buat jadwal',render:r=>r.jadwal==='Ya'?tag('Ya','success'):'<span class="muted">Tidak</span>',hide:true},
-      {label:'Menu',render:r=>`${MODULES.filter(m=>r.perm[m][0]).length}/${MODULES.length}`,align:'r',hide:true},{label:'User',render:r=>live('user').filter(u=>u.role===r.id).length,align:'r'},{label:'Status',render:r=>stPill(r.status)}],
+      {label:'Menu',render:r=>[hasWeb(r)&&`Web ${MODULES.filter(m=>r.perm[m][0]).length}/${MODULES.length}`,hasMobile(r)&&`Mobile ${MOBILE_MENUS.filter(m=>r.mperm?.[m]).length}/${MOBILE_MENUS.length}`].filter(Boolean).join(' · '),align:'r',hide:true},{label:'User',render:r=>live('user').filter(u=>u.role===r.id).length,align:'r'},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>{ const n=live('user').filter(u=>u.role===r.id).length; return n?`Role ini dipakai ${n} user. Pindahkan user ke role lain dulu, atau nonaktifkan role.`:''; }}
 };
 const nameCol=(sub)=>({label:'Nama',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span>${sub?`<span class="xs muted" style="display:block">${esc(sub(r)||'')}</span>`:''}`,prim:true});
