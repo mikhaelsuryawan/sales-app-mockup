@@ -733,7 +733,7 @@ const MENUS = {
   canvas:[['Jual dari stok','bag',"act(()=>startSale())",1],['Stok bawaan','box',"go('stok')"],['Catat retur','retur',"act(()=>go('stok-form',{kind:'retur'}))",1],['Usulkan toko','plus',"act(()=>go('toko-baru'))",1],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   order:[['Buat pesanan','order',"act(()=>startOrder())",1],['Daftar pesanan','file',"tab('pesanan')"],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Usulkan toko','plus',"act(()=>go('toko-baru'))",1],['Ajukan izin','file',"go('izin')"]],
   leads:[['Leads saya','users',"tab('leads')"],['Buat leads','plus',"act(()=>go('lead-baru'))",1],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
-  fmcg:[['Aktivitas toko','grid',"tab('aktivitas')"],['Buat jadwal','route',"act(()=>go('kunjungan-form'))",1],['SKU display','grid',"fmGate(()=>go('sku'))"],['Market share','pie',"fmGate(()=>go('share'))"],['Kunjungan','route',"tab('kunjungan')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
+  fmcg:[['Aktivitas toko','grid',"tab('aktivitas')"],['Buat jadwal','route',"act(()=>go('kunjungan-form'))",1],['Market share','pie',"fmGate(()=>go('share'))"],['Kunjungan','route',"tab('kunjungan')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
   trainer:[['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Kunjungan','route',"tab('kunjungan')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   cbd:[['Leads saya','users',"tab('leads')"],['Buat leads','plus',"act(()=>go('lead-baru'))",1],['Mitra saya','user',"go('mitra')"],['Task Team Leader','check',"go('cbd-task')"],['Kunjungan','route',"tab('kunjungan')"],['Target & KPI','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   arco:[['Assign leads','users',"go('assign')"],['Semua leads','file',"go('leads-all')"],['Tim saya','user',"tab('tim')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
@@ -1056,7 +1056,7 @@ function repeatVisit(id){ const v=visitById(id); v.sesi=(v.sesi||1)+1; v.cin=nul
 const visitById = id => (S.visits[vk()]||[]).find(v=>v.id===id);
 const VISIT_NOW = {in:'10:02',out:'10:41'};
 const visitOpen = () => (S.visits[vk()]||[]).find(v=>v.cin&&!v.cout);
-const FM_TASKS=[['stok','Cek stok','box','fm-stok'],['promo','Price promo','tag','fm-promo'],['facing','Facing display','grid','fm-facing'],['posm','Campaign, POSM & planogram','image','posm'],['sku','SKU display','grid','sku'],['share','Market share','pie','share']];
+const FM_TASKS=[['stok','Cek stok','box','fm-stok'],['promo','Price promo','tag','fm-promo'],['facing','Facing display','grid','fm-facing'],['share','Market share','pie','share']];
 const fmPending = v => FM_TASKS.filter(t=>!(v.done||{})[t[0]]);
 const ST_TONE={'Belum Selesai':'red','Draft':'amber','Selesai':'green'};
 const stChip = st => chip(st,ST_TONE[st]);
@@ -1113,7 +1113,7 @@ SCR['kunjungan-foto'] = p => {
 function saveVisitPhotos(){
   const {id,mode,n}=cur().p, v=visitById(id);
   if(!S.demo.inRadius){ toast(mode==='in'?'Kamu belum berada di lokasi toko (radius 100 m)':'Check-out harus di lokasi yang sama dengan check-in','alert'); return; }
-  if(mode==='in'){ if(role()==='fmcg'){ v.done={}; S.fm={...S.fm,stok:{},extra:[],stokDone:false,foto:{},fac:{},draft:{}}; S.posm={}; S.shareState=null; S.sku={t1:null,t2:null}; S.skuFoto={}; S.skuDone={}; } v.cin=VISIT_NOW.in; v.pIn=n; v.status='Berjalan'; back(); toast('Check-in tercatat di '+v.place,'pin'); return; }
+  if(mode==='in'){ if(role()==='fmcg'){ v.done={}; S.fm={...S.fm,stok:{},extra:[],stokDone:false,foto:{},fac:{},draft:{}}; S.posm={}; S.facing={}; S.shareState=null; S.sku={t1:null,t2:null}; S.skuFoto={}; S.skuDone={}; } v.cin=VISIT_NOW.in; v.pIn=n; v.status='Berjalan'; back(); toast('Check-in tercatat di '+v.place,'pin'); return; }
   v.cout=VISIT_NOW.out; v.dur='39 mnt'; v.pOut=n; v.status='Selesai';
   back(); toast(role()==='canvas'?'Kunjungan tersubmit, check-out otomatis':'Kunjungan selesai, durasi 39 mnt');
 }
@@ -1766,24 +1766,29 @@ SCR['fm-stok'] = () => {
     <button class="btn ghost" onclick="fmAddSheet()">${I('plus',20)} Tambah SKU</button>
   </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="fmDraftSave('stok')">Simpan sementara</button><button class="btn" onclick="fmSubmit()">Submit stock opname</button></footer>`};
 };
-const FM_PRICE={f1:'Rp24.900',f2:'Rp3.500',f3:'Rp5.500',f4:'Rp1.500',f5:'Rp9.900'};
-const promoCek=()=>shRead('pcek',['f1','f3']).filter(id=>FMCG_SKU.some(s=>s.id===id)).map(id=>({id,name:FMCG_SKU.find(s=>s.id===id).name,price:FM_PRICE[id]}));
+const FM_PRICE={f1:{b:'Rp29.900',a:'Rp24.900',pct:17},f2:{b:'Rp4.000',a:'Rp3.500',pct:13},f3:{b:'Rp6.500',a:'Rp5.500'},f4:{b:'Rp2.000',a:'Rp1.500',pct:25},f5:{b:'Rp11.900',a:'Rp9.900',pct:17}};
+const promoCek=()=>shRead('pcek',['f1','f3']).filter(id=>FMCG_SKU.some(s=>s.id===id)).map(id=>({id,name:FMCG_SKU.find(s=>s.id===id).name,...FM_PRICE[id]}));
 function fmPhoto(k){ S.fm.foto[k]=true; render(false,true); toast('Foto tersimpan','camera'); }
 SCR['fm-promo'] = () => {
   const ok=promoCek().length>0&&promoCek().every(x=>S.fm.foto[x.id+'d']&&S.fm.foto[x.id+'t']);
-  return {note:'Price promo (MOM 10.2). Produk yang dicek sesuai setup admin di dashboard. Foto display beserta foto price tag promo.',
-  html:`${appbar('Price promo')}<main class="content">${promoCek().length?'':`<div class="empty">Admin belum menetapkan produk price promo untuk outlet ini.</div>`}${promoCek().map(x=>`<div class="card" style="margin-bottom:10px"><div class="row between"><b>${x.name}</b><b class="num">${x.price}</b></div><div class="thumbs">${photoSlot('Foto display',S.fm.foto[x.id+'d'],`fmPhoto('${x.id}d')`)}${photoSlot('Price tag',S.fm.foto[x.id+'t'],`fmPhoto('${x.id}t')`)}</div></div>`).join('')}
+  return {note:'Price promo (MOM 10.2). Produk yang dicek sesuai setup admin di dashboard. Foto display beserta foto price tag promo. Harga sebelum dan setelah diskon tampil per produk, persen diskon tampil jika tersedia.',
+  html:`${appbar('Price promo')}<main class="content">${promoCek().length?'':`<div class="empty">Admin belum menetapkan produk price promo untuk outlet ini.</div>`}${promoCek().map(x=>`<div class="card" style="margin-bottom:10px"><div class="row between"><b>${x.name}</b>${x.pct?chip('Diskon '+x.pct+'%','green'):''}</div>
+    <div class="row" style="gap:8px;margin-top:10px"><div class="grow"><div class="small muted">Harga sebelum diskon</div><div class="num" style="text-decoration:line-through;color:var(--muted,#6B7C93)">${x.b}</div></div><div class="grow"><div class="small muted">Harga setelah diskon</div><b class="num">${x.a}</b></div></div><div class="thumbs">${photoSlot('Foto display',S.fm.foto[x.id+'d'],`fmPhoto('${x.id}d')`)}${photoSlot('Price tag',S.fm.foto[x.id+'t'],`fmPhoto('${x.id}t')`)}</div></div>`).join('')}
   </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="fmDraftSave('promo')">Simpan sementara</button><button class="btn" ${ok?'':'disabled'} onclick="fmMark('promo');back();toast('Price promo terkirim')">Kirim price promo</button></footer>`};
 };
-SCR['fm-facing'] = () => {
-  const ok=S.fm.foto.fc&&S.fm.foto.ft;
-  return {note:'Facing display (MOM 10.2). Plan tata letak per tahap (phasing) diatur di dashboard. Promotor mengisi facing aktual per area, lalu foto display dan price tag.',
-  html:`${appbar('Facing display')}<main class="content">
-    <div class="field" style="margin-top:14px"><span>Phasing SKU display</span><div class="opts">${['Minggu 1','Minggu 2','Minggu 3','Minggu 4'].map(w=>`<button class="opt ${(S.fm.phase||'Minggu 4')===w?'on':''}" onclick="S.fm.phase='${w}';render(false,true)">${w}</button>`).join('')}</div><div class="hint">SKU display bisa diatur sendiri per tahap (MOM 10.2).</div></div>
-    ${(()=>{ const ph=S.fm.phase||'Minggu 4', pl=shRead('plan',PLAN_DEFAULT)[ph]||[]; S.fm.fac=S.fm.fac||{}; const tot=pl.reduce((s,r)=>s+r[1],0), act=pl.reduce((s,r)=>s+(S.fm.fac[r[0]]||0),0); return `<div class="card" style="margin-top:14px"><div class="row between"><b>Plan tata letak · ${ph}</b>${chip(act+' dari '+tot+' facing',act>=tot?'green':'amber')}</div>${pl.map(r=>`<div class="row between" style="margin-top:10px"><div><div class="t" style="font-weight:700">${r[0]}</div><div class="small muted">Plan ${r[1]} facing</div></div><div class="stepper"><button onclick="S.fm.fac['${r[0]}']=Math.max(0,(S.fm.fac['${r[0]}']||0)-1);render(false,true)" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${S.fm.fac[r[0]]||0}</span><button onclick="S.fm.fac['${r[0]}']=(S.fm.fac['${r[0]}']||0)+1;render(false,true)" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>`).join('')}</div>`})()}
-    <div class="thumbs">${photoSlot('Foto display',S.fm.foto.fc,"fmPhoto('fc')")}${photoSlot('Price tag',S.fm.foto.ft,"fmPhoto('ft')")}</div>
-  </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="fmDraftSave('facing')">Simpan sementara</button><button class="btn" ${ok?'':'disabled'} onclick="fmMark('facing');back();toast('Facing display terkirim')">Kirim facing display</button></footer>`};
+const FACING=[{id:'fc1',name:'Rak Utama',kind:'Facing display',acuan:'Susunan facing di rak utama sesuai brief'},{id:'fc2',name:'Boot',kind:'Facing display',acuan:'Susunan facing di boot sesuai brief'},{id:'fc3',name:'Gudang',kind:'Facing display',acuan:'Susunan barang di gudang sesuai brief'}];
+SCR['fm-facing'] = () => ({note:'Facing display (MOM 10.2). Isi menu sama dengan Campaign, POSM & planogram: pilih item, foto lokasi, lalu dicocokkan dengan foto brief (nilai AI simulasi). Pilihan item: Rak Utama, Boot, Gudang.',
+  html:`${appbar('Facing display')}<main class="content"><div class="list">${FACING.map(x=>`<button class="li" onclick="go('facing-detail',{id:'${x.id}'})"><div class="ico-tile">${I('image',20)}</div><div class="grow"><div class="t">${x.name}</div><div class="s">${x.kind}</div></div>${(S.facing||{})[x.id]?chip('Nilai '+S.facing[x.id],'green'):stChip('Belum Selesai')}</button>`).join('')}</div></main><footer class="actions"><button class="btn ghost" onclick="fmDraftSave('facing')">Simpan sementara</button></footer>`});
+SCR['facing-detail'] = p => {
+  const x=FACING.find(a=>a.id===p.id), n=(S.facing||{})[x.id];
+  return {note:'Nilai AI di sini simulasi. Rekomendasi ambang: 80 atau lebih lulus, 70 sampai 79 ditinjau Team Leader, di bawah 70 foto ulang. Acuan final menunggu klien.',
+  html:`${appbar(x.name)}<main class="content">
+    <div class="card"><b>${x.name}</b><div class="small muted" style="margin-top:2px">Acuan: ${x.acuan}</div></div>
+    <div class="sec-title">Foto brief</div><div class="wm-photo">${I('image',26)}</div>
+    <div class="sec-title">Foto kamu</div>${n?`<div class="wm-photo">${I('image',26)}</div><div class="card" style="margin-top:12px"><div class="row between"><div class="small muted">Nilai AI</div>${n>=80?chip('Lulus','green'):n>=70?chip('Ditinjau Team Leader','amber'):chip('Foto ulang','red')}</div><div class="big-num num">${n}</div><p class="hint">Dicocokkan dengan foto brief.</p></div>`:`<button class="wm-photo add" onclick="act(()=>facingShoot('${x.id}'))" aria-label="Ambil foto">${I('camera',26)}<span class="small">Ambil foto</span></button>`}
+  </main>`};
 };
+function facingShoot(id){ S.facing=S.facing||{}; S.facing[id]=86; if(FACING.every(a=>S.facing[a.id])) fmMark('facing'); render(false,true); toast('Foto dinilai AI: 86','camera'); }
 SCR['fm-task'] = () => ({note:'Support task (MOM 10.2). Sales membuat task sendiri, atau task di-assign outlet atau Team Leader. Team Leader melihat hasilnya tanpa approval.',
   html:`${appbar('Support task',{right:`<button class="ib" onclick="act(()=>go('fm-task-form',{}))" aria-label="Buat task">${I('plus',24,2)}</button>`})}<main class="content">
     <div class="list">${S.fm.tasks.map((x,i)=>`<button class="li" onclick="act(()=>go('fm-task-form',{i:${i}}))"><div class="ico-tile ${x.done?'green':'tan'}">${I(x.done?'check':'clock',20,2)}</div><div class="grow"><div class="t">${esc(x.t)}</div><div class="s">${x.from}</div></div>${stChip(x.done?'Selesai':x.draft?'Draft':'Belum Selesai')}</button>`).join('')}</div>
@@ -1920,10 +1925,8 @@ SCR.aktivitas = () => {
     <div class="list">
     ${row('box','Cek stok','Stok display, gudang, dan kompetitor',"go('fm-stok')","stok")}
     ${row('tag','Price promo','Foto display dan price tag promo',"go('fm-promo')","promo")}
-    ${row('grid','Facing display','Foto dan plan tata letak',"go('fm-facing')","facing")}
+    ${row('grid','Facing display','Foto per rak, boot, dan gudang',"go('fm-facing')","facing")}
     ${row('check','Support task','Foto before, after, dan catatan',"go('fm-task')","support")}
-    ${row('image','Campaign, POSM & planogram','Foto dinilai AI',"go('posm')","posm")}
-    ${row('grid','SKU display','Input harian di toko',"go('sku')","sku")}
     ${row('pie','Market share','Input harian, bisa draft',"go('share')","share")}
   </div></main>`};
 };
