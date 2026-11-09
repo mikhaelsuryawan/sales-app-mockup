@@ -401,21 +401,22 @@ const LOGO = 'data:image/webp;base64,UklGRpgMAABXRUJQVlA4IIwMAADQNgCdASosAU8APpE
 /* =========================================================
    DATA (dummy – nanti dari API SIM / BPR1)
    ========================================================= */
+/* Client adalah entitas tertinggi (kasta tertinggi): satu pegawai hanya terhubung ke satu client (clientId, dipakai untuk filter brand & hirarki kategori produk), lalu di-mapping ke toko milik client itu. */
 const USERS = {
-  'spg.rina':  {name:'Rina Marlina', init:'RM', role:'spg', roleLabel:'SPG / Sales Promotor', nip:'SIM-24-01187', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
-  'sales.budi':{name:'Budi Santoso', init:'BS', role:'canvas', roleLabel:'Sales Canvasing', nip:'SIM-23-00912', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Rute Pasar Minggu – Cilandak', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
-  'sales.dimas':{name:'Dimas Prasetyo', init:'DP', role:'order', roleLabel:'Sales Taking Order', nip:'SIM-24-00455', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Area Fatmawati – Bintaro', sched:'WFA', main:{key:'pesanan',label:'Pesanan',icon:'order'}},
-  'spv.sari':  {name:'Sari Wulandari', init:'SW', role:'spv', roleLabel:'Team Leader (SPV 1)', nip:'CLT-TL-0208', client:'Arunika Elektronik & BPR Mitra Usaha', unit:'Cabang Jakarta Selatan', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
-  'ffor.yoga': {name:'Yoga Permana', init:'YP', role:'spv', roleLabel:'FFOR (SPV 2)', nip:'SIM-18-00144', client:'Arunika Elektronik', unit:'Region Jakarta', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
-  'arco.maya': {name:'Maya Anggraini', init:'MA', role:'spv', menu:'arco', roleLabel:'Arco (Leader SPG)', nip:'ARCO-0012', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
-  'cbd.tono':  {name:'Tono Hidayat', init:'TH', role:'leads', menu:'cbd', roleLabel:'CBD / Mediator', nip:'SIM-23-00871', client:'BPR Mitra Usaha', unit:'Kantor Cabang Cilandak', place:'Area Fatmawati', sched:'WFA', main:{key:'leads',label:'Leads',icon:'users'}},
-  'rea.nina':  {name:'Nina Safitri', init:'NS', role:'leads', roleLabel:'REA / SPG Multi Finance', nip:'SIM-24-01322', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'leads',label:'Leads',icon:'users'}},
-  'fmcg.tari': {name:'Lestari Putri', init:'LP', role:'fmcg', roleLabel:'Promotor FMCG', nip:'SIM-24-01355', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
-  'md.rangga': {name:'Rangga Saputra', init:'RS', role:'fmcg', roleLabel:'Merchandising (MD)', nip:'SIM-23-01102', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
-  'mobile.fikri':{name:'Fikri Ramadhan', init:'FR', role:'spg', menu:'mobile', roleLabel:'Mobile Promotor', nip:'SIM-24-01377', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Beberapa toko dan event', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
-  'trainer.joko':{name:'Joko Susilo', init:'JS', role:'trainer', roleLabel:'Trainer', nip:'SIM-20-00412', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Kelas pelatihan Jakarta Selatan', sched:'WFO', main:{key:'quiz',label:'Quiz',icon:'quiz'}},
-  'bantuan.eko':{name:'Eko Prabowo', init:'EP', role:'spg', menu:'bantuan', roleLabel:'Promotor Bantuan', nip:'BTN-0007', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
-  'reliever.gita':{name:'Gita Puspita', init:'GP', role:'spg', menu:'bantuan', roleLabel:'Reliever', nip:'RLV-0031', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}}
+  'spg.rina':  {name:'Rina Marlina', init:'RM', role:'spg', roleLabel:'SPG / Sales Promotor', nip:'SIM-24-01187', clientId:'cl1', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
+  'sales.budi':{name:'Budi Santoso', init:'BS', role:'canvas', roleLabel:'Sales Canvasing', nip:'SIM-23-00912', clientId:'cl1', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Rute Pasar Minggu – Cilandak', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
+  'sales.dimas':{name:'Dimas Prasetyo', init:'DP', role:'order', roleLabel:'Sales Taking Order', nip:'SIM-24-00455', clientId:'cl1', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Area Fatmawati – Bintaro', sched:'WFA', main:{key:'pesanan',label:'Pesanan',icon:'order'}},
+  'spv.sari':  {name:'Sari Wulandari', init:'SW', role:'spv', roleLabel:'Team Leader (SPV 1)', nip:'CLT-TL-0208', clientId:'cl1', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
+  'ffor.yoga': {name:'Yoga Permana', init:'YP', role:'spv', roleLabel:'FFOR (SPV 2)', nip:'SIM-18-00144', clientId:'cl1', client:'Arunika Elektronik', unit:'Region Jakarta', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
+  'arco.maya': {name:'Maya Anggraini', init:'MA', role:'spv', menu:'arco', roleLabel:'Arco (Leader SPG)', nip:'ARCO-0012', clientId:'cl2', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
+  'cbd.tono':  {name:'Tono Hidayat', init:'TH', role:'leads', menu:'cbd', roleLabel:'CBD / Mediator', nip:'SIM-23-00871', clientId:'cl2', client:'BPR Mitra Usaha', unit:'Kantor Cabang Cilandak', place:'Area Fatmawati', sched:'WFA', main:{key:'leads',label:'Leads',icon:'users'}},
+  'rea.nina':  {name:'Nina Safitri', init:'NS', role:'leads', roleLabel:'REA / SPG Multi Finance', nip:'SIM-24-01322', clientId:'cl2', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'leads',label:'Leads',icon:'users'}},
+  'fmcg.tari': {name:'Lestari Putri', init:'LP', role:'fmcg', roleLabel:'Promotor FMCG', nip:'SIM-24-01355', clientId:'cl1', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
+  'md.rangga': {name:'Rangga Saputra', init:'RS', role:'fmcg', roleLabel:'Merchandising (MD)', nip:'SIM-23-01102', clientId:'cl1', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
+  'mobile.fikri':{name:'Fikri Ramadhan', init:'FR', role:'spg', menu:'mobile', roleLabel:'Mobile Promotor', nip:'SIM-24-01377', clientId:'cl1', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Beberapa toko dan event', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
+  'trainer.joko':{name:'Joko Susilo', init:'JS', role:'trainer', roleLabel:'Trainer', nip:'SIM-20-00412', clientId:'cl1', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Kelas pelatihan Jakarta Selatan', sched:'WFO', main:{key:'quiz',label:'Quiz',icon:'quiz'}},
+  'bantuan.eko':{name:'Eko Prabowo', init:'EP', role:'spg', menu:'bantuan', roleLabel:'Promotor Bantuan', nip:'BTN-0007', clientId:'cl1', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
+  'reliever.gita':{name:'Gita Puspita', init:'GP', role:'spg', menu:'bantuan', roleLabel:'Reliever', nip:'RLV-0031', clientId:'cl1', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}}
 };
 const PRODUCTS = [
   {id:'tv50',name:'VISTARA 4K Google TV 50"',sku:'AR-TV50G',cat:'TV',price:6499000},
@@ -423,7 +424,9 @@ const PRODUCTS = [
   {id:'kl2p',name:'Kulkas 2 Pintu 315 L',sku:'AR-KL315',cat:'Kulkas',price:4299000},
   {id:'mc85',name:'Mesin Cuci Top Load 8,5 kg',sku:'AR-MC85',cat:'Mesin Cuci',price:2199000},
   {id:'ac1', name:'AC Inverter 1 PK',sku:'AR-AC1PK',cat:'AC',price:4599000},
-  {id:'ap30',name:'Air Purifier Puraklin',sku:'AR-AP30',cat:'Air Purifier',price:1799000}
+  {id:'ap30',name:'Air Purifier Puraklin',sku:'AR-AP30',cat:'Air Purifier',price:1799000},
+  {id:'nac1',name:'NHA AC Split 1 PK',sku:'NHA-AC1PK',cat:'Home Appliance',price:3299000},
+  {id:'nac2',name:'NHA AC Split 2 PK',sku:'NHA-AC2PK',cat:'Home Appliance',price:4899000}
 ];
 const CANVAS_PRODUCTS = [
   {id:'rc18',name:'Rice Cooker 1,8 L',sku:'AR-RC18',price:459000},
@@ -764,7 +767,7 @@ SCR.home = () => {
     <section class="hero">${rings()}
       <div class="top"><div class="av">${u.init}</div><div class="grow"><div class="hello">Selamat pagi,</div><div class="name">${u.name}</div></div>
       <button class="bell" onclick="go('notif')" aria-label="Notifikasi">${I('bell',22)}<i></i></button></div>
-      <span class="role">${u.roleLabel} · ${u.client.split(' & ')[0]}</span>
+      <span class="role">${u.roleLabel} · ${u.client}</span>
     </section>
     <div class="home-body" style="padding:0 16px 24px">
       ${attCard()}
@@ -2057,10 +2060,11 @@ SCR.aktivitas = () => {
    Isi menu, lokasi check-in, form penjualan, kategori, brand, produk, status produk, dan target dibaca dari data bersama
    yang ditulis dashboard (Konfigurasi aplikasi dan Master data). Nilai cadangan di bawah hanya dipakai bila dashboard belum pernah dibuka. */
 const MASTER_DEF={
-  brand:[['ARUNIKA','Client'],['KIRANA','Client'],['Samsung','Kompetitor'],['LG','Kompetitor'],['Polytron','Kompetitor']].map(([name,jenis])=>({name,jenis})),
+  brand:[['ARUNIKA','Client','cl1'],['KIRANA','Client','cl1'],['Samsung','Kompetitor','cl1'],['LG','Kompetitor','cl1'],['Polytron','Kompetitor','cl1'],['NHA','Client','cl4']].map(([name,jenis,client])=>({name,jenis,client})),
   katprod:[['TV','ARUNIKA',''],['Smart TV','ARUNIKA','TV'],['Google TV','ARUNIKA','Smart TV'],['Android TV','ARUNIKA','Smart TV'],['LED TV','ARUNIKA','TV'],['Kulkas','ARUNIKA',''],['2 Pintu','ARUNIKA','Kulkas'],['Inverter','ARUNIKA','2 Pintu'],['Non inverter','ARUNIKA','2 Pintu'],['1 Pintu','ARUNIKA','Kulkas'],['Mesin Cuci','ARUNIKA',''],['Top Load','ARUNIKA','Mesin Cuci'],['Front Load','ARUNIKA','Mesin Cuci'],['AC','ARUNIKA',''],['AC Inverter','ARUNIKA','AC'],['AC Standar','ARUNIKA','AC'],['Air Purifier','ARUNIKA',''],['Small Appliances','ARUNIKA',''],
-    ['Peralatan Dapur','KIRANA',''],['Rice Cooker','KIRANA','Peralatan Dapur'],['Blender','KIRANA','Peralatan Dapur'],['Dispenser','KIRANA','Peralatan Dapur'],['Perawatan Rumah','KIRANA',''],['Kipas Angin','KIRANA','Perawatan Rumah']].map(([name,brand,parent])=>({name,brand,parent,share:'Ya'})),
-  produk:[['tv50','ARUNIKA','Google TV'],['tv43','ARUNIKA','LED TV'],['kl2p','ARUNIKA','Inverter'],['mc85','ARUNIKA','Top Load'],['ac1','ARUNIKA','AC Inverter'],['ap30','ARUNIKA','Air Purifier'],['rc18','KIRANA','Rice Cooker'],['bl11','KIRANA','Blender'],['kp16','KIRANA','Kipas Angin'],['ds72','KIRANA','Dispenser']].map(([id,brand,kat])=>{ const p=prodById(id); return {id,name:p.name,sku:p.sku,price:p.price,brand,kat}; }),
+    ['Peralatan Dapur','KIRANA',''],['Rice Cooker','KIRANA','Peralatan Dapur'],['Blender','KIRANA','Peralatan Dapur'],['Dispenser','KIRANA','Peralatan Dapur'],['Perawatan Rumah','KIRANA',''],['Kipas Angin','KIRANA','Perawatan Rumah'],
+    ['Home Appliance','NHA',''],['AC','NHA','Home Appliance'],['1 PK','NHA','AC'],['2 PK','NHA','AC'],['Kulkas','NHA',''],['1 Pintu','NHA','Kulkas'],['2 Pintu','NHA','Kulkas']].map(([name,brand,parent])=>({name,brand,parent,share:'Ya'})),
+  produk:[['tv50','ARUNIKA','Google TV'],['tv43','ARUNIKA','LED TV'],['kl2p','ARUNIKA','Inverter'],['mc85','ARUNIKA','Top Load'],['ac1','ARUNIKA','AC Inverter'],['ap30','ARUNIKA','Air Purifier'],['rc18','KIRANA','Rice Cooker'],['bl11','KIRANA','Blender'],['kp16','KIRANA','Kipas Angin'],['ds72','KIRANA','Dispenser'],['nac1','NHA','1 PK'],['nac2','NHA','2 PK']].map(([id,brand,kat])=>{ const p=prodById(id); return {id,name:p.name,sku:p.sku,price:p.price,brand,kat}; }),
   aktcfg:{r3:{lokasi:'penempatan',checkin:'Ya',akt:['jual','sku','share'],gated:['stok'],skuFoto:2,skuMetode:['qr','manual'],skuMulti:'Ya',shareDraft:'Ya',metrik:['qty'],dasar:'qty'}},
   formjual:[['kategori','Kategori produk','select','katprod','','Produk','Ya','Ya','kategori'],['status','Status produk','select','statprod','','Produk','Ya','Ya',''],['nama','Nama produk','text','produk','','Produk','Ya','Ya','produk'],
     ['harga','Harga','money','','','Produk','Ya','Ya',''],['diskon','Diskon','money','','','Produk','Tidak','Ya',''],['setelah','Harga setelah diskon','calc','','{harga} - {diskon}','Produk','Tidak','Tidak','harga'],
@@ -2072,8 +2076,10 @@ const MASTER_DEF={
 const BULAN_AKTIF='Oktober 2026';
 const uid = () => S.user.split('.').pop();
 const mBrand = () => shRead('brand',MASTER_DEF.brand);
-const clientBrands = () => mBrand().filter(b=>b.jenis==='Client').map(b=>b.name);
-const compBrands = () => mBrand().filter(b=>b.jenis==='Kompetitor').map(b=>b.name);
+/* Client adalah entitas tertinggi: brand dan hirarki kategorinya ikut terpisah per client, jadi SPG hanya melihat brand milik client-nya sendiri. */
+const curClientId = () => USERS[S.user]?.clientId||'';
+const clientBrands = () => mBrand().filter(b=>b.jenis==='Client'&&(!curClientId()||!b.client||b.client===curClientId())).map(b=>b.name);
+const compBrands = () => mBrand().filter(b=>b.jenis==='Kompetitor'&&(!curClientId()||!b.client||b.client===curClientId())).map(b=>b.name);
 const mKat = () => shRead('katprod',MASTER_DEF.katprod);
 const mProd = () => shRead('produk',MASTER_DEF.produk);
 const aktCfg = () => S.user?shRead('aktcfg',MASTER_DEF.aktcfg)[RID[S.user]]:null;
