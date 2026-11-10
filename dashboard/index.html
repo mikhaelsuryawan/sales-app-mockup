@@ -68,6 +68,8 @@ main.loading{pointer-events:none}
 main.loading :is(.stat,.card){position:relative;overflow:hidden}
 main.loading :is(.stat,.card)::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 20%,var(--shine) 50%,transparent 80%);animation:shimmer 1.15s ease-in-out infinite;pointer-events:none}
 main.loading :is(.stat,.card) *{color:transparent!important;border-color:transparent!important;box-shadow:none!important;text-shadow:none!important;transition:none!important}
+/* Placeholder input tidak ikut color:transparent turunan, jadi disembunyikan sendiri agar tidak menimpa blok skeleton */
+main.loading :is(.stat,.card) ::placeholder{color:transparent!important;opacity:0!important}
 main.loading :is(.stat,.card) .pills *{background:none!important} main.loading :is(.stat,.card) :is(.dotc,.capkey){background:var(--sk)!important}
 main.loading :is(.stat,.card) svg:not(.lc svg):not(.donut svg){opacity:0}
 main.loading :is(.stat,.card) :is(h2,small,b,p,a,span:not(:has(*)),dd,dt,.tag,.btn,.pills,.inp,.sel,.si,.av,.thumb,.cb){background:var(--sk)!important;border-radius:8px}
