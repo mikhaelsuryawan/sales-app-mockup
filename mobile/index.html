@@ -413,7 +413,6 @@ const USERS = {
   'fmcg.tari': {name:'Lestari Putri', init:'LP', role:'fmcg', roleLabel:'Promotor FMCG', nip:'SIM-24-01355', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
   'md.rangga': {name:'Rangga Saputra', init:'RS', role:'fmcg', roleLabel:'Merchandising (MD)', nip:'SIM-23-01102', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
   'mobile.fikri':{name:'Fikri Ramadhan', init:'FR', role:'spg', menu:'mobile', roleLabel:'Mobile Promotor', nip:'SIM-24-01377', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Beberapa toko dan event', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
-  'trainer.joko':{name:'Joko Susilo', init:'JS', role:'trainer', roleLabel:'Trainer', nip:'SIM-20-00412', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Kelas pelatihan Jakarta Selatan', sched:'WFO', main:{key:'quiz',label:'Quiz',icon:'quiz'}},
   'bantuan.eko':{name:'Eko Prabowo', init:'EP', role:'spg', menu:'bantuan', roleLabel:'Promotor Bantuan', nip:'BTN-0007', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
   'reliever.gita':{name:'Gita Puspita', init:'GP', role:'spg', menu:'bantuan', roleLabel:'Reliever', nip:'RLV-0031', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}}
 };
@@ -525,7 +524,6 @@ function freshState(){
       canvas:[{id:'v1',place:'Toko Sinar Jaya Elektronik',time:'09:00',tasks:['Penjualan','Ambil retur'],status:'Selesai',photos:{0:1,1:1},cin:'09:02',cout:'09:31',dur:'29 mnt'},{id:'v2',place:'Toko Makmur Abadi',time:'10:30',tasks:['Penjualan'],status:'Belum',photos:{}},{id:'v3',place:'Toko Berkah Elektronik',time:'13:00',tasks:['Penjualan','Cek display'],status:'Belum',photos:{}},{id:'v4',place:'Toko Cahaya Baru',time:'15:00',tasks:['Penjualan'],status:'Belum',photos:{}}],
       order:[{id:'v1',place:'Toko Mega Elektronik',time:'10:00',tasks:['Ambil pesanan'],status:'Selesai',photos:{0:1},cin:'10:04',cout:'10:30',dur:'26 mnt'},{id:'v2',place:'CV Sumber Rejeki Elektronik',time:'13:30',tasks:['Ambil pesanan','Penagihan'],status:'Belum',photos:{}},{id:'v3',place:'Toko Abadi Jaya',time:'15:30',tasks:['Ambil pesanan'],status:'Belum',photos:{}}],
       leads:[{id:'v1',place:'Ahmad Fauzi (nasabah)',time:'10:00',tasks:['Survey usaha'],status:'Belum',photos:{}},{id:'v2',place:'Yuliana Putri (nasabah)',time:'14:00',tasks:['Verifikasi dokumen'],status:'Belum',photos:{}}],
-      trainer:[{id:'v1',place:'Kelas pelatihan Jakarta Selatan',time:'10:00',tasks:['Quiz','Survey'],status:'Belum',photos:{}}],
       fmcg:[{id:'v1',place:'Electronic City Kemang',time:'09:00',tasks:['Semua aktivitas toko'],status:'Belum',photos:{}},{id:'v2',place:'Best Denki Senayan City',time:'13:00',tasks:['Semua aktivitas toko'],status:'Belum',photos:{}}],
       spv:[{id:'v1',place:'Electronic City Kemang',time:'11:00',tasks:['Supervisi SPG'],status:'Belum',photos:{}}]
     },
@@ -732,7 +730,6 @@ const MENUS = {
   order:[['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
   leads:[['Leads','users',"act(()=>tab('leads'))",1],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   fmcg:[['Buat jadwal','route',"act(()=>go('kunjungan-form'))",1],['Kunjungan','route',"tab('kunjungan')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
-  trainer:[['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Kunjungan','route',"tab('kunjungan')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   cbd:[['Leads','users',"act(()=>tab('leads'))",1],['Mitra saya','user',"act(()=>go('mitra'))",1],['Task Team Leader','check',"act(()=>go('cbd-task'))",1],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   arco:[['Assign leads','users',"go('assign')"],['Semua leads','file',"go('leads-all')"],['Tim saya','user',"tab('tim')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   bantuan:[['Catat penjualan','bag',"act(()=>startSale())",1],['Riwayat penjualan','file',"tab('penjualan')"],['Kunjungan','route',"tab('kunjungan')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
@@ -778,7 +775,6 @@ SCR.home = () => {
 };
 function fieldDash(){
   const r=role();
-  if(r==='trainer') return `<div class="sec-title">Kunjungan pelatihan</div><div class="banner blue">${I('quiz',18)}<span>Trainer mendukung tim lewat quiz, survey, dan kunjungan. Tanpa penjualan dan leads.</span></div>${todayVisits()}`;
   if(r==='fmcg') return `<div class="banner blue">${I('grid',18)}<span>Check-in di tab ${fmAktLabel()}, lalu kerjakan pekerjaan di halaman yang sama. Tanpa penjualan.</span></div>
     ${todayVisits()}`;
   if(r==='leads'){
@@ -992,7 +988,7 @@ function assignSheetRender(){ const u=S.assignUser, pick=S.assignPick;
   <button class="btn" style="margin-top:14px" ${pick.length?'':'disabled'} onclick="assignSave()">Simpan ${pick.length?pick.length+' toko':''}</button>`); }
 function assignToggle(id){ const p=S.assignPick; S.assignPick=p.includes(id)?p.filter(x=>x!==id):[...p,id]; assignSheetRender(); }
 function assignSave(){ S.canvasArea[S.assignUser]=S.assignPick; closeSheet(); render(false,true); toast(S.assignPick.length+' toko di-assign'); }
-const RID={'spg.rina':'r3','sales.budi':'r4','sales.dimas':'r5','spv.sari':'r2','ffor.yoga':'r7','arco.maya':'r8','cbd.tono':'r9','rea.nina':'r10','fmcg.tari':'r11','md.rangga':'r12','mobile.fikri':'r13','bantuan.eko':'r14','reliever.gita':'r15','trainer.joko':'r16'};
+const RID={'spg.rina':'r3','sales.budi':'r4','sales.dimas':'r5','spv.sari':'r2','ffor.yoga':'r7','arco.maya':'r8','cbd.tono':'r9','rea.nina':'r10','fmcg.tari':'r11','md.rangga':'r12','mobile.fikri':'r13','bantuan.eko':'r14','reliever.gita':'r15'};
 const JADWAL_DEFAULT={r1:'Ya',r2:'Ya',r7:'Ya',r11:'Ya',r12:'Ya'};
 const canSchedule = () => shRead('roleJadwal',JADWAL_DEFAULT)[RID[S.user]]==='Ya';
 const apprChain = u => { const r=RID[u]; if(['r6','r8','r10'].includes(r)) return 'Arco → Team Leader'; if(['r3','r4','r5','r13'].includes(r)) return 'Team Leader → FFOR'; return 'Team Leader'; };
@@ -1037,8 +1033,7 @@ const VISIT_FORM={
   spg:[['Kondisi display','opt',['Rapi','Perlu dirapikan','Kosong']],['Promo kompetitor aktif','opt',['Ada','Tidak ada']],['Stok terlihat','opt',['Cukup','Menipis','Habis']]],
   canvas:[['Kondisi toko','opt',['Buka','Tutup','Sepi']],['Minat order berikutnya','opt',['Tinggi','Sedang','Rendah']],['Retur diambil','opt',['Ya','Tidak']]],
   order:[['Status pesanan','opt',['Baru','Follow up','Menunggu bayar']],['Janji bayar','text']],
-  leads:[['Hasil kontak','opt',['Tersambung','Tidak diangkat','Bertemu langsung']],['Dokumen','opt',['Lengkap','Kurang','Belum']]],
-  trainer:[['Peserta hadir','text'],['Topik pelatihan','text']]
+  leads:[['Hasil kontak','opt',['Tersambung','Tidak diangkat','Bertemu langsung']],['Dokumen','opt',['Lengkap','Kurang','Belum']]]
 };
 function vfSet(id,k,v){ S.vform[id]=S.vform[id]||{}; S.vform[id][k]=v; render(false,true); }
 function visitFormHTML(x){
