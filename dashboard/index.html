@@ -677,27 +677,59 @@ const qtyActTotal=u=>trxOct().filter(t=>t.u===u).reduce((a,t)=>a+t.q,0);
 const CAT_SLOT={'TV':1,'Kulkas':2,'AC':3,'Mesin Cuci':4,'Small Appliances':5,'Air Purifier':0};
 const catMix=list=>{ const m=new Map(); list.forEach(t=>{ const c=trxProd(t).cat; m.set(c,(m.get(c)||0)+trxVal(t)); }); const tot=[...m.values()].reduce((a,b)=>a+b,0)||1; return {tot:[...m.values()].reduce((a,b)=>a+b,0),items:[...m].sort((a,b)=>b[1]-a[1]).map(([l,v])=>[l,Math.round(v/tot*100),CAT_SLOT[l]??0])}; };
 function tokoRef(name,u){ return TOKO.find(x=>x.name===name&&!x.del)||{id:'tmp:'+name,name,cabang:byU(u)?.cabang||'–',client:'cl1',cat:'Temporary',dealer:'',sales:[],status:'Aktif'}; }
-function drillList(path,day){
-  const map=new Map();
-  trxOct().filter(t=>tdy(t)===day).forEach(t=>{ const tk=tokoRef(t.toko,t.u); let key;
-    if(path.length===0) key=tk.cabang; else if(tk.cabang!==path[0]) return; else if(path.length===1) key=tk.name; else if(tk.name!==path[1]) return; else key=byU(t.u)?.name||t.u;
-    map.set(key,(map.get(key)||0)+trxVal(t)); });
-  return [...map].sort((a,b)=>b[1]-a[1]);
-}
-const PERL={d:'Hari ini',w:'7 hari',m:'Oktober'};
 { // Pengajuan hapus penjualan menunjuk ke transaksi nyata di ledger
   const a3=D.approvals.find(a=>a.id==='a3'), t=TRX.find(x=>x.u==='rina'&&tmo(x)===10&&tdy(x)===25)||TRX.find(x=>x.u==='rina'&&tmo(x)===10);
   if(a3&&t){ t.st='Menunggu hapus'; a3.ref=t.id; a3.detail=`${t.id} · ${PRODUCTS.find(pp=>pp.id===t.p).name} · ${rp(trxVal(t))}`; }
   const a6=D.approvals.find(a=>a.id==='a6'); if(a6) a6.ref='PO-2610-014';
 }
+/* ---------- Filter laporan penjualan: klien, cabang, toko, sales, rentang tanggal ---------- */
+const LD_START='2026-05-01', LD_END='2026-10-26';
+const isoOf=(m,d)=>`2026-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+const trxIso=t=>isoOf(tmo(t),tdy(t));
+const REP_PRESETS=[['d','Hari ini',[isoOf(10,26),isoOf(10,26)]],['w','7 hari',[isoOf(10,20),isoOf(10,26)]],['30','30 hari',[isoOf(9,27),isoOf(10,26)]],['m','Oktober',[isoOf(10,1),isoOf(10,26)]],['a','Mei–Okt',[LD_START,LD_END]]];
+function repRange(q){
+  if(q.from||q.to){ const cl=x=>x<LD_START?LD_START:x>LD_END?LD_END:x; let f=cl(q.from||LD_START), t=cl(q.to||LD_END); if(f>t) [f,t]=[t,f]; return {from:f,to:t,preset:''}; }
+  const pr=REP_PRESETS.find(x=>x[0]===q.per)||REP_PRESETS[3]; return {from:pr[2][0],to:pr[2][1],preset:pr[0]};
+}
+const isoDay=x=>({m:+x.slice(5,7),d:+x.slice(8,10)});
+const fmtIso=x=>{ const o=isoDay(x); return o.d+' '+LD_MN[o.m]; };
+const repLabel=q=>{ const r=repRange(q); if(r.preset==='d') return 'hari ini ('+fmtIso(r.to)+')'; if(r.preset==='m') return 'Oktober 2026'; if(r.preset==='a') return 'Mei sampai Oktober 2026'; return r.from===r.to?fmtIso(r.to)+' 2026':fmtIso(r.from)+' sampai '+fmtIso(r.to)+' 2026'; };
+const repDimOk=(t,q)=>{ const tk=tokoRef(t.toko,t.u); return (!q.cl||tk.client===q.cl)&&(!q.cb||tk.cabang===q.cb)&&(!q.tk||tk.id===q.tk)&&(!q.u||t.u===q.u); };
+const repTrx=(q,r=repRange(q))=>allTrx().filter(t=>{ const x=trxIso(t); return x>=r.from&&x<=r.to&&repDimOk(t,q); });
+const repDays=r=>Math.round((new Date(r.to+'T00:00:00')-new Date(r.from+'T00:00:00'))/864e5)+1;
+// Target mengikuti filter: toko terpilih memakai target toko, selain itu jumlah target sales yang penjualannya cocok dengan filter.
+const repUsers=q=>[...new Set(allTrx().filter(t=>repDimOk(t,q)).map(t=>t.u))];
+const repTgtMonth=(q,m)=>{ if(q.tk&&!q.u){ const r=(MD.tgttoko||[]).find(x=>x.m===m&&x.toko===q.tk&&!x.del); return r?r.amount:0; } return repUsers(q).reduce((a,u)=>a+tgtUser(m,u),0); };
+// Bagian target bulan m untuk rentang r: seluruh hari berjalan bulan itu berarti target penuh, sebagian dihitung prorata.
+function repMonthFrac(m,r){ const first=isoOf(m,1), last=isoOf(m,ldCal(m)), lo=r.from>first?r.from:first, hi=r.to<last?r.to:last; if(lo>hi) return 0; const d=isoDay(hi).d-isoDay(lo).d+1; return lo===first&&isoDay(hi).d>=ldDays(m)?1:d/ldCal(m); }
+const repTgt=(q,r)=>LD_MONTHS.reduce((a,m)=>a+repTgtMonth(q,m)*repMonthFrac(m,r),0);
+function repSeries(q){
+  const r=repRange(q), list=repTrx(q,r), nd=repDays(r), f=new Date(r.from+'T00:00:00'), pts=[];
+  if(nd<=31){
+    for(let i=0;i<nd;i++){ const dt=new Date(f.getTime()+i*864e5), m=dt.getMonth()+1, d=dt.getDate(), iso=isoOf(m,d);
+      pts.push({key:iso,label:d===1&&nd>1?LD_MN[m]:String(d),title:d+' '+LD_MN[m],value:list.filter(x=>trxIso(x)===iso).reduce((a,x)=>a+trxVal(x),0),target:repTgtMonth(q,m)/ldCal(m),r:{from:iso,to:iso}}); }
+    return {pts,r,unit:'harian'};
+  }
+  LD_MONTHS.forEach(m=>{ const first=isoOf(m,1), last=isoOf(m,ldCal(m)), lo=r.from>first?r.from:first, hi=r.to<last?r.to:last; if(lo>hi) return; const rr={from:lo,to:hi};
+    pts.push({key:'m'+m,label:LD_MN[m],title:LD_FULL[m],value:list.filter(x=>tmo(x)===m).reduce((a,x)=>a+trxVal(x),0),target:repTgtMonth(q,m)*repMonthFrac(m,r),r:rr}); });
+  return {pts,r,unit:'bulanan'};
+}
+function drillList(path,list){
+  const map=new Map();
+  list.forEach(t=>{ const tk=tokoRef(t.toko,t.u); let key;
+    if(path.length===0) key=tk.cabang; else if(tk.cabang!==path[0]) return; else if(path.length===1) key=tk.name; else if(tk.name!==path[1]) return; else key=byU(t.u)?.name||t.u;
+    map.set(key,(map.get(key)||0)+trxVal(t)); });
+  return [...map].sort((a,b)=>b[1]-a[1]);
+}
+function dealerRowsQ(q){ const r=repRange(q), list=repTrx(q,r);
+  return live('dealer').filter(d=>d.status==='Aktif').map(d=>{ const si=live('sellin').filter(x=>x.dealer===d.id&&repMonthFrac(x.m,r)>0);
+    return {n:d.name,id:d.id,a:Math.round(si.reduce((a,x)=>a+x.amount*repMonthFrac(x.m,r),0)),t:Math.round(si.reduce((a,x)=>a+x.target*repMonthFrac(x.m,r),0)),so:sumVal(list.filter(tr=>tokoRef(tr.toko,tr.u).dealer===d.name))}; }); }
 function repAtoms(q,forcePer){
-  const per=forcePer||q.per||'m', lo=per==='d'?LD_TODAY:per==='w'?LD_TODAY-6:1;
-  const mon=new Map(), mu=new Map(), out=new Map();
-  trxOct().forEach(t=>{ const k=t.u+'|'+tokoRef(t.toko,t.u).id; mon.set(k,(mon.get(k)||0)+trxVal(t)); mu.set(t.u,(mu.get(t.u)||0)+trxVal(t)); });
-  trxOct().forEach(t=>{ if(tdy(t)<lo) return; const tk=tokoRef(t.toko,t.u);
-    if(q.cl&&tk.client!==q.cl) return; if(q.cb&&tk.cabang!==q.cb) return; if(q.tk&&tk.id!==q.tk) return; if(q.u&&t.u!==q.u) return;
-    const k=t.u+'|'+tk.id, a=out.get(k)||{u:t.u,t:tk,val:0,trx:0,tg:0}; a.val+=trxVal(t); a.trx++; out.set(k,a); });
-  out.forEach((a,k)=>{ const sh=mu.get(a.u)?mon.get(k)/mu.get(a.u):0; a.tg=tgtUser(10,a.u)*sh*(per==='m'?1:(LD_TODAY-lo+1)/ldCal(10)); });
+  let r=repRange(q); if(forcePer==='d') r={from:r.to,to:r.to};
+  const list=repTrx(q,r), mon=new Map(), mu=new Map(), out=new Map();
+  allTrx().forEach(t=>{ const k=tmo(t)+'|'+t.u; mon.set(k+'|'+tokoRef(t.toko,t.u).id,(mon.get(k+'|'+tokoRef(t.toko,t.u).id)||0)+trxVal(t)); mu.set(k,(mu.get(k)||0)+trxVal(t)); });
+  list.forEach(t=>{ const tk=tokoRef(t.toko,t.u), k=t.u+'|'+tk.id, a=out.get(k)||{u:t.u,t:tk,val:0,trx:0,tg:0}; a.val+=trxVal(t); a.trx++; out.set(k,a); });
+  out.forEach(a=>{ a.tg=LD_MONTHS.reduce((sum,m)=>{ const fr=repMonthFrac(m,r); if(!fr) return sum; const base=mu.get(m+'|'+a.u)||0, sh=base?(mon.get(m+'|'+a.u+'|'+a.t.id)||0)/base:0; return sum+tgtUser(m,a.u)*sh*fr; },0); });
   return [...out.values()];
 }
 function repGroup(atoms,keyFn){ const m=new Map(); atoms.forEach(a=>{ const k=keyFn(a); const g=m.get(k)||{key:k,_id:String(k),val:0,tg:0,trx:0,us:new Set(),ts:new Set(),cb:new Set(),cl:new Set(),atoms:[]}; g.val+=a.val; g.tg+=a.tg; g.trx+=a.trx; g.us.add(a.u); g.ts.add(a.t.id); g.cb.add(a.t.cabang); g.cl.add(a.t.client); g.atoms.push(a); m.set(k,g); }); return [...m.values()].sort((a,b)=>b.val-a.val); }
@@ -707,7 +739,7 @@ function repTable(tab,q){
   const forced=tab==='harian'?'d':null, atoms=repAtoms(q,forced), tot=atoms.reduce((a,b)=>a+b.val,0);
   const money=r=>`<b class="fg tabular">${rp(r.val)}</b>`;
   if(tab==='klien'){
-    const rows=repGroup(atoms,a=>a.t.client); const bpr=(!q.cl||q.cl==='cl2')&&!q.cb&&!q.tk&&!q.u;
+    const rows=repGroup(atoms,a=>a.t.client); const bpr=(!q.cl||q.cl==='cl2')&&!q.cb&&!q.tk&&!q.u&&repRange(q).to>='2026-10-01';
     const goal=D.leads.filter(l=>l.status==='Deal').reduce((a,b)=>a+b.goal,0), goalT=tgtUser(10,'nina')+tgtUser(10,'tono');
     return dataTable('rp_klien',{rows:[...rows,...(bpr?[{_id:'cl2',key:'cl2',bpr:true,val:goal,trx:D.leads.filter(l=>l.status==='Deal').length,tg:goalT,us:new Set(['nina','tono']),ts:new Set(),cb:new Set(['Jakarta Selatan']),cl:new Set(['cl2'])}]:[])],rowClick:r=>r.bpr?`go('/leads')`:`setQ({tab:'cabang',cl:'${r.key}'})`,cols:[
       {label:'Klien',render:r=>`<span class="fg" style="font-weight:500">${esc(clientName(r.key))}</span><span class="xs muted" style="display:block">${r.bpr?'Sales automation · goal pinjaman disetujui':'Sales retail · sell-out'}</span>`,prim:true},
@@ -724,22 +756,37 @@ function repTable(tab,q){
   if(tab==='sales'||tab==='harian'){ const rows=repGroup(atoms,a=>a.u);
     return dataTable('rp_'+tab,{rows,rowClick:r=>`salesReport('${r.key}')`,cols:[{label:'Sales',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(byU(r.key).name)}<span><span class="fg" style="font-weight:500">${byU(r.key).name}</span><span class="xs muted" style="display:block">${byU(r.key).job}</span></span></span>`,prim:true},
       {label:'Klien',render:r=>[...r.cl].map(clientName).join(', '),hide:true},{label:'Cabang',render:r=>[...r.cb].join(', '),hide:true},{label:'Toko / rute',render:r=>r.ts.size>1?r.ts.size+' toko':tokoName([...r.ts][0]),hide:true},
-      {label:tab==='harian'?'Penjualan 26 Okt':'Penjualan',render:money,align:'r'},{label:'Transaksi',render:r=>r.trx,align:'r',hide:true},...(tab==='harian'?[]:[{label:'Rata-rata / hari',render:r=>rp(r.val/(q.per==='d'?1:q.per==='w'?7:26)),align:'r',hide:true}]),{label:'Pencapaian',render:r=>achBar(r.val,r.tg)}]}); }
+      {label:tab==='harian'?'Penjualan '+fmtIso(repRange(q).to):'Penjualan',render:money,align:'r'},{label:'Transaksi',render:r=>r.trx,align:'r',hide:true},...(tab==='harian'?[]:[{label:'Rata-rata / hari',render:r=>rp(r.val/repDays(repRange(q))),align:'r',hide:true}]),{label:'Pencapaian',render:r=>achBar(r.val,r.tg)}]}); }
   return '';
 }
 function repBar(q,tab){
-  const stats=['klien','cabang','toko','sales'].includes(tab); const per=q.per||'m';
-  const atoms=stats?repAtoms(q):[]; const tot=atoms.reduce((a,b)=>a+b.val,0), tg=atoms.reduce((a,b)=>a+b.tg,0), trx=atoms.reduce((a,b)=>a+b.trx,0);
-  const chips=[['cl',q.cl&&'Klien: '+clientName(q.cl)],['cb',q.cb&&'Cabang: '+q.cb],['tk',q.tk&&'Toko: '+tokoName(q.tk)],['u',q.u&&'Sales: '+(byU(q.u)?.name||q.u)]].filter(c=>c[1]);
-  return `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">${pills([['d','Hari ini'],['w','7 hari'],['m','Oktober']],per,'repPer')}
-    ${sel([['','Semua klien'],...live('client').filter(c=>c.modul.includes('Sales retail')&&c.status==='Aktif').map(c=>[c.id,c.name])],q.cl||'',"setQ({cl:this.value,tk:''})",{label:'Filter klien',cls:'sm'})}
-    ${sel([['','Semua cabang'],...CABANG.slice(1)],q.cb||'',"setQ({cb:this.value,tk:''})",{label:'Filter cabang',cls:'sm'})}
-    ${chips.map(([k,l])=>`<button class="fchip on" onclick="setQ({${k}:''})">${esc(l)} ${I('x',12,2.4)}</button>`).join('')}
-    ${chips.length?`<button class="btn b-ghost sm" onclick="setQ({cl:'',cb:'',tk:'',u:''})">Hapus filter</button>`:''}</div>
-  ${stats?`<div class="stats" style="margin-bottom:12px">${[['Total penjualan',jt(tot)],['Transaksi',trx.toLocaleString('id-ID')],['Rata-rata / transaksi',trx?jt(tot/trx):'–'],['Pencapaian target',tg?Math.round(tot/tg*100)+'%':'–']].map(([l,v])=>`<div class="tile"><div class="xs muted">${l}</div><b class="fg tabular" style="font-size:22px;font-weight:500">${v}</b></div>`).join('')}</div>
-  <p class="xs muted" style="margin:-4px 2px 12px">Sell-out SPG dan canvasing, periode ${PERL[per]} 2026. Klik baris untuk menelusuri ke level berikutnya: klien → cabang → toko → sales. Pesanan Taking Order ada di tab Pemesanan, goal pinjaman di menu Leads.</p>`:''}`;
+  const atoms=repAtoms(q); const tot=atoms.reduce((a,b)=>a+b.val,0), tg=atoms.reduce((a,b)=>a+b.tg,0), trx=atoms.reduce((a,b)=>a+b.trx,0);
+  return `<div class="stats" style="margin-bottom:12px">${[['Total penjualan',jt(tot)],['Transaksi',trx.toLocaleString('id-ID')],['Rata-rata / transaksi',trx?jt(tot/trx):'–'],['Pencapaian target',tg?Math.round(tot/tg*100)+'%':'–']].map(([l,v])=>`<div class="tile"><div class="xs muted">${l}</div><b class="fg tabular" style="font-size:22px;font-weight:500">${v}</b></div>`).join('')}</div>
+  <p class="xs muted" style="margin:-4px 2px 12px">Sell-out SPG dan canvasing, periode ${repLabel(q)}. Klik baris untuk menelusuri ke level berikutnya: klien → cabang → toko → sales. Pesanan Taking Order ada di menu Pemesanan, goal pinjaman di menu Leads.</p>`;
 }
-function repPer(k){ setQ({per:k}); }
+function repSet(p){ ST.drill=[]; ST.penKey=null; setQ(p); }
+function repPer(k){ repSet({per:k,from:'',to:''}); }
+function repDate(){ const f=document.getElementById('rf_from').value, t=document.getElementById('rf_to').value;
+  if(f&&t&&f>t){ toast('Rentang tidak valid','Tanggal mulai harus sebelum atau sama dengan tanggal akhir.','danger'); return; }
+  repSet({from:f,to:t,per:''}); }
+function repFilters(q){
+  const r=repRange(q), list=repTrx(q,r), n=list.length, tot=sumVal(list);
+  const clients=live('client').filter(c=>c.modul.includes('Sales retail')&&c.status==='Aktif');
+  const tokoOpts=live('toko').filter(t=>t.status==='Aktif'&&(!q.cl||t.client===q.cl)&&(!q.cb||t.cabang===q.cb));
+  const salesIds=[...new Set(allTrx().filter(t=>repDimOk(t,{...q,u:''})).map(t=>t.u))];
+  const dirty=q.cl||q.cb||q.tk||q.u||q.from||q.to||(q.per&&q.per!=='m');
+  return card('Filter',`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">${pills(REP_PRESETS.map(x=>[x[0],x[1]]),r.preset,'repPer')}
+      <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal mulai</span><input id="rf_from" type="date" min="${LD_START}" max="${LD_END}" value="${r.from}" onchange="repDate()" style="width:140px"></label>
+      <span class="muted xs">sampai</span>
+      <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal akhir</span><input id="rf_to" type="date" min="${LD_START}" max="${LD_END}" value="${r.to}" onchange="repDate()" style="width:140px"></label></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      ${sel([['','Semua klien'],...clients.map(c=>[c.id,c.name])],q.cl||'',"repSet({cl:this.value,tk:'',u:''})",{label:'Filter klien',cls:'sm'})}
+      ${sel([['','Semua cabang'],...CABANG.slice(1)],q.cb||'',"repSet({cb:this.value,tk:'',u:''})",{label:'Filter cabang',cls:'sm'})}
+      ${sel([['','Semua toko'],...tokoOpts.map(t=>[t.id,t.name])],q.tk||'',"repSet({tk:this.value,u:''})",{label:'Filter toko',cls:'sm'})}
+      ${sel([['','Semua sales'],...salesIds.map(u=>[u,(byU(u)||{}).name||u])],q.u||'',"repSet({u:this.value})",{label:'Filter sales',cls:'sm'})}
+      ${dirty?`<button class="btn b-ghost sm" onclick="repSet({cl:'',cb:'',tk:'',u:'',from:'',to:'',per:''})">Hapus filter</button>`:''}</div>
+    <p class="xs muted" style="margin-top:12px">Menampilkan <b class="fg">${repLabel(q)}</b>: ${n.toLocaleString('id-ID')} transaksi, ${jt(tot)}. Filter berlaku untuk grafik, rincian, komposisi, dan semua tab.</p>`);
+}
 function salesReport(u){
   const s=byU(u), days=dailyOf(u), mt=repMonth(u), tg=tgtUser(10,u), td=days[25], mineO=trxOct().filter(t=>t.u===u), nTrx=mineO.length, avgTrx=nTrx?mt/nTrx:0, g=GRADE.find(x=>x.u===u), inc=INC.find(x=>x.u===u);
   const perToko=(()=>{ const m=new Map(); mineO.forEach(t=>{ const tk=tokoRef(t.toko,u); const e=m.get(tk.id)||[tk,0]; e[1]+=trxVal(t); m.set(tk.id,e); }); return [...m.values()].sort((a,b)=>b[1]-a[1]); })(); const mine=mineO, mix={}; mine.forEach(t=>{ const p=trxProd(t); mix[p.name]=(mix[p.name]||0)+trxVal(t); });
@@ -778,7 +825,7 @@ function refreshDerived(){
 /* =====================================================================
    CHARTS
    ===================================================================== */
-function niceScale(max){ const raw=max/4; const p=10**Math.floor(Math.log10(raw)); const f=[1,2,2.5,5,10].find(x=>x*p>=raw); const step=f*p; return [0,1,2,3,4].map(i=>i*step); }
+function niceScale(max){ max=Math.max(max,1e3); const raw=max/4; const p=10**Math.floor(Math.log10(raw)); const f=[1,2,2.5,5,10].find(x=>x*p>=raw); const step=f*p; return [0,1,2,3,4].map(i=>i*step); }
 function columnChart({data,sel,onSel,fmt=jt,targets=true,label='Grafik kolom',badge}){
   const ticks=niceScale(Math.max(...data.map(d=>Math.max(d.value,d.target||0)))*1.02), top=ticks[4];
   return `<figure class="cc" aria-label="${label}">
@@ -1036,7 +1083,7 @@ function statIcon(ic,i){ return `<span class="si" style="${POPS[i]}">${I(ic,18)}
 function ovPer(p){ ST.ovPeriod=p; ST.ovSel=p==='d'?13:p==='w'?3:5; render(false); }
 
 /* ---------- Penjualan ---------- */
-function penSel(i){ ST.penSel=i; render(false); }
+function penSel(i){ ST.penKey=(ST.penKeys||[])[i]; render(false); }
 const LEVELS=['Seluruh cabang','Cabang','Toko','Sales'];
 function drillTo(name){ if(ST.drill.length<2){ ST.drill.push(name); render(false); } else toast('Level terdalam','Ini sudah level sales.'); }
 function drillUp(n){ ST.drill=ST.drill.slice(0,n); render(false); }
@@ -1046,40 +1093,42 @@ const allTrx=()=>[...appTrx(),...TRX].filter(t=>t.st!=='Dihapus');
 const trxProd=t=>PRODUCTS.find(p=>p.id===t.p)||{name:t.pname||'–',sku:'–',cat:t.kat||'–'};
 function pagePenjualan(q){
   const tab=q.tab||'klien';
-  const data=sellout14().map((v,i)=>({label:DAYS14[i],value:v,target:tgtDay(10)}));
-  const level=ST.drill.length, list=drillList(ST.drill,+DAYS14[ST.penSel]), max=Math.max(1,...list.map(x=>x[1])), mix=catMix(trxOct());
+  const ser=repSeries(q); ST.penKeys=ser.pts.map(x=>x.key); let si=ST.penKeys.indexOf(ST.penKey); if(si<0) si=ST.penKeys.length-1; const sp=ser.pts[si]||{title:'',r:ser.r};
+  const data=ser.pts.map(x=>({label:x.label,value:x.value,target:x.target}));
+  const rlist=repTrx(q), level=ST.drill.length, list=drillList(ST.drill,repTrx(q,sp.r)), max=Math.max(1,...list.map(x=>x[1])), mix=catMix(rlist);
   const catF=q.cat||'';
-  const per=q.per||'m'; const rows=allTrx().filter(t=>per==='d'?t.d===0:per==='w'?t.d<=6:true).filter(t=>{ const tk=TOKO.find(x=>x.name===t.toko); return (!q.cl||tk?.client===q.cl)&&(!q.cb||tk?.cabang===q.cb)&&(!q.tk||tk?.id===q.tk)&&(!q.u||t.u===q.u); }).filter(t=>!q.iv||(q.iv==='big'?t.inv?.flag:!t.inv)).filter(t=>!catF||trxProd(t).cat===catF).filter(t=>!q.q||(byU(t.u).name+t.toko+t.id).toLowerCase().includes(q.q.toLowerCase())).map(t=>({...t,_id:t.id}));
-  const tabs=[['klien','Per klien'],['cabang','Per cabang'],['toko','Per toko'],['sales','Per sales'],['penjualan','Transaksi',trxOct().length],['dealer','Summary dealer'],['harian','Sales harian'],['bulanan','Summary bulanan']];
+  const rows=rlist.filter(t=>!q.iv||(q.iv==='big'?t.inv?.flag:!t.inv)).filter(t=>!catF||trxProd(t).cat===catF).filter(t=>!q.q||(byU(t.u).name+t.toko+t.id).toLowerCase().includes(q.q.toLowerCase())).map(t=>({...t,_id:t.id}));
+  const tabs=[['klien','Per klien'],['cabang','Per cabang'],['toko','Per toko'],['sales','Per sales'],['penjualan','Transaksi',rlist.length],['dealer','Summary dealer'],['harian','Sales harian'],['bulanan','Summary bulanan']];
   let tableHTML='';
   if(tab==='penjualan') tableHTML=dataTable('trx',{rows,rowClick:r=>`trxPanel('${r.id}')`,cols:[
     {label:'No. transaksi',render:r=>`<span class="mono">${r.id}</span>`,prim:true},{label:'Tanggal',k:'date'},{label:'Sales',render:r=>byU(r.u).name},{label:'Toko',k:'toko',hide:true},
     {label:'Produk',render:r=>esc(trxProd(r).name)+(r.q>1?' ×'+r.q:'')+(r.app?' '+tag('Aplikasi','info'):'')},{label:'Promo',render:r=>r.promo?tag(r.promo,'info'):'<span class="muted">–</span>',hide:true},
     {label:'Harga invoice',render:r=>r.inv?`<b class="fg tabular">${rp(r.inv.price)}</b>`:`<b class="fg tabular">${rp(r.total)}</b>`,align:'r'},{label:'Harga sistem',render:r=>`<span class="tabular muted">${rp(r.total)}</span>`,align:'r',hide:true},
     {label:'Selisih',render:r=>!r.inv?tag('Tanpa invoice','warning'):Math.abs(r.inv.pct)<.5?'<span class="muted">Sama</span>':tag((r.inv.pct>0?'+':'−')+Math.abs(r.inv.pct).toFixed(1).replace('.',',')+'%',r.inv.flag?'warning':'info')},{label:'Status',render:r=>spill(r.st,r.st==='Terkirim'?'success':'warning')}]});
-  if(tab==='dealer') tableHTML=dataTable('dlr',{rows:dealerRows(10).map(r=>({...r,_id:r.n})),rowClick:r=>`go('/sell-in')`,empty:'Belum ada data sell-in.',cols:[
-    {label:'Dealer',k:'n',prim:true},{label:'Sell-in Okt',render:r=>rp(r.a),align:'r'},{label:'Target sell-in',render:r=>rp(r.t),align:'r'},{label:'Pencapaian',render:r=>`<div style="display:flex;gap:8px;align-items:center;min-width:140px"><div class="bar" style="flex:1"><i style="width:${Math.min(100,r.t?r.a/r.t*100:0)}%"></i></div><b class="tabular fg">${r.t?Math.round(r.a/r.t*100):0}%</b></div>`},{label:'Sell-out Okt',render:r=>rp(r.so),align:'r',hide:true},{label:'Sell-out / sell-in',render:r=>r.a?Math.round(r.so/r.a*100)+'%':'–',align:'r',hide:true}]});
+  if(tab==='dealer') tableHTML=dataTable('dlr',{rows:dealerRowsQ(q).map(r=>({...r,_id:r.n})),rowClick:r=>`go('/sell-in')`,empty:'Belum ada data sell-in.',cols:[
+    {label:'Dealer',k:'n',prim:true},{label:'Sell-in',render:r=>rp(r.a),align:'r'},{label:'Target sell-in',render:r=>rp(r.t),align:'r'},{label:'Pencapaian',render:r=>`<div style="display:flex;gap:8px;align-items:center;min-width:140px"><div class="bar" style="flex:1"><i style="width:${Math.min(100,r.t?r.a/r.t*100:0)}%"></i></div><b class="tabular fg">${r.t?Math.round(r.a/r.t*100):0}%</b></div>`},{label:'Sell-out',render:r=>rp(r.so),align:'r',hide:true},{label:'Sell-out / sell-in',render:r=>r.a?Math.round(r.so/r.a*100)+'%':'–',align:'r',hide:true}]});
   if(['klien','cabang','toko','sales','harian'].includes(tab)) tableHTML=repTable(tab,q);
-  if(tab==='bulanan') tableHTML=dataTable('bln',{rows:ovMonths().map(r=>({_id:r.label,m:r.label,v:r.value,t:r.target})).reverse(),rowClick:r=>`toast('Summary ${r.m} dibuka','Rincian per cabang, tanggal, dan sub kategori.')`,cols:[
-    {label:'Bulan',render:r=>r.m+' 2026',prim:true},{label:'Penjualan',render:r=>rp(r.v),align:'r'},{label:'Target',render:r=>rp(r.t),align:'r'},{label:'Pencapaian',render:r=>`<b class="tabular fg">${Math.round(r.v/r.t*100)}%</b>`,align:'r'}]});
+  if(tab==='bulanan') tableHTML=dataTable('bln',{rows:LD_MONTHS.map(m=>({_id:LD_MN[m],m:LD_MN[m],v:sumVal(allTrx().filter(t=>tmo(t)===m&&repDimOk(t,q))),t:repTgtMonth(q,m)})).reverse(),rowClick:r=>`toast('Summary ${r.m} dibuka','Rincian per cabang, tanggal, dan sub kategori.')`,cols:[
+    {label:'Bulan',render:r=>r.m+' 2026',prim:true},{label:'Penjualan',render:r=>rp(r.v),align:'r'},{label:'Target',render:r=>rp(r.t),align:'r'},{label:'Pencapaian',render:r=>`<b class="tabular fg">${r.t?Math.round(r.v/r.t*100)+'%':'–'}</b>`,align:'r'}]});
   return {title:'Laporan penjualan',html:`
-  <p class="purpose">Penjualan harian dengan rincian bertingkat klien → cabang → toko → sales, laporan per sales, komposisi per sub kategori, dan tabel yang bisa difilter lalu diunduh (BRD 2.17).</p>
+  <p class="purpose">Penjualan harian dengan rincian bertingkat klien → cabang → toko → sales, laporan per sales, komposisi per sub kategori, dan tabel yang bisa difilter lalu diunduh (BRD 2.17). Filter klien, cabang, toko, sales, dan rentang tanggal berlaku untuk seluruh halaman.</p>
+  <div style="margin-bottom:16px">${repFilters(q)}</div>
   <div class="grid g-side" style="margin-bottom:16px">
-    ${card('Penjualan harian',`${columnChart({data,sel:ST.penSel,onSel:'penSel',label:'Penjualan harian',badge:(d)=>Math.round(d.value/d.target*100)+'%'})}
-      <div class="legend" style="margin-top:12px"><span><i class="capkey"></i>Target harian ${jt(tgtDay(10))}</span><span>Pilih kolom untuk melihat tanggal, lalu telusuri di kartu sebelah.</span></div>`,
-      {acts:`${sel(['14 hari terakhir','Oktober 2026','September 2026'],'14 hari terakhir',"toast('Rentang diubah','Data mockup tetap sama.')",{label:'Rentang'})}${btn('PDF',{v:'soft',size:'sm',icon:'down',on:"toast('Laporan diunduh','penjualan_okt2026.pdf')"})}${btn('Excel',{v:'soft',size:'sm',icon:'down',on:"toast('Laporan diunduh','penjualan_okt2026.xlsx')"})}`})}
-    ${card(`Rincian ${DAYS14[ST.penSel]} Okt`,`
+    ${card('Penjualan '+ser.unit,`${data.length?columnChart({data,sel:si,onSel:'penSel',label:'Penjualan '+ser.unit,badge:(d)=>d.target?Math.round(d.value/d.target*100)+'%':'–'}):'<p class="muted sm">Tidak ada data pada rentang ini.</p>'}
+      <div class="legend" style="margin-top:12px"><span><i class="capkey"></i>Target ${ser.unit} mengikuti filter</span><span>Pilih kolom untuk melihat ${ser.unit==='harian'?'tanggal':'bulan'}, lalu telusuri di kartu sebelah.</span></div>`,
+      {acts:`${btn('PDF',{v:'soft',size:'sm',icon:'down',on:"toast('Laporan diunduh','penjualan_"+repRange(q).from+"_"+repRange(q).to+".pdf')"})}${btn('Excel',{v:'soft',size:'sm',icon:'down',on:"toast('Laporan diunduh','penjualan_"+repRange(q).from+"_"+repRange(q).to+".xlsx')"})}`})}
+    ${card(`Rincian ${sp.title}`,`
       <div class="chips" style="margin-bottom:12px">${['Seluruh cabang',...ST.drill].map((n,i)=>`<button class="fchip ${i===level?'on':''}" onclick="drillUp(${i})">${i?esc(n):n}</button>`).join(`<span class="muted">${I('right',14)}</span>`)}</div>
       <div class="xs muted" style="margin-bottom:8px">Level: ${LEVELS[level]} · klik baris untuk turun satu level</div>
-      <div class="rows">${list.length?'':'<p class="muted sm" style="padding:12px 4px">Tidak ada penjualan di level ini pada tanggal terpilih.</p>'}${list.map(([n,v],i)=>`<button class="rowlink" onclick="drillTo('${esc(n)}')"><span style="flex:1;min-width:0"><span class="sm fg" style="display:block;font-weight:500">${esc(n)}</span><div class="bar" style="margin-top:6px"><i style="width:${v/max*100}%;background:${sc((i%5)+1)}"></i></div></span><b class="tabular fg sm">${jt(v)}</b>${level<2?I('right',16):''}</button>`).join('')}</div>`)}
+      <div class="rows">${list.length?'':'<p class="muted sm" style="padding:12px 4px">Tidak ada penjualan di level ini pada periode dan filter terpilih.</p>'}${list.map(([n,v],i)=>`<button class="rowlink" onclick="drillTo('${esc(n)}')"><span style="flex:1;min-width:0"><span class="sm fg" style="display:block;font-weight:500">${esc(n)}</span><div class="bar" style="margin-top:6px"><i style="width:${v/max*100}%;background:${sc((i%5)+1)}"></i></div></span><b class="tabular fg sm">${jt(v)}</b>${level<2?I('right',16):''}</button>`).join('')}</div>`)}
   </div>
   <div class="grid g-side" style="margin-bottom:16px">
-    ${card('Komposisi sub kategori',`${donut('cat',mix.items.map(([l,v,s])=>({label:l,value:v,slot:s,share:v,fmt:v+'%'})),{total:jt(mix.tot).replace('Rp',''),caption:'sell-out Oktober',link:it=>`setQ({cat:'${it.label}'})`})}
+    ${card('Komposisi sub kategori',`${donut('cat',mix.items.map(([l,v,s])=>({label:l,value:v,slot:s,share:v,fmt:v+'%'})),{total:jt(mix.tot).replace('Rp',''),caption:'sell-out '+repLabel(q),link:it=>`setQ({cat:'${it.label}'})`})}
       ${catF?`<div class="callout blue" style="margin-top:14px">${I('tag',18)}<span>Tabel difilter kategori <b>${catF}</b>. <button style="color:var(--accent-text);font-weight:600" onclick="setQ({cat:''})">Hapus filter</button></span></div>`:''}`)}
     ${card('Promo berjalan',`<div class="rows">${D.promos.filter(p=>p.status==='Aktif').map(p=>`<a class="rowlink" href="#/promo"><span class="si" style="width:36px;height:36px;border-radius:12px;display:grid;place-items:center;${POPS[p.combine?3:1]}">${I('tag',16)}</span><span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${p.name}</b><span class="xs muted">${p.prod} · ${p.combine?'bisa digabung':'tidak bisa digabung'}</span></span><b class="tabular sm fg">${p.used}×</b></a>`).join('')}</div>`)}
   </div>
   ${card('Laporan',`${utabs(tabs,tab,'penTab')}
-    ${['klien','cabang','toko','sales','penjualan'].includes(tab)?repBar(q,tab):''}
+    ${['klien','cabang','toko','sales'].includes(tab)?repBar(q,tab):''}
     ${tab==='penjualan'?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px"><form style="flex:1;min-width:220px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari transaksi</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari sales, toko, atau nomor transaksi"></label></form>${sel([['','Semua kategori'],...mix.items.map(c=>c[0])],catF,"setQ({cat:this.value})",{label:'Kategori'})}${sel([['','Semua invoice'],['big','Selisih besar'],['none','Tanpa invoice']],q.iv||'',"setQ({iv:this.value})",{label:'Filter invoice'})}</div>`:''}
     ${tableHTML}`,{acts:`${btn('PDF',{v:'soft',size:'sm',icon:'down',on:"toast('Laporan diunduh','PDF sesuai tab dan filter aktif.')"})}${btn('Excel',{v:'soft',size:'sm',icon:'down',on:"toast('Laporan diunduh','Excel sesuai tab dan filter aktif.')"})}`})}`};
 }
