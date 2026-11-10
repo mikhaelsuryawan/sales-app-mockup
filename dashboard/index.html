@@ -2338,103 +2338,143 @@ function syncApp(){
 }
 
 /* ---------- Hasil kerja sales ---------- */
-/* Usulan: halaman ini tidak ada di BRD/URD. Ia mengumpulkan input mobile per sales supaya admin tidak membuka sembilan laporan satu per satu. */
-const HK_DATES=['26 Okt','25 Okt'];
+/* Usulan: tab ini tidak ada di BRD/URD. Ia mengumpulkan input mobile per sales supaya admin tidak membuka sembilan laporan satu per satu.
+   Pekerjaan = tugas wajib per peran: tugas kunjungan FMCG/MD (BR-043), SKU display harian (BR-102), market share, stok bawaan dan tanda terima canvasing (FR-STOCK-006), kunjungan terjadwal, dan lead yang di-assign.
+   Data aktivitas di mockup baru ada sejak 25 Okt (SKU display, tugas FMCG), stok bawaan, market share, dan kunjungan sejak 26 Okt. */
+const HK_TODAY='2026-10-26', HK_FM_FROM='2026-10-25';
 const HK_ROLES=[['','Semua peran'],['spg','SPG / Promotor'],['canvas','Canvasing'],['order','Taking Order'],['fmcg','Promotor FMCG & MD'],['leads','REA & CBD']];
 const HK_RETUR=[{u:'budi',toko:'Toko Makmur Abadi',p:'rc18',q:2,kondisi:'Layak jual'},{u:'budi',toko:'Toko Berkah Elektronik',p:'kp16',q:1,kondisi:'Tidak layak jual'},{u:'kevin',toko:'Toko Jaya Abadi Kembangan',p:'bl11',q:3,kondisi:'Layak jual'}];
+const HK_ST={done:['Selesai','success'],draft:['Berjalan','warning'],todo:['Belum','neutral']};
 const hkUsers=()=>[...SALES,...FMCG_USERS,...LEADS_USERS];
 const hkKind=u=>{ const j=byU(u).job; return j==='Canvasing'?'canvas':j==='Taking Order'?'order':isFm(u)?'fmcg':LEADS_USERS.some(x=>x.u===u)?'leads':'spg'; };
 const hkVal=t=>t.inv?t.inv.price:t.total;
-function hkData(u,d){
-  const me=byU(u), k=hkKind(u), today=d===HK_DATES[0];
-  const x={u,k,me,d,today,
-    trx:allTrx().filter(t=>t.u===u&&t.date===d),
-    sku:SKU_REP.filter(r=>r.u===u&&r.tgl===d),
-    share:today?SHARE_REP.flatMap(r=>r.inp.filter(i=>i[0]===u).map(i=>({toko:r.toko,cat:r.cat,brand:r.brand,qty:i[1],st:i[2]}))):[],
-    fm:fmLogRows().filter(r=>r.who===me.name&&r.tgl===d),
-    orders:MD.order.filter(o=>!o.del&&o.u===u&&o.date===d),
-    leads:D.leads.filter(l=>l.owner===u),
-    retur:today?HK_RETUR.filter(r=>r.u===u):[],
-    cv:today?CV_REP.find(r=>r.u===u):null,
-    usulan:D.usulan.filter(s=>s.by===u&&String(s.when).startsWith(d)),
+const hkQ=q=>(q.per||q.from||q.to)?q:{...q,per:'d'};
+const hkRange=q=>repRange(hkQ(q));
+const hkLabel=q=>repLabel(hkQ(q));
+const labIso=l=>{ const [d,mn]=String(l).trim().split(' '); const m=+Object.keys(LD_MN).find(k=>LD_MN[k]===mn); return m?isoOf(m,+d):''; };
+const hkIn=(iso,r)=>!!iso&&iso>=r.from&&iso<=r.to;
+const hkDays=r=>{ const o=[]; for(const t=new Date(r.from+'T00:00:00');t<=new Date(r.to+'T00:00:00');t.setDate(t.getDate()+1)) o.push(isoOf(t.getMonth()+1,t.getDate())); return o; };
+function hkScope(u){
+  const me=byU(u), usr=live('user').find(x=>x.id===u);
+  let tks=tokoOfU(u); if(!tks.length&&me.toko) tks=TOKO.filter(t=>t.name===me.toko&&!t.del);
+  return {cl:(usr&&usr.clients)||['cl1'],cb:[...new Set([me.cabang,...tks.map(t=>t.cabang)])],tk:tks.map(t=>t.id),tkName:tks.length>1?tks.length+' toko · '+tks[0].name:(tks[0]?tks[0].name:me.toko||'–')};
+}
+function hkData(u,r){
+  const me=byU(u), k=hkKind(u), today=hkIn(HK_TODAY,r), sc=hkScope(u);
+  const x={u,k,me,r,sc,today,multi:r.from!==r.to,
+    trx:allTrx().filter(t=>t.u===u&&hkIn(trxIso(t),r)),
+    sku:SKU_REP.filter(s=>s.u===u&&hkIn(labIso(s.tgl),r)),
+    share:today?SHARE_REP.flatMap(s=>s.inp.filter(i=>i[0]===u).map(i=>({toko:s.toko,cat:s.cat,brand:s.brand,qty:i[1],st:i[2]}))):[],
+    fm:fmLogRows().filter(a=>a.who===me.name&&hkIn(labIso(a.tgl),r)),
+    orders:MD.order.filter(o=>!o.del&&o.u===u&&hkIn(isoOf(o.m,o.day),r)),
+    leads:D.leads.filter(l=>l.owner===u&&hkIn(labIso(l.date),r)),
+    retur:today?HK_RETUR.filter(a=>a.u===u):[],
+    cv:today?CV_REP.find(a=>a.u===u):null,
+    usulan:D.usulan.filter(s=>s.by===u&&hkIn(labIso(String(s.when).split(',')[0]),r)),
+    visits:today?D.visits.filter(v=>!v.del&&v.u===u):[],
     abs:today?TODAY.find(a=>a.u===u):null};
-  const fl=[], rusak=x.sku.filter(r=>r.cond==='Rusak').length, tl=x.retur.filter(r=>r.kondisi!=='Layak jual').length,
-    dr=x.fm.filter(r=>r.status==='Draft').length+x.share.filter(i=>i.st==='Draft').length,
-    mu=x.usulan.filter(s=>s.status==='Menunggu verifikasi').length, sel_=x.trx.filter(t=>t.inv&&t.inv.flag).length;
+  const cuti=today&&x.abs&&x.abs.st==='Cuti', T=[], add=(date,name,st)=>T.push({date,name,st});
+  const fmSt=s=>s==='Selesai'?'done':s==='Draft'?'draft':'todo';
+  if(k==='leads') x.leads.forEach(l=>add(labIso(l.date),'Lead '+l.name,l.status==='Deal'||l.status==='Belum Tertarik'?'done':l.status==='Prospect'?'draft':'todo'));
+  else hkDays(r).forEach(iso=>{
+    if(cuti&&iso===HK_TODAY) return;
+    if(k==='fmcg'&&iso>=HK_FM_FROM) ['Cek stok','Price promo','Facing display','Market share'].forEach(j=>{ const a=x.fm.find(z=>z.jenis===j&&labIso(z.tgl)===iso); add(iso,j,a?fmSt(a.status):'todo'); });
+    if(k==='spg'&&iso>=HK_FM_FROM) add(iso,'SKU display',x.sku.some(s=>labIso(s.tgl)===iso)?'done':'todo');
+    if(k==='spg'&&iso===HK_TODAY) add(iso,'Market share',x.share.some(s=>s.st!=='Draft')?'done':x.share.length?'draft':'todo');
+    if(k==='canvas'&&iso===HK_TODAY){ add(iso,'Stok bawaan',x.cv?'done':'todo'); add(iso,'Tanda terima',x.cv&&x.cv.tt==='Ada'?'done':'todo'); }
+    if((k==='spg'||k==='canvas'||k==='order')&&iso===HK_TODAY) x.visits.forEach(v=>add(iso,'Kunjungan '+v.place,v.status==='Selesai'?'done':v.status==='Berjalan'?'draft':'todo'));
+  });
+  x.tasks=T; x.total=T.length; x.done=T.filter(t=>t.st==='done').length; x.todo=x.total-x.done; x.draft=T.filter(t=>t.st==='draft').length;
+  const fl=[], rusak=x.sku.filter(a=>a.cond==='Rusak').length, tl=x.retur.filter(a=>a.kondisi!=='Layak jual').length,
+    dr=x.fm.filter(a=>a.status==='Draft').length+x.share.filter(i=>i.st==='Draft').length,
+    mu=x.usulan.filter(s=>s.status==='Menunggu verifikasi').length, sl=x.trx.filter(t=>t.inv&&t.inv.flag).length;
+  if(cuti) fl.push(['Cuti','info']);
   if(rusak) fl.push([rusak+' SKU rusak','danger']);
   if(tl) fl.push([tl+' retur tidak layak','warning']);
   if(x.cv&&x.cv.tt==='Belum') fl.push(['Tanda terima belum ada','warning']);
   if(dr) fl.push([dr+' draft','warning']);
   if(mu) fl.push(['Usulan toko menunggu','info']);
-  if(sel_) fl.push([sel_+' selisih invoice','warning']);
+  if(sl) fl.push([sl+' selisih invoice','warning']);
   x.flags=fl;
-  x.n=x.trx.length+x.sku.length+x.share.length+x.fm.length+x.orders.length+x.retur.length+x.usulan.length+(x.cv?1:0)+(k==='leads'?x.leads.length:0);
-  const fmDone=x.fm.filter(r=>r.status==='Selesai').length;
-  x.sum=k==='order'?`${x.orders.length} pesanan · ${jt(x.orders.reduce((a,o)=>a+ordTotal(o),0))}`
-    :k==='fmcg'?`${fmDone} dari ${x.fm.length} aktivitas selesai`
-    :k==='leads'?`${x.leads.length} lead · ${x.leads.filter(l=>l.status==='Deal').length} Deal`
-    :!x.trx.length?'Belum ada transaksi'
-    :`${x.trx.length} transaksi · ${jt(x.trx.reduce((a,t)=>a+hkVal(t),0))}`;
+  x.n=x.trx.length+x.sku.length+x.share.length+x.fm.length+x.orders.length+x.retur.length+x.usulan.length+(x.cv?1:0)+x.leads.length;
   return x;
 }
+function hkPer(k){ setQ({per:k,from:'',to:''}); }
+function hkDate(){ const f=document.getElementById('hk_from').value, t=document.getElementById('hk_to').value;
+  if(f&&t&&f>t){ toast('Rentang tidak valid','Tanggal mulai harus sebelum atau sama dengan tanggal akhir.','danger'); return; }
+  setQ({from:f,to:t,per:''}); }
 function hkView(q){
-  const d=HK_DATES.includes(q.d)?q.d:HK_DATES[0], role=q.r||'', f=q.f||'', qq=(q.q||'').toLowerCase();
-  const all=hkUsers().filter(s=>!role||hkKind(s.u)===role).filter(s=>!qq||s.name.toLowerCase().includes(qq)).map(s=>({...hkData(s.u,d),_id:s.u}));
-  const rows=all.filter(r=>f==='lapor'?r.n>0:f==='flag'?r.flags.length>0:true);
-  const lapor=all.filter(r=>r.n>0).length, nilai=all.reduce((a,r)=>a+r.trx.reduce((b,t)=>b+hkVal(t),0),0), ntrx=all.reduce((a,r)=>a+r.trx.length,0);
-  const fmAll=all.flatMap(r=>r.fm), fmDone=fmAll.filter(r=>r.status==='Selesai').length, fmDraft=fmAll.filter(r=>r.status==='Draft').length;
-  const nflag=all.filter(r=>r.flags.length).length;
+  q=hkQ(q); const r=hkRange(q), role=q.r||'', f=q.f||'', qq=(q.q||'').toLowerCase();
+  const all=hkUsers().filter(s=>!role||hkKind(s.u)===role).filter(s=>!qq||s.name.toLowerCase().includes(qq)).map(s=>({...hkData(s.u,r),_id:s.u})).filter(x=>(!q.cl||x.sc.cl.includes(q.cl))&&(!q.cb||x.sc.cb.includes(q.cb))&&(!q.tk||x.sc.tk.includes(q.tk)));
+  const rows=all.filter(x=>f==='lapor'?x.n>0:f==='flag'?x.flags.length>0:f==='belum'?x.todo>0:true);
+  const lapor=all.filter(x=>x.n>0).length, T=all.reduce((a,x)=>a+x.total,0), D_=all.reduce((a,x)=>a+x.done,0), nflag=all.filter(x=>x.flags.length).length, nbelum=all.filter(x=>x.todo>0).length;
+  const clients=live('client').filter(c=>c.status==='Aktif');
+  const tokoOpts=live('toko').filter(t=>t.status==='Aktif'&&(!q.cl||t.client===q.cl)&&(!q.cb||t.cabang===q.cb));
+  const dirty=q.cl||q.cb||q.tk||role||q.q||q.from||q.to||(q.per&&q.per!=='d');
   const stat=(l,v,sub,on,act)=>`<button class="stat ${act?'on':''}" onclick="${on}"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></button>`;
-  return {html:`<p class="purpose">Input dari aplikasi mobile dikumpulkan per sales: penjualan, SKU display, market share, stok bawaan, retur, pesanan, aktivitas toko, dan hasil leads. Klik satu sales untuk melihat rincian per input. <b>Usulan</b>: tab ini belum ada di BRD atau URD.</p>
+  const filt=card('Filter',`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">${pills(REP_PRESETS.map(p=>[p[0],p[1]]),r.preset,'hkPer')}
+      <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal mulai</span><input id="hk_from" type="date" min="${LD_START}" max="${LD_END}" value="${r.from}" onchange="hkDate()" style="width:140px"></label>
+      <span class="muted xs">sampai</span>
+      <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal akhir</span><input id="hk_to" type="date" min="${LD_START}" max="${LD_END}" value="${r.to}" onchange="hkDate()" style="width:140px"></label></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      ${sel(HK_ROLES,role,"setQ({r:this.value})",{label:'Filter peran',cls:'sm'})}
+      ${sel([['','Semua klien'],...clients.map(c=>[c.id,c.name])],q.cl||'',"setQ({cl:this.value,tk:''})",{label:'Filter klien',cls:'sm'})}
+      ${sel([['','Semua cabang'],...CABANG.slice(1)],q.cb||'',"setQ({cb:this.value,tk:''})",{label:'Filter cabang',cls:'sm'})}
+      ${sel([['','Semua toko'],...tokoOpts.map(t=>[t.id,t.name])],q.tk||'',"setQ({tk:this.value})",{label:'Filter toko',cls:'sm'})}
+      <form style="flex:1;min-width:180px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari sales</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari nama sales"></label></form>
+      ${dirty?btn('Hapus filter',{v:'ghost',size:'sm',on:"setQ({cl:'',cb:'',tk:'',r:'',q:'',f:'',from:'',to:'',per:''})"}):''}</div>
+    <p class="xs muted" style="margin-top:12px">Menampilkan <b class="fg">${hkLabel(q)}</b>: ${all.length} sales, ${T} pekerjaan (${D_} selesai). Data aktivitas di mockup baru ada sejak 25 Okt 2026 (SKU display, tugas FMCG dan MD), stok bawaan, market share, dan kunjungan sejak 26 Okt. <b>Usulan</b>: tab ini belum ada di BRD atau URD.</p>`);
+  return {html:`<p class="purpose">Pekerjaan wajib tiap sales dari aplikasi mobile beserta hasil inputnya: penjualan, SKU display, market share, stok bawaan, retur, pesanan, aktivitas toko, dan hasil leads. Klik satu sales untuk melihat rincian per pekerjaan dan per input.</p>
+  <div style="margin-bottom:16px">${filt}</div>
   <div class="stats">
     ${stat('Sales melapor',lapor+' dari '+all.length,f==='lapor'?'Filter aktif · klik untuk hapus':'Klik untuk lihat yang sudah input',`setQ({f:'${f==='lapor'?'':'lapor'}'})`,f==='lapor')}
-    ${stat('Nilai penjualan',jt(nilai),ntrx+' transaksi · buka laporan penjualan',"location.hash='#/penjualan?tab=penjualan'")}
-    ${stat('Aktivitas toko selesai',fmDone+' dari '+fmAll.length,fmDraft+' masih draft · buka log aktivitas',"setQ({tab:'log'})")}
+    ${stat('Total pekerjaan',T,(T-D_)+' belum selesai · '+D_+' selesai',`setQ({f:'${f==='belum'?'':'belum'}'})`,f==='belum')}
+    ${stat('Pekerjaan selesai',T?Math.round(D_/T*100)+'%':'–',D_+' dari '+T+' · buka log aktivitas',"setQ({tab:'log'})")}
     ${stat('Perlu tindak lanjut',nflag+' sales',f==='flag'?'Filter aktif · klik untuk hapus':'SKU rusak, retur, draft, usulan',`setQ({f:'${f==='flag'?'':'flag'}'})`,f==='flag')}
   </div>
-  ${card('Hasil kerja per sales',`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:flex-end">
-      ${sel(HK_DATES.map(x=>[x,x+' 2026']),d,"setQ({d:this.value})",{label:'Tanggal',cls:'sm'})}
-      ${sel(HK_ROLES,role,"setQ({r:this.value})",{label:'Peran',cls:'sm'})}
-      <form style="flex:1;min-width:200px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari sales</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari nama sales"></label></form>
-      ${q.q||f||role?btn('Hapus filter',{v:'ghost',size:'sm',on:"setQ({q:'',f:'',r:''})"}):''}</div>
-    ${dataTable('hk',{rows,rowClick:r=>`hkPanel('${r.u}')`,empty:'Tidak ada sales dengan filter ini.',cols:[
-      {label:'Sales',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(r.me.name)}<span><span class="fg" style="font-weight:500">${esc(r.me.name)}</span><span class="xs muted" style="display:block">${esc(r.me.job)}</span></span></span>`,prim:true},
-      {label:'Absen',render:r=>r.abs?tag(r.abs.st,STTONE[r.abs.st]||'neutral'):'<span class="muted">–</span>',hide:true},
-      {label:'Hasil utama',render:r=>r.n?esc(r.sum):'<span class="muted">Belum ada input</span>'},
-      {label:'Input',render:r=>`<span class="tabular">${r.n}</span>`,align:'r',hide:true},
-      {label:'Catatan',render:r=>r.flags.length?`<span style="display:flex;gap:6px;flex-wrap:wrap">${r.flags.map(([t,tn])=>tag(esc(t),tn)).join('')}</span>`:'<span class="muted">–</span>'}]})}`,
-    {acts:btn('Unduh rekap',{v:'soft',size:'sm',icon:'down',on:`toast('Rekap hasil kerja diunduh','${d} 2026, sesuai filter yang aktif.')`})})}`};
+  ${card('Hasil kerja per sales',dataTable('hk',{rows,rowClick:x=>`hkPanel('${x.u}')`,empty:'Tidak ada sales dengan filter ini.',cols:[
+      {label:'Sales',render:x=>`<span style="display:flex;gap:10px;align-items:center">${av(x.me.name)}<span><span class="fg" style="font-weight:500">${esc(x.me.name)}</span><span class="xs muted" style="display:block">${esc(x.me.job)}</span></span></span>`,prim:true},
+      {label:'Klien',render:x=>esc(x.sc.cl.map(clientName).join(', ')),hide:true},
+      {label:'Cabang',render:x=>esc(x.sc.cb.join(', ')),hide:true},
+      {label:'Toko',render:x=>esc(x.sc.tkName),hide:true},
+      {label:'Pekerjaan',render:x=>x.total?`<span class="tabular">${x.total}</span>`:'<span class="muted">–</span>',align:'r'},
+      {label:'Selesai',render:x=>x.total?`<b class="tabular t-success">${x.done}</b>`:'<span class="muted">–</span>',align:'r'},
+      {label:'Belum',render:x=>x.total?`<b class="tabular ${x.todo?'fg':'muted'}">${x.todo}</b>${x.draft?` <span class="xs muted">(${x.draft} berjalan)</span>`:''}`:'<span class="muted">–</span>',align:'r'},
+      {label:'Pencapaian',render:x=>x.total?achBar(x.done,x.total):'<span class="muted">–</span>',hide:true},
+      {label:'Catatan',render:x=>x.flags.length?`<span style="display:flex;gap:6px;flex-wrap:wrap">${x.flags.map(([t,tn])=>tag(esc(t),tn)).join('')}</span>`:'<span class="muted">–</span>',hide:true}]}),
+    {acts:btn('Unduh rekap',{v:'soft',size:'sm',icon:'down',on:`toast('Rekap hasil kerja diunduh','${esc(hkLabel(q))}, sesuai filter yang aktif.')`})})}`};
 }
-const hkSec=(title,n,link,body)=>`<div style="margin-top:18px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap"><b class="fg sm" style="flex:1;min-width:120px">${title}</b>${tag(n,'neutral')}<a href="#${link[0]}" onclick="closeLayer()" class="xs" style="color:var(--accent-text);font-weight:600">${link[1]}</a></div>${n?body:`<div class="tile xs muted">Belum ada input pada tanggal ini.</div>`}</div>`;
+const hkSec=(title,n,link,body)=>`<div style="margin-top:18px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap"><b class="fg sm" style="flex:1;min-width:120px">${title}</b>${tag(n,'neutral')}<a href="#${link[0]}" onclick="closeLayer()" class="xs" style="color:var(--accent-text);font-weight:600">${link[1]}</a></div>${n?body:`<div class="tile xs muted">Belum ada data pada rentang ini.</div>`}</div>`;
 const hkTbl=(cols,rows)=>`<div class="tbl-wrap"><table class="tbl"><thead><tr>${cols.map(c=>`<th class="${c[2]||''}">${c[0]}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${cols.map(c=>`<td class="${c[2]||''}">${c[1](r)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 const hkInv=t=>!t.inv?tag('Tanpa invoice','warning'):t.inv.flag?tag('Selisih '+Math.abs(t.inv.pct).toFixed(0)+'%','warning'):tag('Sesuai','success');
-const hkTrx=(x,title)=>hkSec(title,x.trx.length,['/penjualan?tab=penjualan','Laporan penjualan'],hkTbl([['No.',t=>`<span class="mono">${esc(t.id)}</span>`],['Toko',t=>esc(t.toko)],['Produk',t=>esc(trxProd(t).name)+(t.q>1?' ×'+t.q:'')],['Nilai',t=>`<b class="fg tabular">${rp(hkVal(t))}</b>`,'r'],['Invoice',hkInv]],x.trx));
-const hkFm=(x,jenis)=>{ const r=x.fm.filter(a=>a.jenis===jenis); return hkSec(jenis,r.length,['/aktivitas?tab=log','Log aktivitas'],hkTbl([['Toko',a=>esc(a.toko)],['Status',a=>spill(a.status,FM_ST_TONE[a.status]||'neutral')],['Rincian',a=>`<span class="xs">${esc(a.isi)}</span>`]],r)); };
+const hkDc=(x,fn)=>x.multi?[['Tgl',fn]]:[];
+const hkTrx=(x,title)=>hkSec(title,x.trx.length,['/penjualan?tab=penjualan','Laporan penjualan'],hkTbl([...hkDc(x,t=>esc(t.date)),['No.',t=>`<span class="mono">${esc(t.id)}</span>`],['Toko',t=>esc(t.toko)],['Produk',t=>esc(trxProd(t).name)+(t.q>1?' ×'+t.q:'')],['Nilai',t=>`<b class="fg tabular">${rp(hkVal(t))}</b>`,'r'],['Invoice',hkInv]],x.trx));
+const hkFm=(x,jenis)=>{ const a=x.fm.filter(z=>z.jenis===jenis); return hkSec(jenis,a.length,['/aktivitas?tab=log','Log aktivitas'],hkTbl([...hkDc(x,z=>esc(z.tgl)),['Toko',z=>esc(z.toko)],['Status',z=>spill(z.status,FM_ST_TONE[z.status]||'neutral')],['Rincian',z=>`<span class="xs">${esc(z.isi)}</span>`]],a)); };
 function hkPanel(u){
-  const d=HK_DATES.includes(parse().q.d)?parse().q.d:HK_DATES[0], x=hkData(u,d), k=x.k;
-  const kv=`<div class="kv"><div><dt>Peran</dt><dd>${esc(x.me.job)}</dd></div><div><dt>Cabang</dt><dd>${esc(x.me.cabang)}</dd></div><div><dt>Penempatan</dt><dd>${esc(x.me.toko||tokoLabel(u))}</dd></div><div><dt>Absen</dt><dd>${x.abs?x.abs.st+(x.abs.in?' · '+x.abs.in:''):'–'}</dd></div><div><dt>Tanggal</dt><dd>${d} 2026</dd></div><div><dt>Total input</dt><dd>${x.n}</dd></div></div>`;
+  const q=hkQ(parse().q), r=hkRange(q), x=hkData(u,r), k=x.k;
+  const kv=`<div class="kv"><div><dt>Peran</dt><dd>${esc(x.me.job)}</dd></div><div><dt>Klien</dt><dd>${esc(x.sc.cl.map(clientName).join(', '))}</dd></div><div><dt>Cabang</dt><dd>${esc(x.sc.cb.join(', '))}</dd></div><div><dt>Toko</dt><dd>${esc(x.sc.tkName)}</dd></div><div><dt>Pekerjaan</dt><dd>${x.done} dari ${x.total} selesai</dd></div><div><dt>Absen</dt><dd>${x.abs?x.abs.st+(x.abs.in?' · '+x.abs.in:''):'–'}</dd></div></div>`;
   const fl=x.flags.length?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">${x.flags.map(([t,tn])=>tag(esc(t),tn)).join('')}</div>`:'';
-  let s='';
+  let s=hkSec('Daftar pekerjaan',x.total,k==='leads'?['/leads','Leads pinjaman']:['/kunjungan','Kunjungan'],hkTbl([...hkDc(x,t=>fmtIso(t.date)),['Pekerjaan',t=>esc(t.name)],['Status',t=>spill(HK_ST[t.st][0],HK_ST[t.st][1])]],x.tasks));
   if(k==='spg'){
     s+=hkTrx(x,'Catat penjualan');
-    s+=hkSec('SKU display',x.sku.length,['/sku-display','Laporan SKU display'],hkTbl([['Toko',r=>esc(r.toko)],['Produk',r=>esc(PRODUCTS.find(p=>p.id===r.id).name)],['Qty',r=>r.q,'r'],['Penempatan',r=>esc(r.place)],['Kondisi',r=>tag(r.cond,r.cond==='Baik'?'success':r.cond==='Rusak'?'danger':'warning')]],x.sku));
-    s+=hkSec('Market share',x.share.length,['/market-share','Laporan market share'],hkTbl([['Toko',r=>esc(r.toko)],['Kategori',r=>esc(r.cat)],['Brand',r=>esc(r.brand)],['Qty',r=>r.qty,'r'],['Status',r=>spill(r.st==='Draft'?'Draft':'Selesai',r.st==='Draft'?'warning':'success')]],x.share));
+    s+=hkSec('SKU display',x.sku.length,['/sku-display','Laporan SKU display'],hkTbl([...hkDc(x,a=>esc(a.tgl)),['Toko',a=>esc(a.toko)],['Produk',a=>esc(PRODUCTS.find(p=>p.id===a.id).name)],['Qty',a=>a.q,'r'],['Penempatan',a=>esc(a.place)],['Kondisi',a=>tag(a.cond,a.cond==='Baik'?'success':a.cond==='Rusak'?'danger':'warning')]],x.sku));
+    s+=hkSec('Market share',x.share.length,['/market-share','Laporan market share'],hkTbl([['Toko',a=>esc(a.toko)],['Kategori',a=>esc(a.cat)],['Brand',a=>esc(a.brand)],['Qty',a=>a.qty,'r'],['Status',a=>spill(a.st==='Draft'?'Draft':'Selesai',a.st==='Draft'?'warning':'success')]],x.share));
   } else if(k==='canvas'){
     s+=hkTrx(x,'Jual dari toko');
     s+=hkSec('Stok bawaan',x.cv?1:0,['/canvassing','Canvassing'],x.cv?`<div class="kv"><div><dt>Dibawa</dt><dd>${rp(x.cv.bawa)}</dd></div><div><dt>Retur</dt><dd>${rp(x.cv.retur)}</dd></div><div><dt>Terjual</dt><dd>${rp(x.cv.jual)}</dd></div><div><dt>Tanda terima</dt><dd>${tag(x.cv.tt,x.cv.tt==='Ada'?'success':'warning')}</dd></div></div>`:'');
-    s+=hkSec('Catat retur',x.retur.length,['/canvassing','Canvassing'],hkTbl([['Dari toko',r=>esc(r.toko)],['Produk',r=>esc(PRODUCTS.find(p=>p.id===r.p).name)],['Jumlah',r=>r.q,'r'],['Kondisi',r=>tag(r.kondisi,r.kondisi==='Layak jual'?'success':'warning')]],x.retur));
+    s+=hkSec('Catat retur',x.retur.length,['/canvassing','Canvassing'],hkTbl([['Dari toko',a=>esc(a.toko)],['Produk',a=>esc(PRODUCTS.find(p=>p.id===a.p).name)],['Jumlah',a=>a.q,'r'],['Kondisi',a=>tag(a.kondisi,a.kondisi==='Layak jual'?'success':'warning')]],x.retur));
   } else if(k==='order'){
-    s+=hkSec('Buat pesanan dan daftar pesanan',x.orders.length,['/pemesanan','Pemesanan'],hkTbl([['No. PO',o=>`<span class="mono">${esc(o.id)}</span>`],['Toko',o=>esc(tokoName(o.toko))],['Produk',o=>esc(ordText(o))],['Total',o=>`<b class="fg tabular">${rp(ordTotal(o))}</b>`,'r'],['Status',o=>spill(o.st,ORD_TONE[o.st]||'neutral')]],x.orders));
+    s+=hkSec('Buat pesanan dan daftar pesanan',x.orders.length,['/pemesanan','Pemesanan'],hkTbl([...hkDc(x,o=>esc(o.date)),['No. PO',o=>`<span class="mono">${esc(o.id)}</span>`],['Toko',o=>esc(tokoName(o.toko))],['Produk',o=>esc(ordText(o))],['Total',o=>`<b class="fg tabular">${rp(ordTotal(o))}</b>`,'r'],['Status',o=>spill(o.st,ORD_TONE[o.st]||'neutral')]],x.orders));
   } else if(k==='fmcg'){
     ['Cek stok','Price promo','Facing display','Market share','Support task'].forEach(j=>{ s+=hkFm(x,j); });
   } else {
-    s+=hkSec('Hasil leads (semua tanggal)',x.leads.length,['/leads','Leads pinjaman'],hkTbl([['Nasabah',l=>esc(l.name)],['Produk',l=>esc(l.prod)],['Pengajuan',l=>`<span class="tabular">${jt(l.amount)}</span>`,'r'],['Status',l=>tag(l.status,l.status==='Deal'?'success':l.status==='Prospect'?'accent':l.status==='Baru'?'info':'neutral')],['Goal',l=>l.goal?`<b class="fg tabular">${jt(l.goal)}</b>`:'<span class="muted">–</span>','r']],x.leads));
+    s+=hkSec('Hasil leads',x.leads.length,['/leads','Leads pinjaman'],hkTbl([['Nasabah',l=>esc(l.name)],['Produk',l=>esc(l.prod)],['Pengajuan',l=>`<span class="tabular">${jt(l.amount)}</span>`,'r'],['Status',l=>tag(l.status,l.status==='Deal'?'success':l.status==='Prospect'?'accent':l.status==='Baru'?'info':'neutral')],['Goal',l=>l.goal?`<b class="fg tabular">${jt(l.goal)}</b>`:'<span class="muted">–</span>','r']],x.leads));
   }
-  if(k==='canvas'||k==='order') s+=hkSec('Usulan toko baru',x.usulan.length,['/toko?tab=usulan','Verifikasi usulan'],hkTbl([['Toko',r=>esc(r.name)],['Pemilik',r=>esc(r.owner)],['Kategori',r=>esc(r.cat)],['Status',r=>tag(r.status,r.status==='Menunggu verifikasi'?'info':'neutral')]],x.usulan));
-  openPanel(esc(x.me.name),kv+fl+s,btn('Tutup',{v:'card',on:'closeLayer()'})+btn('Unduh rekap',{v:'soft',icon:'down',on:`toast('Rekap ${esc(x.me.name.split(' ')[0])} diunduh','${d} 2026.')`}),{sub:esc(x.me.job)+' · '+d+' 2026'});
+  if(k==='canvas'||k==='order') s+=hkSec('Usulan toko baru',x.usulan.length,['/toko?tab=usulan','Verifikasi usulan'],hkTbl([...hkDc(x,a=>esc(String(a.when).split(',')[0])),['Toko',a=>esc(a.name)],['Pemilik',a=>esc(a.owner)],['Kategori',a=>esc(a.cat)],['Status',a=>tag(a.status,a.status==='Menunggu verifikasi'?'info':'neutral')]],x.usulan));
+  openPanel(esc(x.me.name),kv+fl+s,btn('Tutup',{v:'card',on:'closeLayer()'})+btn('Unduh rekap',{v:'soft',icon:'down',on:`toast('Rekap ${esc(x.me.name.split(' ')[0])} diunduh','${esc(hkLabel(q))}.')`}),{sub:esc(x.me.job)+' · '+esc(hkLabel(q))});
 }
 
-function aktTab(k){ setQ({tab:k==='sales'?'':k,f:'',st:'',q:'',r:'',d:''}); }
+function aktTab(k){ setQ({tab:k==='sales'?'':k,f:'',st:'',q:'',r:'',cl:'',cb:'',tk:'',per:'',from:'',to:''}); }
 function pageAktivitas(q){
   const tab=q.tab==='log'?'log':'sales', v=tab==='log'?aktLog(q):hkView(q);
   return {title:'Aktivitas lapangan',html:`<div style="margin-bottom:14px">${pills([['sales','Hasil kerja per sales'],['log','Log aktivitas toko']],tab,'aktTab')}</div>`+v.html};
