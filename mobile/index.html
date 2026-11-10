@@ -1785,14 +1785,16 @@ const photoSlot = (label,on,click) => `<button class="thumb ${on?'':'add'}" styl
 /* ---------- FMCG & MD ---------- */
 const FMCG_SKU=[{id:'f1',name:'Sabun Cair Segar 500 ml',sku:'FM-SC500'},{id:'f2',name:'Mi Instan Rasa Soto',sku:'FM-MI75'},{id:'f3',name:'Teh Melati Botol 350 ml',sku:'FM-TM350'},{id:'f4',name:'Kopi Sachet Susu',sku:'FM-KS25'},{id:'f5',name:'Biskuit Kelapa 120 g',sku:'FM-BK120'}];
 const fmSkus = () => { const base=role()==='spg'?PRODUCTS.slice(0,6).map(p=>({id:p.id,name:p.name,sku:p.sku})):FMCG_SKU, m=shRead('outlet',{})[U()?.place]; return [...(m?base.filter(x=>m.includes(x.id)):base),...S.fm.extra]; };
-const fmRow = id => S.fm.stok[id]||(S.fm.stok[id]={d:'',g:'',u:'Pcs',k:'',saved:false});
+const fmRow = id => S.fm.stok[id]||(S.fm.stok[id]={d:'',g:'',u:satBase().id,k:'',saved:false});
+const fmPcsText = id => { const v=fmRow(id), s=satById(v.u); if(v.na||s.dasar) return ''; const isi=satIsi(id,v.u), has=v.d!==''||v.g!==''; return `1 ${s.name} = ${isi} pcs`+(has?` · total ${((+v.d||0)+(+v.g||0))*isi} pcs`:''); };
+function fmUseBump(){ const u=shRead('satuanUse',{}); fmSkus().forEach(x=>{ const v=fmRow(x.id); if(v.na) return; const s=satById(v.u), a='s:'+s.id, b='k:'+x.id+':'+s.id; u[a]=(u[a]||0)+1; u[b]=(u[b]||0)+1; }); shSet('satuanUse',u); }
 const fmFull = id => { const x=fmRow(id); return !!x.na||(x.d!==''&&x.g!==''); };
 function fmNa(id){ const x=fmRow(id); x.na=!x.na; if(x.na) Object.assign(x,{d:'',g:'',k:''}); x.saved=false; render(false,true); }
 function fmDel(id){ const x=S.fm.extra.find(a=>a.id===id); if(!x) return;
   sheet(`<h3 style="font-size:18px;font-weight:800">Hapus barang ini?</h3><p class="muted small" style="margin:6px 0 16px;line-height:1.5">${esc(x.name)} ditambahkan sendiri di luar planned product, jadi bisa dihapus. Isian stoknya ikut hilang.</p>
   <button class="btn danger" onclick="fmDelDo('${id}')">Hapus barang</button><button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Batal</button>`); }
 function fmDelDo(id){ const i=S.fm.extra.findIndex(x=>x.id===id); if(i<0) return; S.fm.extra.splice(i,1); delete S.fm.stok[id]; closeSheet(); render(false,true); toast('Barang dihapus dari daftar'); }
-function fmSet(id,k,v){ const x=fmRow(id); x[k]=v; x.saved=false; const c=document.getElementById('fmCount'), l=fmSkus(); if(c) c.textContent=l.filter(a=>fmFull(a.id)).length+' dari '+l.length+' terisi'; }
+function fmSet(id,k,v){ const x=fmRow(id); x[k]=v; x.saved=false; const h=document.getElementById('fmPcs_'+id); if(h) h.textContent=fmPcsText(id); const c=document.getElementById('fmCount'), l=fmSkus(); if(c) c.textContent=l.filter(a=>fmFull(a.id)).length+' dari '+l.length+' terisi'; }
 function fmAddSheet(){
   sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Tambah SKU</h3><p class="small muted" style="margin:-6px 0 12px">Ditandai sebagai barang di luar planned product.</p>
   <label class="field"><span>Nama barang</span><input class="input" id="fa_n"></label><label class="field"><span>Kode SKU</span><input class="input" id="fa_s"></label>
@@ -1802,7 +1804,7 @@ function fmAdd(){ const n=val('fa_n'); if(!n){ toast('Isi nama barang','alert');
 function fmSubmit(){
   const miss=fmSkus().filter(x=>!fmFull(x.id)).length;
   if(miss){ toast(miss+' item belum terisi','alert'); return; }
-  fmMark('stok'); S.fm.stokDone=true; fmSkus().forEach(x=>fmRow(x.id).saved=true); back(); toast('Stock opname terkirim');
+  fmUseBump(); fmMark('stok'); S.fm.stokDone=true; fmSkus().forEach(x=>fmRow(x.id).saved=true); back(); toast('Stock opname terkirim');
 }
 SCR['fm-stok'] = () => {
   const list=fmSkus(), done=list.filter(x=>fmFull(x.id)).length;
@@ -1811,7 +1813,8 @@ SCR['fm-stok'] = () => {
     <div class="row between" style="margin:0 2px 12px"><b id="fmCount">${done} dari ${list.length} terisi</b>${stChip(S.fm.stokDone?'Selesai':(S.fm.draft||{}).stok?'Draft':'Belum Selesai')}</div>
     ${list.map(x=>{const v=fmRow(x.id), dis=v.na?'disabled':'';return `<div class="card" style="margin-bottom:10px"><div class="row between"><div class="grow"><b>${esc(x.name)}</b><div class="small muted">${esc(x.sku)}</div></div>${x.off?chip('Di luar planned','amber'):''}</div>
       <div class="row" style="gap:8px;margin-top:10px"><label class="field grow" style="margin:0"><span>Display</span><input class="input num" inputmode="numeric" ${dis} value="${v.d}" oninput="fmSet('${x.id}','d',this.value)"></label><label class="field grow" style="margin:0"><span>Gudang</span><input class="input num" inputmode="numeric" ${dis} value="${v.g}" oninput="fmSet('${x.id}','g',this.value)"></label></div>
-      <div class="row" style="gap:8px;margin-top:8px"><label class="field grow" style="margin:0"><span>Satuan</span><select class="input" ${dis} onchange="fmSet('${x.id}','u',this.value)">${['Pcs','Dus'].map(u=>`<option ${v.u===u?'selected':''}>${u}</option>`).join('')}</select></label><label class="field grow" style="margin:0"><span>Stok kompetitor</span><input class="input num" inputmode="numeric" ${dis} value="${v.k}" oninput="fmSet('${x.id}','k',this.value)"></label></div>
+      <div class="row" style="gap:8px;margin-top:8px"><label class="field grow" style="margin:0"><span>Satuan</span><select class="input" ${dis} onchange="fmSet('${x.id}','u',this.value)">${mSatuan().map(u=>`<option value="${u.id}" ${satById(v.u).id===u.id?'selected':''}>${esc(u.name)}</option>`).join('')}</select></label><label class="field grow" style="margin:0"><span>Stok kompetitor</span><input class="input num" inputmode="numeric" ${dis} value="${v.k}" oninput="fmSet('${x.id}','k',this.value)"></label></div>
+      <div class="small muted" id="fmPcs_${x.id}" style="margin-top:6px">${fmPcsText(x.id)}</div>
       <button class="row" style="gap:10px;margin-top:12px;background:none;border:0;padding:0;text-align:left;font:inherit;color:inherit" onclick="fmNa('${x.id}')" role="checkbox" aria-checked="${!!v.na}"><span class="check ${v.na?'on':''}">${v.na?I('check',14,3):''}</span><span>Barang tidak tersedia</span></button>
       ${x.off?`<div class="row" style="margin-top:10px"><button class="btn danger sm grow" onclick="fmDel('${x.id}')">${I('trash',18)} Hapus</button></div>`:''}</div>`}).join('')}
     <button class="btn ghost" onclick="fmAddSheet()">${I('plus',20)} Tambah SKU</button>
@@ -2052,6 +2055,8 @@ SCR.aktivitas = () => {
    Isi menu, lokasi check-in, form penjualan, kategori, brand, produk, status produk, dan target dibaca dari data bersama
    yang ditulis dashboard (Konfigurasi aplikasi dan Master data). Nilai cadangan di bawah hanya dipakai bila dashboard belum pernah dibuka. */
 const MASTER_DEF={
+  satuan:[{id:'sa2',name:'Dus',code:'DUS',isi:12,dasar:false},{id:'sa3',name:'Pack',code:'PAK',isi:6,dasar:false},{id:'sa4',name:'Unit',code:'UNT',isi:1,dasar:false},{id:'sa1',name:'Pcs',code:'PCS',isi:1,dasar:true}],
+  konversi:[{produk:'rc18',satuan:'sa2',isi:4},{produk:'bl11',satuan:'sa2',isi:6},{produk:'bl11',satuan:'sa3',isi:3},{produk:'kp16',satuan:'sa2',isi:8},{produk:'ds72',satuan:'sa2',isi:2}],
   brand:[['ARUNIKA','Client'],['KIRANA','Client'],['Samsung','Kompetitor'],['LG','Kompetitor'],['Polytron','Kompetitor']].map(([name,jenis])=>({name,jenis})),
   katprod:[['TV','ARUNIKA',''],['Smart TV','ARUNIKA','TV'],['Google TV','ARUNIKA','Smart TV'],['Android TV','ARUNIKA','Smart TV'],['LED TV','ARUNIKA','TV'],['Kulkas','ARUNIKA',''],['2 Pintu','ARUNIKA','Kulkas'],['Inverter','ARUNIKA','2 Pintu'],['Non inverter','ARUNIKA','2 Pintu'],['1 Pintu','ARUNIKA','Kulkas'],['Mesin Cuci','ARUNIKA',''],['Top Load','ARUNIKA','Mesin Cuci'],['Front Load','ARUNIKA','Mesin Cuci'],['AC','ARUNIKA',''],['AC Inverter','ARUNIKA','AC'],['AC Standar','ARUNIKA','AC'],['Air Purifier','ARUNIKA',''],['Small Appliances','ARUNIKA',''],
     ['Peralatan Dapur','KIRANA',''],['Rice Cooker','KIRANA','Peralatan Dapur'],['Blender','KIRANA','Peralatan Dapur'],['Dispenser','KIRANA','Peralatan Dapur'],['Perawatan Rumah','KIRANA',''],['Kipas Angin','KIRANA','Perawatan Rumah']].map(([name,brand,parent])=>({name,brand,parent,share:'Ya'})),
@@ -2071,6 +2076,10 @@ const clientBrands = () => mBrand().filter(b=>b.jenis==='Client').map(b=>b.name)
 const compBrands = () => mBrand().filter(b=>b.jenis==='Kompetitor').map(b=>b.name);
 const mKat = () => shRead('katprod',MASTER_DEF.katprod);
 const mProd = () => shRead('produk',MASTER_DEF.produk);
+const mSatuan = () => shRead('satuan',MASTER_DEF.satuan);
+const satBase = () => mSatuan().find(s=>s.dasar)||mSatuan()[mSatuan().length-1];
+const satById = u => mSatuan().find(s=>s.id===u||s.name===u)||satBase();
+const satIsi = (skuId,u) => { const s=satById(u), k=shRead('konversi',MASTER_DEF.konversi).find(x=>x.produk===skuId&&x.satuan===s.id); return k?k.isi:s.isi; };
 const aktCfg = () => S.user?shRead('aktcfg',MASTER_DEF.aktcfg)[RID[S.user]]:null;
 const isSpg = () => !!aktCfg();
 const HARI_KERJA = () => shRead('hariKerja',26);

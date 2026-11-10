@@ -1715,12 +1715,12 @@ Object.assign(ENT,{
     inUse:r=>r.dasar?'Pcs adalah satuan dasar dan tidak bisa dihapus.':satUsed(r)>0?`Satuan ini sudah dipakai ${satUsed(r)} catatan stock opname. Data riwayat harus tetap bisa dilacak, jadi nonaktifkan saja.`:kvCount(r.id)?`Satuan ini dipakai ${kvCount(r.id)} konversi produk. Hapus konversinya dulu di menu Konversi satuan, atau nonaktifkan satuan.`:'',
     lockStatus:r=>r.dasar?'Pcs adalah satuan dasar dan tidak bisa dinonaktifkan.':r.status==='Aktif'&&kvActive(r.id)?`Satuan ini dipakai ${kvActive(r.id)} konversi aktif. Nonaktifkan konversinya dulu.`:''},
   konversi:{label:'Konversi',lower:'konversi',plural:'Daftar konversi satuan',prefix:'kv',store:()=>MD.konversi,title:r=>prodNm(r.produk)+' · '+satName(r.satuan),search:r=>prodNm(r.produk)+satName(r.satuan),filter:(r,q)=>!q.sat||r.satuan===q.sat,blank:()=>({satuan:'sa2',isi:12,dipakai:0}),
-    extraTop:r=>r.dipakai>0?callout('<b>Dikunci.</b> Konversi ini sudah dipakai '+r.dipakai+' catatan stock opname, jadi produk, satuan, dan isinya tidak bisa diubah. Untuk mengganti isi, nonaktifkan konversi ini lalu buat konversi baru.'):'',
-    fields:[{k:'produk',label:'Produk',type:'select',req:true,lock:r=>r.dipakai>0,fmt:v=>prodNm(v),opts:()=>PRODUCTS.map(p=>[p.id,p.name+' · '+p.sku])},
-      {k:'satuan',label:'Satuan',type:'select',req:true,lock:r=>r.dipakai>0,fmt:v=>satName(v),opts:()=>kvSatOpts(),hint:'Pcs tidak ada di daftar karena menjadi satuan dasar',validate:(v,vals)=>MD.konversi.some(x=>!x.del&&x.status==='Aktif'&&x.id!==(FORM&&FORM.id)&&x.produk===vals.produk&&x.satuan===v)?'Produk ini sudah punya konversi aktif untuk satuan tersebut':''},
-      {k:'isi',label:'Isi (pcs)',type:'number',req:true,lock:r=>r.dipakai>0,hint:'Jumlah pcs dalam 1 satuan, bilangan bulat. Contoh: 1 Dus rice cooker berisi 4 pcs, isi 4',validate:v=>v<1?'Minimal 1':!Number.isInteger(v)?'Isi harus bilangan bulat':''}],
-    cols:[{label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${esc(prodNm(r.produk))}</span><span class="xs muted" style="display:block">${esc((PRODUCTS.find(p=>p.id===r.produk)||{}).sku||'–')}</span>`,prim:true},{label:'Konversi',render:r=>`<b class="fg">1 ${esc(satName(r.satuan))} = ${r.isi} pcs</b>`},{label:'Standar satuan',render:r=>{ const t=kvStd(r); return t==null?'<span class="muted">–</span>':`<span class="muted">1 ${esc(satName(r.satuan))} = ${t} pcs</span>`; },hide:true},{label:'Keterangan',render:r=>kvStd(r)===r.isi?tag('Sama dengan standar','neutral'):tag('Khusus produk','info'),hide:true},{label:'Pemakaian',render:r=>r.dipakai>0?`${tag('Terkunci','warning')} <span class="xs muted">${r.dipakai} catatan</span>`:'<span class="muted">Belum dipakai</span>',hide:true},{label:'Status',render:r=>stPill(r.status)}],
-    inUse:r=>r.dipakai>0?`Konversi ini sudah dipakai ${r.dipakai} catatan stock opname. Data riwayat harus tetap bisa dilacak, jadi nonaktifkan saja.`:'',
+    extraTop:r=>kvUsed(r)>0?callout('<b>Dikunci.</b> Konversi ini sudah dipakai '+kvUsed(r)+' catatan stock opname, jadi produk, satuan, dan isinya tidak bisa diubah. Untuk mengganti isi, nonaktifkan konversi ini lalu buat konversi baru.'):'',
+    fields:[{k:'produk',label:'Produk',type:'select',req:true,lock:r=>kvUsed(r)>0,fmt:v=>prodNm(v),opts:()=>PRODUCTS.map(p=>[p.id,p.name+' · '+p.sku])},
+      {k:'satuan',label:'Satuan',type:'select',req:true,lock:r=>kvUsed(r)>0,fmt:v=>satName(v),opts:()=>kvSatOpts(),hint:'Pcs tidak ada di daftar karena menjadi satuan dasar',validate:(v,vals)=>MD.konversi.some(x=>!x.del&&x.status==='Aktif'&&x.id!==(FORM&&FORM.id)&&x.produk===vals.produk&&x.satuan===v)?'Produk ini sudah punya konversi aktif untuk satuan tersebut':''},
+      {k:'isi',label:'Isi (pcs)',type:'number',req:true,lock:r=>kvUsed(r)>0,hint:'Jumlah pcs dalam 1 satuan, bilangan bulat. Contoh: 1 Dus rice cooker berisi 4 pcs, isi 4',validate:v=>v<1?'Minimal 1':!Number.isInteger(v)?'Isi harus bilangan bulat':''}],
+    cols:[{label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${esc(prodNm(r.produk))}</span><span class="xs muted" style="display:block">${esc((PRODUCTS.find(p=>p.id===r.produk)||{}).sku||'–')}</span>`,prim:true},{label:'Konversi',render:r=>`<b class="fg">1 ${esc(satName(r.satuan))} = ${r.isi} pcs</b>`},{label:'Standar satuan',render:r=>{ const t=kvStd(r); return t==null?'<span class="muted">–</span>':`<span class="muted">1 ${esc(satName(r.satuan))} = ${t} pcs</span>`; },hide:true},{label:'Keterangan',render:r=>kvStd(r)===r.isi?tag('Sama dengan standar','neutral'):tag('Khusus produk','info'),hide:true},{label:'Pemakaian',render:r=>kvUsed(r)>0?`${tag('Terkunci','warning')} <span class="xs muted">${kvUsed(r)} catatan</span>`:'<span class="muted">Belum dipakai</span>',hide:true},{label:'Status',render:r=>stPill(r.status)}],
+    inUse:r=>kvUsed(r)>0?`Konversi ini sudah dipakai ${kvUsed(r)} catatan stock opname. Data riwayat harus tetap bisa dilacak, jadi nonaktifkan saja.`:'',
     lockStatus:r=>r.status==='Nonaktif'&&MD.konversi.some(x=>!x.del&&x.status==='Aktif'&&x.id!==r.id&&x.produk===r.produk&&x.satuan===r.satuan)?'Sudah ada konversi aktif untuk produk dan satuan ini. Nonaktifkan yang lama dulu.':''},
   event:{label:'Event',plural:'Daftar event',prefix:'ev',store:()=>MD.event,title:r=>r.name,search:r=>r.name+r.lokasi+r.cabang,unique:'name',blank:()=>({client:'cl1',cabang:'Jakarta Selatan',start:'2026-11-01',end:'2026-11-03'}),
     fields:[{k:'name',label:'Nama event',req:true},{k:'lokasi',label:'Lokasi',req:true},{k:'client',label:'Client',type:'select',req:true,opts:clientOpts},{k:'cabang',label:'Cabang',type:'select',req:true,opts:CABANG.slice(1)},{k:'start',label:'Mulai',type:'date',req:true},{k:'end',label:'Selesai',type:'date',req:true,validate:(v,vals)=>vals.start&&v<vals.start?'Tanggal selesai harus setelah tanggal mulai':''}],
@@ -2004,7 +2004,9 @@ const kvSatOpts=()=>{ const cur=FORM&&FORM.id?(MD.konversi.find(x=>x.id===FORM.i
 const kvCount=id=>live('konversi').filter(r=>r.satuan===id).length;
 const kvActive=id=>live('konversi').filter(r=>r.satuan===id&&r.status==='Aktif').length;
 const kvStd=r=>{ const a=satOf(r.satuan); return a?a.isi:null; };
-const satUsed=r=>r.dipakai||0;
+const satUse=()=>shRead('satuanUse',{});
+const satUsed=r=>(r.dipakai||0)+(satUse()['s:'+r.id]||0);
+const kvUsed=r=>(r.dipakai||0)+(satUse()['k:'+r.produk+':'+r.satuan]||0);
 const satLocked=r=>!!r.dasar||satUsed(r)>0;
 function pageKonversi(q){
   const sat=q.sat||'', sats=live('satuan').filter(x=>!x.dasar), all=live('konversi');
@@ -2366,6 +2368,8 @@ function syncApp(){
     shSet('brand',[...live('brand').filter(b=>b.status==='Aktif').map(({name,client})=>({name,jenis:'Client',client})),...live('kompetitor').filter(b=>b.status==='Aktif').map(({name,client})=>({name,jenis:'Kompetitor',client}))]);
     shSet('katprod',live('katprod').filter(k=>k.status==='Aktif').map(({name,brand,parent,share})=>({name,brand,parent,share})));
     shSet('produk',PRODUCTS.map(({id,name,sku,price,brand,kp})=>({id,name,sku,price,brand,kat:kp})));
+    shSet('satuan',live('satuan').filter(x=>x.status==='Aktif').map(({id,name,code,isi,dasar})=>({id,name,code,isi,dasar:!!dasar})));
+    shSet('konversi',live('konversi').filter(x=>x.status==='Aktif').map(({produk,satuan,isi})=>({produk,satuan,isi})));
     shSet('statprod',live('statprod').filter(r=>r.status==='Aktif').map(r=>r.name));
     shSet('aktcfg',Object.fromEntries(live('aktcfg').filter(a=>a.status==='Aktif').map(({role,id,status,...c})=>[role,c])));
     shSet('formjual',live('formjual').filter(f=>f.status==='Aktif').sort((a,b)=>a.urut-b.urut).map(({id,status,del,...f})=>f));
