@@ -43,7 +43,7 @@ Acuan revisi: `../docs/00-sources/extracted/S5-mom-workshop-27-28-okt-2026.md`. 
 
 ### Mobile (`mobile/index.html`)
 
-14 user demo (password bebas). Panel demo juga bisa mengganti jadwal WFO, WFA, dan OFF.
+13 user demo (password bebas). Panel demo juga bisa mengganti jadwal WFO, WFA, dan OFF.
 
 | Username | Role |
 |---|---|
@@ -58,7 +58,6 @@ Acuan revisi: `../docs/00-sources/extracted/S5-mom-workshop-27-28-okt-2026.md`. 
 | `fmcg.tari`, `md.rangga` | Promotor FMCG, Merchandising |
 | `mobile.fikri` | Mobile Promotor |
 | `bantuan.eko`, `reliever.gita` | Promotor Bantuan, Reliever |
-| `trainer.joko` | Trainer (quiz, survey, kunjungan pelatihan) |
 
 - **Login dan absen:** foto wajah referensi wajib saat login pertama. Beranda terkunci sebelum absen masuk. WFO dalam radius 100 m, WFA bebas, OFF tidak bisa absen. Ada pengingat sebelum absen dengan pilihan suara.
 - **Kunjungan:** jadwal dibuat Team Leader. Hanya Promotor FMCG dan MD yang membuat sendiri (1 hari 1 toko). Periode harian, mingguan, 2 mingguan, bulanan. Check-in dan check-out wajib 1 foto ber-watermark. Lupa check-out ditutup otomatis. Sales Canvasing dan Taking Order check-in dan check-out di tiap toko, hanya dalam radius toko. Keluar radius tanpa check-out memunculkan notifikasi; saat check-in di toko berikutnya, sales boleh check-out toko sebelumnya dari luar radius (revisi Nov 2026, perlu dikonfirmasi ke klien). Quiz dan Survey bisa menjadi tugas kunjungan.
@@ -126,7 +125,7 @@ Keputusan 2 Nov 2026 (lengkap di `../docs/00-sources/OPEN-QUESTIONS.md` dan `../
 
 - **FSD direvisi mengikuti MOM** ([ADR-0015](../../docs/02-architecture/decisions/ADR-0015-fsd-ikut-mom-workshop.md)). Sepuluh konflik FSD dan MOM tidak lagi terbuka.
 - **Dijawab MOM:** pembuat jadwal kunjungan (Team Leader, kecuali FMCG dan MD), dua dokumen Deal, bentuk leveling produk.
-- **Rekomendasi, dikonfirmasi di MOM hasil review berikutnya:** scan barcode hanya di SKU Display, foto submit Canvassing dihitung sebagai foto check-out, Reliever dan Promotor Bantuan dua role, badge sidebar dihapus, hierarki, tugas Trainer, format data mitra dan file leads, sinkron BPR harian, ambang nilai AI (80 lulus, 70 sampai 79 ditinjau, di bawah 70 foto ulang), sumber overdue dan goal.
+- **Rekomendasi, dikonfirmasi di MOM hasil review berikutnya:** scan barcode hanya di SKU Display, foto submit Canvassing dihitung sebagai foto check-out, Reliever dan Promotor Bantuan dua role, badge sidebar dihapus, hierarki, format data mitra dan file leads, sinkron BPR harian, ambang nilai AI (80 lulus, 70 sampai 79 ditinjau, di bawah 70 foto ulang), sumber overdue dan goal.
 - **Menunggu pihak lain:** API ganti password ke IOS 1 atau BPR, use case lengkap aturan leads Multi Finance.
 
 Catatan: klien sudah mengesahkan MOM pertama. MOM hasil review di meeting berikutnya akan menjadi sumber baru dan bisa mengubah keputusan di atas.
