@@ -1034,7 +1034,6 @@ function pagePenjualan(q){
     ${tab==='penjualan'?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px"><form style="flex:1;min-width:220px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari transaksi</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari sales, toko, atau nomor transaksi"></label></form>${sel([['','Semua kategori'],...CAT.map(c=>c[0])],catF,"setQ({cat:this.value})",{label:'Kategori'})}${sel([['','Semua invoice'],['big','Selisih besar'],['none','Tanpa invoice']],q.iv||'',"setQ({iv:this.value})",{label:'Filter invoice'})}</div>`:''}
     ${tableHTML}`,{acts:`${btn('PDF',{v:'soft',size:'sm',icon:'down',on:"toast('Laporan diunduh','PDF sesuai tab dan filter aktif.')"})}${btn('Excel',{v:'soft',size:'sm',icon:'down',on:"toast('Laporan diunduh','Excel sesuai tab dan filter aktif.')"})}`})}`};
 }
-function penTab(t){ setQ({tab:t,q:'',cat:''}); }
 function trxPanel(id){ const t=allTrx().find(x=>x.id===id), p=trxProd(t), s=byU(t.u), iv=t.inv;
   const unitSys=Math.round(t.total/t.q), unitInv=iv?Math.round(iv.price/t.q):unitSys;
   openPanel(t.id,`<div class="kv" style="margin-bottom:14px"><div><dt>Tanggal</dt><dd>${t.date} 2026</dd></div><div><dt>Total (invoice)</dt><dd>${rp(iv?iv.price:t.total)}</dd></div><div><dt>Status</dt><dd>${t.st}</dd></div></div>
@@ -1096,11 +1095,11 @@ function fmVisitSync(){ shSet('fmVisits',D.visits.filter(v=>isFm(v.u)&&!v.del).m
 function pageKunjungan(q){
   const f=q.f||'', all=visList().map(visLive), rows=all.filter(v=>!f||v.status===f).map(v=>({...v,_id:v.id}));
   const c=k=>all.filter(v=>v.status===k).length;
-  return {title:'Kunjungan',html:`<p class="purpose">Pantau pelaksanaan kunjungan hari ini. Jadwal dibuat dan diubah di menu <a href="#/penugasan?tab=jadwal" style="color:var(--accent-text);font-weight:600">Penugasan</a>. Kunjungan Promotor FMCG dan MD yang dijadwalkan tampil di aplikasi mobile dan tidak bisa dihapus oleh promotor. Check-in dan check-out di lokasi dengan 1 foto ber-watermark (MOM 5.1, 5.2). Multi Finance, REA, dan CBD tidak memakai check-in dan check-out ke nasabah. Sales Canvasing dan Taking Order wajib check-in dan check-out di tiap toko dalam radius. Jika keluar radius tanpa check-out, sales mendapat notifikasi dan baris ditandai <b>Keluar radius</b>. Saat check-in di toko berikutnya, sales boleh check-out toko sebelumnya dari luar radius; baris ditandai <b>Check-out luar radius</b>.</p>
+  return {title:'Kunjungan',html:`<p class="purpose">Jadwal dibuat Team Leader atau admin, sales mengikuti. Penempatan sales di toko diatur di menu <a href="#/penugasan" style="color:var(--accent-text);font-weight:600">Penugasan</a>. Kunjungan Promotor FMCG dan MD yang dibuat di sini tampil di aplikasi mobile dan tidak bisa dihapus oleh promotor. Check-in dan check-out di lokasi dengan 1 foto ber-watermark (MOM 5.1, 5.2). Multi Finance, REA, dan CBD tidak memakai check-in dan check-out ke nasabah. Sales Canvasing dan Taking Order wajib check-in dan check-out di tiap toko dalam radius. Jika keluar radius tanpa check-out, sales mendapat notifikasi dan baris ditandai <b>Keluar radius</b>. Saat check-in di toko berikutnya, sales boleh check-out toko sebelumnya dari luar radius; baris ditandai <b>Check-out luar radius</b>.</p>
   <div class="stats">${[['','Semua',all.length],['Selesai','Selesai',c('Selesai')],['Berjalan','Berjalan',c('Berjalan')],['Belum','Belum dimulai',c('Belum')]].map(([k,l,v])=>`<button class="stat ${f===k?'on':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${v}</b></button>`).join('')}</div>
-  ${card('Kunjungan hari ini',dataTable('vis',{rows,rowClick:r=>`visPanel('${r.id}')`,cols:[
+  ${card('Kunjungan hari ini',dataTable('vis',{rows,rowClick:r=>`visPanel('${r.id}')`,acts:r=>rowActs(`visForm('${r.id}')`,`visDelAsk('${r.id}')`),cols:[
     {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${byU(r.u).name}</span><span class="xs muted" style="display:block">${byU(r.u).job}</span>`,prim:true},{label:'Tujuan',k:'place'},{label:'Jadwal',render:r=>`${r.plan}${r.period&&r.period!=='Sekali'?` <span class="xs muted">· ${perLabel(r)}</span>`:''}`,hide:true},{label:'Check-in',render:r=>r.cin||'–'},{label:'Tugas',render:r=>isFm(r.u)?`<span class="tabular">${fmDone(r)}/${FM_TASK_KEYS.length}</span> selesai`:'<span class="muted">–</span>',hide:true},{label:'Foto',render:r=>r.photos,align:'r',hide:true},{label:'Status',render:r=>spill(r.status,r.status==='Selesai'?'success':r.status==='Berjalan'?'accent':'neutral')+(r.left&&!r.cout?' '+spill('Keluar radius','warning'):'')+(r.remote?' '+spill('Check-out luar radius','neutral'):'')}]}),
-    {acts:`${btn('Atur jadwal',{v:'soft',size:'sm',icon:'cal',on:"go('/penugasan?tab=jadwal')"})}${btn('Unduh laporan',{v:'soft',size:'sm',icon:'down',on:"toast('Laporan penugasan diunduh','Lengkap dengan foto dokumentasi.')"})}`})}`};
+    {acts:`${btn('Buat jadwal',{v:'accent',size:'sm',icon:'plus',on:"visForm()"})}${btn('Unduh laporan',{v:'soft',size:'sm',icon:'down',on:"toast('Laporan penugasan diunduh','Lengkap dengan foto dokumentasi.')"})}`})}`};
 }
 function visPanel(id){ const v=visLive(D.visits.find(x=>x.id===id)), s=byU(v.u), fm=isFm(v.u);
   openPanel(v.place,`${['Multi Finance','REA / SPG Multi Finance','CBD / Mediator'].includes(s.job)?`<div class="kv" style="margin-bottom:14px"><div><dt>Jadwal</dt><dd>${v.plan}</dd></div><div><dt>Status</dt><dd>${v.status}</dd></div></div>${callout('Multi Finance, REA, dan CBD tidak memakai check-in dan check-out ke nasabah.')}<div style="height:14px"></div>`:`<div class="kv" style="margin-bottom:14px"><div><dt>Jadwal</dt><dd>${v.plan}</dd></div><div><dt>Check-in</dt><dd>${v.cin||'–'}</dd></div><div><dt>Check-out</dt><dd>${v.cout||'–'}${v.dur?' · '+v.dur:''}</dd></div></div>`}
@@ -1108,7 +1107,7 @@ function visPanel(id){ const v=visLive(D.visits.find(x=>x.id===id)), s=byU(v.u),
   ${callout('Check-out hanya bisa setelah semua tugas berstatus Selesai. Support task dikerjakan terpisah dan tidak wajib. Kalau lupa check-out, kunjungan ditutup otomatis saat check-in di toko berikutnya.')}<div style="height:14px"></div>`
   :`<div class="tile" style="margin-bottom:14px"><div class="xs muted">Tugas</div><b class="fg">${v.tasks}</b></div>${v.left&&!v.cout?callout('Sales keluar dari radius toko tanpa check-out. Notifikasi belum check-out sudah dikirim. Check-out bisa dilakukan saat check-in di toko berikutnya, tanpa harus di radius toko ini.')+'<div style="height:14px"></div>':''}${v.remote?callout('Check-out dilakukan dari luar radius toko, saat sales check-in di toko berikutnya.')+'<div style="height:14px"></div>':''}`}
   <div class="xs muted" style="margin-bottom:8px">Dokumentasi (${v.photos} foto, 1 foto per check-in dan check-out)</div><div class="thumbs">${v.photos?Array.from({length:v.photos}).map(()=>`<div class="thumb">${I('image',22)}</div>`).join(''):'<span class="muted sm">Belum ada foto.</span>'}</div>`,
-  `<span style="flex:1"></span>${btn('Tutup',{v:'card',on:'closeLayer()'})}${btn('Atur di Penugasan',{v:'accent',icon:'cal',on:`closeLayer();go('/penugasan?tab=jadwal')`})}`,{sub:s.name+' · '+s.job}); }
+  `${btn('Hapus',{v:'danger',icon:'trash',on:`visDelAsk('${id}')`})}<span style="flex:1"></span>${btn('Tutup',{v:'card',on:'closeLayer()'})}${btn('Edit',{v:'accent',icon:'edit',on:`closeLayer();visForm('${id}')`})}`,{sub:s.name+' · '+s.job}); }
 function modalPill(k){ document.querySelectorAll('.modal .pills button').forEach(b=>{ const on=b.getAttribute('onclick').includes(`'${k}'`); b.classList.toggle('on',on); b.setAttribute('aria-selected',on); }); }
 const DAYS7=['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
 const needDays=p=>p==='Mingguan'||p==='2 mingguan';
@@ -1763,12 +1762,11 @@ function cvAssignSave(){ const {u,sel:S}=ST.cvPick; if(!S.size) return;
 const PEN_ROLES=['r3','r4','r5','r13'];
 const penSales=()=>live('user').filter(u=>PEN_ROLES.includes(u.role)&&u.status==='Aktif');
 const penTipe=n=>n>1?tag('Bergerak','info'):n===1?tag('Diam','neutral'):tag('Belum ditugaskan','accent');
-function penTab(t){ setQ({tab:t,v:'',q:'',st:''}); }
+function penTab(t){ setQ({tab:t,q:'',cat:''}); }
 function pagePenugasan(q){
-  const tab=q.tab==='jadwal'?'jadwal':'penempatan', v=q.v==='toko'?'toko':'sales';
-  const tabs=utabs([['penempatan','Penempatan toko',penSales().length],['jadwal','Jadwal kunjungan',visList().length]],tab,'penTab');
+  const v=q.v==='toko'?'toko':'sales';
   let body='';
-  if(tab==='penempatan'){
+  {
     const pills=`<div class="chips" style="margin-bottom:12px" role="group" aria-label="Tampilan">${[['sales','Per sales'],['toko','Per toko']].map(([k,l])=>`<button class="fchip ${v===k?'on':''}" aria-pressed="${v===k}" onclick="setQ({v:'${k}'})">${l}</button>`).join('')}</div>`;
     const table=v==='sales'
       ?dataTable('pens',{rows:penSales().map(u=>({...u,_id:u.id})),rowClick:r=>`penSalesModal('${r.id}')`,empty:'Belum ada sales aktif.',cols:[
@@ -1783,14 +1781,8 @@ function pagePenugasan(q){
           {label:'Sales ditugaskan',render:r=>r.sales.length?`<span class="fg">${esc(r.sales.map(userName).join(', '))}</span>`:tag('Belum ada sales','accent')}],
         acts:r=>btn('Ubah',{v:'soft',size:'sm',icon:'edit',on:`penTokoModal('${r.id}')`})});
     body=card('Penempatan toko',`${callout('Satu toko berarti sales Diam, lebih dari satu berarti Bergerak. Canvasser, taking order, dan mobile promotor tidak bisa ditempatkan di toko Modern Retail. Hanya toko dan sales dari client yang sama yang bisa dipasangkan.')}<div style="height:12px"></div>${pills}${table}`);
-  } else {
-    body=card('Jadwal kunjungan',dataTable('pjd',{rows:visList().map(x=>({...x,_id:x.id})),rowClick:r=>`visPanel('${r.id}')`,empty:'Belum ada jadwal.',acts:r=>rowActs(`visForm('${r.id}')`,`visDelAsk('${r.id}')`),cols:[
-      {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(byU(r.u).name)}</span><span class="xs muted" style="display:block">${esc(byU(r.u).job)}</span>`,prim:true},
-      {label:'Tujuan',k:'place'},{label:'Jam',render:r=>r.plan,hide:true},{label:'Periode',render:r=>esc(perLabel(r))},
-      {label:'Status',render:r=>spill(r.status,r.status==='Selesai'?'success':r.status==='Berjalan'?'accent':'neutral')}]}),
-      {acts:btn('Buat jadwal',{v:'accent',size:'sm',icon:'plus',on:'visForm()'})});
   }
-  return {title:'Penugasan',html:`<p class="purpose">Tempatkan sales di toko dan atur jadwal kunjungannya. Hasil kunjungan dipantau di menu Kunjungan. Sales mengikuti penugasan ini dan menerima notifikasi H-1 (MOM 9 Nov, bagian 4; MOM 27-28 Okt, bagian 5.1).</p><div style="margin-bottom:4px">${tabs}</div>${body}`};
+  return {title:'Penugasan',html:`<p class="purpose">Tempatkan sales di toko, dilihat per sales atau per toko. Jadwal dan pelaksanaan kunjungan ada di menu <a href="#/kunjungan" style="color:var(--accent-text);font-weight:600">Kunjungan</a> (MOM 9 Nov, bagian 4).</p>${body}`};
 }
 function penSalesModal(u){ cvAssignModal(u); }
 function penTokoModal(id){
