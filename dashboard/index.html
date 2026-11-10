@@ -1424,12 +1424,14 @@ function gradePanel(u){ const g=GRADE.find(x=>x.u===u); if(!g) return; const s=b
 /* ---------- Leads ---------- */
 function pageLeads(q){
   const f=q.f||'', qq=(q.q||'').toLowerCase();
-  const rows=D.leads.filter(l=>f==='unassigned'?!l.owner:!f||l.status===f).filter(l=>!qq||l.name.toLowerCase().includes(qq)).map(l=>({...l,_id:l.id}));
-  const c=k=>D.leads.filter(l=>l.status===k).length; const S=ST.sel.lds||(ST.sel.lds=new Set());
-  const goal=D.leads.filter(l=>l.status==='Deal').reduce((a,b)=>a+b.goal,0);
+  const base=D.leads.filter(l=>leadDimOk(l,q)&&leadIn(l,q));
+  const rows=base.filter(l=>f==='unassigned'?!l.owner:!f||l.status===f).filter(l=>!qq||l.name.toLowerCase().includes(qq)).map(l=>({...l,_id:l.id}));
+  const c=k=>base.filter(l=>l.status===k).length; const S=ST.sel.lds||(ST.sel.lds=new Set());
+  const goal=base.filter(l=>l.status==='Deal').reduce((a,b)=>a+b.goal,0);
   return {title:'Leads pinjaman',html:`<p class="purpose">Data leads diupload dari CRM client dan melekat ke cabang. Arco dan Team Leader meng-assign ke REA dan CBD di cabang itu. Status hasil verifikasi, dan nominal disetujui (goal) yang dikirim ke SIM (URD Sales Automation FR-001 sampai FR-016).</p>
+  <div style="margin-bottom:16px">${ldFilters(q,base)}</div>
   <div class="stats">
-    <button class="stat ${f==='unassigned'?'on':''}" onclick="setQ({f:'${f==='unassigned'?'':'unassigned'}'})"><small>Belum di-assign</small><b class="tabular">${D.leads.filter(l=>!l.owner).length}</b><span class="xs muted">Dari upload 26 Okt, 06:00</span></button>
+    <button class="stat ${f==='unassigned'?'on':''}" onclick="setQ({f:'${f==='unassigned'?'':'unassigned'}'})"><small>Belum di-assign</small><b class="tabular">${base.filter(l=>!l.owner).length}</b><span class="xs muted">Dari upload 26 Okt, 06:00</span></button>
     <button class="stat ${f==='Prospect'?'on':''}" onclick="setQ({f:'${f==='Prospect'?'':'Prospect'}'})"><small>Prospect</small><b class="tabular">${c('Prospect')}</b><span class="xs muted">Perlu follow up</span></button>
     <button class="stat ${f==='Deal'?'on':''}" onclick="setQ({f:'${f==='Deal'?'':'Deal'}'})"><small>Deal</small><b class="tabular">${c('Deal')}</b><span class="xs muted">Goal ${jt(goal)}</span></button>
     <button class="stat ${f==='Belum Tertarik'?'on':''}" onclick="setQ({f:'${f==='Belum Tertarik'?'':'Belum Tertarik'}'})"><small>Belum Tertarik</small><b class="tabular">${c('Belum Tertarik')}</b><span class="xs muted">Tertarik, prospect, atau rejected</span></button>
@@ -1450,6 +1452,32 @@ function pageLeads(q){
     {acts:`${btn('Template',{v:'soft',size:'sm',icon:'down',on:"toast('Template diunduh','template_leads_crm.xlsx. Kolom wajib: ID sumber, nama, nomor HP, produk, cabang.')"})}${btn('Assign leads',{v:'soft',size:'sm',icon:'users',on:"assignModal()"})}${btn('Import assign',{v:'soft',size:'sm',icon:'up',on:"uploadModal('Assign leads')"})}${btn('Upload pengajuan',{v:'accent',size:'sm',icon:'up',on:"uploadModal('Data pengajuan')"})}`})}`};
 }
 function leadPer(){ toast('Periode diubah','Data mockup tetap sama.'); }
+/* Filter Leads mengikuti Laporan penjualan: periode (preset dan rentang tanggal), klien, cabang, lalu dimensi khusus leads: produk dan ditangani. Tanggal leads = tanggal masuk. */
+const leadDimOk=(l,q)=>(!q.cl||q.cl==='cl2')&&(!q.cb||leadCab(l)===q.cb)&&(!q.pk||l.prod===q.pk)&&(!q.u||(q.u==='__none'?!l.owner:l.owner===q.u));
+const leadIn=(l,q)=>{ const r=repRange(q), x=labIso(l.date); return x>=r.from&&x<=r.to; };
+const leadOwnerName=u=>u==='sari'?'Sari W. (manager)':((byU(u)||{}).name||u);
+function ldPer(k){ setQ({per:k,from:'',to:''}); }
+function ldDate(){ const f=document.getElementById('ld_from').value, t=document.getElementById('ld_to').value;
+  if(f&&t&&f>t){ toast('Rentang tidak valid','Tanggal mulai harus sebelum atau sama dengan tanggal akhir.','danger'); return; }
+  setQ({from:f,to:t,per:''}); }
+function ldFilters(q,base){
+  const r=repRange(q), clients=live('client').filter(c=>c.modul.includes('Sales automation')&&c.status==='Aktif');
+  const cabs=[...new Set(D.leads.map(leadCab))], prods=[...new Set(D.leads.map(l=>l.prod))];
+  const owners=[...new Set(D.leads.filter(l=>leadDimOk(l,{...q,u:''})).map(l=>l.owner).filter(Boolean))];
+  const dirty=q.cl||q.cb||q.pk||q.u||q.from||q.to||(q.per&&q.per!=='m');
+  const goal=base.filter(l=>l.status==='Deal').reduce((a,b)=>a+(b.goal||0),0);
+  return card('Filter',`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">${pills(REP_PRESETS.map(x=>[x[0],x[1]]),r.preset,'ldPer')}
+      <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal mulai</span><input id="ld_from" type="date" min="${LD_START}" max="${LD_END}" value="${r.from}" onchange="ldDate()" style="width:140px"></label>
+      <span class="muted xs">sampai</span>
+      <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal akhir</span><input id="ld_to" type="date" min="${LD_START}" max="${LD_END}" value="${r.to}" onchange="ldDate()" style="width:140px"></label></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      ${sel([['','Semua klien'],...clients.map(c=>[c.id,c.name])],q.cl||'',"setQ({cl:this.value})",{label:'Filter klien',cls:'sm'})}
+      ${sel([['','Semua cabang'],...cabs],q.cb||'',"setQ({cb:this.value,u:''})",{label:'Filter cabang',cls:'sm'})}
+      ${sel([['','Semua produk'],...prods],q.pk||'',"setQ({pk:this.value})",{label:'Filter produk',cls:'sm'})}
+      ${sel([['','Semua ditangani'],['__none','Belum di-assign'],...owners.map(u=>[u,leadOwnerName(u)])],q.u||'',"setQ({u:this.value})",{label:'Filter ditangani',cls:'sm'})}
+      ${dirty?btn('Hapus filter',{v:'ghost',size:'sm',on:"setQ({cl:'',cb:'',pk:'',u:'',from:'',to:'',per:''})"}):''}</div>
+    <p class="xs muted" style="margin-top:12px">Menampilkan <b class="fg">${repLabel(q)}</b>: ${base.length} leads, pengajuan ${jt(base.reduce((a,b)=>a+b.amount,0))}, goal ${jt(goal)}. Filter berlaku untuk kartu status dan daftar leads; grafik di bawah masih data contoh.</p>`);
+}
 /* Assign leads mengikuti mobile: pilih user REA atau CBD dulu, lalu pilih satu leads atau lebih di cabang user itu (MOM 12.5).
    Penerima diambil dari role, bukan daftar tetap, jadi user REA atau CBD baru langsung muncul. */
 const leadCab=l=>l.cab||'Fatmawati';
