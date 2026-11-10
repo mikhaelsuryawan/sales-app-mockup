@@ -72,7 +72,10 @@ main.loading :is(.stat,.card) .pills *{background:none!important} main.loading :
 main.loading :is(.stat,.card) svg:not(.lc svg):not(.donut svg){opacity:0}
 main.loading :is(.stat,.card) :is(h2,small,b,p,a,span:not(:has(*)),dd,dt,.tag,.btn,.pills,.inp,.sel,.si,.av,.thumb,.cb){background:var(--sk)!important;border-radius:8px}
 main.loading :is(.stat,.card) :is(td,th){background:linear-gradient(var(--sk),var(--sk)) left center/72% 12px no-repeat!important}
-main.loading :is(.stat,.card) :is(td,th) *{background:none!important}
+main.loading.loading :is(.stat,.card) :is(td,th) *{background:none!important}
+/* Satu blok skeleton per komponen: elemen di dalam blok skeleton tidak boleh menggambar blok sendiri, supaya tidak saling menimpa */
+main.loading.loading :is(.stat,.card) :is(h2,small,b,p,a,span:not(:has(*)),dd,dt,.tag,.btn,.pills,.inp,.sel,.si,.av,.thumb,.cb) *{background:none!important}
+main.loading :is(.stat,.card) :is(.stat,.card)::after{display:none}
 main.loading :is(.stat,.card) :is(.cc,.lc,.meter,.bar){background:var(--sk)!important;border-radius:14px}
 main.loading :is(.stat,.card) :is(.cc,.lc,.meter,.bar)>*{visibility:hidden}
 main.loading .donut svg{opacity:1} main.loading .donut circle{stroke:var(--sk)!important}
