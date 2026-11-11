@@ -168,3 +168,10 @@ Jalankan `python3 -m http.server 5173`, buka `http://localhost:5173/dashboard/`.
 6. Ganti akun ke Rudi Hartono (Supervisor) lewat menu akun. Menu Buat lebih pendek, master data tampil baca saja, dan Pengaturan tidak menampilkan Reset data demo.
 7. Di lebar 375: bar bawah, menu Buat dan More sebagai bottom sheet, panel rincian membuka dari bawah dan tombol Back peramban menutupnya.
 8. Pengaturan > Reset data demo: konfirmasi, halaman dimuat ulang dengan data awal.
+
+9. Penugasan > Penempatan toko: tambahkan toko kedua ke Lestari Putri (Promotor FMCG) lewat Ubah. Ditolak dengan toast yang menyebut role satu toko. Rangga Saputra (MD) boleh banyak toko.
+10. Penugasan > Journey plan, pilih Budi, Minggu 1: Kamis bertanda Off dan tombol tambah nonaktif. Tambah toko ke Senin sampai melewati kapasitas: tersimpan, ringkasan validasi memperingatkan. Ubah urutan toko Senin, lalu masuk ke mobile sebagai sales.budi: daftar Kunjungan hari ini mengikuti urutan itu.
+11. Canvassing: kartu Sisa barang menampilkan batas 24 jam (ubah di kartu Batas pengembalian). Check-out tidak diblokir.
+12. Mobile sebagai sales.budi, Usulkan toko: tombol bernama Simpan toko, toko langsung aktif dan masuk daftar kunjungan. Di dashboard, Toko > Toko baru dari sales menampilkan toko itu. Role lain tetap diverifikasi admin.
+
+Catatan Usulan (konfirmasi klien 11 Nov 2026, lihat `OPEN-QUESTIONS.md` TL-013 sampai TL-017): batas penempatan per role, journey plan, frekuensi per kategori, sisa barang canvassing, dan toko baru canvassing langsung aktif. Data bersama lewat `salesapp.shared.v1` dengan kunci `jpPlan` (memuat nama toko, karena ID toko mobile dan dashboard berbeda), `visitFreq`, `jpKap`, `canvasSisaJam`, `cvSisaOk`, `tokoBaruSales`.
