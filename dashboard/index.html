@@ -1764,7 +1764,7 @@ function notifItems(){
   if(ap) out.push({id:'ap@'+ap.id,tone:'warning',icon:'checks',title:`${D.approvals.length} pengajuan menunggu approval`,body:'Absen, cuti, hapus transaksi, batal pesanan, dan promo.',at:ap.when,to:'/approval'});
   if(c.leads) out.push({id:'ld@'+c.leads,tone:'info',icon:'users',title:`${c.leads} leads baru belum di-assign`,body:'Assign ke manager atau sales sebelum jatuh tempo.',at:'Hari ini',to:'/leads?f=unassigned'});
   if(c.overdue) out.push({id:'od@'+c.overdue,tone:'danger',icon:'clock',title:`${c.overdue} leads overdue`,body:'Sudah melewati batas tindak lanjut.',at:'Hari ini',to:'/overdue'});
-  if(c.usulan) out.push({id:'us@'+c.usulan,tone:'info',icon:'store',title:`${c.usulan} usulan toko baru dari lapangan`,body:'Verifikasi sebelum masuk master toko.',at:'Hari ini',to:'/toko?tab=usulan'});
+  if(c.usulan) out.push({id:'us@'+c.usulan,tone:'info',icon:'store',title:`${c.usulan} usulan toko baru dari lapangan`,body:'Verifikasi sebelum masuk master toko.',at:'Hari ini',to:'/toko'});
   if(rk) out.push({id:'rk@'+rk.u,tone:'warning',icon:'wallet',title:'1 selisih rekonsiliasi insentif',body:`${byU(rk.u).name}, selisih ${rp(Math.abs(rk.sys-rk.cli))}.`,at:'Hari ini',to:'/insentif?tab=rekon'});
   /* Usulan: pengecualian dari lapangan (jadwal ulang, terlewat, di luar rencana) menjadi notifikasi Team Leader. */
   shRead('visitExc',[]).slice(-5).reverse().forEach(e=>out.push({id:'ex@'+e.id,tone:e.type==='Terlewat'?'danger':e.type==='Unplanned'?'info':'warning',icon:e.type==='Terlewat'?'clock':e.type==='Unplanned'?'pin':'cal',title:`${byU(e.u).name} ${e.type==='Dijadwal ulang'?'menjadwal ulang':e.type==='Terlewat'?'melewatkan':'berkunjung di luar rencana ke'} ${e.place}`,body:(e.type==='Dijadwal ulang'?'Ke '+e.untuk+'. ':'')+e.alasan,at:e.tgl,to:'/kepatuhan-kunjungan'}));
@@ -1941,7 +1941,7 @@ function pageOverview(){
     [D.approvals.length,'Menunggu approval','checks','#/approval','u'],
     [counts().leads,'Leads belum di-assign','users','#/leads?f=unassigned','u'],
     [D.overdue.length,'Leads overdue','clock','#/overdue','d'],
-    [counts().usulan,'Usulan toko baru','store','#/toko?tab=usulan',''],
+    [counts().usulan,'Usulan toko baru','store','#/toko',''],
     [rk?1:0,'Selisih rekon insentif','wallet','#/insentif?tab=rekon','']
   ].filter(a=>a[0]>0).sort((a,b)=>b[0]-a[0]);
   return {title:'Overview', html:`
@@ -3070,18 +3070,10 @@ function mapOutletToggle(tid,cl){ const t=TOKO.find(x=>x.id===tid), cur=tokoClie
   audit((on?'Melepas ':'Memetakan ')+t.name+(on?' dari ':' ke ')+cName(cl)); render(false); toast(on?'Toko dilepas dari client':'Toko dipetakan ke client',t.name+' · '+cName(cl)); }
 function pageKategori(q){ return {title:'Kategori toko',html:`${crudList('kat',q,{acts:btn('Upload',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Kategori toko')"})})}`}; }
 function pageToko(q){
-  const tab=q.tab||'daftar'; const pend=D.usulan.filter(u=>u.status==='Menunggu verifikasi');
-  const tabs=utabs([['daftar','Daftar toko',live('toko').length],['usulan','Usulan dari lapangan',pend.length]],tab,'tkTab');
   const srcChips=`<div class="chips" style="margin:12px 0 4px" role="group" aria-label="Sumber toko">${[['','Semua sumber'],['Dari client','Toko Client'],['Input sales','Toko Sementara']].map(([k,l])=>`<button class="fchip ${(q.src||'')===k?'on':''}" aria-pressed="${(q.src||'')===k}" onclick="setQ({src:'${k}'})">${l} <span class="n">${live('toko').filter(t=>!k||(t.sumber||'Dari client')===k).length}</span></button>`).join('')}</div>`;
   return {title:'Toko',html:`
-  <div style="margin-bottom:4px">${tabs}</div>
-  ${tab==='daftar'?srcChips+((q.src||'')==='Input sales'?`<div style="margin:4px 0 12px">${callout('<b>Toko Sementara</b> adalah toko hasil input sales di lapangan dan berstatus Takeout. Admin bisa melengkapi datanya, lalu menyimpannya ke Toko Client lewat detail toko.')}</div>`:'')+crudList('toko',q,{acts:`${btn('Template',{v:'outline',size:'sm',icon:'down',on:"toast('Template diunduh','template_toko.xlsx')"})}${btn('Upload',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Toko')"})}`})+`<div style="margin-top:12px">${callout('Sales yang ditugaskan tidak diatur di halaman ini, tapi di menu <a href="#/penugasan" style="color:var(--accent-text);font-weight:600">Penugasan &amp; jadwal</a>. Client lain yang dilayani toko diatur di <a href="#/mapping-outlet" style="color:var(--accent-text);font-weight:600">Mapping outlet</a>.')}</div>`
-  :card('Usulan dari lapangan',D.usulan.length?`<div class="rows">${D.usulan.map(u=>`<button class="rowlink" onclick="usulanPanel('${u.id}')"><span class="thumb" style="width:56px;height:56px;border-radius:14px">${I('store',22)}</span><span style="flex:1;min-width:0"><b class="fg" style="display:block">${esc(u.name)}</b><span class="xs muted">${u.addr} · diusulkan ${byU(u.by).name}</span><span class="xs muted" style="display:block">Tanggal input: <b class="fg">${u.when}</b></span></span>${spill(u.status,u.status==='Aktif'?'success':u.status==='Ditolak'?'danger':'warning')}</button>`).join('')}</div>`:'<p class="muted">Belum ada usulan.</p>')}`};
+  ${srcChips+((q.src||'')==='Input sales'?`<div style="margin:4px 0 12px">${callout('<b>Toko Sementara</b> adalah toko hasil input sales di lapangan dan berstatus Takeout. Admin bisa melengkapi datanya, lalu menyimpannya ke Toko Client lewat detail toko.')}</div>`:'')+crudList('toko',q,{acts:`${btn('Template',{v:'outline',size:'sm',icon:'down',on:"toast('Template diunduh','template_toko.xlsx')"})}${btn('Upload',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Toko')"})}`})+`<div style="margin-top:12px">${callout('Sales yang ditugaskan tidak diatur di halaman ini, tapi di menu <a href="#/penugasan" style="color:var(--accent-text);font-weight:600">Penugasan &amp; jadwal</a>. Client lain yang dilayani toko diatur di <a href="#/mapping-outlet" style="color:var(--accent-text);font-weight:600">Mapping outlet</a>.')}</div>`}`};
 }
-function tokoToClient(id){ const t=TOKO.find(x=>x.id===id); if(!t||t.status!=='Takeout') return;
-  confirmAsk({title:`Simpan ${esc(t.name)} ke Toko Client?`,desc:'Toko ini pindah dari Toko Sementara ke Toko Client dan berstatus Aktif. Perubahan di form yang belum disimpan tidak ikut.',confirmLabel:'Simpan ke Toko Client',on:`tokoToClientDo('${id}')`}); }
-function tokoToClientDo(id){ const t=TOKO.find(x=>x.id===id);
-  act('toko/promote',{perm:'master.edit',run:()=>{ t.sumber='Dari client'; t.status='Aktif'; },audit:`Menyimpan toko sementara ${t.name} ke Toko Client`,toast:['Toko disimpan ke Toko Client',t.name]}); }
 function tkTab(t){ setQ({tab:t,q:'',st:'',src:''}); }
 function usulanPanel(id){ const u=D.usulan.find(x=>x.id===id); if(!u) return panelMissing('Usulan toko'); const done=u.status!=='Menunggu verifikasi';
   openPanel(u.name,`<div class="grid g2" style="gap:10px;margin-bottom:14px"><div class="thumb" style="width:100%;height:140px;border-radius:18px">${I('store',34)}</div><div class="mapbox" style="height:140px"><svg viewBox="0 0 200 140" width="100%" height="100%"><g stroke="#fff" stroke-width="10"><path d="M-10 80 L210 50M70 -10 L90 150"/></g><circle cx="110" cy="70" r="7" fill="#0A92F2" stroke="#fff" stroke-width="3"/></svg></div></div>
@@ -4254,7 +4246,7 @@ function hkPanel(u){
   } else {
     s+=hkSec('Hasil leads',x.leads.length,['/leads','Leads pinjaman'],hkTbl([['Nasabah',l=>esc(l.name)],['Produk',l=>esc(l.prod)],['Pengajuan',l=>`<span class="tabular">${jt(l.amount)}</span>`,'r'],['Status',l=>tag(l.status,l.status==='Deal'?'success':l.status==='Prospect'?'accent':l.status==='Baru'?'info':'neutral')],['Goal',l=>l.goal?`<b class="fg tabular">${jt(l.goal)}</b>`:'<span class="muted">–</span>','r']],x.leads));
   }
-  if(k==='canvas'||k==='order') s+=hkSec('Usulan toko baru',x.usulan.length,['/toko?tab=usulan','Verifikasi usulan'],hkTbl([...hkDc(x,a=>esc(String(a.when).split(',')[0])),['Toko',a=>esc(a.name)],['Pemilik',a=>esc(a.owner)],['Kategori',a=>esc(a.cat)],['Status',a=>tag(a.status,a.status==='Menunggu verifikasi'?'info':'neutral')]],x.usulan));
+  if(k==='canvas'||k==='order') s+=hkSec('Usulan toko baru',x.usulan.length,['/toko','Verifikasi usulan'],hkTbl([...hkDc(x,a=>esc(String(a.when).split(',')[0])),['Toko',a=>esc(a.name)],['Pemilik',a=>esc(a.owner)],['Kategori',a=>esc(a.cat)],['Status',a=>tag(a.status,a.status==='Menunggu verifikasi'?'info':'neutral')]],x.usulan));
   openPanel(esc(x.me.name),kv+fl+s,btn('Tutup',{v:'outline',on:'closeLayer()'})+btn('Unduh rekap',{v:'outline',icon:'down',on:`toast('Rekap ${esc(x.me.name.split(' ')[0])} diunduh','${esc(hkLabel(q))}.')`}),{sub:esc(x.me.job)+' · '+esc(hkLabel(q))});
 }
 
