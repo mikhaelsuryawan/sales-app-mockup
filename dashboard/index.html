@@ -552,54 +552,77 @@ textarea.ta[aria-invalid=true]{border-color:var(--danger)}
 @media (max-width:1023px){.tbl th.hb-lg,.tbl td.hb-lg{display:none!important}}
 @media (max-width:767px){.tbl th.hb-md,.tbl td.hb-md{display:none!important}}
 
-/* charts */
-.cc{display:flex;gap:10px}
-.cc-axis{font-variant-numeric:tabular-nums;display:flex;flex-direction:column;justify-content:space-between;height:220px;font-size:11px;color:var(--subtle);text-align:right;width:40px;padding-bottom:0;flex:none}
+/* charts: satu warna sorot, sisanya ink atau abu; grid solid 1px; tooltip HTML */
+.cc{position:relative;display:flex;gap:8px;margin-top:20px}
+.cc-axis{position:relative;height:220px;flex:none;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.cc-axis span{position:absolute;right:0;transform:translateY(50%);white-space:nowrap}
 .cc-main{flex:1;min-width:0}
-.cc-plot{position:relative;height:220px;display:flex;align-items:flex-end;gap:10px}
-.cc-grid{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none}
-.cc-grid i{border-top:1px dashed var(--line)}
-.cc-cell{position:relative;flex:1;height:100%;display:flex;align-items:flex-end;justify-content:center;min-width:0}
-.cc-col{position:relative;width:100%;max-width:56px;border-radius:14px;border:1px solid var(--line-strong);background-color:var(--raised);transition:height .3s,background-color .15s;min-height:12px}
-.cc-col:hover{background-color:var(--control)}
-.cc-col.sel{background:var(--accent-strong);border-color:transparent;box-shadow:var(--shadow-glow)}
-.cc-col .badge{position:absolute;top:6px;left:50%;transform:translateX(-50%);background:rgb(255 255 255 / .9);color:var(--ink);font-size:11px;font-weight:600;border-radius:99px;padding:2px 7px;white-space:nowrap}
-.cc-col .val{position:absolute;bottom:8px;left:0;right:0;text-align:center;color:#fff;font-size:11px;font-weight:600;white-space:nowrap;letter-spacing:-.01em}
-.cc-cap{position:absolute;left:50%;transform:translateX(-50%);width:40%;max-width:24px;height:3px;border-radius:99px;background:var(--fg);opacity:.85;pointer-events:none}
-.cc-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--ink);color:var(--on-ink);font-size:12px;font-weight:500;padding:6px 10px;border-radius:12px;box-shadow:var(--shadow-float);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s;z-index:3}
-.cc-col:hover .cc-tip,.cc-col:focus-visible .cc-tip{opacity:1}
-.cc-col.sel .cc-tip{display:none}
-.cc-labels{display:flex;gap:10px;margin-top:8px}
-.cc-labels span{font-variant-numeric:tabular-nums;flex:1;text-align:center;font-size:11.5px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cc-plot{position:relative;height:220px}
+.cc-grid{position:absolute;inset:0;pointer-events:none}
+.cc-grid i{position:absolute;left:0;right:0;height:0;border-top:1px solid var(--line)}
+.cc-ref{position:absolute;left:0;right:0;height:0;border-top:1px solid var(--muted);pointer-events:none;z-index:1}
+.cc-ref span{position:absolute;left:0;bottom:5px;font-size:11px;color:var(--muted);background:var(--card);padding-left:6px}
+.cc-cols{position:absolute;inset:0;display:flex;gap:2px;align-items:flex-end;z-index:2}
+.cc-cell{position:relative;flex:1;height:100%;min-width:0}
+.cc-hit{position:relative;display:flex;align-items:flex-end;justify-content:center;width:100%;height:100%;padding:0}
+.cc-hit:focus-visible{outline:2px solid rgb(10 146 242 / .4);outline-offset:0;border-radius:6px}
+.cc-col{display:block;width:100%;max-width:24px;border-radius:4px 4px 0 0;background:var(--chart-muted);transition:background-color .15s,opacity .15s}
+.cc-hit:hover .cc-col{opacity:.8}
+.cc-col.sel{background:var(--accent-strong)}
+.cc-val{position:absolute;left:50%;transform:translateX(-50%);font-size:11px;font-weight:600;color:var(--fg);white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:none}
+.cc-cap{position:absolute;left:50%;transform:translateX(-50%);width:100%;max-width:24px;height:0;border-top:1px solid var(--muted);pointer-events:none}
+.cc-tip,.lc-tip{position:absolute;display:flex;flex-direction:column;gap:1px;background:var(--ink);color:var(--on-ink);font-size:12px;padding:6px 10px;border-radius:12px;box-shadow:var(--shadow-float);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:5;line-height:1.35}
+.cc-tip{bottom:calc(100% + 6px);left:50%;transform:translateX(calc(-50% + var(--tx,0px)))}
+.cc-tip b,.lc-tip b{font-weight:600;font-variant-numeric:tabular-nums} .cc-tip span,.lc-tip span{color:var(--on-ink-muted);font-weight:500}
+.cc-hit:hover .cc-tip,.cc-hit:focus-visible .cc-tip{opacity:1}
+.cc-labels{display:flex;gap:2px;margin-top:8px}
+.cc-labels span{font-variant-numeric:tabular-nums;flex:1;text-align:center;font-size:11px;color:var(--muted);min-width:0;white-space:nowrap}
 .cc-labels span.on{color:var(--fg);font-weight:600}
-.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);align-items:center}
+.cc-labels span.skip{visibility:hidden}
+.lc-empty{display:grid;place-items:center;font-size:14px;color:var(--muted)}
+.legend{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:12px;color:var(--muted);align-items:center}
 .legend span{display:inline-flex;gap:6px;align-items:center}
-.capkey{display:inline-block;width:14px;height:3px;border-radius:99px;background:var(--fg)}
+.capkey{display:inline-block;width:14px;height:0;border-top:1px solid var(--muted)}
+.cnote{margin-top:12px;font-size:12px;color:var(--muted)}
+.cnote a{color:var(--accent-text);font-weight:600}
 .donut-wrap{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
-.donut{position:relative;width:196px;height:196px;flex:none}
-.donut svg{transform:rotate(-90deg)}
-.donut circle.seg{transition:stroke-width .15s,opacity .15s;cursor:pointer}
-.donut.hi circle.seg{opacity:.45} .donut.hi circle.seg.on{opacity:1;stroke-width:30}
+.donut{position:relative;width:148px;height:148px;flex:none}
+.donut svg{transform:rotate(-90deg);overflow:visible}
+.donut circle.seg{transition:transform .15s}
+.donut circle.seg.on{transform:translate(var(--dx),var(--dy))}
+.donut circle.hit{cursor:pointer;pointer-events:stroke}
 .donut .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none}
-.donut .ctr b{font-size:26px;font-weight:800;color:var(--fg);letter-spacing:-.02em}
-.donut .ctr small{font-size:12px;color:var(--muted);max-width:120px}
+.donut .ctr b{font-size:24px;font-weight:700;line-height:1;color:var(--fg);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.donut .ctr small{margin-top:4px;font-size:11px;font-weight:500;color:var(--muted);max-width:96px;line-height:1.25}
 .dleg{flex:1;min-width:180px;display:flex;flex-direction:column;gap:2px}
-.dleg button{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:12px;font-size:13px;text-align:left}
+.dleg button{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:7px 10px;border-radius:12px;font-size:14px;text-align:left}
 .dleg button:hover,.dleg button.on{background:var(--raised)}
-.dleg .lb{flex:1;color:var(--body)} .dleg .v{font-weight:600;color:var(--fg);font-variant-numeric:tabular-nums}
-.lc svg{width:100%;height:auto;display:block;overflow:visible}
+.dleg .lb{flex:1;color:var(--body);min-width:0;display:flex;align-items:center;gap:8px}
+.dleg .v{display:inline-flex;gap:8px;align-items:baseline;font-variant-numeric:tabular-nums}
+.dleg .v b{font-weight:600;color:var(--fg)} .dleg .v .sh{font-size:12px;color:var(--muted)}
+.dexit{display:inline-block;margin-top:12px;font-size:12px;font-weight:600;color:var(--fg)} .dexit:hover{color:var(--accent-text)}
+.lc{position:relative;min-width:0}
+.lc svg.lcs{display:block;overflow:visible;border-radius:6px;touch-action:pan-y}
+.lc svg.lcs:focus-visible{outline:2px solid rgb(10 146 242 / .4);outline-offset:2px}
 .lc text{fill:var(--muted);font-size:11px;font-family:var(--font);font-variant-numeric:tabular-nums}
+.lc text.vl{fill:var(--fg);font-weight:600}
+.lc.oi text{fill:var(--on-ink-muted)} .lc.oi text.vl{fill:#fff}
+.lc .xh{stroke:var(--fg);stroke-opacity:.25;stroke-width:1} .lc.spark .xh{stroke:var(--line);stroke-opacity:1} .lc.oi .xh{stroke:#fff;stroke-opacity:.3}
+.lc.oi .lc-tip{box-shadow:0 0 0 1px rgb(255 255 255 / .15),var(--shadow-float)}
+.bstrip{display:flex;gap:3px;align-items:flex-end;width:100%}
+.bstrip i{flex:1;max-width:24px;min-height:0;border-radius:3px 3px 0 0;background:var(--chart-muted)}
+.bstrip i.hl{background:var(--accent-strong)}
+.bstrip.oi i{background:rgb(255 255 255 / .22)} .bstrip.oi i.hl{background:var(--accent)}
 .gantt{overflow-x:auto}
 .gantt table{border-collapse:separate;border-spacing:3px;font-size:12px}
-.gantt th{font-variant-numeric:tabular-nums;font-weight:500;color:var(--subtle);font-size:10.5px;min-width:18px}
+.gantt th{font-variant-numeric:tabular-nums;font-weight:500;color:var(--muted);font-size:10.5px;min-width:18px}
 .gantt td.nm{white-space:nowrap;padding-right:10px;color:var(--fg);font-weight:500;position:sticky;left:0;background:var(--card)}
 .gantt td.c i{display:block;width:18px;height:22px;border-radius:6px}
 .gantt td.c i.hatch{background-color:var(--raised)}
 .meter{display:flex;justify-content:space-between;gap:2px;flex:1;height:22px;align-items:center}
-.meter i{width:3px;height:100%;border-radius:99px;background:var(--control)}
+.meter i{width:3px;height:100%;border-radius:99px;background:var(--canvas)}
 .funnel>div{margin-bottom:12px}
 .funnel .fb{height:36px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;color:#fff;font-weight:600;font-size:13px}
-
 
 /* hero (pola dashboard MES): kartu ink untuk rekaman unggulan, kartu aksen untuk metrik paling mendesak */
 .g-hero{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);margin-bottom:16px}
@@ -740,7 +763,6 @@ textarea.ta[aria-invalid=true]{border-color:var(--danger)}
   .tbl.resp td.acts-c{grid-column:1/-1;width:auto;white-space:normal;text-align:left;padding-top:8px}
   .tbl.resp td.acts-c::before{display:none}
   .tbl.resp td.acts-c .row-acts{justify-content:flex-start;flex-wrap:wrap}
-  .cc-plot,.cc-labels{gap:4px} .cc-axis{display:none} .cc-col .val{display:none}
   .toasts{left:16px;right:16px;bottom:96px;align-items:stretch}
   .login{grid-template-columns:1fr} .login-art{display:none}
 }
@@ -1370,7 +1392,7 @@ function salesReport(u){
   openPanel(s.name,`<div class="kv" style="margin-bottom:14px"><div><dt>Penjualan Okt</dt><dd>${jt(mt)}</dd></div><div><dt>Target</dt><dd>${jt(tg)}</dd></div><div><dt>Pencapaian</dt><dd>${tg?Math.round(mt/tg*100):0}%</dd></div></div>
   <div class="kv" style="margin-bottom:14px"><div><dt>Hari ini</dt><dd>${jt(td)}</dd></div><div><dt>Transaksi</dt><dd>${nTrx}</dd></div><div><dt>Rata-rata / trx</dt><dd>${jt(avgTrx)}</dd></div></div>
   <div class="xs muted" style="margin-bottom:6px">Penjualan harian Oktober</div>
-  ${lineChart({labels:days.map((_,i)=>(i+1)%5===0||i===0?String(i+1):''),series:[{name:'Penjualan',values:days,slot:1,area:true}],fmt:v=>num(v/1e6,1)+' jt',label:'Penjualan harian '+s.name})}
+  ${lineChart({labels:days.map((_,i)=>(i+1)%5===0||i===0?String(i+1):''),series:[{name:'Penjualan',values:days,area:true}],tipLabels:days.map((_,i)=>(i+1)+' Okt'),fmt:v=>num(v/1e6,1)+' jt',label:'Penjualan harian '+s.name})}
   <div class="xs muted" style="margin:14px 0 6px">Per toko</div><div class="rows" style="margin-bottom:14px">${perToko.map(([tk,v])=>`<div class="rowlink" style="cursor:default"><span style="flex:1" class="sm fg">${esc(tk.name)}<span class="xs muted" style="display:block">${tk.cabang} · ${clientName(tk.client)}</span></span><b class="tabular fg sm">${jt(v)}</b></div>`).join('')||'<span class="muted sm">Belum ada penjualan bulan ini.</span>'}</div>
   ${mixL.length?`<div class="xs muted" style="margin-bottom:6px">Produk terjual (14 hari terakhir)</div><div class="rows" style="margin-bottom:14px">${mixL.map(([n,v])=>`<div style="padding:8px 0"><div style="display:flex;justify-content:space-between" class="sm"><span class="fg">${esc(n)}</span><b class="tabular fg">${jt(v)}</b></div><div class="bar" style="margin-top:6px"><i style="width:${v/mixMax*100}%"></i></div></div>`).join('')}</div>`:''}
   <div class="grid g2" style="gap:10px"><div class="tile"><div class="xs muted">Kehadiran Okt</div><b class="fg">${hadir} hadir · ${telat} terlambat</b></div><div class="tile"><div class="xs muted">Grade / insentif</div><b class="fg">${g?g.grade+' ('+g.total+')':'–'} · ${inc?jt(inc.final):'–'}</b></div></div>`,
@@ -1400,45 +1422,111 @@ function refreshDerived(){
 /* =====================================================================
    CHARTS
    ===================================================================== */
-function niceScale(max){ max=Math.max(max,1e3); const raw=max/4; const p=10**Math.floor(Math.log10(raw)); const f=[1,2,2.5,5,10].find(x=>x*p>=raw); const step=f*p; return [0,1,2,3,4].map(i=>i*step); }
-function columnChart({data,sel,onSel,fmt=jt,targets=true,label='Grafik kolom',badge}){
-  const ticks=niceScale(Math.max(...data.map(d=>Math.max(d.value,d.target||0)))*1.02), top=ticks[4];
-  return `<figure class="cc" aria-label="${label}">
-    <div class="cc-axis">${ticks.slice().reverse().map(t=>`<span>${fmt(t).replace('Rp','')}</span>`).join('')}</div>
-    <div class="cc-main"><div class="cc-plot"><div class="cc-grid">${ticks.map(()=>'<i></i>').join('')}</div>
-      <div role="radiogroup" aria-label="${label}" style="display:contents">
-      ${data.map((d,i)=>{const h=Math.max(d.value/top*100,6), on=i===sel;
-        return `<div class="cc-cell">${targets&&d.target&&!on?`<span class="cc-cap" style="bottom:calc(${d.target/top*100}% - 1px)"></span>`:''}
-        <button role="radio" aria-checked="${on}" tabindex="${on?0:-1}" class="cc-col ${on?'sel':'hatch'}" style="height:${h}%" onclick="${onSel}(${i})" onkeydown="ccKey(event,'${onSel}',${i},${data.length})" aria-label="${d.label}: ${fmt(d.value)}${d.target?', target '+fmt(d.target):''}">
-          ${on&&badge?`<span class="badge">${badge(d,i)}</span>`:''}${on?`<span class="val">${fmt(d.value).replace('Rp','')}</span>`:''}<span class="cc-tip">${d.label} · ${fmt(d.value)}</span></button></div>`}).join('')}
-      </div></div>
-      <div class="cc-labels">${data.map((d,i)=>`<span class="${i===sel?'on':''}">${d.label}</span>`).join('')}</div></div></figure>`;
+/* =====================================================================
+   CHARTS (SVG buatan sendiri, tanpa pustaka). Satu nilai disorot dengan aksen, sisanya ink atau abu.
+   Rencana, target, dan batas digambar sebagai garis acuan, bukan seri kedua.
+   ===================================================================== */
+/* Skala: tick di kelipatan 1, 2, 2.5, 5, 10, dengan min dan max dari data (negatif boleh, data datar ditangani) */
+function niceStep(raw){ const p=10**Math.floor(Math.log10(raw)); return ([1,2,2.5,5,10].find(x=>x*p>=raw*.999)||10)*p; }
+function niceTicks(min,max,count=4){
+  if(!isFinite(min)||!isFinite(max)){ min=0; max=1; }
+  if(max===min){ if(max===0) max=1; else { min=Math.min(0,min); max=max>0?max*1.1:0; } }
+  const step=niceStep((max-min)/count), lo=Math.floor(min/step+1e-9)*step, hi=Math.ceil(max/step-1e-9)*step, t=[];
+  for(let v=lo;v<=hi+step/2;v+=step) t.push(+v.toFixed(10)); return t;
 }
-function ccKey(e,fn,i,n){ if(e.key==='ArrowRight'||e.key==='ArrowLeft'){ e.preventDefault(); const j=Math.max(0,Math.min(n-1,i+(e.key==='ArrowRight'?1:-1))); window[fn](j); setTimeout(()=>document.querySelector('.cc-col.sel')?.focus(),0); } }
+const TONE_COL={ink:'var(--fg)',info:'var(--info)',accent:'var(--accent-strong)',success:'var(--success)',warning:'var(--warning)',danger:'var(--danger)',white:'#fff',muted:'var(--chart-muted)'};
+const SERIES_TONES=['ink','info','accent'];
 const sc=s=>s===0?'var(--s0)':`var(--s${s})`;
-function donut(id,items,{total,caption,link}={}){
+
+/* Kolom: sorot yang dipilih (aksen), kolom lain abu. Ujung data membulat 4px, dasar rata, lebar maksimal 24px. */
+function columnChart({data,sel,onSel,fmt=jt,targets=true,label='Grafik kolom',targetLabel='Target'}){
+  if(!data.length) return `<div class="lc-empty" style="height:220px">Belum ada data</div>`;
+  const ticks=niceTicks(0,Math.max(...data.map(d=>Math.max(d.value,d.target||0)))), top=ticks[ticks.length-1]||1;
+  const aw=Math.max(...ticks.map(t=>fmt(t).replace('Rp','').length))*6.2+10;
+  const hasT=targets&&data.some(d=>d.target), sameT=hasT&&data.every(d=>d.target===data[0].target);
+  return `<figure class="cc" aria-label="${esc(label)}">
+    <div class="cc-axis" style="width:${aw}px">${ticks.map(t=>`<span style="bottom:${t/top*100}%">${fmt(t).replace('Rp','')}</span>`).join('')}</div>
+    <div class="cc-main"><div class="cc-plot"><div class="cc-grid">${ticks.map(t=>`<i style="bottom:${t/top*100}%"></i>`).join('')}</div>
+      ${sameT?`<div class="cc-ref" style="bottom:${data[0].target/top*100}%"><span>${targetLabel} ${fmt(data[0].target).replace('Rp','')}</span></div>`:''}
+      <div class="cc-cols" role="radiogroup" aria-label="${esc(label)}">
+      ${data.map((d,i)=>{ const h=d.value>0?Math.max(d.value/top*100,1):0, on=i===sel;
+        return `<div class="cc-cell">${hasT&&!sameT&&d.target?`<span class="cc-cap" style="bottom:${d.target/top*100}%"></span>`:''}
+        <button type="button" role="radio" aria-checked="${on}" tabindex="${on?0:-1}" class="cc-hit" onclick="${onSel}(${i})" onkeydown="ccKey(event,'${onSel}',${i},${data.length})" aria-label="${esc(d.label)}: ${fmt(d.value)}${d.target?', target '+fmt(d.target):''}">
+          <span class="cc-col ${on?'sel':''}" style="height:${h}%"></span><span class="cc-tip"><b>${fmt(d.value)}</b><span>${esc(d.label)}</span></span></button>
+        ${on?`<span class="cc-val" style="bottom:calc(${h}% + 6px)">${fmt(d.value).replace('Rp','')}</span>`:''}</div>`}).join('')}
+      </div></div>
+      <div class="cc-labels">${data.map((d,i)=>`<span class="${i===sel?'on':''}">${esc(d.label)}</span>`).join('')}</div></div></figure>`;
+}
+function ccKey(e,fn,i,n){ const k=e.key; if(!['ArrowRight','ArrowLeft','Home','End'].includes(k)) return; e.preventDefault(); const j=k==='Home'?0:k==='End'?n-1:Math.max(0,Math.min(n-1,i+(k==='ArrowRight'?1:-1))); window[fn](j); setTimeout(()=>document.querySelector('.cc-hit[aria-checked=true]')?.focus(),0); }
+
+/* Donut: 148px, cincin 16px, mulai jam 12, jarak 2px, ujung rata. Donut kosong menjadi cincin abu penuh. */
+function donut(id,items,{total,caption,link,exit}={}){
   items=items.filter(it=>it.value>0);
-  const sum=items.reduce((a,b)=>a+b.value,0), r=80, C=2*Math.PI*r, gap=6+24; let off=0; const hi=ST.donutHi[id]??-1;
-  const segs=items.map((it,i)=>{ const len=Math.max(it.value/sum*C-gap,1); const s=`<circle class="seg ${i===hi?'on':''}" cx="98" cy="98" r="${r}" fill="none" stroke="${sc(it.slot)}" stroke-width="24" stroke-linecap="round" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off-gap/2}" onmouseenter="dHi('${id}',${i})" onmouseleave="dHi('${id}',-1)"><title>${esc(it.label)}: ${it.fmt||it.value}</title></circle>`; off+=it.value/sum*C; return s; }).join('');
+  const sum=items.reduce((a,b)=>a+b.value,0), R=66, C=2*Math.PI*R, gap=items.length>1?2:0; let off=0; const hi=ST.donutHi[id]??-1;
+  const segs=sum?items.map((it,i)=>{ const frac=it.value/sum, len=Math.max(frac*C-gap,.5), mid=(off+frac*C/2)/C*2*Math.PI, dx=(Math.cos(mid)*3).toFixed(2), dy=(Math.sin(mid)*3).toFixed(2), da=`${len} ${C-len}`, dof=-off-gap/2;
+    const s=`<circle class="seg ${i===hi?'on':''}" cx="74" cy="74" r="${R}" fill="none" stroke="${sc(it.slot)}" stroke-width="16" stroke-dasharray="${da}" stroke-dashoffset="${dof}" style="--dx:${dx}px;--dy:${dy}px"/><circle class="hit" cx="74" cy="74" r="${R}" fill="none" stroke="transparent" stroke-width="28" stroke-dasharray="${da}" stroke-dashoffset="${dof}" onmouseenter="dHi('${id}',${i})" onmouseleave="dHi('${id}',-1)"><title>${esc(it.label)}: ${it.fmt||it.value}</title></circle>`; off+=frac*C; return s; }).join(''):`<circle cx="74" cy="74" r="${R}" fill="none" stroke="var(--canvas)" stroke-width="16"/>`;
   const act=hi>=0?items[hi]:null;
-  return `<div class="donut-wrap"><div class="donut ${hi>=0?'hi':''}" id="dn-${id}"><svg viewBox="0 0 196 196" width="196" height="196" role="img" aria-label="${caption}">${segs}</svg>
-    <div class="ctr"><b class="tabular">${act?(act.fmt||act.value):total}</b><small>${act?esc(act.label):caption}</small></div></div>
-    <div class="dleg">${items.map((it,i)=>`<button class="${i===hi?'on':''}" onmouseenter="dHi('${id}',${i})" onmouseleave="dHi('${id}',-1)" onfocus="dHi('${id}',${i})" onblur="dHi('${id}',-1)" ${link?`onclick="${link(it,i)}"`:''}><i class="dotc" style="background:${sc(it.slot)}"></i><span class="lb">${esc(it.label)}</span><span class="v">${it.share!=null?it.share+'%':(it.fmt||it.value)}</span></button>`).join('')}</div></div>`;
+  return `<div class="donut-wrap"><div class="donut" id="dn-${id}"><svg viewBox="0 0 148 148" width="148" height="148" role="img" aria-label="${esc(caption)}">${segs}</svg>
+    <div class="ctr"><b>${act?(act.fmt||act.value):(total??0)}</b><small>${act?esc(act.label):caption}</small></div><span class="sr-only" aria-live="polite" id="dnl-${id}"></span></div>
+    <div><div class="dleg">${items.map((it,i)=>`<button type="button" class="${i===hi?'on':''}" data-val="${esc(it.fmt||it.value)}" onmouseenter="dHi('${id}',${i})" onmouseleave="dHi('${id}',-1)" onfocus="dHi('${id}',${i})" onblur="dHi('${id}',-1)" ${link?`onclick="${link(it,i)}"`:''}><span class="lb"><i class="dotc" style="background:${sc(it.slot)}"></i><span>${esc(it.label)}</span></span><span class="v">${it.share!=null?`<span class="sh">${it.share}%</span>`:''}<b>${it.fmt||it.value}</b></span></button>`).join('')}</div>${exit?`<a class="dexit" href="${exit[1]}">${exit[0]}</a>`:''}</div></div>`;
 }
-function dHi(id,i){ ST.donutHi[id]=i; const el=$('#dn-'+id); if(!el) return; el.classList.toggle('hi',i>=0); el.querySelectorAll('circle.seg').forEach((c,j)=>c.classList.toggle('on',j===i)); el.parentElement.querySelectorAll('.dleg button').forEach((b,j)=>b.classList.toggle('on',j===i)); const ctr=el.querySelector('.ctr'); const d=el.dataset; if(!d.t){ d.t=ctr.querySelector('b').textContent; d.c=ctr.querySelector('small').textContent; } const lab=el.parentElement.querySelectorAll('.dleg button'); if(i>=0){ ctr.querySelector('b').textContent=lab[i].querySelector('.v').textContent; ctr.querySelector('small').textContent=lab[i].querySelector('.lb').textContent; } else { ctr.querySelector('b').textContent=d.t; ctr.querySelector('small').textContent=d.c; } }
-function smooth(pts){ const n=pts.length; if(n<2) return ''; const dx=[],m=[]; for(let i=0;i<n-1;i++){ dx[i]=pts[i+1][0]-pts[i][0]; m[i]=(pts[i+1][1]-pts[i][1])/dx[i]; } const t=[m[0]]; for(let i=1;i<n-1;i++) t[i]=m[i-1]*m[i]<=0?0:(m[i-1]+m[i])/2; t[n-1]=m[n-2];
-  for(let i=0;i<n-1;i++){ if(m[i]===0){t[i]=t[i+1]=0;continue;} const a=t[i]/m[i], b=t[i+1]/m[i], s=a*a+b*b; if(s>9){ const k=3/Math.sqrt(s); t[i]=k*a*m[i]; t[i+1]=k*b*m[i]; } }
-  let d=`M${pts[0][0]},${pts[0][1]}`; for(let i=0;i<n-1;i++){ d+=` C${pts[i][0]+dx[i]/3},${pts[i][1]+t[i]*dx[i]/3} ${pts[i+1][0]-dx[i]/3},${pts[i+1][1]-t[i+1]*dx[i]/3} ${pts[i+1][0]},${pts[i+1][1]}`; } return d; }
-function lineChart({labels,series,fmt=v=>v,label}){
-  const W=640,H=220,pl=40,pr=12,pt=10,pb=28, max=Math.max(...series.flatMap(s=>s.values)); const ticks=niceScale(max*1.05), top=ticks[4];
-  const x=i=>pl+(W-pl-pr)*i/(labels.length-1), y=v=>pt+(H-pt-pb)*(1-v/top);
-  return `<div class="lc"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${label}">
-    ${ticks.map(t=>`<line x1="${pl}" x2="${W-pr}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)"/><text x="${pl-8}" y="${y(t)+4}" text-anchor="end">${fmt(t)}</text>`).join('')}
-    ${labels.map((l,i)=>`<text x="${x(i)}" y="${H-8}" text-anchor="middle">${l}</text>`).join('')}
-    ${series.map(s=>{const pts=s.values.map((v,i)=>[x(i),y(v)]); const d=smooth(pts); return `${s.area?`<path d="${d} L${x(labels.length-1)},${y(0)} L${x(0)},${y(0)} Z" fill="${sc(s.slot)}" opacity=".1"/>`:''}<path d="${d}" fill="none" stroke="${sc(s.slot)}" stroke-width="2"/>${pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="${sc(s.slot)}" stroke="var(--card)" stroke-width="2"><title>${s.name} ${labels[i]}: ${fmt(s.values[i])}</title></circle>`).join('')}`}).join('')}
-  </svg></div>`;
+function dHi(id,i){ ST.donutHi[id]=i; const el=$('#dn-'+id); if(!el) return; el.querySelectorAll('circle.seg').forEach((c,j)=>c.classList.toggle('on',j===i)); const btns=[...el.parentElement.querySelectorAll('.dleg button')]; btns.forEach((b,j)=>b.classList.toggle('on',j===i)); const ctr=el.querySelector('.ctr'), d=el.dataset; if(!d.t){ d.t=ctr.querySelector('b').textContent; d.c=ctr.querySelector('small').textContent; }
+  if(i>=0&&btns[i]){ ctr.querySelector('b').textContent=btns[i].dataset.val; ctr.querySelector('small').textContent=btns[i].querySelector('.lb span:last-child').textContent; $('#dnl-'+id).textContent=ctr.querySelector('small').textContent+': '+btns[i].dataset.val; } else { ctr.querySelector('b').textContent=d.t; ctr.querySelector('small').textContent=d.c; } }
+
+/* Grafik garis: digambar pada lebar piksel nyata (diukur dari wadahnya), garis lurus 2px, jeda untuk data kosong */
+const CH={}; let chSeq=0, chRO=null;
+function chartHost(cfg){ const id='ch'+(++chSeq); CH[id]=cfg; return `<div class="lc ${cfg.onInk?'oi':''} ${cfg.spark?'spark':''}" data-cid="${id}" style="height:${cfg.height||220}px"></div>`; }
+const lineChart=cfg=>chartHost({height:220,...cfg});
+const sparkline=(values,{height=40,tone='ink',area=true,onInk=false,label='Tren',fmt=num,labels=null,highlightLast=true}={})=>chartHost({spark:true,height,labels:labels||values.map((_,i)=>String(i+1)),series:[{name:label,values,tone:onInk?'white':tone,area}],fmt,label,onInk,highlightLast});
+const barStrip=(values,{height=56,hi=-1,onInk=false,label='Tren'}={})=>{ const mx=Math.max(1,...values), h=hi<0?values.length-1:hi; return `<div class="bstrip ${onInk?'oi':''}" style="height:${height}px" role="img" aria-label="${esc(label)}">${values.map((v,i)=>`<i class="${i===h?'hl':''}" style="height:${v>0?Math.max(v/mx*100,4):0}%"></i>`).join('')}</div>`; };
+const barList=(items,{fmt=num,tone='',emphasis='',max=null,chev=false,empty='Belum ada data'}={})=>{ if(!items.length) return emptyState({compact:true,icon:'chart',title:empty}); const mx=max||Math.max(1,...items.map(i=>i.value)); return `<div class="rows">${items.map(i=>{ const body=`<span style="flex:1;min-width:0"><span class="t">${esc(i.label)}</span>${i.sub?`<span class="m">${i.sub}</span>`:''}<span style="display:block;margin-top:6px">${progressBar(i.value/mx*100,{size:'xs',tone:i.label===emphasis?'accent':tone,label:i.label})}</span></span><b class="tabular fg" style="font-size:13px">${fmt(i.value)}</b>${chev?I('right',16):''}`; return i.href?`<a class="rowlink lr" href="${i.href}">${body}</a>`:`<button type="button" class="rowlink lr" ${i.on?`onclick="${i.on}"`:''}>${body}</button>`; }).join('')}</div>`; };
+function renderLine(cfg,W){
+  const H=cfg.height||220, spark=!!cfg.spark, fmt=cfg.fmt||(v=>v), labels=cfg.labels, n=labels.length;
+  const vals=cfg.series.flatMap(s=>s.values).filter(v=>v!=null);
+  if(!vals.length||!n) return {html:`<div class="lc-empty" style="height:${H}px">Belum ada data</div>`};
+  const ticks=cfg.domain?niceTicks(cfg.domain[0],cfg.domain[1]):niceTicks(Math.min(0,...vals),Math.max(...vals)), lo=ticks[0], hi=ticks[ticks.length-1];
+  const aw=spark?0:Math.max(...ticks.map(t=>String(fmt(t)).length))*6.2+10, pl=spark?6:aw+8, pr=spark?6:16, pt=spark?8:16, pb=spark?8:26;
+  const x=i=>n===1?(pl+W-pr)/2:pl+(W-pl-pr)*i/(n-1), y=v=>pt+(H-pt-pb)*(1-(v-lo)/((hi-lo)||1)), crisp=v=>Math.round(v)+.5;
+  const onInk=!!cfg.onInk, ring=onInk?'var(--ink)':'var(--card)', id=cfg.id;
+  let xl=''; if(!spark){ const idx=labels.map((l,i)=>l===''||l==null?-1:i).filter(i=>i>=0), lw=Math.max(...idx.map(i=>String(labels[i]).length),1)*6.2+10, fit=Math.max(1,Math.floor((W-pl-pr)/lw)), stride=Math.ceil(idx.length/fit), shown=idx.filter((_,k)=>(idx.length-1-k)%stride===0);
+    xl=shown.map(i=>{ const tw=String(labels[i]).length*6.2, cx=Math.min(Math.max(x(i),pl-aw/2+tw/2),W-tw/2); return `<text x="${cx.toFixed(1)}" y="${H-8}" text-anchor="middle">${esc(labels[i])}</text>`; }).join(''); }
+  const grid=spark?'':ticks.map(t=>`<line x1="${pl}" x2="${W-pr}" y1="${crisp(y(t))}" y2="${crisp(y(t))}" stroke="${onInk?'rgb(255 255 255 / .12)':'var(--line)'}" shape-rendering="crispEdges"/><text x="${aw}" y="${y(t)+4}" text-anchor="end">${fmt(t)}</text>`).join('');
+  const zones=(cfg.zones||[]).map(z=>`<rect x="${pl}" y="${y(Math.min(hi,z.to))}" width="${W-pl-pr}" height="${Math.max(0,y(Math.max(lo,z.from))-y(Math.min(hi,z.to)))}" fill="${TONE_COL[z.tone]||TONE_COL.warning}" opacity=".08"/>`).join('');
+  const refs=(cfg.refs||[]).map(r=>`<line x1="${pl}" x2="${W-pr}" y1="${crisp(y(r.value))}" y2="${crisp(y(r.value))}" stroke="${r.tone?TONE_COL[r.tone]:'var(--muted)'}" shape-rendering="crispEdges"/>${r.label?`<text x="${W-pr}" y="${y(r.value)-5}" text-anchor="end">${esc(r.label)}</text>`:''}`).join('');
+  const segsOf=s=>{ const out=[]; let cur=[]; s.values.forEach((v,i)=>{ if(v==null){ if(cur.length) out.push(cur); cur=[]; } else cur.push([x(i),y(v),i]); }); if(cur.length) out.push(cur); return out; };
+  const yb=y(Math.max(lo,0));
+  const lines=cfg.series.map((s,si)=>{ const col=TONE_COL[s.tone||SERIES_TONES[si%3]]; return segsOf(s).map(sg=>{ const d=sg.map((p,j)=>(j?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(''); return `${s.area&&sg.length>1?`<path d="${d}L${sg[sg.length-1][0].toFixed(1)},${yb}L${sg[0][0].toFixed(1)},${yb}Z" fill="${col}" opacity=".1"/>`:''}<path d="${d}" fill="none" stroke="${col}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`; }).join(''); }).join('');
+  const dots=cfg.series.map((s,si)=>{ const col=TONE_COL[s.tone||SERIES_TONES[si%3]], sg=segsOf(s); const pts=cfg.showDots?sg.flat():[...sg.filter(g=>g.length===1).flat(),...(sg.length?[sg[sg.length-1][sg[sg.length-1].length-1]]:[])];
+    return pts.map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="${col}" stroke="${ring}" stroke-width="2"/>`).join(''); }).join('');
+  const last=cfg.series.length===1&&!spark?(()=>{ const s=cfg.series[0], sg=segsOf(s), p=sg.length&&sg[sg.length-1][sg[sg.length-1].length-1]; return p?`<text class="vl" x="${Math.min(p[0],W-4).toFixed(1)}" y="${(p[1]-9).toFixed(1)}" text-anchor="end">${fmt(s.values[p[2]])}</text>`:''; })():'';
+  const html=`<svg class="lcs" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(cfg.label||'Grafik garis')}" tabindex="0"><defs><clipPath id="cp-${id}"><rect x="${pl}" y="0" width="${W-pl-pr}" height="${H-pb+2}"/></clipPath></defs>${zones}${grid}${xl}${refs}<g clip-path="url(#cp-${id})">${lines}</g>${dots}${last}<line class="xh" y1="${pt}" y2="${H-pb}" style="display:none"/><rect class="hit" x="0" y="0" width="${W}" height="${H}" fill="transparent"/></svg><div class="lc-tip" role="presentation"></div><span class="sr-only" aria-live="polite"></span>`;
+  return {html,geom:{x,y,pl,pr,W,H,n}};
 }
-function meter(score){ const n=36, f=Math.round(score/100*n), col=score>=85?'var(--fg)':score>=75?'var(--st-t)':'var(--accent)'; return `<span class="meter" role="meter" aria-valuenow="${score}" aria-valuemin="0" aria-valuemax="100">${Array.from({length:n},(_,i)=>`<i style="${i<f?'background:'+col:''}"></i>`).join('')}</span>`; }
+function bindLine(el,cfg,geom){
+  const svg=el.querySelector('svg.lcs'); if(!svg||!geom) return; const xh=svg.querySelector('.xh'), tip=el.querySelector('.lc-tip'), live=el.querySelector('.sr-only'), fmt=cfg.fmt||(v=>v), n=geom.n; let cur=-1;
+  const labelAt=i=>(cfg.tipLabels?.[i]??cfg.labels[i])||String(i+1);
+  const show=i=>{ cur=i; const gx=geom.x(i); xh.setAttribute('x1',gx); xh.setAttribute('x2',gx); xh.style.display='';
+    const rows=cfg.series.map((s,si)=>({s,v:s.values[i],si})).filter(r=>r.v!=null);
+    tip.innerHTML=cfg.series.length===1?`<b>${rows.length?fmt(rows[0].v):'–'}</b><span>${esc(labelAt(i))}</span>`:`<span>${esc(labelAt(i))}</span>${rows.map(r=>`<span><b style="color:#fff">${fmt(r.v)}</b> ${esc(r.s.name)}</span>`).join('')}`;
+    tip.style.opacity=1; const tw=tip.offsetWidth, th=tip.offsetHeight, topY=Math.min(...rows.map(r=>geom.y(r.v)),geom.H);
+    tip.style.left=Math.max(0,Math.min(gx-tw/2,geom.W-tw))+'px'; tip.style.top=(topY-th-10<0?Math.min(topY+12,geom.H-th):topY-th-10)+'px';
+    live.textContent=labelAt(i)+': '+rows.map(r=>(cfg.series.length>1?r.s.name+' ':'')+fmt(r.v)).join(', '); };
+  const hide=()=>{ cur=-1; xh.style.display='none'; tip.style.opacity=0; };
+  svg.addEventListener('pointermove',e=>{ const r=svg.getBoundingClientRect(); show(Math.max(0,Math.min(n-1,Math.round((e.clientX-r.left-geom.pl)/(geom.W-geom.pl-geom.pr||1)*(n-1))))); });
+  svg.addEventListener('pointerleave',hide); svg.addEventListener('blur',hide); svg.addEventListener('focus',()=>show(n-1));
+  svg.addEventListener('keydown',e=>{ const k=e.key; if(k==='Escape'){ hide(); return; } if(!['ArrowLeft','ArrowRight','Home','End'].includes(k)) return; e.preventDefault(); show(k==='Home'?0:k==='End'?n-1:Math.max(0,Math.min(n-1,(cur<0?n-1:cur)+(k==='ArrowRight'?1:-1)))); });
+}
+function drawLine(el){ const cfg=CH[el.dataset.cid]; if(!cfg) return; const w=Math.floor(el.clientWidth); if(!w) return; el._w=w; const r=renderLine({...cfg,id:el.dataset.cid},w); el.innerHTML=r.html; bindLine(el,cfg,r.geom); }
+function thinColLabels(){ document.querySelectorAll('.cc-labels').forEach(box=>{ const sp=[...box.children], n=sp.length; if(!n) return; const cellW=box.clientWidth/n, need=Math.max(...sp.map(s=>s.textContent.length))*6.2+8, stride=Math.max(1,Math.ceil(need/Math.max(cellW,1))); sp.forEach((s,i)=>s.classList.toggle('skip',stride>1&&(n-1-i)%stride!==0&&!s.classList.contains('on'))); }); }
+function drawCharts(){
+  chRO?.disconnect(); chRO=chRO||new ResizeObserver(es=>es.forEach(e=>{ const el=e.target; if(el.dataset.cid&&Math.floor(el.clientWidth)!==el._w) drawLine(el); else if(el.matches('.cc-main')) thinColLabels(); }));
+  document.querySelectorAll('.lc[data-cid]').forEach(el=>{ drawLine(el); chRO.observe(el); });
+  document.querySelectorAll('.cc-main').forEach(el=>chRO.observe(el)); thinColLabels();
+  Object.keys(CH).forEach(k=>{ if(!document.querySelector(`[data-cid="${k}"]`)) delete CH[k]; });
+}
+/* Tooltip kolom: tetap di dalam plot */
+document.addEventListener('pointerover',e=>{ const h=e.target.closest?.('.cc-hit'); if(!h) return; const tip=h.querySelector('.cc-tip'), plot=h.closest('.cc-plot'); if(!tip||!plot) return; tip.style.setProperty('--tx','0px'); const t=tip.getBoundingClientRect(), p=plot.getBoundingClientRect(); const sh=t.left<p.left?p.left-t.left:t.right>p.right?p.right-t.right:0; tip.style.setProperty('--tx',sh+'px'); });
+function meter(score){ const n=36, f=Math.round(score/100*n), col=score>=85?'var(--fg)':score>=75?'var(--warning)':'var(--danger)'; return `<span class="meter" role="meter" aria-valuenow="${score}" aria-valuemin="0" aria-valuemax="100" aria-label="Skor ${score}">${Array.from({length:n},(_,i)=>`<i style="${i<f?'background:'+col:''}"></i>`).join('')}</span>`; }
 
 /* =====================================================================
    TABLE
@@ -1577,7 +1665,7 @@ function render(scrollTop=true){
   $('main').scrollTop=lastPath===path?keep:0;
   const key=location.hash.split('?')[1]||'';
   if(!reduceMotion()){ if(lastPath!==path) fxBegin('full'); else if(FX.key!==key) fxBegin('soft'); else fxApply(); }
-  FX.key=key; lastPath=path; saveDash(); syncTabsFade(); syncChips(); syncLayer();
+  FX.key=key; lastPath=path; saveDash(); syncTabsFade(); syncChips(); syncLayer(); drawCharts();
   page.after?.();
 }
 
@@ -1637,6 +1725,7 @@ function pageOverview(){
       <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px"><div><div class="kick">Sell-out hari ini</div><h3 id="hero-h">Senin, 26 Oktober</h3><p class="sm muted">Semua klien · ${TODAY.length} sales lapangan</p></div><span style="display:flex;align-items:center;gap:6px">${delta(ovDayChg())}<span class="xs muted">vs kemarin</span></span></div>
       <div style="margin-top:24px"><span class="hero-big">${jt(today)}</span></div>
       <div style="margin-top:18px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span class="muted">Target harian ${jt(tgd)}</span><b class="tabular" style="color:#fff">${tPct}%</b></div><div class="bar"><i style="width:${Math.min(100,tPct)}%"></i></div></div>
+      <div style="margin-top:16px">${sparkline(sellout14(),{height:48,onInk:true,label:'Sell-out 14 hari terakhir',fmt:v=>num(v/1e6,1)+' jt',labels:DAYS14,tipLabels:DAYS14.map(d=>d+' Okt')})}</div>
       <div class="ink-panel sm" style="margin-top:16px">${topCat?`Kategori <b>${topCat[0]}</b> menyumbang ${topCat[1]}% sell-out bulan ini.`:'Belum ada komposisi kategori bulan ini.'}</div>
       <div style="margin-top:auto;padding-top:20px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between">
         <div style="display:flex;flex-wrap:wrap;gap:8px"><a class="ink-chip" href="#/penjualan?tab=cabang">Per cabang</a><a class="ink-chip" href="#/penjualan?tab=toko">Per toko</a><a class="ink-chip" href="#/penjualan?tab=sales">Per sales</a></div>
@@ -1647,23 +1736,23 @@ function pageOverview(){
         <span style="margin-top:8px;display:flex;justify-content:flex-end"><span class="btn b-onpop sm">Buka approval ${I('right',15)}</span></span></a>
       <div class="g-2s">
         <a class="stat" href="#/absensi">${statIcon('finger',2)}<small>Hadir hari ini</small><b class="tabular">${hadir+telat}<span class="muted" style="font-size:16px;font-weight:600"> / ${TODAY.length}</span></b><span class="xs muted">${telat} terlambat · 1 cuti · 1 belum absen</span></a>
-        <a class="stat" href="#/leads">${statIcon('users',3)}<small>Goal pinjaman Oktober</small><b class="tabular">${jt(goal)}</b><span class="xs muted">${deal.length} deal · ${counts().leads} leads belum di-assign</span></a>
+        <a class="stat" href="#/leads">${statIcon('users',3)}<small>Goal pinjaman Oktober</small><b class="tabular">${jt(goal)}</b><span class="xs muted">${deal.length} deal · ${counts().leads} leads belum di-assign</span><div class="kids">${barStrip([2,3,2,3],{height:40,label:'Deal per minggu'})}</div></a>
       </div>
     </div>
   </div>
   <div class="grid g-ov">
-    ${card('Sell-out',`
+    ${card('Sell-out '+({d:'per hari',w:'per minggu',m:'per bulan'}[ST.ovPeriod]),`
       <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px"><div><div class="xs muted">${ST.ovPeriod==='d'?'14 hari terakhir':ST.ovPeriod==='w'?'Minggu Oktober':'6 bulan terakhir'}</div><div class="hero-n tabular">${jt(total)}</div></div>
       <div style="padding-bottom:6px">${delta(ch)} <span class="xs muted">vs periode sebelumnya</span></div>
       <div class="legend" style="margin-left:auto;padding-bottom:6px"><span><i class="capkey"></i>Target · ${onT} dari ${data.length} tercapai</span></div></div>
-      ${columnChart({data,sel:ST.ovSel,onSel:'ovSel',targets:ST.ovTarget,label:'Sell-out per periode',badge:()=>prev?(ch>=0?'+':'')+pct(ch):'—'})}
-      <div class="callout blue" style="margin-top:16px">${I('chart',18)}<span><b>${s.label}${ST.ovPeriod==='d'?' Okt':''}:</b> ${jt(s.value)} dari target ${jt(s.target)} (${Math.round(s.value/s.target*100)}%). <a href="#/penjualan" style="color:var(--accent-text);font-weight:600">Lihat rincian per cabang, toko, dan sales</a></span></div>`,
-      {cls:'span2',acts:`${pills([['d','Harian'],['w','Mingguan'],['m','Bulanan']],ST.ovPeriod,'ovPer')}<button class="btn b-outline sm" aria-pressed="${ST.ovTarget}" onclick="ST.ovTarget=!ST.ovTarget;render(false)">${I('target',15)}Target ${ST.ovTarget?'on':'off'}</button>`})}
+      ${columnChart({data,sel:ST.ovSel,onSel:'ovSel',targets:ST.ovTarget,label:'Sell-out per periode'})}
+      <p class="cnote"><b class="fg">${s.label}${ST.ovPeriod==='d'?' Okt':''}:</b> ${jt(s.value)} dari target ${jt(s.target)} (${Math.round(s.value/s.target*100)}%). <a href="#/penjualan">Lihat rincian per cabang, toko, dan sales</a></p>`,
+      {cls:'span2',desc:'Pilih satu kolom untuk melihat angkanya. Target mengikuti menu Target.',acts:`${pills([['d','Harian'],['w','Mingguan'],['m','Bulanan']],ST.ovPeriod,'ovPer')}<button class="btn b-outline sm" aria-pressed="${ST.ovTarget}" onclick="ST.ovTarget=!ST.ovTarget;render(false)">${I('target',15)}Target ${ST.ovTarget?'on':'off'}</button>`})}
     ${card('Kehadiran hari ini',`${donut('att',[{label:'Hadir',value:hadir,slot:4},{label:'Terlambat',value:telat,slot:2},{label:'Cuti',value:1,slot:1},{label:'Belum absen',value:1,slot:0}],{total:`${hadir+telat}/${TODAY.length}`,caption:'sudah absen',link:()=>"go('/absensi')"})}
       <div class="rows" style="margin-top:12px">${TODAY.filter(t=>t.st!=='Hadir').map(t=>`<a class="rowlink" href="#/absensi?q=${encodeURIComponent(byU(t.u).name)}">${av(byU(t.u).name)}<span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${byU(t.u).name}</b><span class="xs muted">${t.in?'Masuk '+t.in+' · '+t.mode:byU(t.u).job}</span></span>${spill(t.st,STTONE[t.st])}</a>`).join('')}</div>`,{cls:'xl1',acts:btn('Detail',{v:'outline',size:'sm',on:"go('/absensi')"})})}
     ${card('Ringkasan otomatis',`<p class="sm" style="color:var(--body);line-height:1.6">${ovSummary()}</p>
       <a class="rowlink" href="#/insentif?tab=rekon" style="margin-top:14px">${I('wallet',18)}<span class="sm" style="flex:1">${(()=>{ const x=REKON.find(r=>r.sys!==r.cli&&!r.adj); return x?'1 selisih rekonsiliasi insentif '+esc(byU(x.u).name)+' ('+rp(Math.abs(x.sys-x.cli))+')':'Rekonsiliasi insentif tanpa selisih'; })()}</span>${I('right',16)}</a>`,{icon:'spark'})}
-    ${card('Leads pinjaman',`<div class="funnel">${[['Pengajuan masuk',L.length,'var(--s3)'],['Sudah dihubungi',L.filter(l=>l.status!=='Baru').length,'var(--s1)'],['Prospect',L.filter(l=>l.status==='Prospect').length,'var(--s4)'],['Deal',deal.length,'var(--s2)']].map(([l,v,c])=>`<div><div class="xs muted" style="margin-bottom:4px">${l}</div><div class="fb" style="width:${Math.max(28,v/Math.max(1,L.length)*100)}%;background:${c}"><span>${v}</span><span class="xs" style="opacity:.85">${Math.round(v/48*100)}%</span></div></div>`).join('')}</div>
+    ${card('Leads pinjaman',`<div class="funnel">${[['Pengajuan masuk',L.length,'var(--fg)'],['Sudah dihubungi',L.filter(l=>l.status!=='Baru').length,'var(--accent-strong)'],['Prospect',L.filter(l=>l.status==='Prospect').length,'var(--warning)'],['Deal',deal.length,'var(--success)']].map(([l,v,c])=>`<div><div class="xs muted" style="margin-bottom:4px">${l}</div><div class="fb" style="width:${Math.max(28,v/Math.max(1,L.length)*100)}%;background:${c}"><span>${v}</span><span class="xs" style="opacity:.85">${Math.round(v/48*100)}%</span></div></div>`).join('')}</div>
       <div class="kv" style="grid-template-columns:1fr 1fr"><div><dt>Total goal disetujui</dt><dd>${jt(goal)}</dd></div><div><dt>Belum Tertarik</dt><dd>${L.filter(l=>l.status==='Belum Tertarik').length}</dd></div></div>`,{acts:btn('Buka leads',{v:'outline',size:'sm',on:"go('/leads')"})})}
     ${card('Top sales bulan ini',`<div class="rows">${top.map((g,i)=>{const s=byU(g.u);return `<a class="rowlink" href="#/grading?u=${g.u}"><span class="tabular muted" style="width:16px">${i+1}</span>${av(s.name)}<span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${s.name}</b><span class="xs muted">${s.toko}</span><div class="bar" style="margin-top:6px"><i style="width:${g.jual}%"></i></div></span><b class="tabular fg">${g.jual}%</b></a>`}).join('')}</div>`,{acts:btn('Grading',{v:'outline',size:'sm',on:"go('/grading')"})})}
   </div>`};
@@ -1702,13 +1791,13 @@ function pagePenjualan(q){
   
   <div style="margin-bottom:16px">${repFilters(q)}</div>
   <div class="grid g-side" style="margin-bottom:16px">
-    ${card('Penjualan '+ser.unit,`${data.length?columnChart({data,sel:si,onSel:'penSel',label:'Penjualan '+ser.unit,badge:(d)=>d.target?Math.round(d.value/d.target*100)+'%':'–'}):'<p class="muted sm">Tidak ada data pada rentang ini.</p>'}
+    ${card('Penjualan '+ser.unit,`${data.length?columnChart({data,sel:si,onSel:'penSel',label:'Penjualan '+ser.unit}):'<p class="muted sm">Tidak ada data pada rentang ini.</p>'}
       <div class="legend" style="margin-top:12px"><span><i class="capkey"></i>Target ${ser.unit} mengikuti filter</span><span>Pilih kolom untuk melihat ${ser.unit==='harian'?'tanggal':'bulan'}, lalu telusuri di kartu sebelah.</span></div>`,
       {acts:`${btn('PDF',{v:'outline',size:'sm',icon:'down',on:"toast('Laporan diunduh','penjualan_"+repRange(q).from+"_"+repRange(q).to+".pdf')"})}${btn('Excel',{v:'outline',size:'sm',icon:'down',on:"toast('Laporan diunduh','penjualan_"+repRange(q).from+"_"+repRange(q).to+".xlsx')"})}`})}
     ${card(`Rincian ${sp.title}`,`
       <div class="chips" style="margin-bottom:12px">${['Seluruh cabang',...ST.drill].map((n,i)=>`<button class="fchip ${i===level?'on':''}" onclick="drillUp(${i})">${i?esc(n):n}</button>`).join(`<span class="muted">${I('right',14)}</span>`)}</div>
       <div class="xs muted" style="margin-bottom:8px">Level: ${LEVELS[level]} · klik baris untuk turun satu level</div>
-      <div class="rows">${list.length?'':'<p class="muted sm" style="padding:12px 4px">Tidak ada penjualan di level ini pada periode dan filter terpilih.</p>'}${list.map(([n,v],i)=>`<button class="rowlink" onclick="drillTo('${esc(n)}')"><span style="flex:1;min-width:0"><span class="sm fg" style="display:block;font-weight:500">${esc(n)}</span><div class="bar" style="margin-top:6px"><i style="width:${v/max*100}%;background:${sc((i%5)+1)}"></i></div></span><b class="tabular fg sm">${jt(v)}</b>${level<2?I('right',16):''}</button>`).join('')}</div>`)}
+      ${barList(list.map(([n,v])=>({label:n,value:v,on:`drillTo('${esc(n)}')`})),{fmt:jt,chev:level<2,empty:'Tidak ada penjualan di level ini'})}`)}
   </div>
   <div class="grid g-side" style="margin-bottom:16px">
     ${card('Komposisi sub kategori',`${donut('cat',mix.items.map(([l,v,s])=>({label:l,value:v,slot:s,share:v,fmt:v+'%'})),{total:jt(mix.tot).replace('Rp',''),caption:'sell-out '+repLabel(q),link:it=>`setQ({cat:'${it.label}'})`})}
@@ -2079,8 +2168,8 @@ function pageLeads(q){
     <button class="stat ${f==='Belum Tertarik'?'on':''}" onclick="setQ({f:'${f==='Belum Tertarik'?'':'Belum Tertarik'}'})"><small>Belum Tertarik</small><b class="tabular">${c('Belum Tertarik')}</b><span class="xs muted">Tertarik, prospect, atau rejected</span></button>
   </div>
   <div class="grid g-side" style="margin-bottom:16px">
-    ${card('Pengajuan vs deal',`${lineChart({labels:['Mg 1','Mg 2','Mg 3','Mg 4'],series:[{name:'Pengajuan',values:[9,12,14,13],slot:3,area:true},{name:'Dihubungi',values:[6,8,9,8],slot:1},{name:'Deal',values:[2,3,2,3],slot:2}],label:'Pengajuan, dihubungi, dan deal per minggu'})}
-      <div class="legend" style="margin-top:8px"><span><i class="dotc" style="background:var(--s3)"></i>Pengajuan</span><span><i class="dotc" style="background:var(--s1)"></i>Dihubungi</span><span><i class="dotc" style="background:var(--s2)"></i>Deal</span></div>`,{acts:pills([['okt','Oktober'],['q4','Q4']],'okt','leadPer')})}
+    ${card('Pengajuan vs deal',`${lineChart({labels:['Mg 1','Mg 2','Mg 3','Mg 4'],series:[{name:'Pengajuan',values:[9,12,14,13],tone:'ink',area:true},{name:'Dihubungi',values:[6,8,9,8],tone:'info'},{name:'Deal',values:[2,3,2,3],tone:'accent'}],label:'Pengajuan, dihubungi, dan deal per minggu'})}
+      <div class="legend" style="margin-top:8px"><span><i class="dotc" style="background:var(--fg)"></i>Pengajuan</span><span><i class="dotc" style="background:var(--info)"></i>Dihubungi</span><span><i class="dotc" style="background:var(--accent-strong)"></i>Deal</span></div>`,{acts:pills([['okt','Oktober'],['q4','Q4']],'okt','leadPer')})}
     ${card('Status Oktober',donut('lds',[{label:'Deal',value:10,slot:4},{label:'Prospect',value:14,slot:1},{label:'Belum Tertarik',value:9,slot:2},{label:'Belum dihubungi',value:15,slot:0}],{total:'48',caption:'total pengajuan',link:it=>`setQ({f:'${it.label==='Belum dihubungi'?'Baru':it.label}'})`}))}
   </div>
   ${card('Daftar leads',`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px"><form style="flex:1;min-width:220px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari nasabah</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari nama nasabah"></label></form>

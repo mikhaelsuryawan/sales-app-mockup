@@ -199,4 +199,12 @@ Semua butir lampiran masuk ke satu fase atau tercatat tidak berlaku.
   - JS: helper `btn`, `ibtn`, `tag`, `spill`, `badge`, `countBadge`, `statusDot`, `iconTile`, `statCard`, `pills`, `utabs`, `chip`, `segmented`, `choiceGrid`, `stepper`, `swc`, `progressBar`, `segmentBar`, `card`, `banner`, `callout`, `blocker`, `emptyState`, `keyValue`, `splitStats`, `pageHead`, `formField`, `listRow`, `rankedRow`, `historyRow`, `checkList`, `entityChip`, `codeLink`, `personChip`, `flowChain`, `settingsList`, `totalFooter`, `metricOnInk`, `readingTile`, `avatarStack`, `actionMenu`, `confirmAsk`, `toast` (tone default), peta `STATUS_TONE`.
   - Perilaku: fokus terkunci di dialog, latar inert, scroll `main` terkunci, panah di tablist dan radiogroup, menu dengan panah dan Esc, tooltip 200 ms, combobox per kata dengan sheet di ponsel dan `aria-activedescendant`, tabel dengan sort, tombol buka, reset halaman saat URL berubah, dan keadaan kosong. Panel dan semua menu berbentuk bottom sheet di ponsel.
   - Dipindah: pemakaian helper baru di tiap halaman (stepper di panel pesanan dan leads, banner blocker, `rowActs` dengan `block`, `statCard`, `emptyState`) ke fase 6 dan 7. Rail dan bar bawah (K-205 s.d. K-212) ke fase 4.
-- Fase berikutnya: fase 3, grafik.
+- Fase 3 selesai 11 Nov 2026. Grafik di `dashboard/index.html`:
+  - Mesin baru: `niceTicks` (kelipatan 1, 2, 2.5, 5, 10, min dan max dari data), grafik garis digambar pada lebar piksel nyata (ResizeObserver), garis lurus 2px dengan jeda untuk data kosong, titik dan label nilai terakhir, garis acuan, zona, domain tetap, penipisan label X, grid solid, lebar label sumbu dari label terpanjang.
+  - Interaksi: tooltip HTML yang tetap di dalam plot, crosshair, panah dan Home/End, fokus mulai di titik terakhir, echo live region, keadaan kosong "Belum ada data".
+  - Kolom: satu kolom disorot aksen, sisanya abu, ujung data 4px, lebar maksimal 24px, nilai dicetak di atas kolom, target sebagai garis acuan, tanpa lantai 6%.
+  - Donut: 148px, cincin 16px, jarak 2px, segmen terangkat 3px saat disorot, cincin kosong, legenda dengan persen dan jumlah.
+  - Komponen baru: `sparkline` (putih di kartu ink), `barStrip` (di stat Goal pinjaman), `barList` (rincian Penjualan), `segmentBar`.
+  - Grafik "Pengajuan vs deal" kini berskala data (sebelumnya datar karena skala minimal 1.000).
+  - Dipindah ke fase 6 dan 7: tata letak analitik `1.4fr/1fr` dan `1fr/20rem` serta chip drill-down di halaman analitik lain (`/sell-in`, `/target`, `/insentif`, `/grading`, `/sku-display`, `/market-share`, `/kepatuhan-kunjungan`, `/aktivitas`).
+- Fase berikutnya: fase 4, shell dan navigasi.
