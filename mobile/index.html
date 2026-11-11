@@ -815,7 +815,7 @@ function todayVisits(){
 }
 function visitRow(x){
   const tone=x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':x.status==='Dijadwal ulang'?'amber':'';
-  return `<button class="li" onclick="go('kunjungan-detail',{id:'${x.id}'})"><div class="ico-tile ${x.status==='Selesai'?'green':''}">${I('pin',20)}</div><div class="grow"><div class="t">${x.place}</div><div class="s">${x.time} · ${x.tasks.join(', ')}</div></div>${chip(x.status,tone)}</button>`;
+  return `<button class="li" onclick="go('kunjungan-detail',{id:'${x.id}'})"><div class="ico-tile ${x.status==='Selesai'?'green':''}">${I('pin',20)}</div><div class="grow"><div class="t">${x.place}${x.unplanned?' '+chip('Unplanned','amber'):''}</div><div class="s">${x.time} · ${x.tasks.join(', ')}</div></div>${chip(x.status,tone)}</button>`;
 }
 function spvDash(){
   const L=S.leads, c=k=>L.filter(l=>l.status===k).length;
@@ -1005,7 +1005,7 @@ SCR.kunjungan = p => {
     ${seg==='hari'?`<div class="card" style="margin-bottom:14px"><div class="row between"><b>Progres hari ini</b><span class="num small muted">${v.filter(x=>x.status==='Selesai').length} dari ${v.length} selesai</span></div><div class="bar" style="margin-top:10px"><i style="width:${Math.max(3,v.filter(x=>x.status==='Selesai').length/(v.length||1)*100)}%"></i></div></div><div class="list">${v.map(visitRow).join('')}</div>${teamV}`:
     `<div class="list">${S.plans.map(x=>`<div class="li"><div class="ico-tile tan">${I('calendar',20)}</div><div class="grow"><div class="t">${x.place}</div><div class="s">${x.date}</div></div>${chip(x.status,x.status==='Disetujui'?'green':'amber')}</div>`).join('')}
     <div class="li"><div class="ico-tile">${I('refresh',20)}</div><div class="grow"><div class="t">Kunjungan rutin mingguan</div><div class="s">Setiap Senin & Kamis · Okt – Des 2026</div></div>${chip('Berkala','blue')}</div></div>`}
-    ${canSchedule(r)?`<button class="btn sec" style="margin-top:16px" onclick="act(()=>go('kunjungan-form',{spv:${r==='spv'?1:0}}))">${I('plus',20)} ${r==='spv'?'Tugaskan ke tim':'Tambah kunjungan'}${isLocked()?' '+I('lock',16):''}</button>`:`<p class="hint" style="margin-top:14px">Jadwal kunjungan dibuat oleh Team Leader. Kamu cukup mengikuti jadwal ini.</p>`}
+    ${canSchedule(r)?`<button class="btn sec" style="margin-top:16px" onclick="act(()=>go('kunjungan-form',{spv:${r==='spv'?1:0}}))">${I('plus',20)} ${r==='spv'?'Tugaskan ke tim':'Tambah kunjungan'}${isLocked()?' '+I('lock',16):''}</button>`:`${(r==='canvas'||r==='order')?`<button class="btn sec" style="margin-top:16px" onclick="act(()=>unplSheet())">${I('plus',20)} Kunjungan di luar rencana</button>`:''}<p class="hint" style="margin-top:14px">Jadwal kunjungan dibuat oleh Team Leader. Kamu cukup mengikuti jadwal ini.</p>`}
   </main>`};
 };
 SCR['kunjungan-detail'] = p => {
@@ -1020,7 +1020,7 @@ SCR['kunjungan-detail'] = p => {
   else foot=`<button class="btn ${lk?'locked':''}" onclick="act(()=>${role()==='fmcg'?`fmOut('${x.id}')`:`go('kunjungan-foto',{id:'${x.id}',mode:'out'})`})">${I(lk?'lock':'check',18,2.2)} Check-out & selesai</button>`;
   return {note:'Check-in dan check-out wajib 1 foto ber-watermark, catatan opsional (MOM 5.2). Untuk Promotor FMCG dan MD, tugas selalu semua aktivitas toko kecuali support task, dan check-out baru bisa setelah semua tugas hijau. Check-in dan check-out harus di lokasi yang sama, dan Promotor FMCG boleh berulang kali dalam sehari. Lupa check-out ditutup otomatis saat check-in di toko berikutnya atau saat absen pulang. Sales Canvasing dan Taking Order wajib check-in dan check-out di tiap toko, hanya di dalam radius toko. Jika keluar radius tanpa check-out, muncul notifikasi belum check-out. Saat check-in di toko berikutnya, sales boleh check-out toko sebelumnya tanpa harus berada di radius toko itu (revisi Nov 2026).',
   html:`${appbar('Detail kunjungan',{right:(canResched(x)?`<button class="ib" onclick="act(()=>reschedSheet('${x.id}'))" aria-label="Jadwal ulang">${I('calendar',22)}</button>`:'')+(!x.cin&&x.status!=='Selesai'&&(role()!=='fmcg'||x.own)&&canSchedule(role())?`<button class="ib" onclick="act(()=>delVisitSheet('${x.id}'))" aria-label="Hapus kunjungan">${I('trash',20)}</button>`:'')})}<main class="content">
-    <div class="card"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t" style="font-weight:800;font-size:16px">${x.place}</div><div class="small muted">Sen, 26 Okt 2026 · ${x.time}</div></div>${chip(x.status,x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':x.status==='Dijadwal ulang'?'amber':'')}</div>
+    <div class="card"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t" style="font-weight:800;font-size:16px">${x.place}${x.unplanned?' '+chip('Unplanned','amber'):''}</div><div class="small muted">Sen, 26 Okt 2026 · ${x.time}</div></div>${chip(x.status,x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':x.status==='Dijadwal ulang'?'amber':'')}</div>
       ${x.cin?`<div class="kv" style="margin-top:8px"><span>Check-in</span><span class="num">${x.cin} · 24 m dari titik toko</span></div>${x.cout?`<div class="kv"><span>Check-out</span><span class="num">${x.cout} · durasi ${x.dur}${x.remoteOut?' · dari luar radius':''}</span></div>`:''}`
       :noCheckin()?`<div class="banner blue" style="margin-top:12px">${I('alert',18)}<span>Multi Finance, REA, dan CBD tidak memakai check-in dan check-out ke nasabah. Isi hasil kunjungan lalu tandai selesai.</span></div>`:`<div class="banner blue" style="margin-top:12px">${I('pin',18)}<span>Check-in saat sudah sampai. Lokasi kamu dicocokkan dengan titik toko (radius 100 m).</span></div>`}</div>
     <div class="sec-title">Tugas${x.sesi>1?' · sesi ke-'+x.sesi:''}</div>
@@ -1215,6 +1215,23 @@ function missedSave(){ S.ms.note=val('msn'); if(!S.ms.alasan){ $('#mserr').inner
   const m=MISSED_DEFAULT.find(x=>x.id===S.ms.id);
   shSet('visitExc',[...shRead('visitExc',[]),{id:'ex'+Date.now(),ref:m.id,u:m.u,place:m.place,type:'Terlewat',untuk:'',alasan:S.ms.alasan+(S.ms.note?': '+S.ms.note:''),tgl:m.tgl}]);
   closeSheet(); render(false); toast('Alasan tersimpan'); }
+/* Usulan (11 Nov 2026): kunjungan di luar rencana untuk canvassing dan taking order. Alasan wajib, ditandai Unplanned, tidak menambah kepatuhan. */
+const UP_ALASAN=['Toko minta dikunjungi','Peluang order mendadak','Searah dengan rute hari ini','Pengganti kunjungan yang gagal','Lainnya'];
+const unplToko=()=>{ const r=role(), have=(S.visits[vk()]||[]).map(v=>v.place); return [...TOKO[r],...S.newToko.filter(t=>t.role===r&&t.status==='Aktif')].filter(t=>!have.includes(t.name)); };
+function unplSheet(){ S.up={toko:'',alasan:'',note:''}; unplRender(); }
+function unplRender(){ const L=unplToko(), u=S.up;
+  sheet(`<h3 style="font-size:18px;font-weight:800">Kunjungan di luar rencana</h3><p class="muted small" style="margin:6px 0 14px;line-height:1.5">Toko ini tidak ada di daftar hari ini. Dicatat sebagai Unplanned dan tidak menambah angka kepatuhan. Alasan wajib diisi.</p>
+  <div class="field"><span>Toko</span>${L.length?`<div class="opts">${L.map(t=>`<button class="opt ${u.toko===t.id?'on':''}" onclick="upSet('toko','${t.id}')">${esc(t.name)}</button>`).join('')}</div>`:'<div class="hint">Semua tokomu sudah ada di daftar hari ini.</div>'}</div>
+  <div class="field"><span>Alasan</span><div class="opts">${UP_ALASAN.map(a=>`<button class="opt ${u.alasan===a?'on':''}" onclick="upSet('alasan','${a}')">${a}</button>`).join('')}</div></div>
+  <label class="field"><span>Catatan (opsional)</span><textarea class="input" id="upn">${esc(u.note)}</textarea></label><div id="uperr"></div>
+  <button class="btn" onclick="unplSave()">Simpan dan lanjut</button>`); }
+function upSet(k,v){ S.up.note=val('upn'); S.up[k]=v; unplRender(); }
+function unplSave(){ const u=S.up; u.note=val('upn');
+  if(!u.toko||!u.alasan){ $('#uperr').innerHTML='<div class="err">Pilih toko dan alasan.</div>'; return; }
+  const t=unplToko().find(x=>x.id===u.toko); if(!t) return;
+  S.visits[vk()].push({id:'up'+Date.now(),place:t.name,time:'Sekarang',tasks:role()==='canvas'?['Penjualan']:['Ambil pesanan'],status:'Belum',photos:{},own:true,unplanned:true});
+  shSet('visitExc',[...shRead('visitExc',[]),{id:'ex'+Date.now(),u:fmUk(),place:t.name,type:'Unplanned',untuk:'',alasan:u.alasan+(u.note?': '+u.note:''),tgl:'26 Okt'}]);
+  closeSheet(); render(false); toast('Dicatat sebagai Unplanned'); }
 function delVisitSheet(id){
   sheet(`<h3 style="font-size:18px;font-weight:800">Hapus kunjungan ini?</h3><p class="muted small" style="margin:6px 0 16px;line-height:1.5">Kunjungan yang belum dimulai bisa dihapus selama belum lewat hari.</p>
   <button class="btn danger" onclick="S.visits[vk()]=S.visits[vk()].filter(v=>v.id!=='${id}');closeSheet();back();toast('Kunjungan dihapus')">Hapus kunjungan</button>`);
@@ -1416,7 +1433,8 @@ function submitToko(){
   S.newToko.push(t);
   if(direct){ /* Usulan: canvasser tidak perlu persetujuan admin. Toko masuk Toko baru dari sales di dashboard. */
     shSet('tokoBaruSales',[...shRead('tokoBaruSales',[]),{id:t.id,name,addr:t.addr,cat:t.cat,u:fmUk()}]);
-    S.visits.canvas.push({id:'nv'+Date.now(),place:name,time:'Sekarang',tasks:['Penjualan'],status:'Belum',photos:{},own:true}); }
+    S.visits.canvas.push({id:'nv'+Date.now(),place:name,time:'Sekarang',tasks:['Penjualan'],status:'Belum',photos:{},own:true,unplanned:true});
+    shSet('visitExc',[...shRead('visitExc',[]),{id:'ex'+Date.now(),u:fmUk(),place:name,type:'Unplanned',untuk:'',alasan:'Toko baru dari canvasser',tgl:'26 Okt'}]); }
   replace('toko-terkirim',{name,direct});
 }
 SCR['toko-terkirim'] = p => ({note:p.direct?'Toko baru dari canvasser langsung aktif tanpa persetujuan admin. Toko masuk Toko baru dari sales di Web.':'Usulan toko masuk ke antrean verifikasi admin di Web. Sales dapat notifikasi saat disetujui atau ditolak.',
