@@ -207,4 +207,13 @@ Semua butir lampiran masuk ke satu fase atau tercatat tidak berlaku.
   - Komponen baru: `sparkline` (putih di kartu ink), `barStrip` (di stat Goal pinjaman), `barList` (rincian Penjualan), `segmentBar`.
   - Grafik "Pengajuan vs deal" kini berskala data (sebelumnya datar karena skala minimal 1.000).
   - Dipindah ke fase 6 dan 7: tata letak analitik `1.4fr/1fr` dan `1fr/20rem` serta chip drill-down di halaman analitik lain (`/sell-in`, `/target`, `/insentif`, `/grading`, `/sku-display`, `/market-share`, `/kepatuhan-kunjungan`, `/aktivitas`).
-- Fase berikutnya: fase 4, shell dan navigasi.
+- Fase 4 selesai 11 Nov 2026. Shell dan navigasi:
+  - NAV satu sumber (13 seksi, termasuk Sistem) untuk rail, tab seksi, bar bawah, sheet More, dan judul header.
+  - Rail: nama produk dan tagline, tombol Buat, satu baris per seksi yang membuka sub-halaman di tempat, hitungan total di seksi tertutup, tooltip bergaya, workspace dengan menu (Keluar ada di sini), ciutkan hanya di 1280px ke atas. Pengaturan dan tema pindah ke menu pengguna.
+  - Header: judul 18px dengan keterangan klien dan tanggal (disembunyikan di ponsel), pencarian pil dari 768px, ikon cari di ponsel membuka baris penuh, tombol Buat dari 640px, lonceng dengan hitungan belum dibaca, menu pengguna.
+  - Pencarian global langsung per grup (Sales, Toko, Leads, Produk), lima hasil per grup, semua kata harus cocok, panah, Enter, Esc.
+  - Menu Buat berisi enam alur buat yang sudah ada. Notifikasi diturunkan dari data, status baca disimpan per pengguna dan workspace, panel 400px, "Tandai semua dibaca", keadaan kosong.
+  - Tab seksi muncul di bawah 1280px atau saat rail diciutkan. Bar bawah: Overview, Approval, Buat (bulat), Absensi, Leads, More; More aktif saat sheet terbuka. Sheet More: pencarian, Terakhir dibuka, seksi yang bisa dilipat, grid tiga kolom, footer akun. Menu, bel, dan pencarian menjadi bottom sheet di ponsel.
+  - Riwayat: tombol Back menutup dialog, scroll `main` dipulihkan saat Back (Navigation API), halaman tabel kembali ke 1 saat pindah rute. Tabel di ponsel menampilkan empat kolom pertama, sisanya di panel rincian.
+  - Tidak dikerjakan: panel di URL (`?id=`) dan `?new=1`. Panel dibuka oleh puluhan fungsi dengan argumen berbeda, jadi deep link-nya perlu registri per panel. Dicatat sebagai sisa di fase 8.
+- Fase berikutnya: fase 5, aturan perilaku.
