@@ -261,6 +261,8 @@ main{flex:1;min-height:0;overflow-y:auto;padding:2px 2px 8px;outline:none;positi
 /* Grid dan kartu */
 .grid{display:grid;gap:16px}
 .g-ov{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (min-width:1280px){.g-ov{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 20rem}}
+@media (min-width:768px) and (max-width:1279px){.g-ov .md-2{grid-column:span 2}}
 .span2{grid-column:span 2} .span3{grid-column:1/-1}
 .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .g-side{grid-template-columns:minmax(0,1fr) 340px}
@@ -302,6 +304,12 @@ a.stat:hover,button.stat:hover{background:var(--raised)}
 .stat b .u{font-size:14px;font-weight:600;color:var(--muted);letter-spacing:0;margin-left:4px}
 .stat>.xs{color:var(--muted);margin-top:0}
 .stat .kids{margin-top:12px;width:100%}
+.stat.ink{background:var(--ink);color:var(--on-ink)} .stat.ink small{color:var(--on-ink-muted);opacity:1} .stat.ink b{color:#fff} .stat.ink>.xs,.stat.ink .muted{color:var(--on-ink-muted)} a.stat.ink:hover{background:var(--ink-3)}
+.stat.info{background:var(--info-soft)} .stat.info small{color:var(--info-text);opacity:1} .stat.info>.xs{color:var(--info-text);opacity:.8} a.stat.info:hover{filter:brightness(.97)}
+.stat.tn-warning b{color:var(--warning)} .stat.tn-danger b{color:var(--danger)} .stat.tn-success b{color:var(--success)}
+.card.tbl-card{background:none;box-shadow:none;padding:0;border-radius:0}
+.card.tbl-card .ch{margin-bottom:12px}
+.more-row{display:flex;justify-content:center;padding:12px 0 0}
 .hero-n{font-size:30px;font-weight:700;letter-spacing:-.03em;color:var(--fg);line-height:1;font-variant-numeric:tabular-nums}
 
 /* Tab: pill (ink aktif), underline, segmented, chip, stepper */
@@ -552,6 +560,7 @@ textarea.ta[aria-invalid=true]{border-color:var(--danger)}
 .lr .rt{display:none;flex-direction:column;align-items:flex-end;gap:4px;flex:none;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .lr .ph{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
 @media (min-width:640px){.lr .rt{display:flex}.lr .ph{display:none}}
+@media (max-width:767px){.live-cap{display:none}}
 .seqt{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--card);box-shadow:var(--shadow-card);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;flex:none;color:var(--fg)}
 .seqt.rk{width:36px;height:36px}
 .hist{display:flex;align-items:flex-start;gap:12px;padding:8px 12px;border-radius:var(--r-panel)} .hist:hover{background:var(--raised)}
@@ -959,7 +968,7 @@ const totalFooter=(label,value)=>`<div class="totf"><span class="muted">${label}
 const metricOnInk=(label,value,unit='')=>`<div><div class="kick">${label}</div><div style="margin-top:4px;display:flex;align-items:flex-end;gap:6px;line-height:1"><b style="font-size:30px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:#fff">${value}</b>${unit?`<span style="font-size:12px;font-weight:600;color:var(--on-ink-muted);padding-bottom:2px">${unit}</span>`:''}</div></div>`;
 const readingTile=(label,value,unit='')=>`<div class="tile" style="padding:10px 12px;background:var(--canvas)"><div class="kick">${label}</div><div style="margin-top:4px;display:flex;align-items:flex-start;gap:4px;line-height:1">${value==null||value===''?'<span class="na">n/a</span>':`<b style="font-size:24px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--fg)">${value}</b>${unit?`<span style="font-size:12px;font-weight:600;color:var(--muted);padding-top:2px">${unit}</span>`:''}`}</div></div>`;
 const statCard=({label,value,unit='',hint='',tone='neutral',icon='chart',href='',on='',active=false,kids=''})=>{ const body=`${iconTile(icon,{tone,size:'sm'}).replace('class="ic ','class="ic si ')}<small>${label}</small><b>${value}${unit?`<span class="u">${unit}</span>`:''}</b>${hint?`<span class="xs">${hint}</span>`:''}${kids?`<div class="kids">${kids}</div>`:''}`; return href?`<a class="stat ${active?'on':''}" href="${href}">${body}</a>`:on?`<button type="button" class="stat ${active?'on':''}" onclick="${on}" aria-pressed="${active}">${body}</button>`:`<div class="stat">${body}</div>`; };
-const statIcon=(ic,i)=>iconTile(ic,{tone:['soft','info','ink','soft','neutral'][i%5],size:'sm'}).replace('class="ic ','class="ic si ');
+const statIcon=(ic,i)=>iconTile(ic,{tone:['soft','info','ink','soft','neutral','accent'][i%6],size:'sm'}).replace('class="ic ','class="ic si ');
 
 /* Toast: nada default (tanpa tanda), success, danger. Satu wilayah live, maksimal 3 */
 function toast(title,desc='',tone='success',{action='',on=''}={}){
@@ -1586,23 +1595,26 @@ function meter(score){ const n=36, f=Math.round(score/100*n), col=score>=85?'var
    TABLE
    ===================================================================== */
 function tbSig(){ return location.hash.split('?')[1]||''; }
-function dataTable(key,{cols,rows,rowClick,select,acts,empty='Belum ada data',emptyDesc='',perOpts=[5,10,20,50,100],sort:dsort=null,rowCls=null}){
+function dataTable(key,{cols,rows,rowClick,select,acts,empty='Belum ada data',emptyDesc='Data muncul di sini setelah dicatat dari aplikasi atau dashboard.',perOpts=[5,10,20,50,100],sort:dsort=null,rowCls=null}){
   const t=ST.tb[key]||(ST.tb[key]={page:1,per:10,sort:dsort?{i:dsort.i,dir:dsort.dir}:null});
-  const sig=tbSig(); if(t.sig!==undefined&&t.sig!==sig) t.page=1; t.sig=sig;
+  const sig=tbSig(); if(t.sig!==undefined&&t.sig!==sig){ t.page=1; t.shown=6; } t.sig=sig;
+  const phone=isPhone(); if(!t.shown) t.shown=6;
   let data=rows;
   if(t.sort&&cols[t.sort.i]){ const c=cols[t.sort.i], get=typeof c.sort==='function'?c.sort:r=>r[c.k];
     data=[...rows].sort((a,b)=>{ const x=get(a), y=get(b); if(x==null||x==='') return 1; if(y==null||y==='') return -1; const d=(typeof x==='number'&&typeof y==='number')?x-y:String(x).localeCompare(String(y),'id',{numeric:true}); return d*t.sort.dir; }); }
   const pages=Math.max(1,Math.ceil(data.length/t.per)); if(t.page>pages) t.page=pages;
-  const view=data.slice((t.page-1)*t.per,t.page*t.per); const S=ST.sel[key]||(ST.sel[key]=new Set());
+  const view=phone?data.slice(0,t.shown):data.slice((t.page-1)*t.per,t.page*t.per); const S=ST.sel[key]||(ST.sel[key]=new Set());
   const allOn=view.length&&view.every(r=>S.has(r._id));
   const hc=(c,i)=>`${c.hide||(!c.keep&&i>=4)?'hide-m':''} ${c.hideBelow?'hb-'+c.hideBelow:''}`;
   const th=(c,i)=>{ const on=t.sort&&t.sort.i===i; return `<th class="${c.align||''} ${hc(c,i)}" ${c.sort?`aria-sort="${on?(t.sort.dir>0?'ascending':'descending'):'none'}"`:''}>${c.sort?`<button type="button" class="sort" onclick="tbSort('${key}',${i})">${c.label}${I(on?(t.sort.dir>0?'up':'down'):'updown',14)}</button>`:c.label}</th>`; };
   return `<div class="tbl-wrap"><table class="tbl resp"><thead><tr>${select?`<th style="width:34px"><button type="button" class="cb ${allOn?'on':''}" aria-label="Pilih semua di halaman" onclick="tbAll('${key}',[${view.map(r=>`'${r._id}'`).join(',')}],${!allOn})">${allOn?I('check',12,3):''}</button></th>`:''}${cols.map(th).join('')}${acts?'<th class="r">Aksi</th>':''}</tr></thead>
     <tbody>${view.length?view.map(r=>`<tr class="${rowClick?'click':''} ${rowCls?rowCls(r)||'':''}" ${rowClick?`onclick="${rowClick(r)}"`:''}>${select?`<td onclick="event.stopPropagation()"><button type="button" class="cb ${S.has(r._id)?'on':''}" aria-label="Pilih ${esc(r._id)}" onclick="tbSel('${key}','${r._id}')">${S.has(r._id)?I('check',12,3):''}</button></td>`:''}${cols.map((c,ci)=>`<td data-l="${c.label}" class="${c.align||''} ${c.prim?'prim':''} ${hc(c,ci)} ${c.strong?'strong':''} ${rowClick&&ci===0?'has-open':''}">${c.render?c.render(r):esc(r[c.k])}${rowClick&&ci===0?`<button type="button" class="rowopen" aria-label="Buka rincian" data-tip="Buka" onclick="event.stopPropagation();${rowClick(r)}">${I('ext',14)}</button>`:''}</td>`).join('')}${acts?`<td data-l="Aksi" class="r acts-c" onclick="event.stopPropagation()"><div class="row-acts">${acts(r)}</div></td>`:''}</tr>`).join('')
       :`<tr><td colspan="${cols.length+(select?1:0)+(acts?1:0)}">${emptyState({icon:'file',title:empty,desc:emptyDesc,compact:true})}</td></tr>`}</tbody></table></div>
-    <div class="pager"><span class="tabular">${data.length?`${(t.page-1)*t.per+1}–${Math.min(t.page*t.per,data.length)} dari ${data.length}`:'0 data'}</span>
+    ${phone?(t.shown<data.length?`<div class="more-row">${btn(`${data.length-t.shown} lagi · Muat`,{v:'outline',on:`tbMore('${key}')`})}</div>`:''):''}
+    <div class="pager" ${phone?'hidden':''}><span class="tabular">${data.length?`${(t.page-1)*t.per+1}–${Math.min(t.page*t.per,data.length)} dari ${data.length}`:'0 data'}</span>
       <div class="pg"><span>Baris</span>${sel(perOpts,t.per,`tbPer('${key}',this.value)`,{cls:'sm',label:'Baris per halaman'})}${ibtn('left','Halaman sebelumnya',`tbPage('${key}',-1)`,{v:'outline',size:'icon-sm',attrs:t.page<=1?'disabled':''})}<span class="tabular">${t.page}/${pages}</span>${ibtn('right','Halaman berikutnya',`tbPage('${key}',1)`,{v:'outline',size:'icon-sm',attrs:t.page>=pages?'disabled':''})}</div></div>`;
 }
+function tbMore(k){ ST.tb[k].shown=(ST.tb[k].shown||6)+6; render(false); }
 function tbSort(k,i){ const t=ST.tb[k], c=t.sort; t.sort=!c||c.i!==i?{i,dir:1}:c.dir>0?{i,dir:-1}:null; t.page=1; render(false); }
 function tbPer(k,v){ ST.tb[k].per=+v; ST.tb[k].page=1; render(false); }
 function tbPage(k,d){ ST.tb[k].page+=d; render(false); }
@@ -1770,6 +1782,21 @@ function drawMore(){
 }
 function moreGo(p,label){ const r=[{to:p,label},...recentNav().filter(x=>x.to!==p)].slice(0,4); store.set('salesapp.dashboard.recent',JSON.stringify(r)); closeLayer(); }
 
+/* Kepala halaman: satu kalimat tujuan layar. Papan langsung menampilkan waktu pembaruan. */
+const PAGE_DESC={'/penjualan':'Pantau penjualan per klien, cabang, toko, dan sales, lalu telusuri sampai transaksi.','/absensi':'Lihat kehadiran sales hari ini, jam masuk, mode kerja, dan hasil pencocokan wajah.','/kunjungan':'Pantau kunjungan sales ke toko: jadwal, durasi, dan hasilnya.','/approval':'Putuskan pengajuan dari lapangan: absen terlambat, cuti, hapus penjualan, batal pesanan, dan promo.','/target':'Atur target per sales, toko, dan bulan, lalu bandingkan dengan pencapaian.','/promo':'Kelola promo yang berjalan dan promo yang menunggu approval.','/insentif':'Hitung insentif sales per bulan dan cocokkan dengan data klien.','/grading':'Lihat skor grading sales dari penjualan, absensi, quiz, SKU, dan market share.','/leads':'Kelola leads pinjaman: assign ke manager atau sales, tindak lanjut, lalu kirim ke SIM.','/overdue':'Pantau leads yang melewati batas tindak lanjut.','/company-sim':'Kelola data company SIMGROUP yang menjadi induk klien.','/sektor':'Kelola sektor bisnis yang dipakai klien dan produk.','/client':'Kelola klien SaaS beserta sektor dan statusnya.','/kategori-toko':'Kelola kategori toko untuk pelaporan.','/toko':'Kelola toko yang dikunjungi sales, termasuk usulan toko baru dari lapangan.','/iam':'Atur hak akses tiap role: modul, aksi, dan menu di aplikasi mobile.','/produk':'Kelola produk dan harga, pemetaan produk ke toko, serta produk dari sales.','/penugasan':'Atur penugasan dan jadwal sales per toko.','/pemesanan':'Pantau pesanan dealer dari dibuat sampai lunas.','/sell-in':'Bandingkan sell-in dealer dengan target dan sell-out.','/user-sales':'Kelola sales lapangan yang tersinkron dari SIM.','/user-admin':'Kelola pengguna dashboard dan role-nya.','/parameter':'Atur parameter yang dipakai aplikasi dan perhitungan.','/task-pending':'Lihat tugas lapangan yang belum selesai, lalu assign atau tutup.','/aktivitas':'Lihat hasil kerja per sales dan log aktivitas toko.','/canvassing':'Pantau canvassing: barang dibawa, terjual, dan limit.','/posm':'Kelola campaign, POSM, dan planogram untuk toko.','/region':'Kelola region dan cabang.','/brand':'Kelola brand klien.','/kategori-produk':'Kelola kategori produk berjenjang.','/kompetitor':'Kelola kompetitor yang dipantau.','/cabang-client':'Kelola cabang tiap klien.','/mapping-outlet':'Petakan outlet ke klien dan cabang.','/data-penjualan':'Telusuri semua transaksi penjualan dari aplikasi dan dashboard.','/penagihan':'Pantau piutang dan penagihan menurut umur.','/klaim-biaya':'Putuskan klaim biaya sales berdasarkan bukti dan limit.','/live-tracking':'Lihat posisi terakhir sales dan status perjalanannya.','/kepatuhan-kunjungan':'Ukur kepatuhan kunjungan sales terhadap jadwal.','/pengumuman':'Kirim pengumuman ke sales menurut role dan klien.','/sinkron':'Cek status sinkron perangkat sales dan data dari SIM.','/satuan':'Kelola satuan produk.','/konversi':'Atur konversi satuan tiap produk.','/konfigurasi-aktivitas':'Atur aktivitas yang tampil di aplikasi tiap role.','/form-penjualan':'Susun field form catat penjualan di aplikasi.','/status-produk':'Kelola status produk.','/event':'Kelola event dan jadwalnya.','/mitra':'Kelola mitra dan pertanyaan monitoringnya.','/sku-display':'Lihat laporan SKU display per toko.','/market-share':'Lihat laporan market share per toko dan kategori.','/quiz':'Susun dan kelola quiz untuk sales.','/survey':'Susun dan kelola survey untuk sales.','/pengaturan':'Atur preferensi dashboard dan data demo.'};
+const LIVE_PAGES=['/absensi','/live-tracking','/sinkron','/kunjungan'];
+const LIST_CANVAS=['/leads','/overdue','/pemesanan','/data-penjualan','/penagihan','/kunjungan','/absensi','/promo','/posm','/canvassing','/pengumuman','/task-pending','/klaim-biaya','/toko'];
+const timeLabel=()=>{ const d=new Date(nowMs()+7*36e5); return String(d.getUTCHours()).padStart(2,'0')+'.'+String(d.getUTCMinutes()).padStart(2,'0'); };
+const SCOPE_LABEL={q:'pencarian',f:'filter',u:'sales',st:'status',cat:'kategori',cl:'klien',cb:'cabang',tk:'toko',r:'peran'}, SCOPE_SKIP=['tab','per','p','preset','from','to','new'];
+function scopeBanner(path,q){
+  const sc=ST.scope; if(!sc||sc.path!==path) return '';
+  const keys=Object.keys(sc.q).filter(k=>!SCOPE_SKIP.includes(k)&&q[k]===sc.q[k]); if(!keys.length){ ST.scope=null; return ''; }
+  return banner({tone:'info',title:'Daftar dipersempit',body:keys.map(k=>`${SCOPE_LABEL[k]||k}: <b class="fg">${esc(q[k])}</b>`).join(' · '),actions:btn('Tampilkan semua',{v:'outline',size:'sm',on:`scopeClear('${keys.join(',')}')`}),cls:'mb'});
+}
+function scopeClear(keys){ ST.scope=null; setQ(Object.fromEntries(keys.split(',').map(k=>[k,'']))); }
+/* Klik kedua pada chip filter yang aktif menghapus filternya */
+document.addEventListener('click',e=>{ const b=e.target.closest?.('.chips .fchip.on'); if(!b) return; const m=(b.getAttribute('onclick')||'').match(/^setQ\(\{(\w+):'([^']+)'\}\)$/); if(m){ e.stopPropagation(); e.preventDefault(); setQ({[m[1]]:''}); } },true);
+function markTableCards(path){ if(!LIST_CANVAS.includes(path)) return; document.querySelectorAll('main > .card').forEach(c=>{ if(c.querySelector(':scope > .tbl-wrap')) c.classList.add('tbl-card'); }); }
 let lastPath=null;
 /* ---------- Animasi muat data ----------
    Mockup tanpa backend, jadi "fetch" disimulasikan: pindah halaman memuat penuh (skeleton sesuai bentuk komponen),
@@ -1790,6 +1817,7 @@ function render(scrollTop=true){
   const {path,q}=parse(); const app=$('#app');
   if(path==='/login'){ app.innerHTML=pageLogin(); lastPath=path; return; }
   if(!AUTHED){ ST.from=location.hash.slice(1)||'/'; location.replace('#/login'); return; }
+  if(lastPath!==path) ST.scope=Object.keys(q).length&&NAVTYPE==='push'?{path,q:{...q}}:null;
   const page=(ROUTES[path]||pageNotFound)(q);
   if(ST.sidebar===null){ const s=store.get(KEY.rail,null,'sim-sidebar'); ST.sidebar=s===null?true:s==='1'; }
   const railCollapsed=!ST.sidebar||innerWidth<1280;
@@ -1808,14 +1836,14 @@ function render(scrollTop=true){
         <span style="position:relative"><button type="button" class="user-btn" aria-haspopup="menu" aria-expanded="false" aria-label="Akun ${ME.name}" onclick="userPop(this)">${av(ME.name)}<span class="utx"><b>${ME.name}</b><small>${ME.role}</small></span></button></span></div>
     </header>
     ${ST.searchOpen?`<div class="hsearch-m">${gsearch('',{auto:true})}</div>`:''}
-    <main id="main" tabindex="-1">${ST.storageErr?banner({tone:'danger',title:'Perubahan tidak tersimpan.',body:'Browser menolak penyimpanan lokal, jadi perubahan hilang saat halaman dimuat ulang. Mockup tetap bisa dipakai.',cls:'mb'}):''}${secTabs(path)}${page.html}</main></div>${bottomBar(path)}</div>`;
+    <main id="main" tabindex="-1">${ST.storageErr?banner({tone:'danger',title:'Perubahan tidak tersimpan.',body:'Browser menolak penyimpanan lokal, jadi perubahan hilang saat halaman dimuat ulang. Mockup tetap bisa dipakai.',cls:'mb'}):''}${secTabs(path)}${PAGE_DESC[path]?pageHead({desc:PAGE_DESC[path],actions:LIVE_PAGES.includes(path)?`<span class="xs muted live-cap">Diperbarui ${timeLabel()} WIB</span>`:''}):''}${scopeBanner(path,q)}${page.html}</main></div>${bottomBar(path)}</div>`;
   const trav=NAVTYPE==='traverse'&&NEXTID&&SCR[NEXTID]!=null&&lastPath!==path;
   $('main').scrollTop=trav?SCR[NEXTID]:(lastPath===path?keep:0);
   if(NAVTYPE==='push'&&lastPath!==path) Object.values(ST.tb).forEach(t=>t.page=1);
   NAVTYPE=''; if(ST.searchOpen) document.querySelector('.hsearch-m input')?.focus();
   const key=location.hash.split('?')[1]||'';
   if(!reduceMotion()){ if(lastPath!==path) fxBegin('full'); else if(FX.key!==key) fxBegin('soft'); else fxApply(); }
-  FX.key=key; lastPath=path; saveDash(); syncTabsFade(); syncChips(); syncLayer(); drawCharts();
+  FX.key=key; lastPath=path; saveDash(); syncTabsFade(); syncChips(); syncLayer(); drawCharts(); markTableCards(path);
   page.after?.();
 }
 
@@ -1885,8 +1913,8 @@ function pageOverview(){
       <a class="card acc" href="#/approval"><span class="lb">Menunggu approval</span><span class="big">${D.approvals.length}</span><p>Absen, cuti, hapus transaksi, dan promo dari lapangan.</p>
         <span style="margin-top:8px;display:flex;justify-content:flex-end"><span class="btn b-onpop sm">Buka approval ${I('right',15)}</span></span></a>
       <div class="g-2s">
-        <a class="stat" href="#/absensi">${statIcon('finger',2)}<small>Hadir hari ini</small><b class="tabular">${hadir+telat}<span class="muted" style="font-size:16px;font-weight:600"> / ${TODAY.length}</span></b><span class="xs muted">${telat} terlambat · 1 cuti · 1 belum absen</span></a>
-        <a class="stat" href="#/leads">${statIcon('users',3)}<small>Goal pinjaman Oktober</small><b class="tabular">${jt(goal)}</b><span class="xs muted">${deal.length} deal · ${counts().leads} leads belum di-assign</span><div class="kids">${barStrip([2,3,2,3],{height:40,label:'Deal per minggu'})}</div></a>
+        <a class="stat ink" href="#/absensi">${statIcon('finger',5)}<small>Hadir hari ini</small><b class="tabular">${hadir+telat}<span class="muted" style="font-size:16px;font-weight:600"> / ${TODAY.length}</span></b><span class="xs muted">${telat} terlambat · 1 cuti · 1 belum absen</span></a>
+        <a class="stat info" href="#/leads">${statIcon('users',1)}<small>Goal pinjaman Oktober</small><b class="tabular">${jt(goal)}</b><span class="xs muted">${deal.length} deal · ${counts().leads} leads belum di-assign</span><div class="kids">${barStrip([2,3,2,3],{height:40,label:'Deal per minggu'})}</div></a>
       </div>
     </div>
   </div>
@@ -1899,12 +1927,12 @@ function pageOverview(){
       <p class="cnote"><b class="fg">${s.label}${ST.ovPeriod==='d'?' Okt':''}:</b> ${jt(s.value)} dari target ${jt(s.target)} (${Math.round(s.value/s.target*100)}%). <a href="#/penjualan">Lihat rincian per cabang, toko, dan sales</a></p>`,
       {cls:'span2',desc:'Pilih satu kolom untuk melihat angkanya. Target mengikuti menu Target.',acts:`${pills([['d','Harian'],['w','Mingguan'],['m','Bulanan']],ST.ovPeriod,'ovPer')}<button class="btn b-outline sm" aria-pressed="${ST.ovTarget}" onclick="ST.ovTarget=!ST.ovTarget;render(false)">${I('target',15)}Target ${ST.ovTarget?'on':'off'}</button>`})}
     ${card('Kehadiran hari ini',`${donut('att',[{label:'Hadir',value:hadir,slot:4},{label:'Terlambat',value:telat,slot:2},{label:'Cuti',value:1,slot:1},{label:'Belum absen',value:1,slot:0}],{total:`${hadir+telat}/${TODAY.length}`,caption:'sudah absen',link:()=>"go('/absensi')"})}
-      <div class="rows" style="margin-top:12px">${TODAY.filter(t=>t.st!=='Hadir').map(t=>`<a class="rowlink" href="#/absensi?q=${encodeURIComponent(byU(t.u).name)}">${av(byU(t.u).name)}<span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${byU(t.u).name}</b><span class="xs muted">${t.in?'Masuk '+t.in+' · '+t.mode:byU(t.u).job}</span></span>${spill(t.st,STTONE[t.st])}</a>`).join('')}</div>`,{cls:'xl1',acts:btn('Detail',{v:'outline',size:'sm',on:"go('/absensi')"})})}
-    ${card('Ringkasan otomatis',`<p class="sm" style="color:var(--body);line-height:1.6">${ovSummary()}</p>
+      <div class="rows" style="margin-top:12px">${TODAY.filter(t=>t.st!=='Hadir').map(t=>`<a class="rowlink" href="#/absensi?q=${encodeURIComponent(byU(t.u).name)}">${av(byU(t.u).name)}<span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${byU(t.u).name}</b><span class="xs muted">${t.in?'Masuk '+t.in+' · '+t.mode:byU(t.u).job}</span></span>${spill(t.st,STTONE[t.st])}</a>`).join('')}</div>`,{cls:'xl1',count:TODAY.filter(t=>t.st!=='Hadir').length,acts:btn('Lihat semua',{v:'outline',size:'sm',on:"go('/absensi')"})})}
+    ${card('Top sales bulan ini',`<div class="rows">${top.map((g,i)=>{const s=byU(g.u);return `<a class="rowlink" href="#/grading?u=${g.u}"><span class="tabular muted" style="width:16px">${i+1}</span>${av(s.name)}<span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${s.name}</b><span class="xs muted">${s.toko}</span><div class="bar" style="margin-top:6px"><i style="width:${g.jual}%"></i></div></span><b class="tabular fg">${g.jual}%</b></a>`}).join('')}</div>`,{count:top.length,acts:btn('Lihat semua',{v:'outline',size:'sm',on:"go('/grading')"})})}    ${card('Ringkasan otomatis',`<p class="sm" style="color:var(--body);line-height:1.6">${ovSummary()}</p>
       <a class="rowlink" href="#/insentif?tab=rekon" style="margin-top:14px">${I('wallet',18)}<span class="sm" style="flex:1">${(()=>{ const x=REKON.find(r=>r.sys!==r.cli&&!r.adj); return x?'1 selisih rekonsiliasi insentif '+esc(byU(x.u).name)+' ('+rp(Math.abs(x.sys-x.cli))+')':'Rekonsiliasi insentif tanpa selisih'; })()}</span>${I('right',16)}</a>`,{icon:'spark'})}
     ${card('Leads pinjaman',`<div class="funnel">${[['Pengajuan masuk',L.length,'var(--fg)'],['Sudah dihubungi',L.filter(l=>l.status!=='Baru').length,'var(--accent-strong)'],['Prospect',L.filter(l=>l.status==='Prospect').length,'var(--warning)'],['Deal',deal.length,'var(--success)']].map(([l,v,c])=>`<div><div class="xs muted" style="margin-bottom:4px">${l}</div><div class="fb" style="width:${Math.max(28,v/Math.max(1,L.length)*100)}%;background:${c}"><span>${v}</span><span class="xs" style="opacity:.85">${Math.round(v/48*100)}%</span></div></div>`).join('')}</div>
-      <div class="kv" style="grid-template-columns:1fr 1fr"><div><dt>Total goal disetujui</dt><dd>${jt(goal)}</dd></div><div><dt>Belum Tertarik</dt><dd>${L.filter(l=>l.status==='Belum Tertarik').length}</dd></div></div>`,{acts:btn('Buka leads',{v:'outline',size:'sm',on:"go('/leads')"})})}
-    ${card('Top sales bulan ini',`<div class="rows">${top.map((g,i)=>{const s=byU(g.u);return `<a class="rowlink" href="#/grading?u=${g.u}"><span class="tabular muted" style="width:16px">${i+1}</span>${av(s.name)}<span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${s.name}</b><span class="xs muted">${s.toko}</span><div class="bar" style="margin-top:6px"><i style="width:${g.jual}%"></i></div></span><b class="tabular fg">${g.jual}%</b></a>`}).join('')}</div>`,{acts:btn('Grading',{v:'outline',size:'sm',on:"go('/grading')"})})}
+      <div class="kv" style="grid-template-columns:1fr 1fr"><div><dt>Total goal disetujui</dt><dd>${jt(goal)}</dd></div><div><dt>Belum Tertarik</dt><dd>${L.filter(l=>l.status==='Belum Tertarik').length}</dd></div></div>`,{cls:'md-2 xl-1',acts:btn('Buka leads',{v:'outline',size:'sm',on:"go('/leads')"})})}
+
   </div>`};
 }
 function ovPer(p){ ST.ovPeriod=p; ST.ovSel=p==='d'?13:p==='w'?3:5; render(false); }
@@ -2339,7 +2367,7 @@ function pageLeads(q){
   return {title:'Leads pinjaman',html:`
   <div style="margin-bottom:16px">${ldFilters(q,base)}</div>
   <div class="stats">
-    <button class="stat ${f==='unassigned'?'on':''}" onclick="setQ({f:'${f==='unassigned'?'':'unassigned'}'})"><small>Belum di-assign</small><b class="tabular">${base.filter(l=>!l.owner).length}</b><span class="xs muted">Dari upload 26 Okt, 06:00</span></button>
+    <button class="stat ${f==='unassigned'?'on':''} ${base.filter(l=>!l.owner).length?'tn-warning':'tn-success'}" onclick="setQ({f:'${f==='unassigned'?'':'unassigned'}'})"><small>Belum di-assign</small><b class="tabular">${base.filter(l=>!l.owner).length}</b><span class="xs muted">Dari upload 26 Okt, 06:00</span></button>
     <button class="stat ${f==='Prospect'?'on':''}" onclick="setQ({f:'${f==='Prospect'?'':'Prospect'}'})"><small>Prospect</small><b class="tabular">${c('Prospect')}</b><span class="xs muted">Perlu follow up</span></button>
     <button class="stat ${f==='Deal'?'on':''}" onclick="setQ({f:'${f==='Deal'?'':'Deal'}'})"><small>Deal</small><b class="tabular">${c('Deal')}</b><span class="xs muted">Goal ${jt(goal)}</span></button>
     <button class="stat ${f==='Belum Tertarik'?'on':''}" onclick="setQ({f:'${f==='Belum Tertarik'?'':'Belum Tertarik'}'})"><small>Belum Tertarik</small><b class="tabular">${c('Belum Tertarik')}</b><span class="xs muted">Tertarik, prospect, atau rejected</span></button>
@@ -3169,7 +3197,7 @@ const klaimLimit=j=>(KLAIM_JENIS.find(x=>x[0]===j)||[0,0])[1];
 function pageKlaim(q){
   const f=q.f||'Menunggu', rows=KLAIM.filter(k=>!f||k.st===f).map(k=>({...k,_id:k.id})), c=s=>KLAIM.filter(k=>k.st===s);
   return {title:'Klaim biaya',html:`
-  <div class="stats">${[['Menunggu','Menunggu approval'],['Disetujui','Disetujui'],['Ditolak','Ditolak'],['','Semua']].map(([k,l])=>{ const L=k?c(k):KLAIM; return `<button class="stat ${f===k?'on':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${L.length}</b><span class="xs muted">${jt(L.reduce((s,x)=>s+x.n,0))}</span></button>`; }).join('')}</div>
+  <div class="stats">${[['Menunggu','Menunggu approval'],['Disetujui','Disetujui'],['Ditolak','Ditolak'],['','Semua']].map(([k,l])=>{ const L=k?c(k):KLAIM; return `<button class="stat ${f===k?'on':''} ${k==='Menunggu'&&L.length?'tn-warning':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${L.length}</b><span class="xs muted">${jt(L.reduce((s,x)=>s+x.n,0))}</span></button>`; }).join('')}</div>
   ${card('Klaim dari lapangan',dataTable('klm',{rows,rowClick:r=>`klaimPanel('${r.id}')`,empty:'Tidak ada klaim.',cols:[
     {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(byU(r.u).name)}</span><span class="xs muted" style="display:block">${r.tgl} · ${esc(r.toko)}</span>`,prim:true},{label:'Jenis',render:r=>tag(r.jenis,'accent')},
     {label:'Nominal',render:r=>`<b class="tabular fg">${rp(r.n)}</b>${r.n>klaimLimit(r.jenis)?' '+tag('Lewat limit','warning'):''}`,align:'r'},{label:'Status',render:r=>spill(r.st,r.st==='Disetujui'?'success':r.st==='Ditolak'?'danger':'warning'),hide:true}]}))}

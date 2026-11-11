@@ -224,4 +224,11 @@ Semua butir lampiran masuk ke satu fase atau tercatat tidak berlaku.
   - Form: galat berupa kalimat utuh, tampil setelah submit pertama lalu diperbarui saat mengetik, `aria-invalid` dan `aria-describedby`, tombol submit bernama kata kerja, tanda wajib biru. Input penjualan menampilkan banner yang naik dari info ke peringatan saat harga melewati toleransi.
   - Salinan: tanpa em dash.
   - Tidak dikerjakan: filter workspace pada data (butuh field klien di tiap koleksi transaksi), objek `paths` (jalur sudah satu sumber di NAV), alasan pada opsi picker yang tidak bisa dipilih (dukungan `data-reason` sudah ada, belum ada opsi yang memakainya), chip filter yang menghapus diri saat diklik ulang, satuan di slot kanan, picker bergantung "Pilih X dulu". Dicatat sebagai sisa di fase 8.
-- Fase berikutnya: fase 6, Overview dan halaman daftar.
+- Fase 6 selesai 11 Nov 2026. Overview dan halaman daftar:
+  - Overview: baris daftar dan analisis `1fr 1fr 20rem` (Top sales dan Kehadiran dengan hitungan dan "Lihat semua", Ringkasan otomatis, Leads pinjaman sebagai kartu analisis), stat Hadir bernada ink dan Goal pinjaman bernada info, sparkline putih di kartu ink dan bar strip di stat goal.
+  - Semua rute (kecuali Overview) memakai kalimat tujuan satu baris di bawah header; papan langsung (`/absensi`, `/kunjungan`, `/live-tracking`, `/sinkron`) menambah "Diperbarui 09.41 WIB" yang tersembunyi di ponsel.
+  - Banner "Daftar dipersempit" dengan "Tampilkan semua" saat tautan dari halaman lain menyempitkan daftar (`?f=`, `?q=`, `?u=`).
+  - Klik kedua pada chip filter yang aktif menghapus filternya. Stat tile bernada mengikuti hitungan (Leads belum di-assign, Klaim menunggu).
+  - Tabel utama halaman daftar duduk di kanvas tanpa kartu; di ponsel tabel menampilkan enam baris dengan tombol "N lagi · Muat" tanpa pager; keadaan kosong punya judul dan deskripsi.
+  - Tidak dikerjakan: baris status overview enam kartu (opsional, tidak ada padanan yang tidak menggandakan Absensi), pilihan tampilan yang diingat antar sesi (tiap halaman punya fungsi tab sendiri). Dicatat di fase 8.
+- Fase berikutnya: fase 7, detail, master data, antrean, login.
