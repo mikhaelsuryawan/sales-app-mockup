@@ -1847,9 +1847,11 @@ function fxAnimate(root,full){
   [...root.querySelectorAll(':scope > :not(.grid):not(.stats), :scope > .stats > *, :scope > .grid > *, :scope > div > .card')].forEach((el,i)=>el.animate([{opacity:0},{opacity:1}],{duration:200,delay:Math.min(i,8)*30,fill:'backwards',easing:'ease-out'}));
 }
 /* Usulan (11 Nov 2026): toko baru dari canvasser di mobile langsung aktif dan masuk Toko baru dari sales. */
+/* Hari off sales dibaca mobile untuk menyembunyikan hari itu saat jadwal ulang. */
+function syncUserOff(){ try{ const m={}; MD.user.forEach(u=>{ if(u.off) m[u.id]=u.off; }); if(JSON.stringify(shRead('userOff',{}))!==JSON.stringify(m)) shSet('userOff',m); }catch(e){} }
 function syncTokoBaru(){ shRead('tokoBaruSales',[]).forEach(n=>{ if(TOKO.some(t=>t.id===n.id)) return; TOKO.push({id:n.id,name:n.name,cat:n.cat,cabang:'Jakarta Selatan',dealer:'–',sales:[n.u],addr:n.addr,client:'cl1',mapClients:['cl1'],sumber:'Input sales',status:'Aktif',radius:100,coord:'-6.2900, 106.8000'}); const us=MD.user.find(x=>x.id===n.u); if(us&&!(us.toko||[]).includes(n.id)) us.toko=[...(us.toko||[]),n.id]; }); }
 function render(scrollTop=true){
-  syncProducts(); refreshDerived(); syncApp(); syncTokoBaru();
+  syncProducts(); refreshDerived(); syncApp(); syncTokoBaru(); syncUserOff();
   const {path,q}=parse(); const app=$('#app');
   if(path==='/login'){ app.innerHTML=pageLogin(); lastPath=path; return; }
   if(!AUTHED){ ST.from=location.hash.slice(1)||'/'; location.replace('#/login'); return; }
@@ -3254,8 +3256,10 @@ const JP_LALU=[{u:'budi',plan:14,done:11,miss:1,res:2,unpl:2},{u:'dimas',plan:12
 const jpLalu=()=>JP_LALU.map(r=>({...r,_id:r.u,pct:Math.round(r.done/Math.max(1,r.plan-r.res)*100)}));
 function jpHariIni(){ const rows=[];
   jpUsers().forEach(usr=>{ const plan=jpItems(usr.id,1,0), names=plan.map(p=>jpToko(p.t)), vs=visList().map(visLive).filter(v=>v.u===usr.id);
-    const done=vs.filter(v=>v.status==='Selesai'&&names.includes(v.place)).length, run=vs.filter(v=>v.status==='Berjalan'&&names.includes(v.place)).length, unpl=vs.filter(v=>v.status!=='Belum'&&!names.includes(v.place)).length;
-    if(!plan.length&&!unpl) return; rows.push({_id:usr.id,u:usr.id,plan:plan.length,done,run,sisa:plan.length-done-run,unpl}); }); return rows; }
+    const rsP=shRead('visitExc',[]).filter(e=>e.u===usr.id&&e.type==='Dijadwal ulang'&&e.tgl==='26 Okt').map(e=>e.place);
+    const done=vs.filter(v=>v.status==='Selesai'&&names.includes(v.place)&&!rsP.includes(v.place)).length, run=vs.filter(v=>v.status==='Berjalan'&&names.includes(v.place)&&!rsP.includes(v.place)).length, unpl=vs.filter(v=>v.status!=='Belum'&&!names.includes(v.place)).length;
+    const res=rsP.filter(p=>names.includes(p)).length;
+    if(!plan.length&&!unpl) return; rows.push({_id:usr.id,u:usr.id,plan:plan.length,done,run,res,sisa:Math.max(0,plan.length-done-run-res),unpl}); }); return rows; }
 
 /* ---------- Aktivitas lapangan FMCG & MD ---------- */
 const FM_LOG_STATIC=[['26 Okt','Lestari Putri','Electronic City Kemang','Cek stok','Selesai','30 SKU · 2 barang tidak tersedia · 1 di luar planned product'],['26 Okt','Lestari Putri','Electronic City Kemang','Price promo','Selesai','Sabun Cair Segar 500 ml: Rp29.900 → Rp24.900 (16,7%); Teh Melati Botol 350 ml: Rp6.500 → Rp5.500 (15,4%)'],['26 Okt','Rangga Saputra','Best Denki Senayan City','Facing display','Draft','Rak Utama 86, Boot 84, Gudang –'],['26 Okt','Rangga Saputra','Best Denki Senayan City','Support task','Selesai','Bersihkan freezer · foto before dan after'],['25 Okt','Lestari Putri','Electronic City Kemang','Support task','Selesai','Rapikan etalase · foto before dan after']].map(([tgl,who,toko,jenis,status,isi],i)=>({_id:'f'+i,tgl,who,toko,jenis,status,isi}));
@@ -3444,10 +3448,15 @@ function pageKepatuhan(q){
   const hi=jpHariIni(), hP=hi.reduce((a,r)=>a+r.plan,0), hD=hi.reduce((a,r)=>a+r.done,0), hU=hi.reduce((a,r)=>a+r.unpl,0);
   const hariIni=card('Plan vs actual hari ini',dataTable('kph',{rows:hi,rowClick:r=>`jpOpen('${r.u}')`,empty:'Belum ada journey plan untuk hari ini.',cols:[
     {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(byU(r.u).name)}</span><span class="xs muted" style="display:block">${esc(byU(r.u).job)}</span>`,prim:true},
-    {label:'Rencana',render:r=>r.plan,align:'r'},{label:'Selesai',render:r=>r.done,align:'r',hide:true},{label:'Berjalan',render:r=>r.run,align:'r',hide:true},{label:'Belum',render:r=>r.sisa,align:'r',hide:true},
+    {label:'Rencana',render:r=>r.plan,align:'r'},{label:'Selesai',render:r=>r.done,align:'r',hide:true},{label:'Berjalan',render:r=>r.run,align:'r',hide:true},{label:'Dijadwal ulang',render:r=>r.res?spill(String(r.res),'warning'):'<span class="muted">0</span>',align:'r',hide:true},{label:'Belum',render:r=>r.sisa,align:'r',hide:true},
     {label:'Di luar rencana',render:r=>r.unpl?spill(r.unpl+' kunjungan','warning'):'<span class="muted">–</span>'}]}),{desc:'Senin 26 Okt 2026. Rencana dari journey plan, realisasi dari check-in. '+hD+' dari '+hP+' rencana selesai, '+hU+' kunjungan di luar rencana. Kunjungan di luar rencana dicatat, tidak menambah kepatuhan.'});
   return {title:'Kepatuhan kunjungan',html:`
   ${hariIni}<div style="height:12px"></div>
+  ${card('Pengecualian dari lapangan '+tag('Usulan','accent'),dataTable('kpx',{rows:shRead('visitExc',[]).map(e=>({...e,_id:e.id})).reverse(),rowClick:r=>`jpOpen('${r.u}')`,empty:'Belum ada pengecualian dari aplikasi mobile.',cols:[
+    {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(byU(r.u).name)}</span><span class="xs muted" style="display:block">${esc(r.place)}</span>`,prim:true},
+    {label:'Jenis',render:r=>spill(r.type,r.type==='Terlewat'?'danger':'warning')},
+    {label:'Alasan',render:r=>`<span class="xs">${esc(r.alasan)}</span>`,hide:true},
+    {label:'Tanggal',render:r=>r.type==='Dijadwal ulang'?esc(r.tgl+' → '+r.untuk):esc(r.tgl),hide:true}]}),{desc:'Jadwal ulang dan alasan kunjungan terlewat yang dicatat sales di aplikasi mobile. Dijadwal ulang tidak dihitung sebagai kelalaian.'})}<div style="height:12px"></div>
   ${card('Plan vs actual minggu lalu',dataTable('kpl',{rows:jpLalu(),rowClick:r=>`jpOpen('${r.u}')`,cols:[
     {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(byU(r.u).name)}</span><span class="xs muted" style="display:block">${esc(byU(r.u).job)}</span>`,prim:true},
     {label:'Rencana',render:r=>r.plan,align:'r',hide:true},{label:'Selesai',render:r=>r.done,align:'r',hide:true},
