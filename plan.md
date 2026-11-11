@@ -194,4 +194,9 @@ Semua butir lampiran masuk ke satu fase atau tercatat tidak berlaku.
   - Ke fase 4: judul header 18px (V-45), dipasangkan dengan PageHeader di fase 6.
   - Ke fase 5: peta label dan tone per status serta objek `paths` (S-08, S-47, S-72, S-79, M-19), karena harus diterapkan bersama perombakan aksi.
   - `nextCode()` (bagian S-104) baru dibuat bila ada alur yang membuat kode manusiawi.
-- Fase berikutnya: fase 2, kit komponen.
+- Fase 2 selesai 11 Nov 2026. Kit di `dashboard/index.html`:
+  - CSS: tombol sembilan varian dan empat ukuran, kartu (default, ink, aksen, soft), tile ikon, StatCard (ikon di kanan, tone), badge, hitungan, avatar dan tumpukan, input (default, soft, pill, invalid), combobox, textarea, switch, segmented, chip, tab pill dan underline dengan pudar kanan, stepper, progress, segment bar, banner empat tone, keadaan kosong, tabel, dialog, sheet, menu, tooltip, toast, baris komposit.
+  - JS: helper `btn`, `ibtn`, `tag`, `spill`, `badge`, `countBadge`, `statusDot`, `iconTile`, `statCard`, `pills`, `utabs`, `chip`, `segmented`, `choiceGrid`, `stepper`, `swc`, `progressBar`, `segmentBar`, `card`, `banner`, `callout`, `blocker`, `emptyState`, `keyValue`, `splitStats`, `pageHead`, `formField`, `listRow`, `rankedRow`, `historyRow`, `checkList`, `entityChip`, `codeLink`, `personChip`, `flowChain`, `settingsList`, `totalFooter`, `metricOnInk`, `readingTile`, `avatarStack`, `actionMenu`, `confirmAsk`, `toast` (tone default), peta `STATUS_TONE`.
+  - Perilaku: fokus terkunci di dialog, latar inert, scroll `main` terkunci, panah di tablist dan radiogroup, menu dengan panah dan Esc, tooltip 200 ms, combobox per kata dengan sheet di ponsel dan `aria-activedescendant`, tabel dengan sort, tombol buka, reset halaman saat URL berubah, dan keadaan kosong. Panel dan semua menu berbentuk bottom sheet di ponsel.
+  - Dipindah: pemakaian helper baru di tiap halaman (stepper di panel pesanan dan leads, banner blocker, `rowActs` dengan `block`, `statCard`, `emptyState`) ke fase 6 dan 7. Rail dan bar bawah (K-205 s.d. K-212) ke fase 4.
+- Fase berikutnya: fase 3, grafik.
