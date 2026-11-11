@@ -2,61 +2,71 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SIM Sales Console</title>
 <meta name="theme-color" content="#F1F0F1">
-<script>try{if(localStorage.getItem('sim-theme')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23101112'/%3E%3Cpath d='M40 22c-2-3-5.5-4.5-9.5-4.5-5.5 0-9.5 3-9.5 7.5 0 10 19 6.5 19 16 0 4.5-4 7.5-10 7.5-4.5 0-8-1.8-10-5' fill='none' stroke='%23fff' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='49' cy='18' r='5.5' fill='%230A92F2'/%3E%3C/svg%3E">
+<script>try{if((localStorage.getItem('salesapp.dashboard.theme')||localStorage.getItem('sim-theme'))==='dark'){document.documentElement.dataset.theme='dark';document.querySelector('meta[name=theme-color]').content='#0D0D0F'}}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,300..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ===== Tokens: WIT MES house look (kanvas abu, kartu putih tanpa border, satu ink, satu aksen), aksen tetap biru SIM ===== */
 :root{
-  --void:#E4E3E6; --canvas:#F1F0F1; --card:#FFFFFF; --raised:#F5F4F6; --control:#ECEBEE; --hover:#E4E3E6;
-  --line:#E6E5E7; --line-strong:#D9D8DC;
-  --fg:#101112; --body:#333333; --muted:#686868; --subtle:#8B8B8B;
+  --canvas:#F1F0F1; --card:#FFFFFF; --raised:#F5F4F6; --line:#E6E5E7;
+  --fg:#101112; --body:#333333; --muted:#686868; --silver:#C0C0C0; --chart-muted:#D4D3D6;
+  /* Tangga abu kit saja. Nama lama tetap ada sebagai alias supaya pemakaian lama ikut tangga ini. */
+  --surface:var(--canvas); --surface-2:var(--raised); --border:var(--line); --foreground:var(--fg);
+  --void:var(--canvas); --control:var(--canvas); --hover:var(--canvas); --line-strong:var(--line); --subtle:var(--muted);
   --invert:#101112; --on-invert:#FFFFFF; --ink:#101112; --ink-2:#1B1C1E; --ink-3:#26282B; --on-ink:#FFFFFF; --on-ink-muted:#B8B8B8; --ink-line:rgb(255 255 255 / .1);
   --accent:#0A92F2; --accent-strong:#0A6FE0; --accent-dark:#0857B8; --accent-text:#0A62C9; --accent-soft:#E7F2FE;
-  --accent-grad:linear-gradient(180deg,#21CFF7 0%,#0A92F2 45%,#3466FF 100%);
   --info:#EFA477; --info-text:#9A4E24; --info-soft:#FDF1E8;
   --success:#047857; --success-soft:#D1FAE5; --warning:#975000; --warning-soft:#FEF3C7; --danger:#C9141B; --danger-soft:#FDECED;
   --pop-blue:#0A6FE0; --pop-tan:#F6C29C; --pop-ink:#101112; --pop-sky:#D3EAFD; --pop-mist:#E6E5E7;
-  --s1:#0A92F2; --s2:#E07B3C; --s3:#123F75; --s4:#14A38B; --s5:#9B5DE5; --s0:#C0C0C0;
-  --st-h:#0FA968; --st-t:#F2A11F; --st-c:#0A92F2; --st-s:#9B5DE5; --st-o:#D9D8DC; --st-b:#E5484D; --st-p:#E07B3C;
+  /* Slot kategori grafik (D2). Makna slot lama dipertahankan: 1 biru, 2 tan, 3 ink, 4 success, 5 warning, 0 abu. */
+  --s1:var(--accent); --s2:var(--info); --s3:var(--fg); --s4:var(--success); --s5:var(--warning); --s0:var(--chart-muted);
+  --st-h:var(--success); --st-t:var(--warning); --st-c:var(--info); --st-s:var(--s3); --st-o:var(--chart-muted); --st-b:var(--danger); --st-p:var(--accent);
   --r-card:24px; --r-hero:28px; --r-panel:16px; --r-tile:12px;
   --glow:radial-gradient(38% 34% at 72% 22%,rgb(10 146 242 / .10),transparent 70%),radial-gradient(28% 30% at 92% 48%,rgb(52 102 255 / .07),transparent 70%),radial-gradient(34% 30% at 55% 8%,rgb(211 234 253 / .65),transparent 72%);
   --shadow-card:0 1px 2px rgb(16 17 18 / .03),0 8px 24px -12px rgb(16 17 18 / .12);
   --shadow-float:0 12px 40px -12px rgb(16 17 18 / .25);
-  --shadow-glow:0 10px 24px -8px rgb(10 120 240 / .5);
+  --shadow-glow:0 8px 20px -8px rgb(10 146 242 / .6);
+  --shadow-up:0 -10px 30px -14px rgb(16 17 18 / .25);
   --hatch-line:rgb(16 17 18 / .07);
-  --font:'DM Sans',ui-sans-serif,system-ui,Arial,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+  --font:'DM Sans',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif; --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
 :root[data-theme='dark']{
   color-scheme:dark; --hatch-line:rgb(255 255 255 / .055);
-  --void:#070708; --canvas:#0D0D0F; --card:#151517; --raised:#1C1C1F; --control:#242428; --hover:#2C2C31;
-  --line:#232327; --line-strong:#34343B;
-  --fg:#F4F4F5; --body:#C9C9CF; --muted:#94949C; --subtle:#6B6B73;
+  --canvas:#0D0D0F; --card:#151517; --raised:#1C1C1F; --line:#2A2A2F;
+  --fg:#F4F4F5; --body:#C9C9CF; --muted:#94949C; --silver:#5A5A60; --chart-muted:#3A3A41;
   --invert:#F4F4F5; --on-invert:#101112; --ink:#050506; --ink-2:#141416; --ink-3:#1E1E21; --ink-line:rgb(255 255 255 / .08);
   --glow:radial-gradient(38% 34% at 72% 22%,rgb(10 146 242 / .10),transparent 70%),radial-gradient(28% 30% at 92% 48%,rgb(52 102 255 / .06),transparent 70%);
   --accent-text:#5CB8FF; --accent-soft:rgb(10 146 242 / .16);
   --info-text:#F2B48A; --info-soft:rgb(239 164 119 / .14);
   --success:#3DD68C; --success-soft:rgb(61 214 140 / .14); --warning:#FF9447; --warning-soft:rgb(255 148 71 / .14); --danger:#FF5C5C; --danger-soft:rgb(255 92 92 / .14);
   --pop-sky:#173452; --pop-mist:#2C2C31;
-  --s3:#5A8BD0; --s0:#3A3A41; --st-o:#34343B;
+  --s3:#8B8B93;
+  --shadow-glow:0 8px 20px -8px rgb(10 146 242 / .45); --shadow-up:0 -10px 30px -14px rgb(0 0 0 / .7);
   --shadow-card:inset 0 1px 0 rgb(255 255 255 / .035),0 1px 2px rgb(0 0 0 / .5);
   --shadow-float:0 24px 60px -16px rgb(0 0 0 / .75);
 }
-*{box-sizing:border-box;margin:0;padding:0}
+*,::before,::after{box-sizing:border-box;margin:0;padding:0;border-color:var(--line)}
 html,body{height:100%}
-body{font-family:var(--font);font-feature-settings:'ss01','cv11';-webkit-font-smoothing:antialiased;background:var(--canvas);color:var(--body);font-size:14px;line-height:1.45}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:var(--font);font-feature-settings:'ss01','cv11';-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;background:var(--canvas);color:var(--fg);font-size:14px;line-height:1.45}
+p{color:var(--body)}
+::selection{background:var(--accent-strong);color:#fff}
 button,input,select,textarea{font:inherit;color:inherit}
-button{background:none;border:0;cursor:pointer}
+button{background:none;border:0}
+button:not(:disabled),[role=button]{cursor:pointer}
 a{color:inherit;text-decoration:none}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .tabular{font-variant-numeric:tabular-nums}
 .mono{font-family:var(--mono);font-size:12px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .hatch{background-image:repeating-linear-gradient(135deg,var(--hatch-line) 0 1px,transparent 1px 7px)}
+.safe-b{padding-bottom:env(safe-area-inset-bottom)} .safe-t{padding-top:env(safe-area-inset-top)}
+.no-scrollbar{scrollbar-width:none} .no-scrollbar::-webkit-scrollbar{display:none}
 .muted{color:var(--muted)} .fg{color:var(--fg)} .xs{font-size:12px} .sm{font-size:13px}
 @keyframes rise{from{opacity:0;transform:translateY(8px)}} @keyframes fade{from{opacity:0}} @keyframes slidein{from{transform:translateX(-100%)}} @keyframes slideinr{from{transform:translateX(100%)}}
 /* Animasi muat data: skeleton mengikuti bentuk komponen, lalu tiap komponen masuk dengan animasinya sendiri */
@@ -85,15 +95,15 @@ main.loading :is(.stat,.card) :is(.cc,.lc,.meter,.bar)>*{visibility:hidden}
 main.loading .donut svg{opacity:1} main.loading .donut circle{stroke:var(--sk)!important}
 main.refetch :is(.tbl-wrap,.cc,.lc,.donut-wrap,.stats,.rows){opacity:.4;filter:saturate(.4);transition:opacity .2s,filter .2s;pointer-events:none}
 /* Mikro-interaksi */
-.stat,.card{transition:background-color .15s,transform .25s var(--ease-out),box-shadow .25s var(--ease-out)}
-a.stat:hover,button.stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-float)}
-a.stat:active,button.stat:active{transform:translateY(0) scale(.99)}
-.cc-col{transition:height .45s var(--ease-out),background-color .15s,transform .2s var(--ease-out)}
-.cc-col:hover{transform:translateY(-3px)}
-.bar i{transform-origin:left center}
-.lc circle{transform-box:fill-box;transform-origin:center;transition:transform .2s var(--ease-out)}
-.lc circle:hover{transform:scale(1.5)}
+/* Gerak dibatasi (D3): transisi warna, tekan .98, fade dan slide overlay, pulse status hidup */
+.stat,.card{transition:background-color .15s}
+a.stat:hover,button.stat:hover{background:var(--raised)}
+a.stat:active,button.stat:active,.fchip:active,.pills button:active,.dd-opt:active,.mi:active{transform:scale(.98)}
+.cc-col{transition:background-color .15s,opacity .15s}
 .tbl tbody td{transition:background-color .15s}
+@keyframes pulse{50%{opacity:.45}}
+.pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}
+@media (max-width:767px),(pointer:coarse){ .inp input,.sel select,.dd-btn,textarea.ta,input,textarea,select{font-size:16px} }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* ===== Shell: rail ink mengambang, header ringkas, bar bawah ink di HP (pola WIT MES) ===== */
@@ -109,10 +119,11 @@ a.stat:active,button.stat:active{transform:translateY(0) scale(.99)}
 .sb-brand{display:flex;align-items:center;gap:12px;padding:0 4px;flex:none;min-height:44px}
 .sb-logo{height:44px;border-radius:16px;background:#fff;display:flex;align-items:center;padding:0 12px;flex:none}
 .sb-logo img{height:24px;display:block}
-.sb-mark{width:44px;height:44px;border-radius:16px;background:var(--accent-strong);color:#fff;display:grid;place-items:center;font-weight:800;font-size:17px;flex:none;box-shadow:var(--shadow-glow)}
+.sb-mark{position:relative;width:44px;height:44px;border-radius:16px;background:rgb(255 255 255 / .05);color:#fff;display:grid;place-items:center;font-weight:800;font-size:18px;flex:none}
+.sb-mark::after{content:"";position:absolute;top:9px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
 .sb-scroll{flex:1;min-height:0;width:100%;overflow-y:auto;margin-top:12px;padding:2px;scrollbar-width:none}
 .sb-scroll::-webkit-scrollbar{display:none}
-.sb-sec{padding:14px 12px 6px;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--on-ink-muted);white-space:nowrap}
+.sb-sec{padding:14px 12px 6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--on-ink-muted);white-space:nowrap}
 .sb-hr{border:0;border-top:1px solid var(--ink-line);margin:8px 10px}
 .nl{position:relative;display:flex;height:40px;align-items:center;gap:12px;border-radius:16px;padding:0 12px;font-size:13.5px;font-weight:500;color:var(--on-ink-muted);white-space:nowrap;transition:background-color .15s,color .15s}
 .nl:hover{background:rgb(255 255 255 / .1);color:#fff}
@@ -170,7 +181,8 @@ main{flex:1;min-height:0;overflow-y:auto;padding:2px 2px 8px;outline:none;positi
 
 /* ===== Components ===== */
 .btn{display:inline-flex;flex:none;align-items:center;justify-content:center;gap:8px;border-radius:999px;font-weight:500;white-space:nowrap;transition:background-color .15s,opacity .15s,color .15s;user-select:none;height:40px;padding:0 16px;font-size:14px}
-.btn:active{transform:scale(.97)}
+.btn:active{transform:scale(.98)}
+.btn.icon-lg:active,.bell:active,.user-btn:active{transform:scale(.95)}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .btn.sm{height:32px;padding:0 12px;font-size:12px}
 .btn.icon{width:40px;padding:0} .btn.icon-sm{width:32px;height:32px;padding:0} .btn.icon-lg{width:48px;height:48px;padding:0}
@@ -207,7 +219,7 @@ main{flex:1;min-height:0;overflow-y:auto;padding:2px 2px 8px;outline:none;positi
 .stat .si{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;margin-bottom:4px}
 .stat small{font-size:12px;color:var(--muted)}
 .stat b{font-size:28px;font-weight:800;color:var(--fg);letter-spacing:-.5px;line-height:1.15;font-variant-numeric:tabular-nums}
-.hero-n{font-size:44px;font-weight:700;letter-spacing:-.03em;color:var(--fg);line-height:1;font-variant-numeric:tabular-nums}
+.hero-n{font-size:30px;font-weight:700;letter-spacing:-.03em;color:var(--fg);line-height:1;font-variant-numeric:tabular-nums}
 
 .pills{display:inline-flex;gap:2px;padding:4px;border-radius:99px;background:var(--card);box-shadow:var(--shadow-card),inset 0 0 0 1px var(--line)}
 .pills button{height:32px;padding:0 14px;border-radius:99px;font-size:13px;font-weight:600;color:var(--muted);transition:background-color .15s,color .15s}
@@ -301,7 +313,7 @@ textarea.ta:focus{outline:2px solid var(--accent);outline-offset:2px}
 /* table */
 .tbl-wrap{overflow-x:auto;margin:0 -4px}
 .tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
-.tbl th{text-align:left;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl th{text-align:left;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.025em;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
 .tbl td{padding:12px;border-bottom:1px solid var(--line);color:var(--body);vertical-align:middle}
 .tbl tr:last-child td{border-bottom:0}
 .tbl tbody tr.click{cursor:pointer}
@@ -327,7 +339,7 @@ textarea.ta:focus{outline:2px solid var(--accent);outline-offset:2px}
 
 /* charts */
 .cc{display:flex;gap:10px}
-.cc-axis{display:flex;flex-direction:column;justify-content:space-between;height:220px;font-size:11px;color:var(--subtle);text-align:right;width:40px;padding-bottom:0;flex:none}
+.cc-axis{font-variant-numeric:tabular-nums;display:flex;flex-direction:column;justify-content:space-between;height:220px;font-size:11px;color:var(--subtle);text-align:right;width:40px;padding-bottom:0;flex:none}
 .cc-main{flex:1;min-width:0}
 .cc-plot{position:relative;height:220px;display:flex;align-items:flex-end;gap:10px}
 .cc-grid{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none}
@@ -335,15 +347,15 @@ textarea.ta:focus{outline:2px solid var(--accent);outline-offset:2px}
 .cc-cell{position:relative;flex:1;height:100%;display:flex;align-items:flex-end;justify-content:center;min-width:0}
 .cc-col{position:relative;width:100%;max-width:56px;border-radius:14px;border:1px solid var(--line-strong);background-color:var(--raised);transition:height .3s,background-color .15s;min-height:12px}
 .cc-col:hover{background-color:var(--control)}
-.cc-col.sel{background:var(--accent-grad);border-color:transparent;box-shadow:var(--shadow-glow)}
+.cc-col.sel{background:var(--accent-strong);border-color:transparent;box-shadow:var(--shadow-glow)}
 .cc-col .badge{position:absolute;top:6px;left:50%;transform:translateX(-50%);background:rgb(255 255 255 / .9);color:var(--ink);font-size:11px;font-weight:600;border-radius:99px;padding:2px 7px;white-space:nowrap}
 .cc-col .val{position:absolute;bottom:8px;left:0;right:0;text-align:center;color:#fff;font-size:11px;font-weight:600;white-space:nowrap;letter-spacing:-.01em}
 .cc-cap{position:absolute;left:50%;transform:translateX(-50%);width:40%;max-width:24px;height:3px;border-radius:99px;background:var(--fg);opacity:.85;pointer-events:none}
-.cc-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--invert);color:var(--on-invert);font-size:11.5px;font-weight:500;padding:4px 8px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s;z-index:3}
+.cc-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--ink);color:var(--on-ink);font-size:12px;font-weight:500;padding:6px 10px;border-radius:12px;box-shadow:var(--shadow-float);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s;z-index:3}
 .cc-col:hover .cc-tip,.cc-col:focus-visible .cc-tip{opacity:1}
 .cc-col.sel .cc-tip{display:none}
 .cc-labels{display:flex;gap:10px;margin-top:8px}
-.cc-labels span{flex:1;text-align:center;font-size:11.5px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cc-labels span{font-variant-numeric:tabular-nums;flex:1;text-align:center;font-size:11.5px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cc-labels span.on{color:var(--fg);font-weight:600}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);align-items:center}
 .legend span{display:inline-flex;gap:6px;align-items:center}
@@ -361,10 +373,10 @@ textarea.ta:focus{outline:2px solid var(--accent);outline-offset:2px}
 .dleg button:hover,.dleg button.on{background:var(--raised)}
 .dleg .lb{flex:1;color:var(--body)} .dleg .v{font-weight:600;color:var(--fg);font-variant-numeric:tabular-nums}
 .lc svg{width:100%;height:auto;display:block;overflow:visible}
-.lc text{fill:var(--subtle);font-size:11px;font-family:var(--font)}
+.lc text{fill:var(--muted);font-size:11px;font-family:var(--font);font-variant-numeric:tabular-nums}
 .gantt{overflow-x:auto}
 .gantt table{border-collapse:separate;border-spacing:3px;font-size:12px}
-.gantt th{font-weight:500;color:var(--subtle);font-size:10.5px;min-width:18px}
+.gantt th{font-variant-numeric:tabular-nums;font-weight:500;color:var(--subtle);font-size:10.5px;min-width:18px}
 .gantt td.nm{white-space:nowrap;padding-right:10px;color:var(--fg);font-weight:500;position:sticky;left:0;background:var(--card)}
 .gantt td.c i{display:block;width:18px;height:22px;border-radius:6px}
 .gantt td.c i.hatch{background-color:var(--raised)}
@@ -378,7 +390,7 @@ textarea.ta:focus{outline:2px solid var(--accent);outline-offset:2px}
 .g-hero{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);margin-bottom:16px}
 .hero-r{display:grid;gap:16px;grid-template-rows:auto 1fr}
 .g-2s{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-.kick{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.kick{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 .card.ink{position:relative;overflow:hidden;background:var(--ink);color:var(--on-ink);border-radius:var(--r-hero);box-shadow:var(--shadow-float);display:flex;flex-direction:column}
 .card.ink::before{content:"";position:absolute;right:-70px;top:-90px;width:280px;height:280px;border-radius:50%;background:var(--accent);opacity:.3;filter:blur(64px);pointer-events:none}
 .card.ink>*{position:relative}
@@ -391,7 +403,6 @@ textarea.ta:focus{outline:2px solid var(--accent);outline-offset:2px}
 .ink .bar{background:rgb(255 255 255 / .15);height:6px} .ink .bar i{background:#fff}
 .ink-chip{display:inline-flex;align-items:center;gap:6px;height:32px;border-radius:99px;border:1px solid var(--ink-line);background:rgb(255 255 255 / .08);padding:0 12px;font-size:12px;font-weight:600;color:#fff;transition:background-color .15s}
 .ink-chip:hover{background:rgb(255 255 255 / .16)}
-a.card.ink:hover,a.card.acc:hover{transform:translateY(-2px)}
 .card.acc{background:var(--accent-strong);color:#fff;box-shadow:var(--shadow-glow);display:flex;flex-direction:column;gap:6px}
 .card.acc .lb{font-size:13px;font-weight:600;color:rgb(255 255 255 / .82)}
 .card.acc .big{font-size:48px;font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
@@ -406,16 +417,21 @@ a.card.ink:hover,a.card.acc:hover{transform:translateY(-2px)}
 .at.u{background:var(--accent-soft);color:var(--accent-text)} .at.d{background:var(--danger-soft);color:var(--danger)}
 .at.u:hover,.at.d:hover{filter:brightness(.97)}
 
+/* banner (versi dasar; dilengkapi di fase 2) */
+.banner{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;border-radius:var(--r-panel);padding:12px 14px;margin-bottom:16px;font-size:13px;line-height:1.5}
+.banner>span{flex:1;min-width:12rem}
+.banner.danger{background:var(--danger-soft);color:var(--fg)} .banner.danger>svg{color:var(--danger);flex:none;margin-top:1px}
+
 /* overlays */
 .overlay{position:fixed;inset:0;z-index:60;background:rgb(16 17 18 / .4);animation:fade .2s}
-.panel{position:fixed;top:12px;right:12px;bottom:12px;z-index:61;width:min(480px,calc(100% - 24px));background:var(--card);border-radius:var(--r-hero);overflow:hidden;box-shadow:var(--shadow-float);display:flex;flex-direction:column;animation:slideinr .25s cubic-bezier(.2,.8,.2,1)}
+.panel{position:fixed;top:12px;right:12px;bottom:12px;z-index:61;width:min(480px,calc(100% - 24px));background:var(--card);border-radius:var(--r-hero);overflow:hidden;box-shadow:var(--shadow-float);display:flex;flex-direction:column;animation:slideinr .2s cubic-bezier(.2,.8,.2,1)}
 .panel-h{display:flex;align-items:flex-start;gap:12px;padding:24px 24px 12px}
-.panel-h h2{font-size:20px;font-weight:700;color:var(--fg);letter-spacing:-.02em;line-height:1.2}
+.panel-h h2{font-size:18px;font-weight:600;color:var(--fg);letter-spacing:-.02em;line-height:1.2}
 .panel-b{flex:1;overflow-y:auto;padding:4px 24px 24px}
 .panel-f{border-top:1px solid var(--line);padding:14px 24px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
-.modal{position:fixed;z-index:61;top:50%;left:50%;transform:translate(-50%,-50%);width:min(520px,calc(100% - 32px));max-height:calc(100dvh - 40px);overflow:auto;border-radius:var(--r-card);background:var(--card);box-shadow:var(--shadow-float);padding:24px;animation:rise .25s}
+.modal{position:fixed;z-index:61;top:50%;left:50%;transform:translate(-50%,-50%);width:min(520px,calc(100% - 32px));max-height:calc(100dvh - 40px);overflow:auto;border-radius:var(--r-card);background:var(--card);box-shadow:var(--shadow-float);padding:24px;animation:rise .2s}
 @keyframes sheetup{from{transform:translateY(100%)}}
-.drawer{position:fixed;left:0;right:0;bottom:0;z-index:61;height:min(86dvh,760px);background:var(--ink);border-radius:28px 28px 0 0;box-shadow:var(--shadow-up,0 -10px 30px -14px rgb(16 17 18 / .25));animation:sheetup .25s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
+.drawer{position:fixed;left:0;right:0;bottom:0;z-index:61;height:min(86dvh,760px);background:var(--ink);border-radius:28px 28px 0 0;box-shadow:var(--shadow-up);animation:sheetup .2s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
 .drawer::before{content:"";width:40px;height:4px;border-radius:99px;background:rgb(255 255 255 / .2);margin:10px auto 0;flex:none}
 .drawer .sidebar{width:100%;height:auto;flex:1;min-height:0;border-radius:0;box-shadow:none;background:none;padding:12px 16px 16px}
 .pop{position:absolute;top:calc(100% + 8px);z-index:40;width:280px;border-radius:var(--r-panel);border:1px solid var(--line-strong);background:var(--card);padding:8px;box-shadow:var(--shadow-float);animation:rise .2s}
@@ -470,7 +486,6 @@ a.card.ink:hover,a.card.acc:hover{transform:translateY(-2px)}
   .hero-big{font-size:48px}
   .g-2s{gap:12px}
   .g-ov{grid-template-columns:minmax(0,1fr)} .span2,.g-ov .xl1{grid-column:auto}
-  .hero-n{font-size:36px}
   .kv{grid-template-columns:repeat(2,minmax(0,1fr))}
   .tbl.resp thead{display:none}
   .tbl.resp,.tbl.resp tbody,.tbl.resp tr{display:block}
@@ -549,14 +564,19 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const rp=n=>'Rp'+Math.round(n).toLocaleString('id-ID');
 const jt=n=>{ if(Math.abs(n)>=1e9) return 'Rp'+(n/1e9).toLocaleString('id-ID',{maximumFractionDigits:2})+' M'; if(Math.abs(n)>=1e6) return 'Rp'+(n/1e6).toLocaleString('id-ID',{maximumFractionDigits:1})+' jt'; if(Math.abs(n)>=1e3) return 'Rp'+Math.round(n/1e3)+' rb'; return rp(n); };
-const pct=n=>n.toLocaleString('id-ID',{maximumFractionDigits:1})+'%';
-const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const num=(n,d=0)=>n.toLocaleString('id-ID',{maximumFractionDigits:d});
+const pct=n=>num(n,1)+'%';
+const writeKey=(k,v)=>{ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } };
+// Penyimpanan gagal (mode privat, kuota penuh): tampilkan banner sekali, mockup tetap jalan di memori.
+function storageFail(){ if(typeof ST!=='undefined'&&!ST.storageErr){ ST.storageErr=true; render(false); } }
+const store={get(k,d,legacy){try{let v=localStorage.getItem(k);if(v===null&&legacy)v=localStorage.getItem(legacy);return v===null?d:v}catch(e){return d}},set(k,v){const ok=writeKey(k,v);if(!ok)storageFail();return ok}};
+const KEY={theme:'salesapp.dashboard.theme',rail:'salesapp.dashboard.rail',data:'salesapp.dashboard.data'};
 const POPS=['background:var(--pop-blue);color:#fff','background:var(--pop-tan);color:#101112','background:var(--pop-ink);color:#fff','background:var(--pop-sky);color:var(--fg)','background:var(--pop-mist);color:var(--fg)'];
 const hash=s=>[...s].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
 const initials=n=>n.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase();
 const av=(name,cls='')=>`<span class="av ${cls}" role="img" aria-label="${esc(name)}" style="${POPS[hash(name)%5]}">${initials(name)}</span>`;
 const tag=(t,tone='neutral')=>`<span class="tag t-${tone}">${t}</span>`;
-const TONEC={neutral:'var(--subtle)',accent:'var(--accent)',info:'var(--info)',success:'var(--success)',warning:'var(--st-t)',danger:'var(--danger)'};
+const TONEC={neutral:'var(--subtle)',accent:'var(--accent)',info:'var(--info)',success:'var(--success)',warning:'var(--warning)',danger:'var(--danger)'};
 const spill=(t,tone='neutral')=>`<span class="spill"><i class="dotc" style="background:${TONEC[tone]}"></i>${t}</span>`;
 const delta=(v,goodUp=true)=>{const good=goodUp?v>=0:v<0;return `<span class="delta ${good?'t-success':'t-danger'}" aria-label="${v>=0?'naik':'turun'} ${Math.abs(v)}%">${I(v>=0?'arrowup':'arrowdown',14,2.4)}${pct(Math.abs(v))}</span>`};
 const btn=(label,{v='card',size='',icon=null,on='',attrs='',dis=false}={})=>`<button class="btn b-${v} ${size}" ${on?`onclick="${on}"`:''} ${attrs} ${dis?'disabled':''}>${icon?I(icon,size==='sm'?15:18):''}${label}</button>`;
@@ -591,8 +611,7 @@ try{ matchMedia('(min-width:1280px)').addEventListener('change',()=>{ if(parse()
 const SHARE_KEY='salesapp.shared.v1';
 const shGet=()=>{try{return JSON.parse(localStorage.getItem(SHARE_KEY))||{}}catch(e){return {}}};
 const shRead=(k,def)=>{const o=shGet();return o[k]!==undefined?o[k]:def};
-const shSet=(k,v)=>{try{const o=shGet();o[k]=v;localStorage.setItem(SHARE_KEY,JSON.stringify(o))}catch(e){}};
-const shReset=()=>{try{localStorage.removeItem(SHARE_KEY)}catch(e){}};
+const shSet=(k,v)=>{const o=shGet();o[k]=v;const ok=writeKey(SHARE_KEY,JSON.stringify(o));if(!ok)storageFail();return ok};
 const SKU_TASK_DEFAULT=[{id:'T-11',prod:'kl2p',toko:'Electronic City Kemang',by:'Rina Marlina',st:'Sedang diperbaiki'},{id:'T-12',prod:'ap30',toko:'Best Denki Alam Sutera',by:'Fajar Nugroho',st:'Menunggu assign'},{id:'T-09',prod:'tv43',toko:'Electronic Solution Puri',by:'Putri Ayuningtyas',st:'Closed'}];
 const CBD_DEFAULT=[{id:'CT-3',t:'Alasan leads tidak goal',to:'Tono Hidayat',qs:['Kenapa nasabah menolak?','Produk apa yang lebih diminati?'],st:'Menunggu jawaban'},{id:'CT-2',t:'Minat produk Dana Tunai',to:'Tono Hidayat',qs:['Produk apa yang paling diminati?','Berapa nominal yang dibutuhkan?','Kapan dibutuhkan?'],st:'Terjawab'}];
 const SALES=[
@@ -928,7 +947,7 @@ function repTable(tab,q){
 }
 function repBar(q,tab){
   const atoms=repAtoms(q); const tot=atoms.reduce((a,b)=>a+b.val,0), tg=atoms.reduce((a,b)=>a+b.tg,0), trx=atoms.reduce((a,b)=>a+b.trx,0);
-  return `<div class="stats" style="margin-bottom:12px">${[['Total penjualan',jt(tot)],['Transaksi',trx.toLocaleString('id-ID')],['Rata-rata / transaksi',trx?jt(tot/trx):'–'],['Pencapaian target',tg?Math.round(tot/tg*100)+'%':'–']].map(([l,v])=>`<div class="tile"><div class="xs muted">${l}</div><b class="fg tabular" style="font-size:22px;font-weight:500">${v}</b></div>`).join('')}</div>
+  return `<div class="stats" style="margin-bottom:12px">${[['Total penjualan',jt(tot)],['Transaksi',num(trx)],['Rata-rata / transaksi',trx?jt(tot/trx):'–'],['Pencapaian target',tg?Math.round(tot/tg*100)+'%':'–']].map(([l,v])=>`<div class="tile"><div class="xs muted">${l}</div><b class="fg tabular" style="font-size:22px;font-weight:500">${v}</b></div>`).join('')}</div>
   <p class="xs muted" style="margin:-4px 2px 12px">Sell-out SPG dan canvasing, periode ${repLabel(q)}. Klik baris untuk menelusuri ke level berikutnya: klien → cabang → toko → sales. Pesanan Taking Order ada di menu Pemesanan, goal pinjaman di menu Leads.</p>`;
 }
 function repSet(p){ ST.drill=[]; ST.penKey=null; setQ(p); }
@@ -952,7 +971,7 @@ function repFilters(q){
       ${sel([['','Semua toko'],...tokoOpts.map(t=>[t.id,t.name])],q.tk||'',"repSet({tk:this.value,u:''})",{label:'Filter toko',cls:'sm'})}
       ${sel([['','Semua sales'],...salesIds.map(u=>[u,(byU(u)||{}).name||u])],q.u||'',"repSet({u:this.value})",{label:'Filter sales',cls:'sm'})}
       ${dirty?`<button class="btn b-ghost sm" onclick="repSet({cl:'',cb:'',tk:'',u:'',from:'',to:'',per:''})">Hapus filter</button>`:''}</div>
-    <p class="xs muted" style="margin-top:12px">Menampilkan <b class="fg">${repLabel(q)}</b>: ${n.toLocaleString('id-ID')} transaksi, ${jt(tot)}. Filter berlaku untuk grafik, rincian, komposisi, dan semua tab.</p>`);
+    <p class="xs muted" style="margin-top:12px">Menampilkan <b class="fg">${repLabel(q)}</b>: ${num(n)} transaksi, ${jt(tot)}. Filter berlaku untuk grafik, rincian, komposisi, dan semua tab.</p>`);
 }
 function salesReport(u){
   const s=byU(u), days=dailyOf(u), mt=repMonth(u), tg=tgtUser(10,u), td=days[25], mineO=trxOct().filter(t=>t.u===u), nTrx=mineO.length, avgTrx=nTrx?mt/nTrx:0, g=GRADE.find(x=>x.u===u), inc=INC.find(x=>x.u===u);
@@ -962,7 +981,7 @@ function salesReport(u){
   openPanel(s.name,`<div class="kv" style="margin-bottom:14px"><div><dt>Penjualan Okt</dt><dd>${jt(mt)}</dd></div><div><dt>Target</dt><dd>${jt(tg)}</dd></div><div><dt>Pencapaian</dt><dd>${tg?Math.round(mt/tg*100):0}%</dd></div></div>
   <div class="kv" style="margin-bottom:14px"><div><dt>Hari ini</dt><dd>${jt(td)}</dd></div><div><dt>Transaksi</dt><dd>${nTrx}</dd></div><div><dt>Rata-rata / trx</dt><dd>${jt(avgTrx)}</dd></div></div>
   <div class="xs muted" style="margin-bottom:6px">Penjualan harian Oktober</div>
-  ${lineChart({labels:days.map((_,i)=>(i+1)%5===0||i===0?String(i+1):''),series:[{name:'Penjualan',values:days,slot:1,area:true}],fmt:v=>(v/1e6).toLocaleString('id-ID',{maximumFractionDigits:1})+' jt',label:'Penjualan harian '+s.name})}
+  ${lineChart({labels:days.map((_,i)=>(i+1)%5===0||i===0?String(i+1):''),series:[{name:'Penjualan',values:days,slot:1,area:true}],fmt:v=>num(v/1e6,1)+' jt',label:'Penjualan harian '+s.name})}
   <div class="xs muted" style="margin:14px 0 6px">Per toko</div><div class="rows" style="margin-bottom:14px">${perToko.map(([tk,v])=>`<div class="rowlink" style="cursor:default"><span style="flex:1" class="sm fg">${esc(tk.name)}<span class="xs muted" style="display:block">${tk.cabang} · ${clientName(tk.client)}</span></span><b class="tabular fg sm">${jt(v)}</b></div>`).join('')||'<span class="muted sm">Belum ada penjualan bulan ini.</span>'}</div>
   ${mixL.length?`<div class="xs muted" style="margin-bottom:6px">Produk terjual (14 hari terakhir)</div><div class="rows" style="margin-bottom:14px">${mixL.map(([n,v])=>`<div style="padding:8px 0"><div style="display:flex;justify-content:space-between" class="sm"><span class="fg">${esc(n)}</span><b class="tabular fg">${jt(v)}</b></div><div class="bar" style="margin-top:6px"><i style="width:${v/mixMax*100}%"></i></div></div>`).join('')}</div>`:''}
   <div class="grid g2" style="gap:10px"><div class="tile"><div class="xs muted">Kehadiran Okt</div><b class="fg">${hadir} hadir · ${telat} terlambat</b></div><div class="tile"><div class="xs muted">Grade / insentif</div><b class="fg">${g?g.grade+' ('+g.total+')':'–'} · ${inc?jt(inc.final):'–'}</b></div></div>`,
@@ -1120,8 +1139,8 @@ function bottomBar(path){
 function wsList(){ return [['all','Semua klien'],...live('client').filter(c=>c.status==='Aktif').map(c=>[c.id,c.name])]; }
 function wsPop(el){ if(el.parentElement.querySelector('.pop')) return el.parentElement.querySelector('.pop').remove(); const p=document.createElement('div'); p.className='pop'; p.style.left='0'; p.style.top='auto'; p.style.bottom='calc(100% + 8px)'; p.innerHTML=`<div class="xs muted" style="padding:6px 12px">Klien SIM (multi-tenant)</div>${wsList().map(([k,l])=>`<button class="mi" onclick="ST.ws='${k}';toast('Workspace diganti','Menampilkan ${l}. Data mockup tetap sama.');render(false)">${I(k==='all'?'dash':'store',16)}<span style="flex:1">${l}</span>${ST.ws===k?I('check',16,2.4):''}</button>`).join('')}<hr class="sb-hr"><a class="mi" href="index.html">${I('mobile',16)}Aplikasi mobile sales</a>`; el.parentElement.appendChild(p); }
 function doSearch(q){ q=q.trim().toLowerCase(); if(!q) return; const s=SALES.find(x=>x.name.toLowerCase().includes(q)); if(s) return go('/absensi?q='+encodeURIComponent(s.name)); const l=D.leads.find(x=>x.name.toLowerCase().includes(q)); if(l) return go('/leads?q='+encodeURIComponent(l.name)); const t=TOKO.find(x=>x.name.toLowerCase().includes(q)); if(t) return go('/toko?q='+encodeURIComponent(t.name)); toast('Tidak ditemukan','Coba nama sales, toko, atau nasabah.','danger'); }
-function toggleSb(){ ST.sidebar=!ST.sidebar; store.set('sim-sidebar',ST.sidebar?'1':'0'); render(false); }
-function setTheme(t){ ST.theme=t||(ST.theme==='dark'?'light':'dark'); document.documentElement.dataset.theme=ST.theme==='dark'?'dark':''; if(ST.theme!=='dark') delete document.documentElement.dataset.theme; store.set('sim-theme',ST.theme); render(false); }
+function toggleSb(){ ST.sidebar=!ST.sidebar; store.set(KEY.rail,ST.sidebar?'1':'0'); render(false); }
+function setTheme(t){ ST.theme=t||(ST.theme==='dark'?'light':'dark'); document.documentElement.dataset.theme=ST.theme==='dark'?'dark':''; if(ST.theme!=='dark') delete document.documentElement.dataset.theme; store.set(KEY.theme,ST.theme); const tc=document.querySelector('meta[name=theme-color]'); if(tc) tc.content=ST.theme==='dark'?'#0D0D0F':'#F1F0F1'; render(false); }
 function openDrawer(){ lastFocus=document.activeElement; $('#layer').innerHTML=`<div class="overlay" onclick="closeLayer()"></div><div class="drawer" role="dialog" aria-modal="true" aria-label="Menu" tabindex="-1">${sidebarHTML(false,true)}</div>`; $('#layer .drawer').focus(); }
 function bellPop(el){ if(el.parentElement.querySelector('.pop')) return el.parentElement.querySelector('.pop').remove(); const p=document.createElement('div'); p.className='pop'; p.style.right='0';
   p.innerHTML=`<div class="xs muted" style="padding:6px 12px">Perlu perhatian</div>
@@ -1138,50 +1157,20 @@ let lastPath=null;
    Render karena state lokal (pilih baris, hover, toggle) tidak dianggap fetch. */
 const FX={key:null,mode:null,until:0,timer:0};
 const reduceMotion=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
-const easeOut=t=>1-Math.pow(1-t,3);
 function fxBegin(mode){ const ms=mode==='full'?480+Math.random()*260:260+Math.random()*140; FX.mode=mode; FX.until=Date.now()+ms; clearTimeout(FX.timer); FX.timer=setTimeout(fxReveal,ms); fxApply(); }
 function fxApply(){ const m=$('main'), h=$('.hdr'); if(!m) return; const on=FX.mode&&Date.now()<FX.until; m.classList.toggle('loading',on&&FX.mode==='full'); m.classList.toggle('refetch',on&&FX.mode==='soft'); h?.classList.toggle('fetching',!!on); if(on) m.setAttribute('aria-busy','true'); else m.removeAttribute('aria-busy'); }
 function fxReveal(){ const mode=FX.mode; FX.mode=null; fxApply(); const m=$('main'); if(!m||!mode) return; fxAnimate(m,mode==='full'); }
 function fxAnimate(root,full){
-  const A=(el,kf,o)=>el.animate(kf,{fill:'backwards',easing:'cubic-bezier(.16,1,.3,1)',...o});
-  if(full) [...root.querySelectorAll(':scope > :not(.grid):not(.stats), :scope > .stats > *, :scope > .grid > *, :scope > div > .card')].forEach((el,i)=>A(el,[{opacity:0,transform:'translateY(14px) scale(.985)'},{opacity:1,transform:'none'}],{duration:520,delay:Math.min(i,10)*55}));
-  // Angka: hitung naik dari 0 ke nilai akhir, format Indonesia tetap
-  root.querySelectorAll('.stat b, .hero-n, .hero-big, .card.acc .big, .at b, .donut .ctr b').forEach((el,i)=>countUp(el,700+i*40));
-  // Grafik kolom: batang tumbuh dari bawah, bergantian
-  root.querySelectorAll('.cc').forEach(cc=>cc.querySelectorAll('.cc-col').forEach((c,i)=>A(c,[{transform:'scaleY(0)',transformOrigin:'bottom',opacity:.3},{transform:'scaleY(1)',transformOrigin:'bottom',opacity:1}],{duration:650,delay:120+i*45})));
-  root.querySelectorAll('.cc-cap').forEach((c,i)=>A(c,[{opacity:0},{opacity:.85}],{duration:300,delay:500+i*45}));
-  // Grafik garis: garis tergambar, area muncul, titik meletup
-  root.querySelectorAll('.lc svg').forEach(svg=>{
-    svg.querySelectorAll('path[fill="none"]').forEach((p,i)=>{ const L=p.getTotalLength(); A(p,[{strokeDasharray:L,strokeDashoffset:L},{strokeDasharray:L,strokeDashoffset:0}],{duration:900,delay:150+i*120,easing:'cubic-bezier(.65,0,.35,1)'}); });
-    svg.querySelectorAll('path:not([fill="none"])').forEach(p=>A(p,[{opacity:0},{opacity:.1}],{duration:700,delay:500}));
-    svg.querySelectorAll('circle').forEach((c,i)=>A(c,[{transform:'scale(0)'},{transform:'scale(1)'}],{duration:380,delay:350+i*25,easing:'cubic-bezier(.34,1.56,.64,1)'}));
-  });
-  // Donut: segmen menyapu searah jarum jam
-  root.querySelectorAll('.donut').forEach(d=>{ d.querySelectorAll('circle.seg').forEach((c,i)=>{ const [len,rest]=c.getAttribute('stroke-dasharray').split(' ').map(Number); A(c,[{strokeDasharray:`0 ${len+rest}`},{strokeDasharray:`${len} ${rest}`}],{duration:700,delay:150+i*110}); }); });
-  root.querySelectorAll('.dleg button').forEach((b,i)=>A(b,[{opacity:0,transform:'translateX(-6px)'},{opacity:1,transform:'none'}],{duration:360,delay:300+i*50}));
-  // Tabel dan daftar: baris berurutan
-  root.querySelectorAll('.tbl tbody, .rows').forEach(tb=>[...tb.children].slice(0,14).forEach((r,i)=>A(r,[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:380,delay:140+i*35})));
-  // Progress dan meter
-  root.querySelectorAll('.bar i').forEach((b,i)=>A(b,[{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:800,delay:200+Math.min(i,12)*40}));
-  root.querySelectorAll('.meter').forEach(m=>[...m.children].forEach((c,i)=>A(c,[{opacity:0,transform:'scaleY(.2)'},{opacity:1,transform:'none'}],{duration:300,delay:150+i*14})));
-}
-function countUp(el,dur){
-  const txt=el.textContent, m=txt.match(/\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+(?:,\d+)?/);
-  if(!m||txt.includes(':')||/^0\d/.test(m[0])) return;
-  const dec=(m[0].split(',')[1]||'').length, end=parseFloat(m[0].replace(/\./g,'').replace(',','.')); if(!end) return;
-  const fmt=v=>v.toLocaleString('id-ID',{minimumFractionDigits:dec,maximumFractionDigits:dec}), pre=txt.slice(0,m.index), post=txt.slice(m.index+m[0].length);
-  const t0=performance.now(); el.textContent=pre+fmt(0)+post;
-  const step=now=>{ if(!el.isConnected) return; const k=Math.min(1,(now-t0)/dur); el.textContent=pre+fmt(k<1?Math.round(end*easeOut(k)*10**dec)/10**dec:end)+post; if(k<1) requestAnimationFrame(step); else { const dn=el.closest('.donut'); if(dn){ delete dn.dataset.t; delete dn.dataset.c; } } };
-  requestAnimationFrame(step);
-  // Tab di latar belakang menahan requestAnimationFrame; pastikan nilai akhir tetap tampil.
-  setTimeout(()=>{ if(el.isConnected&&el.textContent!==txt) el.textContent=txt; },dur+150);
+  // Gerak dibatasi (D3): komponen hanya memudar masuk; angka, batang, dan garis langsung tampil di nilai akhirnya.
+  if(!full) return;
+  [...root.querySelectorAll(':scope > :not(.grid):not(.stats), :scope > .stats > *, :scope > .grid > *, :scope > div > .card')].forEach((el,i)=>el.animate([{opacity:0},{opacity:1}],{duration:200,delay:Math.min(i,8)*30,fill:'backwards',easing:'ease-out'}));
 }
 function render(scrollTop=true){
   syncProducts(); refreshDerived(); syncApp();
   const {path,q}=parse(); const app=$('#app');
   if(path==='/login'){ app.innerHTML=pageLogin(); lastPath=path; return; }
   const page=(ROUTES[path]||pageNotFound)(q);
-  if(ST.sidebar===null){ const s=store.get('sim-sidebar',null); ST.sidebar=s===null?true:s==='1'; }
+  if(ST.sidebar===null){ const s=store.get(KEY.rail,null,'sim-sidebar'); ST.sidebar=s===null?true:s==='1'; }
   const railCollapsed=!ST.sidebar||innerWidth<1280;
   const loc=locate(path);
   const keep=!scrollTop||lastPath===path?($('main')?.scrollTop||0):0;
@@ -1197,11 +1186,11 @@ function render(scrollTop=true){
         <span style="position:relative">${(()=>{const n=D.approvals.length+counts().leads+counts().usulan+1;return `<button class="btn b-card icon bell" aria-label="Notifikasi, ${n} perlu perhatian" onclick="bellPop(this)">${I('bell',18)}<i>${n}</i></button>`})()}</span>
         <span style="position:relative"><button class="user-btn" aria-haspopup="true" aria-label="Akun Dewi Kartika" onclick="userPop(this)">${av('Dewi Kartika')}<span class="utx"><b>Dewi Kartika</b><small>Admin SIM</small></span></button></span></div>
     </header>
-    <main id="main" tabindex="-1">${page.html}</main></div>${bottomBar(path)}</div>`;
+    <main id="main" tabindex="-1">${ST.storageErr?`<div class="banner danger" role="alert">${I('alert',18)}<span><b>Perubahan tidak tersimpan.</b> Browser menolak penyimpanan lokal, jadi perubahan hilang saat halaman dimuat ulang. Mockup tetap bisa dipakai.</span></div>`:''}${page.html}</main></div>${bottomBar(path)}</div>`;
   $('main').scrollTop=lastPath===path?keep:0;
   const key=location.hash.split('?')[1]||'';
   if(!reduceMotion()){ if(lastPath!==path) fxBegin('full'); else if(FX.key!==key) fxBegin('soft'); else fxApply(); }
-  FX.key=key; lastPath=path;
+  FX.key=key; lastPath=path; saveDash();
   page.after?.();
 }
 
@@ -1372,7 +1361,7 @@ function ordPanel(id){ const o=MD.order.find(x=>x.id===id), tot=ordTotal(o), st=
   ${st==='Menunggu batal'?callout('Sales mengajukan pembatalan. Persetujuan ada di menu Approval (BRD 2.15.3).'):''}${st==='Dibatalkan'?callout('Pesanan dibatalkan dan tidak dihitung di pencapaian target sales.'):''}`,
   st==='Menunggu batal'?btn('Buka approval',{v:'accent',on:"closeLayer();go('/approval?type=Batal pesanan')"}):`${st==='Dibuat'?btn('Ajukan batal',{v:'danger',on:`ordCancel('${id}')`}):''}<span style="flex:1"></span>${btn('Tutup',{v:'card',on:'closeLayer()'})}${ORD_NEXT[st]?btn('Tandai '+ORD_NEXT[st].toLowerCase(),{v:'accent',on:`ordAdvance('${id}')`}):''}`,{sub:'Pesanan (taking order)'}); }
 function ordAdvance(id){ const o=MD.order.find(x=>x.id===id); o.st=ORD_NEXT[o.st]; audit('Mengubah status pesanan '+o.id+' menjadi '+o.st); closeLayer(); render(false); toast('Status pesanan diperbarui',o.id+' kini '+o.st.toLowerCase()+'.'); }
-function ordCancel(id){ const o=MD.order.find(x=>x.id===id); o.st='Menunggu batal'; D.approvals.unshift({id:'ap'+Date.now()%1e6,type:'Batal pesanan',u:o.u,ref:o.id,detail:o.id+' · '+tokoName(o.toko)+' · '+rp(ordTotal(o)),reason:'Pengajuan dari dashboard',when:'26 Okt, '+new Date().toTimeString().slice(0,5)}); audit('Mengajukan batal pesanan '+o.id); closeLayer(); render(false); toast('Pembatalan diajukan','Menunggu approval sebelum pesanan dibatalkan.'); }
+function ordCancel(id){ const o=MD.order.find(x=>x.id===id); o.st='Menunggu batal'; D.approvals.unshift({id:newId('ap'),type:'Batal pesanan',u:o.u,ref:o.id,detail:o.id+' · '+tokoName(o.toko)+' · '+rp(ordTotal(o)),reason:'Pengajuan dari dashboard',when:'26 Okt, '+new Date().toTimeString().slice(0,5)}); audit('Mengajukan batal pesanan '+o.id); closeLayer(); render(false); toast('Pembatalan diajukan','Menunggu approval sebelum pesanan dibatalkan.'); }
 function ordForm(){
   const sales=live('user').filter(u=>u.role==='r5'&&u.status==='Aktif'), tk=live('toko').filter(t=>t.status==='Aktif');
   const prods=[['','Pilih produk'],...PRODUCTS.filter(p=>p.status!=='Nonaktif').map(p=>[p.id,p.name+' · '+rp(p.price)])];
@@ -1441,7 +1430,7 @@ function djSave(){
   const L=shRead('trxApp',[]), n=L.filter(t=>t.src==='Dashboard').length+1;
   const rec={id:'TRX-2610-D'+String(n).padStart(3,'0'),m:10,day,date:day+' Okt',d:ldAgo(10,day),u,toko,tokoFree:free,p:pfree?null:p,pname:pfree?pname:undefined,prodFree:pfree,q:qn,total:h*qn,st:'Terkirim',inv:null,src:'Dashboard',alasan:g('dj_a').value,note:clean(g('dj_n').value),by:'Dewi Kartika'};
   shSet('trxApp',[rec,...L]);
-  if(pfree&&!D.prodTemp.some(x=>!x.master&&x.name.toLowerCase()===pname.toLowerCase())) D.prodTemp.unshift({id:'pt'+Date.now()%1e6,name:pname,harga:h,note:'Dari input penjualan dashboard '+rec.id,by:u,toko,when:day+' Okt'}); audit('Menambahkan penjualan '+rec.id+' atas nama '+byU(u).name+' ('+rec.alasan+')');
+  if(pfree&&!D.prodTemp.some(x=>!x.master&&x.name.toLowerCase()===pname.toLowerCase())) D.prodTemp.unshift({id:newId('pt'),name:pname,harga:h,note:'Dari input penjualan dashboard '+rec.id,by:u,toko,when:day+' Okt'}); audit('Menambahkan penjualan '+rec.id+' atas nama '+byU(u).name+' ('+rec.alasan+')');
   closeLayer(); render(false); toast('Penjualan ditambahkan',rec.id+' · '+rp(rec.total)+'. Masuk ke laporan dan target '+byU(u).name+'.'); }
 function djDelAsk(id){ const t=allTrx().find(x=>x.id===id);
   openModal(`<h2 class="pt" style="font-size:22px">Hapus ${esc(id)}?<i>.</i></h2><p class="sm muted" style="margin:10px 0 18px;line-height:1.6">Penjualan input dashboard ini dikeluarkan dari laporan, target, dan insentif. Data tetap tersimpan untuk audit (soft delete).</p><div style="display:flex;gap:10px;justify-content:flex-end">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Hapus',{v:'danger',icon:'trash',on:`djDel('${id}')`})}</div>`); }
@@ -1532,7 +1521,7 @@ function visSave(id){
   if(!plan||!tasks){ toast('Periksa isian','Isi jam dan tugas kunjungan.','danger'); return; }
   if(needDays(period)&&!days.length){ toast('Periksa isian','Pilih minimal satu hari kunjungan.','danger'); return; }
   if(id){ Object.assign(D.visits.find(x=>x.id===id),{u,place,plan,period,tasks,days}); audit('Mengubah jadwal kunjungan '+byU(u).name+' ke '+place); }
-  else { D.visits.push({id:'kv'+Date.now()%1e6,u,place,plan,period,days,tasks,cin:'',cout:'',dur:'',photos:0,status:'Belum'}); audit('Membuat jadwal kunjungan '+byU(u).name+' ke '+place); }
+  else { D.visits.push({id:newId('kv'),u,place,plan,period,days,tasks,cin:'',cout:'',dur:'',photos:0,status:'Belum'}); audit('Membuat jadwal kunjungan '+byU(u).name+' ke '+place); }
   fmVisitSync(); closeLayer(); render(false); toast(id?'Jadwal diperbarui':'Jadwal tersimpan',isFm(u)?'Muncul di aplikasi mobile promotor.':'Sales menerima notifikasi di aplikasi.'); }
 function visDelAsk(id){ const v=D.visits.find(x=>x.id===id);
   if(visLive(v).status!=='Belum') return openModal(`<h2 class="pt" style="font-size:22px">Tidak bisa dihapus<i>.</i></h2><p class="sm" style="margin:10px 0 18px;line-height:1.6">Kunjungan ke ${esc(v.place)} sudah berjalan atau selesai. Datanya dipakai di laporan, jadi tidak bisa dihapus.</p><div style="display:flex;justify-content:flex-end">${btn('Tutup',{v:'card',on:'closeLayer()'})}</div>`);
@@ -1601,7 +1590,7 @@ function tgtSave(kind,m){
   const isU=kind==='user', store=isU?MD.tgtnom:MD.tgttoko, f=isU?'u':'toko', k=document.getElementById('tg_k').value, v=parseInt(document.getElementById('tg_v').value.replace(/\D/g,''))||0;
   if(v<1){ document.getElementById('tg_e').textContent='Isi nominal target.'; return; }
   let r=store.find(x=>x.m===m&&x[f]===k&&!x.del);
-  if(r) r.amount=v; else store.push({id:'tg'+Date.now()%1e6,m,[f]:k,amount:v,status:'Aktif'});
+  if(r) r.amount=v; else store.push({id:newId('tg'),m,[f]:k,amount:v,status:'Aktif'});
   const nm=isU?userName(k):tokoName(k); audit(`${r?'Mengubah':'Menambahkan'} target ${isU?'sales':'toko'} ${nm} ${LD_FULL[m]}`); closeLayer(); render(false); toast('Target disimpan',nm+': '+rp(v)+'. Laporan ikut diperbarui.'); }
 function uploadModal(what){ openModal(`<h2 class="pt" style="font-size:22px">Upload ${what.toLowerCase()}<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Gunakan template agar kolom sesuai. Baris yang tidak valid ditandai dan tidak disimpan.</p>
   <button class="tile" style="width:100%;border:1.5px dashed var(--line-strong);display:flex;gap:10px;align-items:center;justify-content:center;height:90px;font-weight:600;color:var(--accent-text)" onclick="this.outerHTML='<div class=&quot;tile&quot; style=&quot;display:flex;gap:10px;align-items:center&quot;><span style=&quot;flex:1&quot;><b class=&quot;fg&quot;>${what.toLowerCase().replace(/ /g,'_')}_okt.xlsx</b><span class=&quot;xs muted&quot; style=&quot;display:block&quot;>24 baris · 22 valid · 2 perlu diperbaiki</span></span></div>';document.getElementById('upok').disabled=false">${I('up',18)} Pilih file</button>
@@ -2045,7 +2034,13 @@ const userName=id=>MD.user.find(u=>u.id===id)?.name||'–';
 const roleName=id=>MD.role.find(r=>r.id===id)?.name||'–';
 const tokoName=id=>TOKO.find(t=>t.id===id)?.name||'–';
 const CABANG=['Kantor Pusat','Jakarta Selatan','Jakarta Barat','Tangerang'];
-const nowStamp=()=>{ const d=new Date(); return '26 Okt, '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
+// Jam aplikasi: mulai dari "sekarang" data contoh (Senin 26 Okt 2026, 09.41 WIB) lalu berjalan bersama jam dinding.
+const APP_NOW0=Date.parse('2026-10-26T09:41:00+07:00'), APP_T0=Date.now();
+let ID_SEQ=0;
+// ID baru berurutan dan stabil; ikut tersimpan bersama data dashboard.
+const newId=p=>p+'-'+String(++ID_SEQ).padStart(4,'0');
+const nowMs=()=>APP_NOW0+(Date.now()-APP_T0);
+const nowStamp=()=>{ const d=new Date(nowMs()+7*36e5); return '26 Okt, '+String(d.getUTCHours()).padStart(2,'0')+':'+String(d.getUTCMinutes()).padStart(2,'0'); };
 function audit(what){ MD.log.unshift({when:nowStamp(),who:'Dewi Kartika',what}); }
 const stPill=s=>spill(s,s==='Aktif'?'success':'neutral');
 
@@ -2246,7 +2241,7 @@ function saveForm(mode){
   Object.assign(vals,ex);
   let rec;
   if(id){ rec=E.store().find(x=>x.id===id); if(E.onRename&&rec.name!==vals.name) E.onRename(rec.name,vals.name); Object.assign(rec,vals); E.afterSave?.(rec); audit(`Mengubah ${lc(E)} ${E.title(rec)}`); }
-  else { rec={status:'Aktif',...(E.blank?E.blank():{}),...(prefill||{}),...vals,id:E.prefix+(Date.now()%1e6)}; E.store().push(rec); E.afterCreate?.(rec); audit(`Menambahkan ${lc(E)} ${E.title(rec)}`); }
+  else { rec={status:'Aktif',...(E.blank?E.blank():{}),...(prefill||{}),...vals,id:newId(E.prefix)}; E.store().push(rec); E.afterCreate?.(rec); audit(`Menambahkan ${lc(E)} ${E.title(rec)}`); }
   if(mode==='publish'){ rec.status='Terbit'; E.onPublish?.(rec); audit(`Menerbitkan ${lc(E)} ${E.title(rec)}`); }
   const tl=E.toastLabel?E.toastLabel(rec):E.label;
   closeLayer(); render(false); toast(`${tl} ${mode==='publish'?'diterbitkan':id?'diperbarui':'ditambahkan'}`,E.title(rec));
@@ -2547,7 +2542,7 @@ function infoForm(id){ const x=id?INFO.find(a=>a.id===id):{judul:'',isi:'',to:['
 function infoSave(id){ const clean=s=>s.replace(/['"<>`]/g,'').trim(), j=clean(document.getElementById('in_j').value), isi=clean(document.getElementById('in_i').value), cl=document.getElementById('in_c').value, to=[...document.querySelectorAll('#in_t .fchip.on')].map(b=>b.dataset.v);
   if(!j||!isi||!to.length){ toast('Periksa isian','Isi judul, isi, dan minimal satu role penerima.','danger'); return; }
   if(id){ Object.assign(INFO.find(a=>a.id===id),{judul:j,isi,cl,to}); audit('Mengubah pengumuman '+j); }
-  else { INFO.unshift({id:'in'+Date.now()%1e6,judul:j,isi,cl,to,tgl:LD_TODAY+' Okt',baca:0,dari:live('user').filter(u=>to.includes(roleName(u.role))||to.some(t=>roleName(u.role).startsWith(t.split(' ')[0]))).length||1}); audit('Mengirim pengumuman '+j); }
+  else { INFO.unshift({id:newId('in'),judul:j,isi,cl,to,tgl:LD_TODAY+' Okt',baca:0,dari:live('user').filter(u=>to.includes(roleName(u.role))||to.some(t=>roleName(u.role).startsWith(t.split(' ')[0]))).length||1}); audit('Mengirim pengumuman '+j); }
   closeLayer(); render(false); toast(id?'Pengumuman diperbarui':'Pengumuman terkirim',j); }
 function infoDel(id){ const x=INFO.find(a=>a.id===id);
   openModal(`<h2 class="pt" style="font-size:22px">Hapus ${esc(x.judul)}?<i>.</i></h2><p class="sm muted" style="margin:10px 0 18px;line-height:1.6">Pengumuman hilang dari aplikasi sales. Data tetap tersimpan untuk audit (soft delete).</p><div style="display:flex;gap:10px;justify-content:flex-end">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Hapus',{v:'danger',icon:'trash',on:`INFO.find(a=>a.id==='${id}').del=true;audit('Menghapus pengumuman');closeLayer();render(false);toast('Pengumuman dihapus','${esc(x.judul)}')`})}</div>`); }
@@ -2581,7 +2576,7 @@ function posmModal(id){ const x=id?POSM.find(a=>a.id===id):{name:'',kind:'Campai
 function posmSave(id){ const n=document.getElementById('pm_n').value.replace(/['"<>`]/g,'').trim(), k=document.getElementById('pm_k').value, t=document.getElementById('pm_t').value;
   if(!n){ toast('Periksa isian','Isi nama brief.','danger'); return; }
   if(id){ Object.assign(POSM.find(a=>a.id===id),{name:n,kind:k,to:t}); audit('Mengubah brief '+n); }
-  else { POSM.push({id:'pm'+Date.now()%1e6,name:n,kind:k,to:t,done:0,of:25,avg:0}); audit('Membuat brief '+n); }
+  else { POSM.push({id:newId('pm'),name:n,kind:k,to:t,done:0,of:25,avg:0}); audit('Membuat brief '+n); }
   closeLayer(); render(false); toast(id?'Brief diperbarui':'Brief dibuat',n); }
 function posmDelAsk(id){ const x=POSM.find(a=>a.id===id);
   if(x.done>0) return openModal(`<h2 class="pt" style="font-size:22px">Tidak bisa dihapus<i>.</i></h2><p class="sm" style="margin:10px 0 18px;line-height:1.6">${x.done} user sudah mengirim foto untuk brief ini. Data yang dipakai tidak bisa dihapus.</p><div style="display:flex;justify-content:flex-end">${btn('Tutup',{v:'card',on:'closeLayer()'})}</div>`);
@@ -2640,7 +2635,7 @@ function mitraQSave(id){ const q=document.getElementById('mq_q').value.replace(/
   if(!q){ toast('Periksa isian','Isi pertanyaan.','danger'); return; }
   const L=JSON.parse(JSON.stringify(shRead('mitraQ',MITRAQ_DEFAULT)));
   if(id){ Object.assign(L.find(x=>x.id===id),{q,status:st}); audit('Mengubah pertanyaan monitoring mitra'); }
-  else { L.push({id:'mq'+Date.now()%1e6,q,status:st}); audit('Menambahkan pertanyaan monitoring mitra'); }
+  else { L.push({id:newId('mq'),q,status:st}); audit('Menambahkan pertanyaan monitoring mitra'); }
   shSet('mitraQ',L); closeLayer(); render(false); toast(id?'Pertanyaan diperbarui':'Pertanyaan ditambahkan',q.slice(0,60)); }
 function mitraQDelAsk(id){ const x=mitraQAll().find(a=>a.id===id), used=Object.values(shRead('mitraAns',{})).some(r=>r.a&&r.a[id]!==undefined);
   if(used) return openModal(`<h2 class="pt" style="font-size:22px">Tidak bisa dihapus<i>.</i></h2><p class="sm" style="margin:10px 0 18px;line-height:1.6">Pertanyaan ini sudah dijawab CBD dan jawabannya masih dipakai. Nonaktifkan saja supaya tidak muncul lagi di aplikasi.</p><div style="display:flex;gap:10px;justify-content:flex-end">${btn('Tutup',{v:'card',on:'closeLayer()'})}${btn('Nonaktifkan',{v:'accent',on:`mitraQOff('${id}')`})}</div>`);
@@ -3008,7 +3003,7 @@ function pagePengaturan(){
   return {title:'Pengaturan',html:`<div class="grid g2">
     ${card('Profil',`<div style="display:flex;gap:14px;align-items:center;margin-bottom:16px">${av('Dewi Kartika','lg')}<div><b class="fg">Dewi Kartika</b><div class="xs muted">Admin SIM · Jakarta</div></div></div>
       <div class="grid" style="gap:12px"><label class="field"><span>Nama</span><span class="inp"><input value="Dewi Kartika"></span></label><label class="field"><span>Email</span><span class="inp"><input value="dewi.k@sim.co.id"></span></label></div>`)}
-    ${card('Data demo bersama',`<p class="sm muted">Task SKU, task CBD, limit canvassing, event, item facing display, harga sebelum promo, jadwal kunjungan FMCG, pertanyaan monitoring mitra, status tugas dan log aktivitas FMCG, produk difoto, dan izin jadwal per role dibagi dengan aplikasi mobile lewat browser ini.</p>`,{acts:btn('Reset',{v:'soft',size:'sm',on:"shReset();toast('Data bersama direset','Muat ulang halaman untuk melihat data awal.')"})})}
+    ${card('Data demo bersama',`<p class="sm muted">Task SKU, task CBD, limit canvassing, event, item facing display, harga sebelum promo, jadwal kunjungan FMCG, pertanyaan monitoring mitra, status tugas dan log aktivitas FMCG, produk difoto, dan izin jadwal per role dibagi dengan aplikasi mobile lewat browser ini.</p>`,{acts:btn('Reset data demo',{v:'soft',size:'sm',icon:'refresh',on:'resetAsk()'})})}
     ${card('Tampilan',`<div class="field"><span>Tema</span>${pills([['light','Terang'],['dark','Gelap']],ST.theme,'setTheme')}</div><p class="xs muted" style="margin-top:10px">Pilihan tersimpan di browser ini.</p>`)}
     ${card('Notifikasi',`<div class="rows">${[['Approval baru','Kirim email saat ada pengajuan'],['Leads baru dari backend','Ringkasan setiap upload'],['Selisih rekonsiliasi','Saat file klien tidak cocok']].map(([l,h],i)=>`<div class="rowlink" style="cursor:default"><span style="flex:1"><b class="fg sm" style="display:block">${l}</b><span class="xs muted">${h}</span></span>${swc(i!==1,"this.setAttribute('aria-checked',this.getAttribute('aria-checked')!=='true')",l)}</div>`).join('')}</div>`)}
   </div>
@@ -3342,6 +3337,29 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
   addEventListener('pointerdown',e=>{ if(cur&&!cur.pop.contains(e.target)&&!cur.btn.contains(e.target)) close(false); },true);
   enhanceAll();
 })();
+/* ---------- Penyimpanan data dashboard (D6) ----------
+   Perubahan di dashboard disimpan sebagai snapshot berversi. Data bersama dengan mobile tetap di salesapp.shared.v1.
+   Naikkan DASH_VER bila bentuk data contoh berubah, supaya snapshot lama dibuang dan data contoh baru dipakai. */
+const DASH_VER=1;
+const dashData=()=>({D,MD,TOKO,TRX,INFO,POSM,AR,KLAIM,ATT,REK_ADJ});
+function restoreInto(t,src){
+  if(Array.isArray(t)&&Array.isArray(src)){ t.splice(0,t.length,...src); return; }
+  for(const k of Object.keys(src)){ if(Array.isArray(t[k])&&Array.isArray(src[k])) t[k].splice(0,t[k].length,...src[k]); else t[k]=src[k]; }
+}
+function loadDash(){
+  try{
+    const raw=localStorage.getItem(KEY.data); if(!raw) return;
+    const env=JSON.parse(raw);
+    if(env?.version!==DASH_VER||!env.state){ localStorage.removeItem(KEY.data); return; }
+    const cur=dashData(); for(const k of Object.keys(cur)) if(env.state[k]!=null) restoreInto(cur[k],env.state[k]);
+    ID_SEQ=env.state.ID_SEQ||0;
+  }catch(e){ try{ localStorage.removeItem(KEY.data); }catch(_){} }
+}
+let dashT=0, dashLast='';
+function saveDash(){ clearTimeout(dashT); dashT=setTimeout(()=>{ const json=JSON.stringify({version:DASH_VER,state:{...dashData(),ID_SEQ}}); if(json===dashLast) return; if(writeKey(KEY.data,json)) dashLast=json; else storageFail(); },200); }
+function resetAsk(){ openModal(`<h2 class="pt" style="font-size:18px">Reset data demo?</h2><p class="sm muted" style="margin:10px 0 18px;line-height:1.6">Semua perubahan di dashboard dan data bersama dengan aplikasi mobile di browser ini dihapus, lalu halaman dimuat ulang dengan data contoh awal.</p><div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Reset data demo',{v:'danger',icon:'refresh',on:'resetDemo()'})}</div>`); }
+function resetDemo(){ try{ Object.keys(localStorage).filter(k=>k.startsWith('salesapp.')||k.startsWith('sim-')).forEach(k=>localStorage.removeItem(k)); }catch(e){} clearTimeout(dashT); location.reload(); }
+loadDash();
 render(true);
 </script>
 </body>
