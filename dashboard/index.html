@@ -1739,6 +1739,7 @@ const outletMap=id=>shRead('outlet',{})[tokoNm(id)]||[...PRODUCTS.slice(0,6).map
 function outletToggle(tk,pid){ const m=outletMap(tk), on=m.includes(pid), all=shRead('outlet',{}); all[tokoNm(tk)]=on?m.filter(x=>x!==pid):[...m,pid]; shSet('outlet',all); render(false); toast(on?'Produk dilepas dari outlet':'Produk ditambahkan ke outlet',ALL_PROD().find(p=>p.id===pid).name); }
 const catF=()=>Object.fromEntries(MD.kat.filter(k=>!k.del&&k.status==='Aktif').map(k=>[k.name,k.factor]));
 const live=k=>MD[k]?MD[k].filter(r=>!r.del):TOKO.filter(r=>!r.del);
+const simcoCount=(r,kind)=>{ const n=live('user').filter(u=>u.simco===r.id&&(kind==='admin')===ADMIN_ROLES.includes(u.role)).length, path=kind==='admin'?'/user-admin':'/user-sales'; return `<span style="display:inline-flex;gap:12px;align-items:center;justify-content:flex-end" onclick="event.stopPropagation()"><span class="tabular">${n}</span>${btn('Lihat',{v:'soft',size:'sm',on:`go('${path}?sg=${r.id}')`})}</span>`; };
 const simcoName=id=>MD.simco.find(c=>c.id===id)?.name||'–';
 const simcoOpts=()=>live('simco').filter(c=>c.status==='Aktif').map(c=>[c.id,c.name]);
 const simcoFilter=(sg,key='sg')=>`<label class="sel" style="display:flex;min-width:190px;margin-bottom:12px"><span class="sr-only">Company SIM Group</span><select aria-label="Filter Company SIM Group" style="width:100%" onchange="setQ({${key}:this.value})"><option value="">Semua company SIM</option>${live('simco').map(c=>`<option value="${c.id}" ${c.id===sg?'selected':''}>${esc(c.name)}</option>`).join('')}</select>${I('chev',16)}</label>`;
@@ -1756,7 +1757,7 @@ const ENT={
   simco:{label:'Company SIM Group',lower:'company SIM Group',plural:'Daftar Company SIM Group',prefix:'sg',store:()=>MD.simco,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code,unique:'code',
     fields:[{k:'code',label:'Kode company',req:true,ph:'contoh: SIMA',hint:'Huruf kapital, singkat'},{k:'name',label:'Nama company',req:true,ph:'contoh: PT. SIM A'}],
     cols:[{label:'Company',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.code)}</span>`,prim:true},
-      {label:'Sales',render:r=>live('user').filter(u=>u.simco===r.id&&!ADMIN_ROLES.includes(u.role)).length,align:'r'},{label:'User',render:r=>live('user').filter(u=>u.simco===r.id&&ADMIN_ROLES.includes(u.role)).length,align:'r'},{label:'Status',render:r=>stPill(r.status)}],
+      {label:'Sales',render:r=>simcoCount(r,'sales'),align:'r'},{label:'User',render:r=>simcoCount(r,'admin'),align:'r'},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>{ const n=live('user').filter(u=>u.simco===r.id).length; return n?`Company ini masih punya ${n} user dan sales. Pindahkan ke company lain dulu, atau nonaktifkan company.`:''; }},
   client:{label:'Client',plural:'Daftar client',prefix:'cl',store:()=>MD.client,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code+r.pic,unique:'code',
     blank:()=>({ind:'Elektronik',api:'Belum terhubung'}),
