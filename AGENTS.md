@@ -62,7 +62,7 @@ Mockup HTML Sales App SIMGROUP untuk demo ke klien, bukan kode produk. Dua mocku
 - Landasan requirement: BRD, URD, dan hasil workshop (yang terbaru menang). Fitur di luar dokumen boleh jika sederhana dan lazim, beri label "Usulan".
 - Tiap mockup tetap satu file HTML mandiri.
 - Mobile: biru bergradient (#21CFF7, #0A92F2, #3466FF), aksen tan #EFA477, glassmorphic, font Plus Jakarta Sans. Jangan kembali ke gaya datar.
-- Dashboard: gaya WIT v2 (sidebar putih menempel, breadcrumb, judul berakhiran titik beraksen, kartu putih, tab pill), aksen biru. Merah hanya untuk status bahaya.
+- Dashboard: gaya WIT MES (skill `wit-mes-frontend`): kanvas abu dengan glow biru, rail ink mengambang (ikon saja di bawah 1280px), kartu putih tanpa border, kartu hero ink dan kartu aksen di Overview, kontrol pill, bar bawah ink di HP. Aksen tetap biru SIM. Merah hanya untuk status bahaya.
 - Setiap kartu, baris, dan tile mengarah ke sesuatu. Setiap aksi ditutup toast bertense lampau.
 - Hapus selalu soft delete dengan konfirmasi; data yang masih dipakai tidak boleh dihapus.
 - Jangan memakai data nyata (nama klien, pengguna, kredensial, foto wajah). Pengguna demo hanya fiktif.

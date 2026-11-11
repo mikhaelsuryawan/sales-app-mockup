@@ -33,7 +33,7 @@ Menjalankan: `python3 -m http.server 5173`, lalu buka `http://localhost:5173/` (
 ## 3. Keputusan desain
 
 - **Mobile:** biru cerah dengan gradient (#21CFF7 → #0A92F2 → #3466FF), aksen tan/peach (#EFA477) dari logo SIMGROUP, gaya **glassmorphic** (kartu transparan blur, latar mesh gradient). Font Plus Jakarta Sans. Di desktop tampil sebagai frame iPhone dengan panel demo.
-- **Dashboard:** memakai skill `wit-code-agent-2` (WIT house style v2) dengan **merah WIT diganti biru mobile**. Sidebar putih menempel, breadcrumb, judul berakhiran titik berwarna aksen, kartu putih, tab pill, grafik kolom kapsul bergaris. Font DM Sans. Tema terang dan gelap.
+- **Dashboard:** sejak 11 Nov 2026 memakai gaya skill `wit-mes-frontend` (WIT MES) dengan **aksen tetap biru mobile**. Rail ink mengambang (bisa diciutkan di ≥1280px, ikon saja di tablet), header berisi breadcrumb, judul bertitik aksen, pencarian, notifikasi, dan menu akun. Overview dibuka dengan kartu "Perlu tindakan", kartu hero ink sell-out hari ini, dan kartu aksen approval. Kartu putih tanpa border, kontrol pill, ikon stroke 2. Di HP: bar bawah ink (Overview, Penjualan, Approval, Absensi, Leads, Semua menu) dan menu lengkap sebagai bottom sheet. Font DM Sans. Tema terang dan gelap. Rute, data, dan aksi tidak berubah.
 - Fitur di luar BRD/URD diberi label **"Usulan"** di panel demo mobile, supaya client dapat membedakan.
 - Warna merah hanya untuk status bahaya (ditolak, overdue, error).
 
