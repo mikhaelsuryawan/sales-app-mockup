@@ -231,4 +231,12 @@ Semua butir lampiran masuk ke satu fase atau tercatat tidak berlaku.
   - Klik kedua pada chip filter yang aktif menghapus filternya. Stat tile bernada mengikuti hitungan (Leads belum di-assign, Klaim menunggu).
   - Tabel utama halaman daftar duduk di kanvas tanpa kartu; di ponsel tabel menampilkan enam baris dengan tombol "N lagi · Muat" tanpa pager; keadaan kosong punya judul dan deskripsi.
   - Tidak dikerjakan: baris status overview enam kartu (opsional, tidak ada padanan yang tidak menggandakan Absensi), pilihan tampilan yang diingat antar sesi (tiap halaman punya fungsi tab sendiri). Dicatat di fase 8.
-- Fase berikutnya: fase 7, detail, master data, antrean, login.
+- Fase 7 selesai 11 Nov 2026. Resep halaman lain:
+  - Login: kanvas dengan glow, kartu brand ink dengan tiga pilar, kartu form dengan input 48px, tombol besar berpanah, dua akun demo, kembali ke halaman tujuan setelah masuk. Bug `logout()` yang memanggil dirinya sendiri sejak fase 5 diperbaiki.
+  - Panel rincian pesanan, leads, dan klaim: hero ink dengan kode, nama, status, dan tiga metrik; stepper tahapan pada pesanan; catatan blocker bertebal di awal; riwayat per rekaman dari log audit; panel "tidak ditemukan" bila rekaman hilang; halaman tidak ditemukan memakai keadaan kosong.
+  - Approval: setujui dan tolak memakai konfirmasi yang sama (tolak menahan tombol sampai alasan diisi). Layout tetap tabel dengan chip jenis, bukan kartu per jenis, karena pilihan massal lintas jenis dipakai.
+  - Analitik: grafik dan rincian Penjualan memakai `1.4fr/1fr`, kolom samping 20rem. Pemilih rekaman (`/live-tracking`): daftar di kiri 20rem dan peta di kanan, daftar lebih dulu di ponsel.
+  - Integrasi: kartu koneksi SIM (BPR1) di `/sinkron` dengan status, sinkron otomatis, "Sinkron sekarang", dan catatan kepemilikan data.
+  - Master data sudah dicakup fase 2 sampai 5 (tabel, aksi ikon, hapus diblokir, dialog dengan validasi, domain lewat tab seksi).
+  - Tidak dikerjakan: baris insight dengan lencana faktor (tidak ada fitur rekomendasi, jangan dibuat), hasil pencarian sebagai chip di `/mapping-outlet`, panel hero untuk transaksi, absensi, kunjungan, promo, dan penagihan (kini masih `kv`). Dicatat di fase 8.
+- Fase berikutnya: fase 8, QA dan dokumentasi.

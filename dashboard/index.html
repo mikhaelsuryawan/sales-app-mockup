@@ -265,7 +265,7 @@ main{flex:1;min-height:0;overflow-y:auto;padding:2px 2px 8px;outline:none;positi
 @media (min-width:768px) and (max-width:1279px){.g-ov .md-2{grid-column:span 2}}
 .span2{grid-column:span 2} .span3{grid-column:1/-1}
 .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
-.g-side{grid-template-columns:minmax(0,1fr) 340px}
+.g-side{grid-template-columns:minmax(0,1fr) 20rem}
 .card{border-radius:var(--r-card);background:var(--card);padding:20px;box-shadow:var(--shadow-card);min-width:0}
 .card.soft{border-radius:var(--r-panel);background:var(--raised);box-shadow:none}
 .card.strip{padding:16px}
@@ -310,6 +310,23 @@ a.stat:hover,button.stat:hover{background:var(--raised)}
 .card.tbl-card{background:none;box-shadow:none;padding:0;border-radius:0}
 .card.tbl-card .ch{margin-bottom:12px}
 .more-row{display:flex;justify-content:center;padding:12px 0 0}
+.login2{position:relative;min-height:100dvh;overflow:hidden;background:var(--canvas);display:grid;place-items:center;padding:16px}
+.lg-wrap{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:16px;width:100%;max-width:64rem}
+@media (min-width:1024px){.lg-wrap{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}}
+.lg-brand{padding:32px;min-height:26rem}
+.lg-top{display:flex;align-items:center;gap:12px;color:#fff} .lg-top b{display:block;font-size:15px;font-weight:700} .lg-top small{display:block;font-size:11px;color:var(--on-ink-muted)}
+.lg-h{margin-top:8px;font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.15;color:#fff;max-width:26rem} @media (min-width:640px){.lg-h{font-size:36px}}
+.lg-p{margin-top:12px;max-width:26rem;font-size:14px;color:var(--on-ink-muted)}
+.lg-pil{margin-top:24px;display:grid;gap:8px}
+.lg-pil>div{display:flex;align-items:center;gap:12px;border-radius:var(--r-panel);background:rgb(255 255 255 / .05);padding:12px}
+.lg-pil b{display:block;font-size:14px;color:#fff} .lg-pil small{display:block;font-size:12px;color:var(--on-ink-muted)}
+.ic.on-ink{background:rgb(255 255 255 / .1);color:#fff}
+.lg-form{padding:32px;align-self:center}
+.lg-t{font-size:30px;font-weight:700;letter-spacing:-.02em;color:var(--fg);line-height:1.15}
+.lg-demo{margin-top:24px;border-top:1px solid var(--line);padding-top:16px}
+.panel-hero{padding:20px;border-radius:var(--r-hero)} .ph-m{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:20px} .ph-t{font-size:20px;font-weight:700;letter-spacing:-.02em;color:#fff;margin-top:4px;overflow-wrap:anywhere}
+.g-flip>:first-child{order:2}
+@media (min-width:1280px){.g-flip{grid-template-columns:20rem minmax(0,1fr)}.g-rank{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}}
 .hero-n{font-size:30px;font-weight:700;letter-spacing:-.03em;color:var(--fg);line-height:1;font-variant-numeric:tabular-nums}
 
 /* Tab: pill (ink aktif), underline, segmented, chip, stepper */
@@ -600,7 +617,7 @@ textarea.ta[aria-invalid=true]{border-color:var(--danger)}
 .kv dd .u{font-size:12px;font-weight:600;color:var(--muted);margin-left:2px}
 
 
-.banner.mb{margin-bottom:16px}
+.banner.mb{margin-bottom:16px} .banner.mt{margin-top:16px}
 .tabs-x{display:inline-flex;max-width:100%;min-width:0}
 .tabs-x.full{display:block}
 .tabs-x.full::after{background:linear-gradient(90deg,transparent,var(--card));border-radius:0}
@@ -1653,7 +1670,7 @@ function loadSession(){ try{ const a=ACCOUNTS.find(x=>x.id===JSON.parse(localSto
 function startSession(a){ ME=a; AUTHED=true; store.set(SESSION_KEY,JSON.stringify({id:a.id})); }
 function doLogin(f){ const u=f.u.value.trim().toLowerCase(), a=ACCOUNTS.find(x=>x.user===u); if(!u||!f.p.value){ toast('Isi username dan password','Keduanya wajib diisi.','danger'); return; } if(!a){ toast('Username tidak dikenal','Pakai akun demo yang tersedia di halaman ini.','danger'); return; } startSession(a); toast('Berhasil masuk','Selamat datang, '+a.name.split(' ')[0]+'.'); const to=ST.from||'/'; ST.from=''; go(to); }
 function loginAs(id){ const a=ACCOUNTS.find(x=>x.id===id); startSession(a); toast('Berhasil masuk','Selamat datang, '+a.name.split(' ')[0]+'.'); const to=ST.from||'/'; ST.from=''; go(to); }
-function logout(){ AUTHED=false; try{ localStorage.removeItem(SESSION_KEY); }catch(e){} closePops(); if(layerOpen()) closeLayerCore(); logout(); }
+function logout(){ AUTHED=false; try{ localStorage.removeItem(SESSION_KEY); }catch(e){} closePops(); if(layerOpen()) closeLayerCore(); go('/login'); }
 function switchAccount(id){ const a=ACCOUNTS.find(x=>x.id===id); startSession(a); closeLayer(); toast('Akun diganti',a.name+' · '+a.role+'. Menu menyesuaikan hak akses.','default'); render(false); }
 function accountPick(){ openModal(`<h2 class="pt">Ganti akun demo</h2><p class="dlg-d">Tiap akun memakai hak akses berbeda. Penjaga di layar hanya kenyamanan; izin sebenarnya diputuskan backend.</p><div class="dlg-b rows">${ACCOUNTS.map(a=>`<button type="button" class="rowlink lr" onclick="switchAccount('${a.id}')">${av(a.name,'md')}<span style="flex:1;min-width:0"><span class="t">${a.name}</span><span class="m">${a.role}${a.key==='spv'?' · Usulan':''}</span></span>${a.id===ME.id?`<span style="color:var(--accent-strong)">${I('check',16,2.4)}</span>`:''}</button>`).join('')}</div>`,{size:448}); }
 function noAccess(){ toast('Tidak punya akses','Tindakan ini hanya untuk Admin SIM.','danger'); }
@@ -1851,22 +1868,31 @@ function render(scrollTop=true){
    PAGES
    ===================================================================== */
 function pageLogin(){
-  return `<div class="login"><div class="login-art">
-    <svg viewBox="0 0 300 300" style="position:absolute;right:-120px;top:-80px;width:520px;opacity:.9" fill="none"><circle cx="150" cy="150" r="140" stroke="#fff" stroke-opacity=".12" stroke-width="22"/><circle cx="150" cy="150" r="96" stroke="#fff" stroke-opacity=".16" stroke-width="22"/><circle cx="150" cy="150" r="52" stroke="#F6C29C" stroke-opacity=".6" stroke-width="22"/></svg>
-    <div style="background:#fff;border-radius:16px;padding:10px 14px;display:inline-flex;width:max-content;position:relative"><img src="${LOGO}" alt="SIMGROUP" style="height:34px"></div>
-    <div><h2>Sales Console<span style="color:#F6C29C">.</span></h2><p>Pantau absensi, penjualan, leads pinjaman, dan insentif tim lapangan SIM dalam satu tempat.</p></div>
-    <p class="xs" style="opacity:.7">PT Swakarya Insan Mandiri · Data pegawai tersinkron dari SIM (BPR1)</p></div>
-  <div class="login-form"><form class="card" onsubmit="event.preventDefault();doLogin(this)">
-    <h1 class="pt" style="font-size:26px">Masuk<i>.</i></h1><p class="muted" style="margin:6px 0 20px">Gunakan akun pegawai SIMGROUP.</p>
-    <label class="field" style="margin-bottom:14px"><span>Username</span><span class="inp">${I('users',16)}<input name="u" value="dewi.kartika" autocomplete="username"></span></label>
-    <label class="field" style="margin-bottom:8px"><span>Password</span><span class="inp">${I('settings',16)}<input name="p" type="password" value="sim12345" autocomplete="current-password"></span></label>
-    <div style="text-align:right;margin-bottom:18px"><button type="button" class="xs" style="color:var(--accent-text);font-weight:600" onclick="toast('Link reset terkirim','Cek email yang terdaftar di data pegawai SIM.')">Lupa password?</button></div>
-    <button class="btn b-accent" style="width:100%" type="submit">Masuk</button>
-    <p class="xs muted" style="margin-top:16px;text-align:center">Hak akses mengikuti role: Admin SIM melihat semua klien, Supervisor hanya timnya.</p>
-  </form></div></div>`;
+  const pillar=[['finger','Absensi dan kunjungan','Kehadiran dan jadwal sales hari ini'],['chart','Penjualan dan target','Dari klien sampai transaksi'],['users','Leads pinjaman','Assign, tindak lanjut, kirim ke SIM']];
+  return `<div class="login2"><div class="glow" aria-hidden="true"></div><div class="lg-wrap">
+    <section class="card ink lg-brand" aria-label="Tentang Sales Console">
+      <div class="lg-top"><span class="sb-mark">S</span><span><b>Sales Console</b><small>SIMGROUP</small></span></div>
+      <div class="kick" style="margin-top:36px">PT Swakarya Insan Mandiri</div>
+      <h2 class="lg-h">Satu tempat untuk tim lapangan SIM<span style="color:var(--accent)">.</span></h2>
+      <p class="lg-p">Pantau absensi, penjualan, leads pinjaman, dan insentif tanpa pindah aplikasi.</p>
+      <div class="lg-pil">${pillar.map(([ic,t,d])=>`<div>${iconTile(ic,{size:'sm'}).replace('class="ic ','class="ic on-ink ')}<span><b>${t}</b><small>${d}</small></span></div>`).join('')}</div>
+      <p class="xs" style="margin-top:auto;padding-top:24px;color:var(--on-ink-muted)">Data pegawai tersinkron dari SIM (BPR1). Semua data di mockup ini fiktif.</p></section>
+    <form class="card lg-form" onsubmit="event.preventDefault();doLogin(this)" aria-labelledby="lg-t">
+      <h1 class="lg-t" id="lg-t">Masuk<span style="color:var(--accent)">.</span></h1><p class="muted" style="margin:6px 0 20px">Gunakan akun pegawai SIMGROUP.</p>
+      <label class="field" style="margin-bottom:14px"><span>Username</span><span class="inp lg">${I('users',16)}<input name="u" value="dewi.kartika" autocomplete="username"></span></label>
+      <label class="field" style="margin-bottom:8px"><span>Password</span><span class="inp lg">${I('lock',16)}<input name="p" type="password" value="sim12345" autocomplete="current-password"></span></label>
+      <div style="text-align:right;margin-bottom:18px"><button type="button" class="b-link xs btn" style="font-weight:600" onclick="toast('Link reset terkirim','Cek email yang terdaftar di data pegawai SIM.','default')">Lupa password?</button></div>
+      <button class="btn b-accent lg full" type="submit">Masuk ${I('right',16)}</button>
+      <div class="lg-demo"><div class="kick" style="margin-bottom:8px">Akun demo</div><div class="rows">${ACCOUNTS.map(a=>`<button type="button" class="rowlink lr" onclick="loginAs('${a.id}')">${av(a.name,'md')}<span style="flex:1;min-width:0"><span class="t">${a.name}</span><span class="m">${a.role}${a.key==='spv'?' · Usulan':''} · ${a.user}</span></span>${I('right',16)}</button>`).join('')}</div></div>
+      <p class="xs muted" style="margin-top:16px">Hak akses mengikuti role: Admin SIM melihat semua klien, Supervisor hanya timnya.</p>
+    </form></div></div>`;
 }
-function pageNotFound(){ return {title:'Halaman tidak ditemukan',html:card('',`<p class="muted" style="margin-bottom:14px">Alamat ini tidak ada di console.</p>${btn('Kembali ke overview',{v:'solid',on:"go('/')"})}`)}; }
-
+function pageNotFound(){ return {title:'Halaman tidak ditemukan',html:card('',emptyState({icon:'search',title:'Halaman tidak ditemukan',desc:'Alamat ini tidak ada di console. Periksa tautan atau kembali ke Overview.',action:btn('Kembali ke Overview',{v:'secondary',on:"go('/')"})}))}; }
+const panelMissing=what=>openPanel(what+' tidak ditemukan',emptyState({icon:'search',title:what+' tidak ditemukan',desc:'Rekaman ini mungkin sudah dihapus atau belum dimuat.'}),btn('Tutup',{v:'outline',on:'closeLayer()'}));
+/* Hero ink di panel rincian: kode, nama, status, dan tiga metrik */
+const panelHero=({eyebrow='',title,sub='',badge='',metrics=[]})=>`<section class="card ink panel-hero" style="margin-bottom:16px"><div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-start"><div style="min-width:0">${eyebrow?`<div class="xs mono" style="color:var(--on-ink-muted)">${eyebrow}</div>`:''}<h3 class="ph-t">${title}</h3>${sub?`<p class="sm" style="margin-top:4px;color:var(--on-ink-muted)">${sub}</p>`:''}</div>${badge}</div>${metrics.length?`<div class="ph-m">${metrics.map(([l,v,u])=>metricOnInk(l,v,u).replace('font-size:30px','font-size:18px')).join('')}</div>`:''}</section>`;
+/* Riwayat rekaman diambil dari log audit, terbaru di atas */
+const historyBlock=key=>{ const h=MD.log.filter(x=>String(x.what).includes(key)).slice(0,5); return h.length?`<div class="xs muted" style="margin:16px 0 8px">Riwayat</div><div>${h.map(x=>historyRow({time:x.when.split(', ')[1]||x.when,text:esc(x.what),who:esc(x.who),type:x.type||''})).join('')}</div>`:''; };
 /* ---------- Overview ---------- */
 function ovSel(i){ ST.ovSel=i; render(false); }
 function ovData(){
@@ -1968,7 +1994,7 @@ function pagePenjualan(q){
   return {title:'Laporan penjualan',html:`
   
   <div style="margin-bottom:16px">${repFilters(q)}</div>
-  <div class="grid g-side" style="margin-bottom:16px">
+  <div class="grid g-side g-rank" style="margin-bottom:16px">
     ${card('Penjualan '+ser.unit,`${data.length?columnChart({data,sel:si,onSel:'penSel',label:'Penjualan '+ser.unit}):'<p class="muted sm">Tidak ada data pada rentang ini.</p>'}
       <div class="legend" style="margin-top:12px"><span><i class="capkey"></i>Target ${ser.unit} mengikuti filter</span><span>Pilih kolom untuk melihat ${ser.unit==='harian'?'tanggal':'bulan'}, lalu telusuri di kartu sebelah.</span></div>`,
       {acts:`${btn('PDF',{v:'outline',size:'sm',icon:'down',on:"toast('Laporan diunduh','penjualan_"+repRange(q).from+"_"+repRange(q).to+".pdf')"})}${btn('Excel',{v:'outline',size:'sm',icon:'down',on:"toast('Laporan diunduh','penjualan_"+repRange(q).from+"_"+repRange(q).to+".xlsx')"})}`})}
@@ -1987,7 +2013,7 @@ function pagePenjualan(q){
     ${tab==='penjualan'?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px"><form style="flex:1;min-width:220px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari transaksi</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari sales, toko, atau nomor transaksi"></label></form>${sel([['','Semua kategori'],...mix.items.map(c=>c[0])],catF,"setQ({cat:this.value})",{label:'Kategori'})}${sel([['','Semua invoice'],['big','Selisih besar'],['none','Tanpa invoice']],q.iv||'',"setQ({iv:this.value})",{label:'Filter invoice'})}</div>`:''}
     ${tableHTML}`,{acts:`${btn('PDF',{v:'outline',size:'sm',icon:'down',on:"toast('Laporan diunduh','PDF sesuai tab dan filter aktif.')"})}${btn('Excel',{v:'outline',size:'sm',icon:'down',on:"toast('Laporan diunduh','Excel sesuai tab dan filter aktif.')"})}`})}`};
 }
-function trxPanel(id){ const t=allTrx().find(x=>x.id===id), p=trxProd(t), s=byU(t.u), iv=t.inv;
+function trxPanel(id){ const t=allTrx().find(x=>x.id===id); if(!t) return panelMissing('Transaksi'); const p=trxProd(t), s=byU(t.u), iv=t.inv;
   const unitSys=Math.round(t.total/t.q), unitInv=iv?Math.round(iv.price/t.q):unitSys;
   openPanel(t.id,`<div class="kv" style="margin-bottom:14px"><div><dt>Tanggal</dt><dd>${t.date} 2026</dd></div><div><dt>Total (invoice)</dt><dd>${rp(iv?iv.price:t.total)}</dd></div><div><dt>Status</dt><dd>${t.st}</dd></div></div>
   <div class="tile" style="margin-bottom:14px"><div class="xs muted">Produk</div><b class="fg">${p.name} ×${t.q}</b><div class="xs muted">${p.sku}${t.promo?' · promo '+t.promo:''}</div></div>
@@ -2007,12 +2033,11 @@ function invDocSvg(w,h){ return `<svg viewBox="0 0 200 260" width="${w}" height=
 const ORD_TONE={'Dibuat':'neutral','Menunggu batal':'warning','Dikirim':'accent','Lunas':'success','Dibatalkan':'neutral'};
 const ORD_NEXT={'Dibuat':'Dikirim','Dikirim':'Lunas'};
 const ordText=o=>o.items.map(i=>((PRODUCTS.find(p=>p.id===i.p)||{}).name||i.p)+' ×'+i.q).join(', ');
-function ordPanel(id){ const o=MD.order.find(x=>x.id===id), tot=ordTotal(o), st=o.st;
-  openPanel(o.id,`<div class="kv" style="margin-bottom:14px"><div><dt>Toko</dt><dd>${esc(tokoName(o.toko))}</dd></div><div><dt>Total</dt><dd>${rp(tot)}</dd></div><div><dt>Kirim</dt><dd>${o.ship}</dd></div></div>
+function ordPanel(id){ const o=MD.order.find(x=>x.id===id); if(!o) return panelMissing('Pesanan'); const tot=ordTotal(o), st=o.st;
+  openPanel(o.id,`${panelHero({eyebrow:'Pesanan · '+o.date,title:esc(tokoName(o.toko)),sub:byU(o.u).name+' · Taking Order',badge:spill(st,ORD_TONE[st]||'neutral'),metrics:[['Total',rp(tot)],['Item',o.items.reduce((a,i)=>a+i.q,0)+' unit'],['Kirim',o.ship]]})}${stepper(['Dibuat','Dikirim','Lunas'],st==='Menunggu batal'?'Dibuat':st,{cancelled:st==='Dibatalkan'})}<div style="height:16px"></div>
   <div class="xs muted" style="margin-bottom:8px">Item pesanan</div><div class="rows" style="margin-bottom:14px">${o.items.map(i=>{ const p=PRODUCTS.find(x=>x.id===i.p)||{name:i.p,price:0}; return `<div class="rowlink" style="cursor:default"><span class="sm fg" style="flex:1">${esc(p.name)}<span class="xs muted" style="display:block">${rp(p.price)} × ${i.q}</span></span><b class="tabular fg sm">${rp(p.price*i.q)}</b></div>`; }).join('')}</div>
-  <div class="steps">${[['Pesanan dibuat',o.date+' · '+byU(o.u).name,'done'],['Dikirim','',['Dikirim','Lunas'].includes(st)?'done':'up'],['Pembayaran lunas','',st==='Lunas'?'done':st==='Dikirim'?'cur':'up']].map(([t,sub,k])=>`<div class="step"><span class="sd ${k==='done'?'done':k==='cur'?'cur':'up'}"></span><span><b class="fg sm">${t}</b>${sub?`<span class="xs muted" style="display:block">${sub}</span>`:''}</span></div>`).join('')}</div>
-  ${st==='Menunggu batal'?callout('Sales mengajukan pembatalan. Persetujuan ada di menu Approval (BRD 2.15.3).'):''}${st==='Dibatalkan'?callout('Pesanan dibatalkan dan tidak dihitung di pencapaian target sales.'):''}`,
-  st==='Menunggu batal'?btn('Buka approval',{v:'accent',on:"closeLayer();go('/approval?type=Batal pesanan')"}):`${st==='Dibuat'?btn('Ajukan batal',{v:'danger',on:`ordCancel('${id}')`}):''}<span style="flex:1"></span>${btn('Tutup',{v:'card',on:'closeLayer()'})}${ORD_NEXT[st]?btn('Tandai '+ORD_NEXT[st].toLowerCase(),{v:'accent',on:`ordAdvance('${id}')`}):''}`,{sub:'Pesanan (taking order)'}); }
+  ${st==='Menunggu batal'?blocker('Belum bisa dibatalkan:','sales mengajukan pembatalan dan menunggu approval di menu Approval (BRD 2.15.3).'):''}${st==='Dibatalkan'?banner({tone:'neutral',body:'Pesanan dibatalkan dan tidak dihitung di pencapaian target sales.'}):''}${historyBlock(o.id)}`,
+  st==='Menunggu batal'?btn('Buka approval',{v:'accent',on:"closeLayer();go('/approval?type=Batal pesanan')"}):`${st==='Dibuat'?btn('Ajukan batal',{v:'outline',on:`ordCancel('${id}')`}):''}<span style="flex:1"></span>${btn('Tutup',{v:'outline',on:'closeLayer()'})}${ORD_NEXT[st]?btn('Tandai '+ORD_NEXT[st].toLowerCase(),{v:'accent',on:`ordAdvance('${id}')`}):''}`,{sub:'Pesanan (taking order)'}); }
 function ordAdvance(id){
   const o=MD.order.find(x=>x.id===id);
   act('order/advance',{run:()=>{ o.st=ORD_NEXT[o.st]; },audit:()=>'Mengubah status pesanan '+o.id+' menjadi '+o.st,toast:()=>['Status pesanan diperbarui',o.id+' kini '+o.st.toLowerCase()+'.']});
@@ -2200,11 +2225,15 @@ function pageApproval(q){
   const S=ST.sel.apr||(ST.sel.apr=new Set()); [...S].forEach(id=>{ if(!D.approvals.find(a=>a.id===id)) S.delete(id); });
   return {title:'Approval',html:`
   <div class="chips" style="margin-bottom:16px"><button class="fchip ${!t?'on':''}" onclick="setQ({type:''})">Semua <span class="n">${D.approvals.length}</span></button>${types.map(x=>`<button class="fchip ${t===x?'on':''}" onclick="setQ({type:'${x}'})">${x} <span class="n">${D.approvals.filter(a=>a.type===x).length}</span></button>`).join('')}</div>
-  ${card('',`${S.size?`<div class="bulk"><span style="flex:1">${S.size} dipilih</span>${btn('Tolak',{perm:'approval.decide',v:'onpop',size:'sm',on:`rejectModal([${[...S].map(i=>`'${i}'`).join(',')}])`})}${btn('Setujui',{perm:'approval.decide',v:'accent',size:'sm',on:`approve([${[...S].map(i=>`'${i}'`).join(',')}])`})}</div>`:''}
+  ${card('',`${S.size?`<div class="bulk"><span style="flex:1">${S.size} dipilih</span>${btn('Tolak',{perm:'approval.decide',v:'onpop',size:'sm',on:`rejectModal([${[...S].map(i=>`'${i}'`).join(',')}])`})}${btn('Setujui',{perm:'approval.decide',v:'accent',size:'sm',on:`approveAsk([${[...S].map(i=>`'${i}'`).join(',')}])`})}</div>`:''}
     ${dataTable('apr',{rows,select:true,rowClick:r=>`aprPanel('${r.id}')`,empty:'Semua pengajuan sudah diproses.',cols:[
       {label:'Pengaju',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(r.u?byU(r.u).name:r.by)}<span><span class="fg" style="font-weight:500">${r.u?byU(r.u).name:r.by}</span><span class="xs muted" style="display:block">${r.when}</span></span></span>`,prim:true},
       {label:'Jenis',render:r=>tag(r.type,r.type==='Promo baru'?'info':'accent')},{label:'Detail',k:'detail'},{label:'Alasan',render:r=>`<span class="muted">“${esc(r.reason)}”</span>`,hide:true},
-      {label:'',render:r=>`<span style="display:flex;gap:6px;justify-content:flex-end" onclick="event.stopPropagation()">${btn('Tolak',{perm:'approval.decide',v:'outline',size:'sm',on:`rejectModal(['${r.id}'])`})}${btn('Setujui',{perm:'approval.decide',v:'solid',size:'sm',on:`approve(['${r.id}'])`})}</span>`,align:'r'}]})}`)}`};
+      {label:'',render:r=>`<span style="display:flex;gap:6px;justify-content:flex-end" onclick="event.stopPropagation()">${btn('Tolak',{perm:'approval.decide',v:'outline',size:'sm',on:`rejectModal(['${r.id}'])`})}${btn('Setujui',{perm:'approval.decide',v:'solid',size:'sm',on:`approveAsk(['${r.id}'])`})}</span>`,align:'r'}]})}`)}`};
+}
+function approveAsk(ids){
+  if(!can('approval.decide')) return noAccess();
+  confirmAsk({title:ids.length>1?`Setujui ${ids.length} pengajuan?`:'Setujui pengajuan ini?',desc:'Pengaju diberi tahu di aplikasi. Perubahan langsung berlaku.',confirmLabel:'Setujui',on:`approve([${ids.map(i=>`'${i}'`).join(',')}])`});
 }
 function approve(ids){
   const rows=D.approvals.filter(a=>ids.includes(a.id)), who=a=>(a.u&&byU(a.u)?.name)||a.by||'';
@@ -2438,8 +2467,8 @@ function assignSave(){
   const {u,sel:S}=ST.asg; if(!u||!S.size) return; const n=S.size, who=byU(u).name;
   act('leads/assign',{perm:'leads.assign',run:()=>{ D.leads.forEach(l=>{ if(S.has(l.id)) l.owner=u; }); ST.sel.lds?.clear(); },audit:`Meng-assign ${n} leads ke ${who}`,toast:[`${n} leads di-assign ke ${who.split(' ')[0]}`,'Penerima leads mendapat notifikasi di aplikasi.']});
 }
-function leadPanel(id){ const l=D.leads.find(x=>x.id===id);
-  openPanel(l.name,`<div class="kv" style="margin-bottom:14px"><div><dt>Pengajuan</dt><dd>${rp(l.amount)}</dd></div><div><dt>Tenor</dt><dd>${l.tenor} bulan</dd></div><div><dt>Goal</dt><dd>${l.goal?rp(l.goal):'–'}</dd></div></div>
+function leadPanel(id){ const l=D.leads.find(x=>x.id===id); if(!l) return panelMissing('Leads');
+  openPanel(l.name,`${panelHero({eyebrow:l.id,title:esc(l.name),sub:l.prod+' · '+l.cab,badge:spill(l.status,toneOf(l.status)),metrics:[['Pengajuan',rp(l.amount)],['Tenor',l.tenor+' bulan'],['Goal',l.goal?rp(l.goal):'Belum']]})}
   <div class="tile" style="margin-bottom:12px"><div class="xs muted">Produk</div><b class="fg">${l.prod}</b></div>
   ${l.status==='Deal'?`<div class="tile" style="margin-bottom:12px"><div class="xs muted">Dokumen Deal</div><b class="fg">Bukti approve terunggah · Persetujuan pencairan ${l.owner==='nina'&&l.goal>10e6?'terunggah':'belum'} · Serah terima dana ${l.owner==='nina'&&l.goal>10e6?'terunggah':'belum'}</b></div>`:''}
   <div class="steps">${[['Upload backend',l.date+' 2026 · 06:00','done'],['Assign ke sales',l.owner?byU(l.owner).name:'Belum',l.owner?'done':'cur'],['Verifikasi (telepon / WA)',l.status==='Baru'?'Belum':'Selesai',l.status==='Baru'?(l.owner?'cur':'up'):'done'],['Hasil: '+(l.sub?l.status+' · '+l.sub:l.status),l.status==='Deal'?'Goal '+rp(l.goal):l.status==='Prospect'?'Follow up 29 Okt':l.sub==='Rejected'?'Tidak memenuhi syarat':'Belum',l.status==='Deal'||l.sub==='Rejected'?'done':l.status==='Prospect'?'cur':'up'],['Kirim ke SIM',l.sync?'Terkirim':'–',l.sync?'done':'up']].map(([t,s,k])=>`<div class="step"><span class="sd ${k}">${k==='done'?I('check',14,2.6):''}</span><div><b>${t}</b><small>${s}</small></div></div>`).join('')}</div>`,
@@ -3204,10 +3233,10 @@ function pageKlaim(q){
   <div class="grid g-side" style="margin-top:16px">${card('Limit per kunjungan',`<div class="rows">${KLAIM_JENIS.map(([j,n])=>`<div class="rowlink" style="cursor:default"><span class="sm fg" style="flex:1">${j}</span><b class="tabular sm fg">${rp(n)}</b></div>`).join('')}</div>`)}
   <div>${usulanNote('Sales mengajukan biaya operasional per kunjungan dengan foto bukti. Klaim terhubung ke kunjungan yang sudah check-in, lalu disetujui Team Leader.')}</div></div>`};
 }
-function klaimPanel(id){ const k=KLAIM.find(x=>x.id===id), over=k.n>klaimLimit(k.jenis);
-  openPanel(k.jenis+' · '+rp(k.n),`<div class="kv" style="margin-bottom:14px"><div><dt>Sales</dt><dd>${esc(byU(k.u).name)}</dd></div><div><dt>Kunjungan</dt><dd>${esc(k.toko)}</dd></div><div><dt>Status</dt><dd>${k.st}</dd></div></div>
+function klaimPanel(id){ const k=KLAIM.find(x=>x.id===id); if(!k) return panelMissing('Klaim'); const over=k.n>klaimLimit(k.jenis);
+  openPanel(k.jenis+' · '+rp(k.n),`${panelHero({eyebrow:k.tgl,title:esc(byU(k.u).name),sub:esc(k.toko),badge:spill(k.st,toneOf(k.st)),metrics:[['Nominal',rp(k.n)],['Limit',rp(klaimLimit(k.jenis))],['Selisih',(over?'+':'')+rp(k.n-klaimLimit(k.jenis))]]})}
   <div class="xs muted" style="margin-bottom:8px">Foto bukti</div><div class="thumbs" style="margin-bottom:14px"><div class="thumb">${I('image',22)}</div></div>
-  ${over?callout('Nominal melebihi limit '+k.jenis+' ('+rp(klaimLimit(k.jenis))+'). Periksa bukti sebelum menyetujui.'):''}`,
+  ${over?blocker('Periksa bukti dulu:','nominal melebihi limit '+k.jenis+' ('+rp(klaimLimit(k.jenis))+').'):''}${historyBlock(k.jenis+' '+byU(k.u).name)}`,
   k.st==='Menunggu'?`${btn('Tolak',{perm:'approval.decide',v:'card',on:`klaimSet('${id}','Ditolak')`})}${btn('Setujui',{perm:'approval.decide',v:'accent',on:`klaimSet('${id}','Disetujui')`})}`:btn('Tutup',{v:'card',on:'closeLayer()'}),{sub:k.tgl}); }
 function klaimSet(id,st){
   const k=KLAIM.find(x=>x.id===id);
@@ -3218,7 +3247,7 @@ const TR_TONE={'Di toko':'success','Perjalanan':'accent','Offline':'neutral'};
 function pageTracking(q){
   const selU=q.u||'', rows=TRACK.map(t=>({...t,_id:t.u}));
   return {title:'Live tracking',html:`
-  <div class="grid g-side">${card('Posisi sales',`<div class="mapbox" style="height:340px"><svg viewBox="0 0 260 260" width="100%" height="100%" role="img" aria-label="Peta posisi sales"><g stroke="#fff" stroke-width="12" fill="none"><path d="M-10 120 L270 90M80 -10 L110 270M190 -10 L170 270M-10 210 L270 230"/></g>
+  <div class="grid g-side g-flip">${card('Posisi sales',`<div class="mapbox" style="height:340px"><svg viewBox="0 0 260 260" width="100%" height="100%" role="img" aria-label="Peta posisi sales"><g stroke="#fff" stroke-width="12" fill="none"><path d="M-10 120 L270 90M80 -10 L110 270M190 -10 L170 270M-10 210 L270 230"/></g>
     ${TRACK.map(t=>`<g style="cursor:pointer" onclick="setQ({u:'${t.u}'})"><circle cx="${t.xy[0]}" cy="${t.xy[1]}" r="${selU===t.u?11:8}" fill="${t.st==='Offline'?'#9FB1C1':t.st==='Perjalanan'?'#EFA477':'#0A92F2'}" stroke="#fff" stroke-width="3"/><text x="${t.xy[0]+12}" y="${t.xy[1]+4}" font-size="10" fill="#334">${esc(byU(t.u).name.split(' ')[0])}</text></g>`).join('')}</svg></div>
     <div class="legend" style="margin-top:10px"><span><i class="dotc" style="background:#0A92F2"></i>Di toko</span><span><i class="dotc" style="background:#EFA477"></i>Perjalanan</span><span><i class="dotc" style="background:#9FB1C1"></i>Offline</span></div>`)}
   ${card('Sales aktif hari ini',dataTable('trk',{rows,rowClick:r=>`setQ({u:'${r.u}'})`,cols:[
@@ -3263,9 +3292,11 @@ function infoDel(id){ const x=INFO.find(a=>a.id===id);
 
 const SYNC=[['rina','Android 14 · Galaxy A35','2.4.1','13:42',0],['sinta','Android 13 · Redmi Note 12','2.4.1','13:40',0],['budi','Android 12 · Galaxy A14','2.4.0','11:58',6],['dimas','iOS 17 · iPhone 11','2.4.1','13:38',1],['kevin','Android 11 · Oppo A16','2.3.7','09:12',14],['putri','Android 13 · Vivo Y27','2.4.1','11:05',3],['fajar','Android 14 · Galaxy A25','2.4.1','13:30',0]].map(([u,dev,ver,last,q])=>({_id:u,u,dev,ver,last,q}));
 const syncSt=r=>r.q===0?['Tersinkron','success']:r.q>=10?['Tertahan','danger']:['Menunggu sinkron','warning'];
+const simSyncCard=()=>`<section class="card" style="margin-bottom:16px"><div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px">${iconTile('refresh',{tone:'success',size:'lg'})}<div style="flex:1;min-width:14rem"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b class="fg" style="font-size:16px">SIM (BPR1)</b>${spill('Tersambung','success')}</div><p class="xs muted" style="margin-top:2px">Sumber data pegawai dan leads. Terakhir sinkron ${ST.simAt||'Senin 26 Okt 06.00 WIB'}.</p></div><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--body)">Sinkron otomatis ${swc(ST.simAuto!==false,"ST.simAuto=ST.simAuto===false;toast('Sinkron otomatis '+(ST.simAuto!==false?'dinyalakan':'dimatikan'),'SIM (BPR1)','default');render(false)",'Sinkron otomatis SIM',{sm:true})}</span>${btn('Sinkron sekarang',{v:'outline',size:'sm',icon:'refresh',on:'simSyncNow()'})}</div></div>${banner({tone:'neutral',body:'Data pegawai dimiliki SIM (BPR1). Dashboard hanya membaca dan menambahkan jejak aktivitas lapangan.',cls:'mt'})}</section>`;
+function simSyncNow(){ ST.simAt='hari ini '+timeLabel()+' WIB'; toast('Sinkron dari SIM selesai','Data pegawai dan leads sudah terbaru.'); render(false); }
 function pageSinkron(){
   return {title:'Status sinkron',html:`
-  <div class="stats">${[['Perangkat',SYNC.length,'aktif hari ini'],['Tersinkron',SYNC.filter(r=>!r.q).length,'tanpa antrean'],['Data tertunda',SYNC.reduce((a,r)=>a+r.q,0),'transaksi dan aktivitas'],['Versi lama',SYNC.filter(r=>r.ver!=='2.4.1').length,'perlu update']].map(([l,v,sub])=>`<div class="stat"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></div>`).join('')}</div>
+  ${simSyncCard()}<div class="stats">${[['Perangkat',SYNC.length,'aktif hari ini'],['Tersinkron',SYNC.filter(r=>!r.q).length,'tanpa antrean'],['Data tertunda',SYNC.reduce((a,r)=>a+r.q,0),'transaksi dan aktivitas'],['Versi lama',SYNC.filter(r=>r.ver!=='2.4.1').length,'perlu update']].map(([l,v,sub])=>`<div class="stat"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></div>`).join('')}</div>
   ${card('Perangkat sales',dataTable('syn',{rows:SYNC,rowClick:r=>`toast('${esc(byU(r.u).name)}','${r.q} data menunggu dikirim. Sinkron terakhir ${r.last}.')`,cols:[
     {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(byU(r.u).name)}</span><span class="xs muted" style="display:block">${esc(r.dev)}</span>`,prim:true},{label:'Versi app',render:r=>r.ver==='2.4.1'?r.ver:tag(r.ver+' · lama','warning'),hide:true},
     {label:'Sinkron terakhir',render:r=>`<span class="tabular">${r.last}</span>`,hide:true},{label:'Antrean',render:r=>r.q,align:'r'},{label:'Status',render:r=>spill(...syncSt(r))}],
