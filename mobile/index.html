@@ -1523,6 +1523,16 @@ SCR.scan = p => ({dark:true, note:'Scan QR atau barcode produk di rak. Nama prod
     <div class="bottom"><div style="font-size:13.5px;font-weight:600;opacity:.85">Mencari barcode…</div></div></div>`});
 
 /* ---------- Stok bawaan (Canvasing) ---------- */
+/* Usulan (11 Nov 2026): sisa barang canvassing wajib kembali ke gudang dalam batas jam sejak check-out (bawaan 24 jam, diatur di dashboard).
+   Check-out tidak diblokir. Dashboard menandai sisa yang sudah dikembalikan (cvSisaOk). Data contoh sama dengan kartu Sisa barang di dashboard. */
+const CV_SISA_M=[{id:'sb1',u:'budi',item:'Blender 1 L ×2',jam:30,co:'Senin 17:04'},{id:'sb2',u:'budi',item:'Rice Cooker 1,8 L ×1',jam:6,co:'Selasa 17:10'},{id:'sb3',u:'kevin',item:'Kipas Angin 16 inci ×3',jam:28,co:'Senin 16:48'}];
+const cvSisaMine=()=>{ if(role()!=='canvas') return []; const batas=shRead('canvasSisaJam',24), ok=shRead('cvSisaOk',[]);
+  return CV_SISA_M.filter(x=>x.u===fmUk()).map(x=>{ const sisa=batas-x.jam, done=ok.includes(x.id); return {...x,done,sisa,batas}; }); };
+function cvSisaCard(){ const L=cvSisaMine(); if(!L.length) return '';
+  const late=L.filter(x=>!x.done&&x.sisa<0).length;
+  return `<div class="sec-title">Sisa barang dari check-out</div>
+  ${late?`<div class="banner red" style="margin-bottom:12px">${I('alert',18)}<span>${late} sisa barang lewat batas ${L[0].batas} jam. Kembalikan ke gudang secepatnya.</span></div>`:`<div class="banner blue" style="margin-bottom:12px">${I('clock',18)}<span>Kembalikan sisa barang ke gudang dalam ${L[0].batas} jam sejak check-out. Check-out tetap bisa dilakukan.</span></div>`}
+  <div class="list">${L.map(x=>`<div class="li"><div class="ico-tile ${x.done?'green':x.sisa<0?'red':'amber'}">${I(x.done?'check':'box',18,2)}</div><div class="grow"><div class="t">${esc(x.item)}</div><div class="s">Check-out ${x.co}</div></div>${chip(x.done?'Dikembalikan':x.sisa<0?'Lewat '+(-x.sisa)+' jam':'Sisa '+x.sisa+' jam',x.done?'green':x.sisa<0?'red':'amber')}</div>`).join('')}</div>`; }
 SCR.stok = () => {
   const good=Object.values(S.stock).reduce((s,x)=>s+x.good,0), bad=Object.values(S.stock).reduce((s,x)=>s+x.bad,0);
   return {note:'Stok bawaan canvassing (MOM 11.1): limit nominal per hari, input manual atau dari foto invoice, foto tanda terima, dan penjualan dihitung dari retur saat kembali.',
@@ -1536,6 +1546,7 @@ SCR.stok = () => {
     <div class="card" style="margin-top:12px"><div class="kv"><span>Nilai barang dibawa</span><span class="num">${rp(stockValue())}</span></div><div class="kv"><span>Limit per hari</span><span class="num">${rp(canvasLimit())}</span></div><div class="bar" style="margin-top:6px"><i style="width:${Math.min(100,stockValue()/canvasLimit()*100)}%"></i></div></div>
     <div class="thumbs">${photoSlot('Dari foto invoice',0,"act(()=>startStokInv())")}${photoSlot(S.receipt?'Tanda terima ada':'Foto tanda terima',S.receipt,"act(()=>{S.receipt=true;render(false,true);toast('Tanda terima tersimpan','camera')})")}</div>
     <button class="btn sec" style="margin-top:12px" onclick="act(()=>go('stok-rekap'))">${I('retur',18)} Rekap akhir hari</button>
+    ${cvSisaCard()}
     <div class="sec-title">Per produk</div>
     <div class="list">${CANVAS_PRODUCTS.map(p=>`<div class="li"><div class="grow"><div class="t">${p.name}</div><div class="s">${p.sku}</div></div><div class="r"><b class="num">${S.stock[p.id].good}</b><div class="small" style="color:${S.stock[p.id].bad?'var(--red)':'var(--muted)'}">${S.stock[p.id].bad} retur</div></div></div>`).join('')}</div>
     <div class="sec-title">Mutasi hari ini</div>
