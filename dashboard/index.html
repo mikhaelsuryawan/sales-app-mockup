@@ -1289,7 +1289,7 @@ function pageDataJual(q){
 }
 function djTokoMode(v){ document.getElementById('dj_tk_m').style.display=v==='free'?'none':''; document.getElementById('dj_tk_f').style.display=v==='free'?'':'none'; }
 function djProdMode(v){ document.getElementById('dj_p_m').style.display=v==='free'?'none':''; document.getElementById('dj_p_f').style.display=v==='free'?'':'none'; if(v==='free') document.getElementById('dj_h').value=''; else djPrice(); }
-function djPrice(){ const id=document.getElementById('dj_p').value, tn=document.getElementById('dj_t')?.value, tk=TOKO.find(t=>t.name===tn), m=tk&&MD.mapping.find(x=>!x.del&&x.status==='Aktif'&&x.produk===id&&x.toko===tk.id), p=PRODUCTS.find(x=>x.id===id); if(m) document.getElementById('dj_h').value=m.harga; else if(p) document.getElementById('dj_h').value=p.price; }
+function djPrice(){ const id=document.getElementById('dj_p').value, tn=document.getElementById('dj_t')?.value, tk=TOKO.find(t=>t.name===tn), m=tk&&MD.mapping.find(x=>!x.del&&x.status==='Aktif'&&x.produk===id&&x.toko===tk.id), p=PRODUCTS.find(x=>x.id===id); if(m) document.getElementById('dj_h').value=effHarga(m); else if(p) document.getElementById('dj_h').value=p.price; }
 function djForm(){
   const sales=SALES.filter(s=>['SPG / Promotor','Canvasing'].includes(s.job)), tk=live('toko').filter(t=>t.status==='Aktif');
   openModal(`<h2 class="pt" style="font-size:22px">Tambah penjualan<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Dipakai bila sales gagal menginput dari aplikasi. Tercatat atas nama sales, dengan jejak admin yang menginput.</p>
@@ -2568,13 +2568,13 @@ MD.katprod.push({id:'kp143',name:'Small Appliances',brand:'KIRANA',parent:'',cak
 const mkProd=(name,sku,sektor,ex={})=>{ const r={id:ex.id||'prd'+(MD.produk.length+1),name,sku,sektor,price:ex.price||0,lvl:ex.lvl||'C',inc:ex.inc||0,status:'Aktif'}; r.code=codeNext('MD',MD.produk); MD.produk.push(r); return r; };
 const mkMap=(produk,client,toko,harga,kategori='')=>{ const r={id:'mpt'+(MD.mapping.length+1),produk,client,toko,harga,kategori,foto:'',status:'Aktif'}; r.code=codeNext('MPT',MD.mapping); MD.mapping.push(r); return r; };
 { const flag=mkProd('Ponsel Flagship X Pro Max','PX-PM-256','Elektronik',{price:24999000,lvl:'A',inc:100000});
-  mkMap(flag.id,'cl8','dg_a',24999000,'kp141'); mkMap(flag.id,'cl8','dg_b',25499000,'kp141'); mkMap(flag.id,'cl9','dg_c',24799000,'kp141');
+  mkMap(flag.id,'cl8','dg_a','','kp141'); mkMap(flag.id,'cl8','dg_b',25499000,'kp141'); mkMap(flag.id,'cl9','dg_c',24799000,'kp141');
   const pmOf={}, katOf={}, all=ALL_PROD();
   all.forEach(p=>{ const kt=MD.katprod.find(k=>k.cakupan==='Client'&&k.brand===p.brand&&k.name===(p.kp||p.cat))||MD.katprod.find(k=>k.brand===p.brand&&k.name===p.cat)||(p.cat==='FMCG'?{id:'kp142'}:{});
     katOf[p.id]=kt.id||''; pmOf[p.id]=mkProd(p.name,p.sku,p.cat==='FMCG'?'FMCG':sektorOfClient(prodClient(p)),{id:p.id,price:p.price||0,lvl:p.lvl||'C',inc:p.inc||0}).id; });
   MD.produk.forEach(m=>{ if(katOf[m.id]) m.kategoriRef=katOf[m.id]; });
   TOKO.forEach(t=>{ if(['dg_a','dg_b','dg_c'].includes(t.id)) return; const fk=catF()[t.cat]||1;
-    outletMap(t.id).forEach(pid=>{ const p=all.find(x=>x.id===pid); if(p) mkMap(pmOf[pid],prodClient(p)||t.client,t.id,Math.round(p.price*fk/1000)*1000,katOf[pid]); }); }); }
+    outletMap(t.id).forEach(pid=>{ const p=all.find(x=>x.id===pid); if(p) { const hv=Math.round(p.price*fk/1000)*1000; mkMap(pmOf[pid],prodClient(p)||t.client,t.id,hv===p.price?'':hv,katOf[pid]); } }); }); }
 /* Kategori produk di master: jalur, level, dan jumlah level pohonnya. Laporan membaca PRODUCTS yang diturunkan dari master produk. */
 const katChain=k=>{ const c=[k]; let g=0; while(c[0].parent&&g++<30){ const up=katParentOf(c[0]); if(!up) break; c.unshift(up); } return c; };
 const katPathText=k=>katChain(k).map(x=>x.name).join(' › ');
@@ -2586,7 +2586,8 @@ const katOptsFor=cl=>cl?[['','Pilih kategori'],...live('katprod').filter(k=>k.st
 function syncProducts(){ const fm=new Set(FM_PROD.map(x=>x.id)), katBy={}; PRODUCTS.length=0;
   MD.mapping.forEach(x=>{ if(!x.del&&x.status==='Aktif'&&x.kategori&&!katBy[x.produk]) katBy[x.produk]=x.kategori; });
   live('produk').filter(m=>!fm.has(m.id)).forEach(m=>{ const k=MD.katprod.find(x=>x.id===(katBy[m.id]||m.kategoriRef))||{}; PRODUCTS.push({id:m.id,name:m.name,sku:m.sku||'–',cat:k.name?katChain(k)[0].name:'–',price:m.price||0,lvl:m.lvl||'C',inc:m.inc||0,brand:k.brand||'',kp:k.parent?k.name:'',sektor:m.sektor,status:m.status}); }); }
-const priceAt=(pid,tokoId)=>{ const m=MD.mapping.find(x=>!x.del&&x.status==='Aktif'&&x.produk===pid&&x.toko===tokoId); return m?m.harga:((PRODUCTS.find(p=>p.id===pid)||{}).price||0); };
+const effHarga=m=>m.harga>0?m.harga:(pmOne(m.produk).price||0);
+const priceAt=(pid,tokoId)=>{ const m=MD.mapping.find(x=>!x.del&&x.status==='Aktif'&&x.produk===pid&&x.toko===tokoId); return m?effHarga(m):((PRODUCTS.find(p=>p.id===pid)||{}).price||0); };
 /* Foto contoh: ilustrasi SVG sederhana (data fiktif, tanpa gambar asli). */
 const FOTO_ART={
   tv:c=>`<rect x="18" y="30" width="84" height="52" rx="5" fill="#1d2433"/><rect x="22" y="34" width="76" height="44" rx="3" fill="${c}"/><path d="M22 70l22-18 18 12 14-10 22 16v8H22z" fill="#fff" opacity=".28"/><rect x="52" y="82" width="16" height="8" fill="#9aa3b2"/><rect x="40" y="90" width="40" height="5" rx="2.5" fill="#6b7587"/>`,
@@ -2622,7 +2623,7 @@ const pmOne=id=>MD.produk.find(p=>p.id===id)||{};
 const pmName=id=>pmOne(id).name||'–', pmCode=id=>pmOne(id).code||'–';
 const mptState=()=>{ const rec=FORM&&FORM.id?MD.mapping.find(m=>m.id===FORM.id):null, pre=(FORM&&FORM.prefill)||{}; return rec?{cl:rec.client,pm:rec.produk}:{cl:pre.client||'',pm:''}; };
 const mptTokoOpts=cl=>cl?[['','Pilih toko'],...live('toko').filter(t=>t.status==='Aktif'&&tokoClients(t).includes(cl)).map(t=>[t.id,t.name])]:[['','Pilih client dulu']];
-function mptPick(){ const h=document.getElementById('f_harga'), id=document.getElementById('f_produk').value, m=pmOne(id); if(h&&!h.value.trim()&&m.price) h.value=String(m.price); }
+function mptPick(){ const el=document.getElementById('mp_hb'), id=document.getElementById('f_produk').value; if(el) el.textContent=id?rp(pmOne(id).price||0):''; }
 function mptSync(){ const c=document.getElementById('f_client').value, t=document.getElementById('f_toko'), k=document.getElementById('f_kategori'), oh=a=>a.map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join(''); t.innerHTML=oh(mptTokoOpts(c)); k.innerHTML=oh(katOptsFor(c)); pmKatSync(); }
 const FOTO={mp:'',pm:''};
 const fotoHTML=k=>FOTO[k]?`<div style="display:flex;gap:12px;align-items:center"><img src="${FOTO[k]}" alt="Foto produk" style="width:72px;height:72px;object-fit:cover;border-radius:14px;border:1px solid var(--line)">${btn('Ganti foto',{v:'soft',size:'sm',attrs:'type="button"',on:`document.getElementById('${k}_file').click()`})}${btn('Hapus foto',{v:'soft',size:'sm',attrs:'type="button"',on:`fotoClear('${k}')`})}</div>`:btn('Pilih foto',{v:'soft',size:'sm',icon:'up',attrs:'type="button"',on:`document.getElementById('${k}_file').click()`});
@@ -2657,13 +2658,13 @@ Object.assign(ENT,{
       {k:'client',label:'Client',type:'select',req:true,opts:()=>[['','Pilih client'],...live('client').filter(c=>c.status==='Aktif'||c.id===mptState().cl).map(c=>[c.id,c.name])],onchange:'mptSync()'},
       {k:'toko',label:'Toko',type:'select',req:true,opts:()=>mptTokoOpts(mptState().cl),hint:'Toko dari client yang dipilih'},
       {k:'kategori',label:'Kategori produk',type:'select',req:true,opts:()=>katOptsFor(mptState().cl),onchange:'pmKatSync()',hint:r=>`<span id="pm_kinfo">${pmKatInfo(r.kategori)}</span>`},
-      {k:'harga',label:'Harga (Rp)',type:'number',req:true,validate:v=>!(v>0)?'Isi harga lebih dari nol':''}],
+      {k:'harga',label:'Harga toko (Rp), opsional',type:'number',ph:'Kosong = ikut harga master',validate:v=>!(v>0)?'Isi harga lebih dari nol, atau kosongkan':'',hint:r=>`Kosongkan untuk memakai harga dasar dari master produk <b class="fg" id="mp_hb">${r.produk?rp(pmOne(r.produk).price||0):''}</b>`}],
     extra:r=>fotoField('mp',r.foto,'Kosongkan untuk memakai foto dari master produk. Maksimal 2 MB.'),
     readExtra:()=>({foto:FOTO.mp}),
     validateExtra:v=>{ const t=TOKO.find(x=>x.id===v.toko); if(t&&!tokoClients(t).includes(v.client)) return 'Toko ini bukan milik client yang dipilih.'; const kt=MD.katprod.find(k=>k.id===v.kategori); if(kt&&kt.cakupan!=='General'&&brandClient(kt.brand)!==v.client) return 'Kategori ini bukan milik client yang dipilih.'; return MD.mapping.some(m=>!m.del&&m.id!==(FORM&&FORM.id)&&m.produk===v.produk&&m.toko===v.toko)?'Produk ini sudah dipetakan di toko tersebut.':''; },
     cols:[{label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${esc(pmName(r.produk))}</span><span class="mono muted" style="display:block">${esc(pmCode(r.produk))}</span>`,prim:true},{label:'ID mapping',render:r=>`<span class="mono">${esc(r.code)}</span>`},{label:'Client',render:r=>esc(clientName(r.client))},{label:'Toko',render:r=>esc(tokoName(r.toko))},
       {label:'Kategori',render:r=>{ const k=MD.katprod.find(x=>x.id===r.kategori); return k?`<span class="fg">${esc(k.name)}</span><span class="xs muted" style="display:block">Level ${katLevel(k)} dari ${katTreeLevels(k)}</span>`:'<span class="muted">–</span>'; },hide:true},
-      {label:'Harga',render:r=>`<span class="tabular">${rp(r.harga)}</span>`,align:'r'},{label:'Foto',render:r=>r.foto?fotoThumb(r.foto):pmOne(r.produk).foto?`<span style="opacity:.6" title="Dari master produk">${fotoThumb(pmOne(r.produk).foto)}</span>`:'<span class="muted">–</span>',hide:true},{label:'Status',render:r=>stPill(r.status)}]}
+      {label:'Harga',render:r=>`<span class="tabular">${rp(effHarga(r))}</span>${r.harga>0?'':'<span class="xs muted" style="display:block">Ikut master</span>'}`,align:'r'},{label:'Foto',render:r=>r.foto?fotoThumb(r.foto):pmOne(r.produk).foto?`<span style="opacity:.6" title="Dari master produk">${fotoThumb(pmOne(r.produk).foto)}</span>`:'<span class="muted">–</span>',hide:true},{label:'Status',render:r=>stPill(r.status)}]}
 });
 
 /* ---------- Produk & harga ---------- */
