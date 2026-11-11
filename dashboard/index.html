@@ -1766,6 +1766,8 @@ function notifItems(){
   if(c.overdue) out.push({id:'od@'+c.overdue,tone:'danger',icon:'clock',title:`${c.overdue} leads overdue`,body:'Sudah melewati batas tindak lanjut.',at:'Hari ini',to:'/overdue'});
   if(c.usulan) out.push({id:'us@'+c.usulan,tone:'info',icon:'store',title:`${c.usulan} usulan toko baru dari lapangan`,body:'Verifikasi sebelum masuk master toko.',at:'Hari ini',to:'/toko?tab=usulan'});
   if(rk) out.push({id:'rk@'+rk.u,tone:'warning',icon:'wallet',title:'1 selisih rekonsiliasi insentif',body:`${byU(rk.u).name}, selisih ${rp(Math.abs(rk.sys-rk.cli))}.`,at:'Hari ini',to:'/insentif?tab=rekon'});
+  /* Usulan: pengecualian dari lapangan (jadwal ulang, terlewat, di luar rencana) menjadi notifikasi Team Leader. */
+  shRead('visitExc',[]).slice(-5).reverse().forEach(e=>out.push({id:'ex@'+e.id,tone:e.type==='Terlewat'?'danger':e.type==='Unplanned'?'info':'warning',icon:e.type==='Terlewat'?'clock':e.type==='Unplanned'?'pin':'cal',title:`${byU(e.u).name} ${e.type==='Dijadwal ulang'?'menjadwal ulang':e.type==='Terlewat'?'melewatkan':'berkunjung di luar rencana ke'} ${e.place}`,body:(e.type==='Dijadwal ulang'?'Ke '+e.untuk+'. ':'')+e.alasan,at:e.tgl,to:'/kepatuhan-kunjungan'}));
   return out;
 }
 const unreadCount=()=>{ const r=readSet(); return notifItems().filter(n=>!r.has(n.id)).length; };
@@ -3179,9 +3181,12 @@ const JP_DEFAULT=[...jpSeed('budi',1,0,['c1','c2','c3']),...jpSeed('budi',1,1,['
 const jpAll=()=>shRead('jpPlan',JP_DEFAULT);
 const jpItems=(u,w,d)=>jpAll().filter(x=>x.u===u&&x.w===w&&x.d===d).sort((a,b)=>a.o-b.o);
 const jpUsers=()=>live('user').filter(x=>JP_ROLES.includes(x.role)&&x.status==='Aktif');
-const jpState=()=>{ const us=jpUsers(), J=ST.jp||(ST.jp={u:'',w:1}); if(!us.find(x=>x.id===J.u)) J.u=us[0]?.id||''; return J; };
+const jpState=()=>{ const J=ST.jp||(ST.jp={r:'',u:'',w:1}), us=jpUsers(), roles=JP_ROLES.filter(r=>us.some(x=>x.role===r));
+  if(!roles.includes(J.r)) J.r=us.find(x=>x.id===J.u)?.role||roles[0]||'';
+  const inRole=us.filter(x=>x.role===J.r); if(!inRole.find(x=>x.id===J.u)) J.u=inRole[0]?.id||''; return J; };
 const jpToko=id=>TOKO.find(t=>t.id===id)?.name||id;
-function jpPick(u){ ST.jp={u,w:ST.jp?.w||1}; render(false); }
+function jpPick(u){ const J=jpState(); J.u=u; render(false); }
+function jpRole(r){ const J=jpState(); J.r=r; J.u=''; render(false); }
 function jpWeek(w){ jpState().w=+w; render(false); }
 function jpOpen(u){ ST.jp={u,w:1}; go('/penugasan?tab=jp'); }
 function jpCoverage(u){ const all=jpAll().filter(x=>x.u===u);
@@ -3190,19 +3195,19 @@ function jpCoverage(u){ const all=jpAll().filter(x=>x.u===u);
 function jpOver(u){ const m={}, kap=jpKap(); jpAll().filter(x=>x.u===u).forEach(x=>{ const k=x.w+'-'+x.d; m[k]=(m[k]||0)+1; });
   return Object.entries(m).filter(([,n])=>n>kap).map(([k,n])=>{ const [w,d]=k.split('-'); return {w:+w,d:+d,n}; }); }
 function jpBody(){
-  const J=jpState(), users=jpUsers(), usr=users.find(x=>x.id===J.u);
+  const J=jpState(), users=jpUsers(), usr=users.find(x=>x.id===J.u), roles=JP_ROLES.filter(r=>users.some(x=>x.role===r)), inRole=users.filter(x=>x.role===J.r);
   if(!usr) return card('Journey plan '+tag('Usulan','accent'),'<p class="muted sm">Belum ada sales yang boleh punya journey plan.</p>');
   const kap=jpKap(), toko=tokoOfU(usr.id), cov=jpCoverage(usr.id), over=jpOver(usr.id), ruteRole=['r4','r5','r13'].includes(usr.role);
   const chips=(arr,cur,fn)=>`<div class="chips" style="margin-bottom:12px" role="group">${arr.map(([k,l])=>`<button class="fchip ${cur===k?'on':''}" aria-pressed="${cur===k}" onclick="${fn}('${k}')">${l}</button>`).join('')}</div>`;
   const days=JP_DAYS.map((dn,d)=>{ const it=jpItems(usr.id,J.w,d), off=usr.off===dn;
     return `<div class="tile" style="min-width:0"><div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:8px"><b class="fg sm">${dn}</b>${off?tag('Off','danger'):`<span class="xs muted tabular">${it.length}/${kap}</span>`}</div>
-    <div class="rows" style="margin-bottom:8px">${it.length?it.map((x,i)=>`<div class="rowlink" style="cursor:default;gap:6px"><span class="xs muted tabular" style="width:16px">${i+1}</span><span class="xs fg" style="flex:1;min-width:0">${esc(jpToko(x.t))}</span>${i>0?ibtn('arrowup','Naikkan urutan',`jpMove('${x.id}',-1)`):''}${i<it.length-1?ibtn('arrowdown','Turunkan urutan',`jpMove('${x.id}',1)`):''}${ibtn('x','Hapus dari plan',`jpDel('${x.id}')`)}</div>`).join(''):`<p class="xs muted">${off?'Hari off. Tidak bisa dijadwalkan.':'Belum ada kunjungan.'}</p>`}</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">${it.length?it.map((x,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:10px 10px 10px 12px;background:var(--card);border-radius:14px;box-shadow:var(--shadow-card);min-width:0"><span class="xs tabular fg" style="width:24px;height:24px;border-radius:50%;background:var(--raised);display:grid;place-items:center;flex:none;font-weight:600">${i+1}</span><span style="flex:1;min-width:0"><span class="sm fg" style="font-weight:500;display:block">${esc(jpToko(x.t))}</span><span class="xs muted">${esc(TOKO.find(t=>t.id===x.t)?.cat||'')}</span></span>${i>0?ibtn('arrowup','Naikkan urutan',`jpMove('${x.id}',-1)`):''}${i<it.length-1?ibtn('arrowdown','Turunkan urutan',`jpMove('${x.id}',1)`):''}${ibtn('x','Hapus dari plan',`jpDel('${x.id}')`)}</div>`).join(''):`<p class="xs muted">${off?'Hari off. Tidak bisa dijadwalkan.':'Belum ada kunjungan.'}</p>`}</div>
     ${btn('Tambah toko',{v:'outline',size:'sm',icon:'plus',on:`jpAddModal(${d})`,dis:off||!toko.length})}</div>`; }).join('');
   const covRows=cov.map(c=>`<div class="rowlink" style="cursor:default"><span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${esc(c.t.name)}</b><span class="xs muted">${esc(c.t.cat)} · target ${c.need} kali per 4 minggu${c.khusus?' (khusus toko)':''}</span></span><span class="tabular sm">${c.plan}/${c.need}</span>${c.st==='overdue'?spill('Overdue','danger'):c.st==='due'?spill('Due, kurang '+c.kurang,'warning'):spill('Terpenuhi','success')}</div>`).join('');
   const nOver=cov.filter(c=>c.st==='overdue').length, nDue=cov.filter(c=>c.st==='due').length;
   const warn=[...cov.filter(c=>c.kurang).map(c=>`${esc(c.t.name)} baru ${c.plan} dari ${c.need} kunjungan`),...over.map(o=>`${JP_DAYS[o.d]} minggu ${o.w} berisi ${o.n} kunjungan, melebihi kapasitas ${kap}`)];
-  return card('Journey plan '+tag('Usulan','accent'),`${chips(users.map(u=>[u.id,esc(u.name.split(' ')[0])]),J.u,'jpPick')}${chips(JP_WEEKS.map(([w,l])=>[w,'Minggu '+w+' · '+l]),J.w,'jpWeek')}
-    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">${days}</div>`,{desc:esc(usr.name)+' · '+esc(roleName(usr.role))+(ruteRole?'. Urutan di tiap hari adalah rute kunjungan.':'. Urutan di tiap hari menjadi urutan kunjungan.'),acts:`${btn('Salin dari minggu '+(J.w-1),{v:'outline',size:'sm',on:'jpCopyAsk()',dis:J.w<2})}<span class="xs muted" style="margin-left:8px">Siklus 26 Okt – 22 Nov 2026</span>`})
+  return card('Journey plan '+tag('Usulan','accent'),`<div class="xs muted" style="margin-bottom:6px">Role</div>${chips(roles.map(r=>[r,esc(roleName(r))]),J.r,'jpRole')}<div class="xs muted" style="margin-bottom:6px">Sales</div>${chips(inRole.map(u=>[u.id,esc(u.name)]),J.u,'jpPick')}<div class="xs muted" style="margin-bottom:6px">Minggu</div>${chips(JP_WEEKS.map(([w,l])=>[w,'Minggu '+w+' · '+l]),J.w,'jpWeek')}
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">${days}</div>`,{desc:esc(usr.name)+' · '+esc(roleName(usr.role))+(ruteRole?'. Urutan di tiap hari adalah rute kunjungan.':'. Urutan di tiap hari menjadi urutan kunjungan.'),acts:`${btn(J.w<2?'Salin dari minggu sebelumnya':'Salin dari minggu '+(J.w-1),{v:'outline',size:'sm',on:'jpCopyAsk()',dis:J.w<2})}<span class="xs muted" style="margin-left:8px">Siklus 26 Okt – 22 Nov 2026</span>`})
     +`<div style="height:12px"></div>`+card('Due, overdue, dan validasi',`${warn.length?callout('<b>Peringatan.</b> '+warn.join('. ')+'. Plan tetap bisa disimpan.'):callout('Coverage dan kapasitas harian terpenuhi.','blue')}<div style="height:12px"></div><div class="rows">${covRows||'<p class="muted sm" style="padding:12px">Belum ada toko yang ditempatkan. Atur di tab Penempatan toko.</p>'}</div>`,{desc:(nOver||nDue?nOver+' toko overdue dan '+nDue+' toko due dalam siklus ini. ':'Semua toko memenuhi frekuensinya. ')+'Hari off ditolak saat menambah toko. Coverage dan kapasitas hanya memperingatkan.'});
 }
 function jpCopyAsk(){ const {u,w}=jpState(), usr=live('user').find(x=>x.id===u), src=jpAll().filter(x=>x.u===u&&x.w===w-1);
@@ -3256,8 +3261,9 @@ const JP_LALU=[{u:'budi',plan:14,done:11,miss:1,res:2,unpl:2},{u:'dimas',plan:12
 const jpLalu=()=>JP_LALU.map(r=>({...r,_id:r.u,pct:Math.round(r.done/Math.max(1,r.plan-r.res)*100)}));
 function jpHariIni(){ const rows=[];
   jpUsers().forEach(usr=>{ const plan=jpItems(usr.id,1,0), names=plan.map(p=>jpToko(p.t)), vs=visList().map(visLive).filter(v=>v.u===usr.id);
+    const upN=shRead('visitExc',[]).filter(e=>e.u===usr.id&&e.type==='Unplanned'&&e.tgl==='26 Okt').map(e=>e.place);
     const rsP=shRead('visitExc',[]).filter(e=>e.u===usr.id&&e.type==='Dijadwal ulang'&&e.tgl==='26 Okt').map(e=>e.place);
-    const done=vs.filter(v=>v.status==='Selesai'&&names.includes(v.place)&&!rsP.includes(v.place)).length, run=vs.filter(v=>v.status==='Berjalan'&&names.includes(v.place)&&!rsP.includes(v.place)).length, unpl=vs.filter(v=>v.status!=='Belum'&&!names.includes(v.place)).length;
+    const done=vs.filter(v=>v.status==='Selesai'&&names.includes(v.place)&&!rsP.includes(v.place)).length, run=vs.filter(v=>v.status==='Berjalan'&&names.includes(v.place)&&!rsP.includes(v.place)).length, unpl=new Set([...vs.filter(v=>v.status!=='Belum'&&!names.includes(v.place)).map(v=>v.place),...upN]).size;
     const res=rsP.filter(p=>names.includes(p)).length;
     if(!plan.length&&!unpl) return; rows.push({_id:usr.id,u:usr.id,plan:plan.length,done,run,res,sisa:Math.max(0,plan.length-done-run-res),unpl}); }); return rows; }
 
@@ -3454,9 +3460,9 @@ function pageKepatuhan(q){
   ${hariIni}<div style="height:12px"></div>
   ${card('Pengecualian dari lapangan '+tag('Usulan','accent'),dataTable('kpx',{rows:shRead('visitExc',[]).map(e=>({...e,_id:e.id})).reverse(),rowClick:r=>`jpOpen('${r.u}')`,empty:'Belum ada pengecualian dari aplikasi mobile.',cols:[
     {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(byU(r.u).name)}</span><span class="xs muted" style="display:block">${esc(r.place)}</span>`,prim:true},
-    {label:'Jenis',render:r=>spill(r.type,r.type==='Terlewat'?'danger':'warning')},
+    {label:'Jenis',render:r=>spill(r.type,r.type==='Terlewat'?'danger':r.type==='Unplanned'?'info':'warning')},
     {label:'Alasan',render:r=>`<span class="xs">${esc(r.alasan)}</span>`,hide:true},
-    {label:'Tanggal',render:r=>r.type==='Dijadwal ulang'?esc(r.tgl+' → '+r.untuk):esc(r.tgl),hide:true}]}),{desc:'Jadwal ulang dan alasan kunjungan terlewat yang dicatat sales di aplikasi mobile. Dijadwal ulang tidak dihitung sebagai kelalaian.'})}<div style="height:12px"></div>
+    {label:'Tanggal',render:r=>r.type==='Dijadwal ulang'?esc(r.tgl+' → '+r.untuk):esc(r.tgl),hide:true}]}),{desc:'Jadwal ulang, kunjungan terlewat, dan kunjungan di luar rencana (Unplanned) yang dicatat sales di aplikasi mobile. Dijadwal ulang tidak dihitung sebagai kelalaian. Unplanned dicatat dan tidak menambah kepatuhan. Team Leader juga menerimanya di lonceng notifikasi.'})}<div style="height:12px"></div>
   ${card('Plan vs actual minggu lalu',dataTable('kpl',{rows:jpLalu(),rowClick:r=>`jpOpen('${r.u}')`,cols:[
     {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(byU(r.u).name)}</span><span class="xs muted" style="display:block">${esc(byU(r.u).job)}</span>`,prim:true},
     {label:'Rencana',render:r=>r.plan,align:'r',hide:true},{label:'Selesai',render:r=>r.done,align:'r',hide:true},
