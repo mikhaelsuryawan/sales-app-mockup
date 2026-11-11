@@ -1897,7 +1897,7 @@ Object.assign(ENT,{
     cols:[nameCol(r=>r.parent?'Di bawah '+r.parent:''),{label:'Level',render:r=>tag('Level '+katLevel(r),katLevel(r)===1?'accent':'neutral')},{label:'Market share',render:r=>r.share==='Tidak'?'<span class="muted">Tidak</span>':tag('Ya','success'),hide:true},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>katInUse(r)},
   katc:{src:'katprod',label:'Kategori produk',lower:'kategori produk',plural:'Kategori produk Client',prefix:'kp',store:()=>MD.katprod,title:r=>r.name,search:r=>r.name+r.brand+(r.parent||''),filter:(r,q)=>r.cakupan==='Client'&&(!q.cl||brandClient(r.brand)===q.cl),blank:()=>({cakupan:'Client',share:'Ya'}),
-    fields:[{k:'client',label:'Client',type:'select',req:true,opts:()=>clientOpts(),onchange:"katcSync('client')"},
+    fields:[{k:'client',label:'Client',type:'ro',fmt:(v,r)=>clientName(v||brandClient(r.brand)),hint:'Mengikuti client yang dipilih di filter'},
       {k:'brand',label:'Brand',type:'select',req:true,opts:()=>katcBrandOpts(katcState().cl),onchange:"katcSync('brand')",hint:'Brand milik client yang dipilih'},
       {k:'parent',label:'Kategori induk',type:'select',opts:()=>katcParentOpts(katcState().br),hint:'Kosongkan untuk kategori level 1. Level dihitung otomatis dari kedalaman induk, tanpa batas.',validate:v=>katCycle(v,(document.getElementById('f_name')?.value||'').trim())?'Induk tidak boleh dirinya sendiri atau turunannya':''},
       {k:'share',label:'Dipakai untuk market share',type:'select',opts:['Ya','Tidak'],hint:'Client bisa membuat kategori sendiri untuk market share (MOM 8)'},{k:'name',label:'Nama',req:true}],
