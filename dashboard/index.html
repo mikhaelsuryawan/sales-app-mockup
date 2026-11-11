@@ -1743,7 +1743,7 @@ const outletMap=id=>shRead('outlet',{})[tokoNm(id)]||[...PRODUCTS.slice(0,6).map
 function outletToggle(tk,pid){ const m=outletMap(tk), on=m.includes(pid), all=shRead('outlet',{}); all[tokoNm(tk)]=on?m.filter(x=>x!==pid):[...m,pid]; shSet('outlet',all); render(false); toast(on?'Produk dilepas dari outlet':'Produk ditambahkan ke outlet',ALL_PROD().find(p=>p.id===pid).name); }
 const catF=()=>Object.fromEntries(MD.kat.filter(k=>!k.del&&k.status==='Aktif').map(k=>[k.name,k.factor]));
 const live=k=>MD[k]?MD[k].filter(r=>!r.del):TOKO.filter(r=>!r.del);
-const simcoCount=(r,kind)=>{ const n=live('user').filter(u=>userSimcos(u).includes(r.id)&&(kind==='admin')===ADMIN_ROLES.includes(u.role)).length, path=kind==='admin'?'/user-admin':'/user-sales'; return `<span style="display:inline-flex;gap:12px;align-items:center;justify-content:flex-end" onclick="event.stopPropagation()"><span class="tabular">${n}</span>${btn('Lihat',{v:'soft',size:'sm',on:`go('${path}?sg=${r.id}')`})}</span>`; };
+const simcoCount=(r,kind)=>{ const n=kind==='client'?live('client').filter(c=>c.simco===r.id).length:live('user').filter(u=>userSimcos(u).includes(r.id)&&(kind==='admin')===ADMIN_ROLES.includes(u.role)).length, path=kind==='client'?'/client':kind==='admin'?'/user-admin':'/user-sales'; return `<span style="display:inline-flex;gap:12px;align-items:center;justify-content:flex-end" onclick="event.stopPropagation()"><span class="tabular">${n}</span>${btn('Lihat',{v:'soft',size:'sm',on:`go('${path}?sg=${r.id}')`})}</span>`; };
 const userSimcos=u=>u.allSimco?MD.simco.map(c=>c.id):(u.simcos||[u.simco]).filter(Boolean);
 const simcoLabel=u=>u.allSimco?'Semua company':userSimcos(u).map(id=>MD.simco.find(c=>c.id===id)?.name||'–').join(', ')||'–';
 const clientLabel=u=>u.allClients?'Semua client':(u.clients||[]).map(clientName).join(', ')||'–';
@@ -1764,9 +1764,9 @@ const ENT={
   simco:{label:'Company',lower:'company',plural:'Daftar Company',prefix:'sg',store:()=>MD.simco,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code,unique:'code',afterCreate:rec=>{ MD.user.forEach(u=>{ if(u.allSimco) u.simcos=[...(u.simcos||[]),rec.id]; }); },
     fields:[{k:'code',label:'Kode company',req:true,ph:'contoh: SIM',hint:'Huruf kapital, singkat'},{k:'name',label:'Nama company',req:true,ph:'contoh: SIM'}],
     cols:[{label:'Company',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.code)}</span>`,prim:true},
-      {label:'Sales',render:r=>simcoCount(r,'sales'),align:'r'},{label:'User',render:r=>simcoCount(r,'admin'),align:'r'},{label:'Status',render:r=>stPill(r.status)}],
+      {label:'Client',render:r=>simcoCount(r,'client'),align:'r'},{label:'Sales',render:r=>simcoCount(r,'sales'),align:'r'},{label:'User',render:r=>simcoCount(r,'admin'),align:'r'},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>{ const n=live('user').filter(u=>userSimcos(u).includes(r.id)).length, c=live('client').filter(x=>x.simco===r.id).length; return n||c?`Company ini masih punya ${c} client dan ${n} user dan sales. Pindahkan ke company lain dulu, atau nonaktifkan company.`:''; }},
-  client:{label:'Client',plural:'Daftar client',prefix:'cl',store:()=>MD.client,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code+r.pic,unique:'code',
+  client:{label:'Client',plural:'Daftar client',prefix:'cl',store:()=>MD.client,filter:(r,q)=>!q.sg||r.simco===q.sg,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code+r.pic,unique:'code',
     blank:()=>({simco:'sg1',ind:'Elektronik',api:'Belum terhubung'}),
     afterCreate:rec=>{ MD.user.forEach(u=>{ if(u.allClients) u.clients=[...(u.clients||[]),rec.id]; }); },
     fields:[{k:'code',label:'Kode client',req:true,ph:'contoh: ARUNIKA',hint:'Huruf kapital, dipakai di nomor transaksi'},{k:'name',label:'Nama perusahaan',req:true},{k:'simco',label:'Company',type:'select',req:true,opts:simcoOpts,hint:'Perusahaan di SIM Group yang menaungi client ini'},{k:'ind',label:'Industri',type:'select',opts:['Elektronik','Perbankan','FMCG','Tekstil','Otomotif','Lainnya'],hint:'Data industri ada di BPR 1. Cara pengambilannya belum dibahas'},
@@ -1970,7 +1970,7 @@ function simImport(){
 }
 
 /* ---------- pages ---------- */
-function pageClient(q){ return {title:'Client',html:`${crudList('client',q)}<div style="margin-top:12px">${callout('<b>MOM 9 Nov.</b> Modul Sales retail dan Sales automation tidak lagi diatur di sini, tapi per role di <a href="#/iam" style="color:var(--accent-text);font-weight:600">IAM</a>. Cabang client diatur di menu <a href="#/cabang-client" style="color:var(--accent-text);font-weight:600">Cabang client</a>.')}</div>`}; }
+function pageClient(q){ return {title:'Client',html:`${simcoFilter(q.sg||'')}${crudList('client',q)}<div style="margin-top:12px">${callout('<b>MOM 9 Nov.</b> Modul Sales retail dan Sales automation tidak lagi diatur di sini, tapi per role di <a href="#/iam" style="color:var(--accent-text);font-weight:600">IAM</a>. Cabang client diatur di menu <a href="#/cabang-client" style="color:var(--accent-text);font-weight:600">Cabang client</a>.')}</div>`}; }
 function pageCabang(q){ return {title:'Cabang client',html:`${crudList('cabang',q)}`}; }
 const pageKompetitor=q=>({title:'Kompetitor',html:`${crudList('kompetitor',q)}<div style="margin-top:12px">${callout('Kompetitor adalah master data terpisah, tidak digabung dengan Brand (MOM 9 Nov bagian 1). Dipakai sebagai pembanding di market share.')}</div>`});
 /* ---------- Mapping outlet ke client (MOM 9 Nov bagian 3) ---------- */
