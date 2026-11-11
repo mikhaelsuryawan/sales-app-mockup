@@ -1716,7 +1716,7 @@ Object.assign(MD,{
   simco:[{id:'sg1',code:'SIM',name:'SIM',status:'Aktif'},{id:'sg2',code:'PHL',name:'PHL',status:'Aktif'},{id:'sg3',code:'WIN',name:'WIN',status:'Aktif'},{id:'sg4',code:'DIS',name:'DIS',status:'Aktif'}],
   cabang:[{id:'cb1',name:'Jakarta Selatan',client:'cl1',kota:'Jakarta',status:'Aktif'},{id:'cb2',name:'Jakarta Barat',client:'cl1',kota:'Jakarta',status:'Aktif'},{id:'cb3',name:'Tangerang',client:'cl4',kota:'Tangerang',status:'Aktif'},{id:'cb4',name:'BPR Fatmawati',client:'cl2',kota:'Jakarta',status:'Aktif'},{id:'cb5',name:'BPR Cilandak',client:'cl2',kota:'Jakarta',status:'Aktif'}],
   region:[{id:'rg1',name:'Jakarta',client:'cl1',cabang:['Jakarta Selatan','Jakarta Barat'],status:'Aktif'},{id:'rg2',name:'Banten',client:'cl4',cabang:['Tangerang'],status:'Aktif'}],
-  brand:[{id:'b1',name:'ARUNIKA',client:'cl1',status:'Aktif'},{id:'b5',name:'KIRANA',client:'cl1',status:'Aktif'},{id:'b6',name:'NHA',client:'cl4',status:'Aktif'}],
+  brand:[{id:'b1',name:'ARUNIKA',client:'cl1',status:'Aktif'},{id:'b5',name:'KIRANA',client:'cl1',status:'Aktif'},{id:'b6',name:'NHA',client:'cl4',status:'Aktif'},{id:'b7',name:'VISTARA',client:'cl1',status:'Aktif'},{id:'b8',name:'MITRA KREDIT',client:'cl2',status:'Aktif'},{id:'b9',name:'MITRA DANA',client:'cl2',status:'Aktif'},{id:'b10',name:'MAJU TEX',client:'cl3',status:'Aktif'},{id:'b11',name:'SERAT PRIMA',client:'cl3',status:'Aktif'},{id:'b12',name:'NUSA COOL',client:'cl4',status:'Aktif'},{id:'b13',name:'NUSA KITCHEN',client:'cl4',status:'Aktif'}],
   kompetitor:[{id:'k1',name:'Samsung',client:'cl1',status:'Aktif'},{id:'k2',name:'LG',client:'cl1',status:'Aktif'},{id:'k3',name:'Polytron',client:'cl1',status:'Aktif'}],
   katprod:[{id:'kp1',name:'TV',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp2',name:'Smart TV',brand:'ARUNIKA',parent:'TV',status:'Aktif'},{id:'kp3',name:'LED TV',brand:'ARUNIKA',parent:'TV',status:'Aktif'},{id:'kp4',name:'Kulkas',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp5',name:'2 Pintu',brand:'ARUNIKA',parent:'Kulkas',status:'Aktif'},{id:'kp6',name:'Mesin Cuci',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp7',name:'Top Load',brand:'ARUNIKA',parent:'Mesin Cuci',status:'Aktif'},{id:'kp8',name:'AC',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp9',name:'Air Purifier',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp10',name:'Small Appliances',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp11',name:'Google TV',brand:'ARUNIKA',parent:'Smart TV',status:'Aktif'},{id:'kp12',name:'Android TV',brand:'ARUNIKA',parent:'Smart TV',status:'Aktif'},{id:'kp13',name:'1 Pintu',brand:'ARUNIKA',parent:'Kulkas',status:'Aktif'},{id:'kp14',name:'Inverter',brand:'ARUNIKA',parent:'2 Pintu',status:'Aktif'},{id:'kp15',name:'Non inverter',brand:'ARUNIKA',parent:'2 Pintu',status:'Aktif'},{id:'kp16',name:'Front Load',brand:'ARUNIKA',parent:'Mesin Cuci',status:'Aktif'},{id:'kp17',name:'AC Inverter',brand:'ARUNIKA',parent:'AC',status:'Aktif'},{id:'kp18',name:'AC Standar',brand:'ARUNIKA',parent:'AC',status:'Aktif'},{id:'kp19',name:'Peralatan Dapur',brand:'KIRANA',parent:'',status:'Aktif'},{id:'kp20',name:'Rice Cooker',brand:'KIRANA',parent:'Peralatan Dapur',status:'Aktif'},{id:'kp21',name:'Blender',brand:'KIRANA',parent:'Peralatan Dapur',status:'Aktif'},{id:'kp22',name:'Dispenser',brand:'KIRANA',parent:'Peralatan Dapur',status:'Aktif'},{id:'kp23',name:'Perawatan Rumah',brand:'KIRANA',parent:'',status:'Aktif'},{id:'kp24',name:'Setrika',brand:'KIRANA',parent:'Perawatan Rumah',status:'Aktif'},{id:'kp25',name:'Kipas Angin',brand:'KIRANA',parent:'Perawatan Rumah',status:'Aktif'}],
   event:shRead('events',[{id:'ev1',name:'Pameran Elektronik Kota Kasablanka',lokasi:'Atrium Lt. 1',start:'2026-10-24',end:'2026-10-26',client:'cl1',cabang:'Jakarta Selatan',status:'Aktif'},{id:'ev2',name:'Bazar Akhir Tahun Alam Sutera',lokasi:'Plaza Utama',start:'2026-12-05',end:'2026-12-07',client:'cl1',cabang:'Tangerang',status:'Aktif'}]),
@@ -1730,7 +1730,39 @@ Object.assign(MD,{
 });
 MD.katprod.forEach(k=>{ k.share='Ya'; k.cakupan='Client'; });
 /* MOM 9 Nov bagian 6: cakupan kategori dinamis. General berlaku untuk semua, Client spesifik. */
-MD.katprod.push({id:'kp30',name:'Elektronik Rumah Tangga',brand:'',parent:'',cakupan:'General',share:'Tidak',status:'Aktif'});
+MD.katprod.push({id:'kp30',name:'Elektronik Rumah Tangga',brand:'',parent:'',cakupan:'General',share:'Tidak',status:'Aktif'},
+  {id:'kp40',name:'Audio',brand:'VISTARA',parent:'',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp41',name:'Soundbar',brand:'VISTARA',parent:'Audio',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp42',name:'Soundbar Dolby',brand:'VISTARA',parent:'Soundbar',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp43',name:'Home Theater',brand:'VISTARA',parent:'Audio',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp44',name:'TV',brand:'NHA',parent:'',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp45',name:'LED TV',brand:'NHA',parent:'TV',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp46',name:'Kulkas',brand:'NHA',parent:'',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp47',name:'1 Pintu',brand:'NHA',parent:'Kulkas',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp48',name:'Mesin Cuci',brand:'NHA',parent:'',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp49',name:'Top Load',brand:'NHA',parent:'Mesin Cuci',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp50',name:'AC',brand:'NHA',parent:'',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp51',name:'AC Standar',brand:'NHA',parent:'AC',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp52',name:'Pendingin',brand:'NUSA COOL',parent:'',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp53',name:'Kipas Pendingin',brand:'NUSA COOL',parent:'Pendingin',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp54',name:'Kipas Pendingin Portable',brand:'NUSA COOL',parent:'Kipas Pendingin',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp55',name:'Peralatan Masak',brand:'NUSA KITCHEN',parent:'',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp56',name:'Panci Elektrik',brand:'NUSA KITCHEN',parent:'Peralatan Masak',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp57',name:'Blender Dapur',brand:'NUSA KITCHEN',parent:'Peralatan Masak',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp58',name:'Kredit Modal Kerja',brand:'MITRA KREDIT',parent:'',cakupan:'Client',share:'Tidak',status:'Aktif'},
+  {id:'kp59',name:'KMK Reguler',brand:'MITRA KREDIT',parent:'Kredit Modal Kerja',cakupan:'Client',share:'Tidak',status:'Aktif'},
+  {id:'kp60',name:'KMK Musiman',brand:'MITRA KREDIT',parent:'KMK Reguler',cakupan:'Client',share:'Tidak',status:'Aktif'},
+  {id:'kp61',name:'Kredit Multiguna',brand:'MITRA KREDIT',parent:'',cakupan:'Client',share:'Tidak',status:'Aktif'},
+  {id:'kp62',name:'KMG Pegawai',brand:'MITRA KREDIT',parent:'Kredit Multiguna',cakupan:'Client',share:'Tidak',status:'Aktif'},
+  {id:'kp63',name:'Dana Tunai',brand:'MITRA DANA',parent:'',cakupan:'Client',share:'Tidak',status:'Aktif'},
+  {id:'kp64',name:'Dana Tunai REA',brand:'MITRA DANA',parent:'Dana Tunai',cakupan:'Client',share:'Tidak',status:'Aktif'},
+  {id:'kp65',name:'Kain',brand:'MAJU TEX',parent:'',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp66',name:'Katun',brand:'MAJU TEX',parent:'Kain',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp67',name:'Katun Combed',brand:'MAJU TEX',parent:'Katun',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp68',name:'Benang',brand:'MAJU TEX',parent:'',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp69',name:'Pakaian Jadi',brand:'SERAT PRIMA',parent:'',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp70',name:'Kemeja',brand:'SERAT PRIMA',parent:'Pakaian Jadi',cakupan:'Client',share:'Ya',status:'Aktif'},
+  {id:'kp71',name:'Kaos',brand:'SERAT PRIMA',parent:'Pakaian Jadi',cakupan:'Client',share:'Ya',status:'Aktif'});
 /* Toko: bedakan toko dari client dan toko baru dari sales; satu toko bisa dipetakan ke lebih dari satu client (menu Mapping outlet). */
 TOKO.forEach(t=>{ t.sumber=t.sumber||'Dari client'; t.mapClients=t.mapClients||[t.client]; });
 ['c3','o2'].forEach(id=>{ const t=TOKO.find(x=>x.id===id); if(t){ t.sumber='Input sales'; } });
