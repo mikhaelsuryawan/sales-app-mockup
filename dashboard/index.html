@@ -2555,6 +2555,31 @@ function pageMarketShare(){
 function sharePanel(id){ const r=SHARE_REP.find(x=>x._id===id);
   openPanel(r.brand,`<div class="rows">${r.inp.map(([u,q,st])=>`<div class="rowlink" style="cursor:default">${av(byU(u).name)}<span style="flex:1" class="sm fg">${byU(u).name}</span>${tag(st,st==='Draft'?'warning':'success')}<b class="tabular fg">${q}</b></div>`).join('')}</div>`,btn('Tutup',{v:'card',on:'closeLayer()'}),{sub:r.toko+' · '+r.cat}); }
 
+/* Produk dari sales: contoh data semua sektor. Isiannya mengikuti form penjualan (input manual) di aplikasi mobile. */
+D.prodTemp.forEach(x=>{ x.sektor=x.sektor||'Elektronik'; });
+[
+  ['pt3', 'Colokan Pintar Wi-Fi', 'Elektronik', 'Elektronik Rumah Tangga', 'Unit baru', 179000, 0, 2, 'rina', 'Electronic City Kemang', '26 Okt, 09:40', '26 Okt 2026', '2 foto', 'Anita Sari', '–', '0812-3000-3303'],
+  ['pt4', 'Speaker Bluetooth Mini', 'Elektronik', 'Elektronik Rumah Tangga', 'Unit display', 329000, 30000, 1, 'putri', 'Electronic Solution Puri', '25 Okt, 14:05', '25 Okt 2026', '2 foto', 'Dewi Lestari', 'Jl. Puri Indah Blok A3', '0812-3000-4404'],
+  ['pt5', 'Lampu LED Pintar 9W', 'Elektronik', 'Elektronik Rumah Tangga', 'Bundling', 89000, 0, 4, 'fajar', 'Best Denki Alam Sutera', '23 Okt, 16:30', '23 Okt 2026', '1 foto', 'Rudi Hartono', '–', '0812-3000-5505'],
+  ['pt6', 'Kabel HDMI 2 m', 'Elektronik', 'Elektronik Rumah Tangga', 'Unit baru', 75000, 0, 3, 'sinta', 'Best Denki Senayan City', '22 Okt, 11:12', '22 Okt 2026', '1 foto', 'Melati Kusuma', '–', '0812-3000-6606'],
+  ['pt7', 'Susu UHT Cokelat 200 ml', 'FMCG', 'Minuman', 'Unit baru', 7500, 0, 12, 'tari', 'Minimarket Segar Sentosa', '26 Okt, 10:55', '26 Okt 2026', '2 foto', 'Bu Ratna', 'Jl. Cipete Raya 9', '0812-3000-7707'],
+  ['pt8', 'Keripik Singkong Balado 100 g', 'FMCG', 'Makanan', 'Unit baru', 12500, 500, 10, 'rangga', 'Grosir Pangan Pasar Minggu', '25 Okt, 09:20', '25 Okt 2026', '1 foto', 'Pak Joko', 'Pasar Minggu Blok C', '0812-3000-8808'],
+  ['pt9', 'Pasta Gigi Herbal 120 g', 'FMCG', 'Perawatan Rumah Tangga', 'Unit baru', 18500, 0, 6, 'tari', 'Supermarket Bumi Lestari BSD', '24 Okt, 15:45', '24 Okt 2026', '2 foto', 'Sari Widya', '–', '0812-3000-9909'],
+  ['pt10', 'Helm Full Face Standar', 'Kendaraan', 'Suku Cadang', 'Unit baru', 389000, 40000, 1, 'budi', 'Dealer Laju Motor Bekasi', '26 Okt, 13:10', '26 Okt 2026', '2 foto', 'Agus Setiawan', 'Jl. Ahmad Yani 30, Bekasi', '0812-3001-1010'],
+  ['pt11', 'Aki Motor 12V 5Ah', 'Kendaraan', 'Suku Cadang', 'Cuci gudang', 275000, 0, 2, 'kevin', 'Showroom Samudra Fatmawati', '25 Okt, 12:00', '25 Okt 2026', '1 foto', 'Bambang P.', '–', '0812-3001-1111'],
+  ['pt12', 'Sarung Jok Mobil Universal', 'Kendaraan', 'Mobil', 'Unit baru', 450000, 50000, 1, 'kevin', 'Showroom Samudra Fatmawati', '23 Okt, 10:35', '23 Okt 2026', '2 foto', 'Eko Prasetyo', 'Jl. RS Fatmawati 40', '0812-3001-1212'],
+  ['pt13', 'Asuransi Kredit Tambahan 12 Bulan', 'Multi Finance', 'Pembiayaan Multiguna', 'Unit baru', 250000, 0, 1, 'nina', 'Mitra Dealer Auto Bekasi', '26 Okt, 14:20', '26 Okt 2026', '1 foto', 'Wahyu Nugroho', '–', '0812-3001-1313'],
+  ['pt14', 'Paket Top Up Pinjaman', 'Multi Finance', 'Dana Tunai Jaminan', 'Unit baru', 5000000, 0, 1, 'tono', 'Agen Dana Siaga Depok', '24 Okt, 09:50', '24 Okt 2026', '1 foto', 'Ibu Marni', 'Jl. Margonda 55, Depok', '0812-3001-1414'],
+  ['pt15', 'Kredit Mikro Pedagang Pasar', 'Perbankan', 'Kredit Modal Kerja', 'Unit baru', 10000000, 0, 1, 'nina', 'Agen Kredit Fatmawati', '25 Okt, 16:15', '25 Okt 2026', '2 foto', 'Pak Darto', 'Pasar Fatmawati Los 4', '0812-3001-1515'],
+  ['pt16', 'Kredit Pegawai Koperasi', 'Perbankan', 'Kredit Multiguna', 'Unit baru', 15000000, 0, 1, 'tono', 'Koperasi Mitra Pasar Minggu', '22 Okt, 13:40', '22 Okt 2026', '1 foto', 'Ibu Sulastri', '–', '0812-3001-1616'],
+  ['pt17', 'Kain Batik Cap Motif Parang (per meter)', 'Tekstil', 'Kain', 'Unit baru', 85000, 5000, 12, 'dimas', 'Toko Kain Sumber Textil', '26 Okt, 11:30', '26 Okt 2026', '2 foto', 'Ny. Hartini', 'Pasar Baru Blok B14', '0812-3001-1717'],
+  ['pt18', 'Selendang Tenun Katun', 'Tekstil', 'Pakaian Jadi', 'Bundling', 65000, 0, 5, 'dimas', 'Butik Serat Nusantara', '24 Okt, 10:05', '24 Okt 2026', '1 foto', 'Dian Permata', '–', '0812-3001-1818'],
+  ['pt19', 'Masker Medis 3 Ply (50 pcs)', 'Kesehatan', 'Produk FMCG Umum', 'Unit baru', 35000, 0, 6, 'tari', 'Minimarket Segar Sentosa', '25 Okt, 11:40', '25 Okt 2026', '1 foto', 'Bu Ratna', 'Jl. Cipete Raya 9', '0812-3001-1919'],
+  ['pt20', 'Termometer Digital Dahi', 'Kesehatan', 'Produk FMCG Umum', 'Unit display', 185000, 15000, 2, 'rangga', 'Supermarket Bumi Lestari BSD', '23 Okt, 14:55', '23 Okt 2026', '2 foto', 'Hendri K.', '–', '0812-3002-2020'],
+  ['pt21', 'Gembok Pintu Besi 50 mm', 'Lainnya', 'Elektronik Rumah Tangga', 'Unit baru', 45000, 0, 5, 'rina', 'Toko Makmur Abadi', '22 Okt, 15:25', '22 Okt 2026', '1 foto', 'Pak Anwar', 'Jagakarsa', '0812-3002-2121']
+].forEach(([id,name,sektor,kat,stp,hargaAsli,diskon,q,by,toko,when,tgl,foto,pembeli,alamat,tel])=>{ const harga=hargaAsli-diskon;
+  D.prodTemp.push({id,name,sektor,kat,stp,hargaAsli,diskon,harga,q,by,toko,when,tgl,pembeli,alamat,tel,trx:'TRX-'+id.replace('pt','26')+'-0'+(100+(+id.slice(2))),
+    vals:[['Kategori produk',kat],['Status produk',stp],['Nama produk',name],['Harga',rp(hargaAsli)],['Diskon',rp(diskon)],['Harga setelah diskon',rp(harga)],['Tanggal pembelian',tgl],['Jumlah produk',String(q)],['Foto produk',foto],['Nama pembeli',pembeli],['Alamat pembeli',alamat],['Telepon pembeli',tel]]}); });
 /* ---------- Master produk dan mapping produk toko ----------
    Master produk: satu baris per produk, berlaku lintas sektor dan client. Mapping produk toko: produk + client + toko + harga + foto (opsional). */
 const sektorNames=()=>live('sektor').filter(x=>x.status==='Aktif').map(x=>x.name);
@@ -2703,10 +2728,11 @@ function pageProduk(q){
   ${crudList('mpt',q,{acts:btn('Upload',{v:'soft',size:'sm',icon:'up',on:"uploadModal('Mapping produk toko')"}),prefill:`{client:'${cl}',toko:'${tk}'}`})}
   <div style="margin-top:12px">${callout('Satu produk master bisa dipetakan ke banyak toko dan client. Setiap mapping punya harga sendiri, dan foto bersifat opsional.')}</div>`}; }
   return {title:'Produk & harga',html:`<div style="margin-bottom:4px">${tabsHTML}</div>
-  <div style="margin-top:12px">${card('Produk dari Sales',`<p class="xs muted" style="margin-bottom:10px">Sales mencatat penjualan produk yang belum ada di master lewat form Input manual di aplikasi. Klik baris untuk melihat isiannya, lalu jadikan master bila perlu.</p>${dataTable('ptmp',{rows:D.prodTemp.map(x=>({...x,_id:x.id})),rowClick:r=>`prodTempPanel('${r.id}')`,empty:'Belum ada produk dari sales.',cols:[
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0"><span class="sm muted">Sales</span>${sel([['','Semua sales'],...[...new Set(D.prodTemp.map(x=>x.by))].map(u=>[u,byU(u)?.name||u]).sort((a,b)=>a[1].localeCompare(b[1]))],q.sl||'',"setQ({sl:this.value})",{label:'Filter sales'})}${q.sl?btn('Reset filter',{v:'soft',size:'sm',on:"setQ({sl:''})"}):''}</div>
+  <div>${card('Produk dari Sales',`<p class="xs muted" style="margin-bottom:10px">Sales mencatat penjualan produk yang belum ada di master lewat form Input manual di aplikasi. Klik baris untuk melihat isiannya, lalu jadikan master bila perlu.</p>${dataTable('ptmp',{rows:D.prodTemp.filter(x=>!q.sl||x.by===q.sl).map(x=>({...x,_id:x.id})),rowClick:r=>`prodTempPanel('${r.id}')`,empty:q.sl?`Tidak ada produk dari sales ini. <button style="color:var(--accent-text);font-weight:600" onclick="setQ({sl:''})">Hapus filter</button>`:'Belum ada produk dari sales.',cols:[
       {label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${esc(r.toko)}</span>`,prim:true},
-      {label:'Kategori',render:r=>esc(ptVal(r,'Kategori produk')||r.kat||'–'),hide:true},{label:'Harga',render:r=>`<span class="tabular">${rp(r.harga)}</span>`,align:'r'},{label:'Jumlah',render:r=>r.q||1,align:'r',hide:true},
-      {label:'Dicatat oleh',render:r=>`${esc(byU(r.by)?.name||r.by)}<span class="xs muted" style="display:block">${esc(r.when)}</span>`,hide:true},{label:'Status',render:r=>r.master?spill('Jadi master','success'):spill('Sementara','warning')}]})}`)}</div>`};
+      {label:'Sektor',render:r=>r.sektor?tag(r.sektor,'neutral'):'<span class="muted">–</span>',hide:true},{label:'Kategori',render:r=>esc(ptVal(r,'Kategori produk')||r.kat||'–'),hide:true},{label:'Harga',render:r=>`<span class="tabular">${rp(r.harga)}</span>`,align:'r'},{label:'Jumlah',render:r=>r.q||1,align:'r',hide:true},
+      {label:'Sales',render:r=>`${esc(byU(r.by)?.name||r.by)}<span class="xs muted" style="display:block">${esc(r.when)}</span>`},{label:'Status',render:r=>r.master?spill('Jadi master','success'):spill('Sementara','warning')}]})}`)}</div>`};
 }
 const ptVal=(r,label)=>((r.vals||[]).find(v=>v[0]===label)||[])[1]||'';
 const ptNum=s=>parseInt(String(s||'').replace(/\D/g,''),10)||0;
@@ -2736,7 +2762,7 @@ function prodTempPanel(id){ const x=D.prodTemp.find(a=>a.id===id); if(!x) return
   done?`${btn('Tutup',{v:'card',on:'closeLayer()'})}${btn('Buka di master',{v:'accent',on:`closeLayer();go('/produk?tab=master&q=${encodeURIComponent(x.name)}')`})}`:`${btn('Tutup',{v:'card',on:'closeLayer()'})}${btn('Ubah',{v:'soft',icon:'edit',on:`prodTempEdit('${id}')`})}${btn('Jadikan master',{v:'accent',on:`prodTempToMaster('${id}')`})}`,{sub:'Produk dari Sales · '+(done?'Jadi master':'Sementara')}); }
 function prodTempEdit(id){ const x=D.prodTemp.find(a=>a.id===id); if(!x||x.master) return; closeLayer(); openForm('ptmp',id); }
 function prodTempToMaster(id){ const x=D.prodTemp.find(a=>a.id===id); if(!x||x.master) return; closeLayer(); openForm('produkm',null,{name:x.name,price:x.harga,sektor:'',_tmp:id}); }
-function prTab(t){ setQ({tab:t,q:'',st:'',cl:'',tk:'',sk:''}); }
+function prTab(t){ setQ({tab:t,q:'',st:'',cl:'',tk:'',sk:'',sl:''}); }
 const brandClient=name=>MD.brand.find(b=>!b.del&&b.name===name)?.client||'';
 const katInUse=r=>{ const n=live('katprod').filter(k=>k.parent===r.name).length, p=live('mapping').filter(x=>x.kategori===r.id).length; return n||p?`Kategori ini dipakai ${n} sub kategori dan ${p} mapping produk toko. Pindahkan dulu, atau nonaktifkan kategori.`:''; };
 const katcState=()=>{ const rec=FORM&&FORM.id?MD.katprod.find(k=>k.id===FORM.id):null, pre=(FORM&&FORM.prefill)||{}; return rec?{cl:brandClient(rec.brand),br:rec.brand}:{cl:pre.client||'',br:pre.brand||''}; };
