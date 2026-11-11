@@ -814,7 +814,7 @@ function todayVisits(){
   <div class="list">${v.slice(0,3).map(x=>visitRow(x)).join('')}</div>`;
 }
 function visitRow(x){
-  const tone=x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':'';
+  const tone=x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':x.status==='Dijadwal ulang'?'amber':'';
   return `<button class="li" onclick="go('kunjungan-detail',{id:'${x.id}'})"><div class="ico-tile ${x.status==='Selesai'?'green':''}">${I('pin',20)}</div><div class="grow"><div class="t">${x.place}</div><div class="s">${x.time} · ${x.tasks.join(', ')}</div></div>${chip(x.status,tone)}</button>`;
 }
 function spvDash(){
@@ -999,6 +999,7 @@ SCR.kunjungan = p => {
   return {tab:'kunjungan', note:'Penugasan/kunjungan (MOM 5.1). Check-in dan check-out lewat satu tombol untuk semua role: jika ada lebih dari satu toko di jadwal, pilih toko dulu; jika hanya satu, langsung diproses. Jadwal dibuat Team Leader/Supervisor, sales cukup mengikutinya. Hak membuat jadwal diatur per role di dashboard (IAM); bawaannya hanya Promotor FMCG dan MD yang boleh membuat sendiri.',
   html:`${appbar('Kunjungan',{backBtn:false,right:canSchedule(r)?`<button class="ib" onclick="act(()=>go('kunjungan-form',{spv:${r==='spv'?1:0}}))" aria-label="${r==='spv'?'Tugaskan ke tim':'Tambah kunjungan'}">${I('plus',24,2)}</button>`:''})}<main class="content">
     <div class="segtabs">${[['hari','Hari ini'],['rencana','Rencana']].map(s=>`<button class="${seg===s[0]?'on':''}" onclick="setP({seg:'${s[0]}'})">${s[1]}</button>`).join('')}</div>
+    ${seg==='hari'?missedOpen().map(m=>`<button class="banner amber" style="width:100%;text-align:left;margin-bottom:14px" onclick="act(()=>missedSheet('${m.id}'))">${I('alert',18)}<span>Kunjungan ke ${esc(m.place)} (${m.tgl}) terlewat. Isi alasannya.</span></button>`).join(''):''}
     ${seg==='hari'&&S.leftOpen&&visitById(S.leftOpen)&&!visitById(S.leftOpen).cout?`<div class="banner amber" style="margin-bottom:14px">${I('alert',18)}<span>Kamu keluar dari radius ${visitById(S.leftOpen).place} dan belum check-out. Check-out sekarang atau saat check-in di toko berikutnya.</span></div>`:''}
     ${seg==='hari'&&v.length&&!noCheckin()?`<button class="btn ${isLocked()?'locked':''}" style="margin-bottom:14px" onclick="visitEntry()">${I(isLocked()?'lock':'pin',18)} Check-in / Check-out</button>`:''}
     ${seg==='hari'?`<div class="card" style="margin-bottom:14px"><div class="row between"><b>Progres hari ini</b><span class="num small muted">${v.filter(x=>x.status==='Selesai').length} dari ${v.length} selesai</span></div><div class="bar" style="margin-top:10px"><i style="width:${Math.max(3,v.filter(x=>x.status==='Selesai').length/(v.length||1)*100)}%"></i></div></div><div class="list">${v.map(visitRow).join('')}</div>${teamV}`:
@@ -1012,13 +1013,14 @@ SCR['kunjungan-detail'] = p => {
   if(!x) return SCR.kunjungan({});
   const lk=isLocked();
   let foot;
-  if(noCheckin()) foot=x.status==='Selesai'?`<button class="btn" disabled>Kunjungan selesai</button>`:`<button class="btn" onclick="act(()=>{visitById('${x.id}').status='Selesai';render(false,true);toast('Kunjungan ke nasabah selesai')})">${I('check',18,2.2)} Tandai selesai</button>`;
+  if(x.status==='Dijadwal ulang') foot=`<button class="btn" disabled>Dijadwal ulang ke ${x.resched?x.resched.hari+' '+x.resched.tgl:''}</button>`;
+  else if(noCheckin()) foot=x.status==='Selesai'?`<button class="btn" disabled>Kunjungan selesai</button>`:`<button class="btn" onclick="act(()=>{visitById('${x.id}').status='Selesai';render(false,true);toast('Kunjungan ke nasabah selesai')})">${I('check',18,2.2)} Tandai selesai</button>`;
   else if(x.status==='Selesai') foot=role()==='fmcg'?`<button class="btn ${lk?'locked':''}" onclick="act(()=>repeatVisit('${x.id}'))">${I(lk?'lock':'pin',18)} Check-in lagi di lokasi ini</button>`:`<button class="btn" disabled>Kunjungan selesai</button>`;
   else if(!x.cin) foot=`<button class="btn ghost" style="width:auto" onclick="toast('Membuka Google Maps…','route')">${I('route',18)} Rute</button><button class="btn ${lk?'locked':''}" onclick="act(()=>startCheckin('${x.id}'))">${I(lk?'lock':'pin',18)} Check-in di lokasi</button>`;
   else foot=`<button class="btn ${lk?'locked':''}" onclick="act(()=>${role()==='fmcg'?`fmOut('${x.id}')`:`go('kunjungan-foto',{id:'${x.id}',mode:'out'})`})">${I(lk?'lock':'check',18,2.2)} Check-out & selesai</button>`;
   return {note:'Check-in dan check-out wajib 1 foto ber-watermark, catatan opsional (MOM 5.2). Untuk Promotor FMCG dan MD, tugas selalu semua aktivitas toko kecuali support task, dan check-out baru bisa setelah semua tugas hijau. Check-in dan check-out harus di lokasi yang sama, dan Promotor FMCG boleh berulang kali dalam sehari. Lupa check-out ditutup otomatis saat check-in di toko berikutnya atau saat absen pulang. Sales Canvasing dan Taking Order wajib check-in dan check-out di tiap toko, hanya di dalam radius toko. Jika keluar radius tanpa check-out, muncul notifikasi belum check-out. Saat check-in di toko berikutnya, sales boleh check-out toko sebelumnya tanpa harus berada di radius toko itu (revisi Nov 2026).',
-  html:`${appbar('Detail kunjungan',{right:!x.cin&&x.status!=='Selesai'&&(role()!=='fmcg'||x.own)&&canSchedule(role())?`<button class="ib" onclick="act(()=>delVisitSheet('${x.id}'))" aria-label="Hapus kunjungan">${I('trash',20)}</button>`:''})}<main class="content">
-    <div class="card"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t" style="font-weight:800;font-size:16px">${x.place}</div><div class="small muted">Sen, 26 Okt 2026 · ${x.time}</div></div>${chip(x.status,x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':'')}</div>
+  html:`${appbar('Detail kunjungan',{right:(canResched(x)?`<button class="ib" onclick="act(()=>reschedSheet('${x.id}'))" aria-label="Jadwal ulang">${I('calendar',22)}</button>`:'')+(!x.cin&&x.status!=='Selesai'&&(role()!=='fmcg'||x.own)&&canSchedule(role())?`<button class="ib" onclick="act(()=>delVisitSheet('${x.id}'))" aria-label="Hapus kunjungan">${I('trash',20)}</button>`:'')})}<main class="content">
+    <div class="card"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t" style="font-weight:800;font-size:16px">${x.place}</div><div class="small muted">Sen, 26 Okt 2026 · ${x.time}</div></div>${chip(x.status,x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':x.status==='Dijadwal ulang'?'amber':'')}</div>
       ${x.cin?`<div class="kv" style="margin-top:8px"><span>Check-in</span><span class="num">${x.cin} · 24 m dari titik toko</span></div>${x.cout?`<div class="kv"><span>Check-out</span><span class="num">${x.cout} · durasi ${x.dur}${x.remoteOut?' · dari luar radius':''}</span></div>`:''}`
       :noCheckin()?`<div class="banner blue" style="margin-top:12px">${I('alert',18)}<span>Multi Finance, REA, dan CBD tidak memakai check-in dan check-out ke nasabah. Isi hasil kunjungan lalu tandai selesai.</span></div>`:`<div class="banner blue" style="margin-top:12px">${I('pin',18)}<span>Check-in saat sudah sampai. Lokasi kamu dicocokkan dengan titik toko (radius 100 m).</span></div>`}</div>
     <div class="sec-title">Tugas${x.sesi>1?' · sesi ke-'+x.sesi:''}</div>
@@ -1043,6 +1045,7 @@ function visitFormHTML(x){
 }
 function visitAction(id){
   const v=visitById(id);
+  if(v.status==='Dijadwal ulang'){ toast('Kunjungan ini dijadwal ulang ke '+(v.resched?v.resched.hari+' '+v.resched.tgl:'hari lain'),'alert'); return; }
   if(v.status==='Selesai'){ if(role()==='fmcg') repeatVisit(id); else toast('Kunjungan ke '+v.place+' sudah selesai'); return; }
   if(!v.cin) startCheckin(id);
   else if(role()==='fmcg') fmOut(id);
@@ -1053,7 +1056,7 @@ function visitEntry(){ act(()=>{
   if(!L.length){ toast('Belum ada kunjungan terjadwal','alert'); return; }
   if(L.length===1){ visitAction(L[0].id); return; }
   sheet(`<h3 style="font-size:18px;font-weight:800">Pilih toko</h3><p class="muted small" style="margin:6px 0 12px;line-height:1.5">Pilih toko yang mau di-check-in atau di-check-out.</p>
-  <div class="list">${L.map(v=>{ const open=v.cin&&!v.cout, done=v.status==='Selesai'&&role()!=='fmcg';
+  <div class="list">${L.map(v=>{ const open=v.cin&&!v.cout, done=(v.status==='Selesai'&&role()!=='fmcg')||v.status==='Dijadwal ulang';
     return `<button class="li" ${done?'disabled':''} onclick="closeSheet();visitAction('${v.id}')"><div class="ico-tile ${v.status==='Selesai'?'green':''}">${I('pin',20)}</div><div class="grow"><div class="t">${v.place}</div><div class="s">${v.time}</div></div>${chip(open?'Check-out':v.status==='Selesai'?(role()==='fmcg'?'Check-in lagi':'Selesai'):'Check-in',open?'blue':v.status==='Selesai'?'green':'')}</button>`; }).join('')}</div>`);
 }); }
 function repeatVisit(id){ const v=visitById(id); v.sesi=(v.sesi||1)+1; v.cin=null; v.cout=null; v.dur=null; v.status='Belum'; render(false,true); toast('Sesi ke-'+v.sesi+' siap, check-in di lokasi yang sama','pin'); }
@@ -1177,6 +1180,41 @@ function saveVisitPhotos(){
   if(remote&&S.pendingIn){ const nx=S.pendingIn; S.pendingIn=null; toast('Check-out '+v.place+' tercatat, lanjut check-in','check'); go('kunjungan-foto',{id:nx,mode:'in'}); return; }
   toast('Kunjungan selesai, durasi 39 mnt');
 }
+/* Usulan (11 Nov 2026): jadwal ulang dan alasan kunjungan terlewat untuk canvassing dan taking order.
+   Dicatat di salesapp.shared.v1 (visitExc) dan tampil di dashboard, Kepatuhan kunjungan. Hari off dibaca dari userOff (ditulis dashboard). */
+const RS_ALASAN=['Toko tutup','Toko minta jadwal lain','Sales berhalangan','Kendala perjalanan','Lainnya'];
+const MS_ALASAN=['Toko tutup','Kendala perjalanan','Sales berhalangan','Waktu tidak cukup','Lainnya'];
+const RS_HARI=[['Selasa','27 Okt'],['Rabu','28 Okt'],['Kamis','29 Okt'],['Jumat','30 Okt'],['Sabtu','31 Okt']];
+const USER_OFF_DEFAULT={budi:'Kamis',dimas:'Jumat',kevin:'Kamis'};
+const MISSED_DEFAULT=[{id:'ms1',u:'budi',place:'Toko Cahaya Baru',tgl:'Sab, 24 Okt'}];
+const canResched=x=>(role()==='canvas'||role()==='order')&&!x.cin&&x.status==='Belum';
+const missedOpen=()=>{ if(role()!=='canvas'&&role()!=='order') return []; const done=shRead('visitExc',[]).filter(e=>e.type==='Terlewat').map(e=>e.ref); return MISSED_DEFAULT.filter(m=>m.u===fmUk()&&!done.includes(m.id)); };
+function reschedSheet(id){ S.rs={id,hari:'',alasan:'',note:''}; reschedRender(); }
+function reschedRender(){ const r=S.rs, x=visitById(r.id), off=shRead('userOff',USER_OFF_DEFAULT)[fmUk()];
+  sheet(`<h3 style="font-size:18px;font-weight:800">Jadwal ulang ${esc(x.place)}</h3><p class="muted small" style="margin:6px 0 14px;line-height:1.5">Pilih hari baru dalam siklus yang sama. Alasan wajib diisi. Team Leader melihatnya di dashboard.</p>
+  <div class="field"><span>Hari baru</span><div class="opts">${RS_HARI.filter(h=>h[0]!==off).map(h=>`<button class="opt ${r.hari===h[0]?'on':''}" onclick="rsSet('hari','${h[0]}')">${h[0]} ${h[1]}</button>`).join('')}</div>${off?`<div class="hint">${off} tidak ditampilkan karena hari off kamu.</div>`:''}</div>
+  <div class="field"><span>Alasan</span><div class="opts">${RS_ALASAN.map(a=>`<button class="opt ${r.alasan===a?'on':''}" onclick="rsSet('alasan','${a}')">${a}</button>`).join('')}</div></div>
+  <label class="field"><span>Catatan (opsional)</span><textarea class="input" id="rsn">${esc(r.note)}</textarea></label><div id="rserr"></div>
+  <button class="btn" onclick="reschedSave()">Jadwal ulang</button>`); }
+function rsSet(k,v){ S.rs.note=val('rsn'); S.rs[k]=v; reschedRender(); }
+function reschedSave(){ const r=S.rs; S.rs.note=val('rsn');
+  if(!r.hari||!r.alasan){ $('#rserr').innerHTML='<div class="err">Pilih hari baru dan alasan.</div>'; return; }
+  const x=visitById(r.id); if(!x||!canResched(x)) return;
+  const tgl=RS_HARI.find(h=>h[0]===r.hari)[1];
+  x.status='Dijadwal ulang'; x.resched={hari:r.hari,tgl};
+  shSet('visitExc',[...shRead('visitExc',[]),{id:'ex'+Date.now(),u:fmUk(),place:x.place,type:'Dijadwal ulang',untuk:r.hari+' '+tgl,alasan:r.alasan+(r.note?': '+r.note:''),tgl:'26 Okt'}]);
+  closeSheet(); render(false); toast('Dijadwal ulang ke '+r.hari+' '+tgl); }
+function missedSheet(id){ S.ms={id,alasan:'',note:''}; missedRender(); }
+function missedRender(){ const m=MISSED_DEFAULT.find(x=>x.id===S.ms.id);
+  sheet(`<h3 style="font-size:18px;font-weight:800">Kenapa ${esc(m.place)} terlewat?</h3><p class="muted small" style="margin:6px 0 14px;line-height:1.5">Kunjungan ${m.tgl} tanpa check-in. Alasanmu masuk ke laporan kepatuhan.</p>
+  <div class="field"><span>Alasan</span><div class="opts">${MS_ALASAN.map(a=>`<button class="opt ${S.ms.alasan===a?'on':''}" onclick="msSet('${a}')">${a}</button>`).join('')}</div></div>
+  <label class="field"><span>Catatan (opsional)</span><textarea class="input" id="msn">${esc(S.ms.note)}</textarea></label><div id="mserr"></div>
+  <button class="btn" onclick="missedSave()">Simpan alasan</button>`); }
+function msSet(a){ S.ms.note=val('msn'); S.ms.alasan=a; missedRender(); }
+function missedSave(){ S.ms.note=val('msn'); if(!S.ms.alasan){ $('#mserr').innerHTML='<div class="err">Pilih alasan.</div>'; return; }
+  const m=MISSED_DEFAULT.find(x=>x.id===S.ms.id);
+  shSet('visitExc',[...shRead('visitExc',[]),{id:'ex'+Date.now(),ref:m.id,u:m.u,place:m.place,type:'Terlewat',untuk:'',alasan:S.ms.alasan+(S.ms.note?': '+S.ms.note:''),tgl:m.tgl}]);
+  closeSheet(); render(false); toast('Alasan tersimpan'); }
 function delVisitSheet(id){
   sheet(`<h3 style="font-size:18px;font-weight:800">Hapus kunjungan ini?</h3><p class="muted small" style="margin:6px 0 16px;line-height:1.5">Kunjungan yang belum dimulai bisa dihapus selama belum lewat hari.</p>
   <button class="btn danger" onclick="S.visits[vk()]=S.visits[vk()].filter(v=>v.id!=='${id}');closeSheet();back();toast('Kunjungan dihapus')">Hapus kunjungan</button>`);
