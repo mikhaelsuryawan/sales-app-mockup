@@ -2132,7 +2132,7 @@ function saveForm(mode){
   if(keys.length){ keys.forEach(k=>{ const e=document.getElementById('e_'+k); if(e) e.textContent=errs[k]; }); document.getElementById('f_'+keys[0])?.focus?.(); toast('Periksa isian',errs.__extra||'Ada '+keys.length+' field yang perlu diperbaiki.','danger'); return; }
   Object.assign(vals,ex);
   let rec;
-  if(id){ rec=E.store().find(x=>x.id===id); if(E.onRename&&rec.name!==vals.name) E.onRename(rec.name,vals.name); Object.assign(rec,vals); audit(`Mengubah ${lc(E)} ${E.title(rec)}`); }
+  if(id){ rec=E.store().find(x=>x.id===id); if(E.onRename&&rec.name!==vals.name) E.onRename(rec.name,vals.name); Object.assign(rec,vals); E.afterSave?.(rec); audit(`Mengubah ${lc(E)} ${E.title(rec)}`); }
   else { rec={status:'Aktif',...(E.blank?E.blank():{}),...(prefill||{}),...vals,id:E.prefix+(Date.now()%1e6)}; E.store().push(rec); E.afterCreate?.(rec); audit(`Menambahkan ${lc(E)} ${E.title(rec)}`); }
   if(mode==='publish'){ rec.status='Terbit'; E.onPublish?.(rec); audit(`Menerbitkan ${lc(E)} ${E.title(rec)}`); }
   const tl=E.toastLabel?E.toastLabel(rec):E.label;
@@ -2690,7 +2690,7 @@ Object.assign(ENT,{
 /* Penjualan mobile dengan nama produk di luar master (p kosong) otomatis masuk tabel produk sementara. */
 function prodTempSync(){ appTrx().forEach(t=>{ if(t.p||!t.pname||t.src==='Dashboard'||t.st==='Dihapus') return; const n=t.pname.toLowerCase(); if(PRODUCTS.some(p=>p.name.toLowerCase()===n)||D.prodTemp.some(x=>x.name.toLowerCase()===n)) return; D.prodTemp.unshift({id:'pt'+hash(t.id),name:t.pname,harga:Math.round(t.total/(t.q||1)),q:t.q||1,kat:t.kat||'',by:t.u,toko:t.toko,when:t.date,trx:t.id,vals:t.vals||null}); }); }
 function pageProduk(q){
-  prodTempSync();
+  prodTempSync(); D.prodTemp.forEach(ptHydrate);
   const tab=['master','mapping','temp'].includes(q.tab)?q.tab:'master';
   const tabsHTML=utabs([['master','Master produk',live('produk').length],['mapping','Mapping produk toko',live('mapping').length],['temp','Produk dari Sales',D.prodTemp.length]],tab,'prTab');
   if(tab==='master') return {title:'Produk & harga',html:`<div style="margin-bottom:4px">${tabsHTML}</div>
@@ -2709,12 +2709,32 @@ function pageProduk(q){
       {label:'Dicatat oleh',render:r=>`${esc(byU(r.by)?.name||r.by)}<span class="xs muted" style="display:block">${esc(r.when)}</span>`,hide:true},{label:'Status',render:r=>r.master?spill('Jadi master','success'):spill('Sementara','warning')}]})}`)}</div>`};
 }
 const ptVal=(r,label)=>((r.vals||[]).find(v=>v[0]===label)||[])[1]||'';
+const ptNum=s=>parseInt(String(s||'').replace(/\D/g,''),10)||0;
+function ptHydrate(x){ const g=l=>ptVal(x,l); if(x.hargaAsli==null) x.hargaAsli=ptNum(g('Harga'))||x.harga; if(x.diskon==null) x.diskon=ptNum(g('Diskon')); if(x.stp==null) x.stp=g('Status produk'); if(x.tgl==null) x.tgl=g('Tanggal pembelian'); if(x.pembeli==null) x.pembeli=g('Nama pembeli'); if(x.alamat==null) x.alamat=g('Alamat pembeli'); if(x.tel==null) x.tel=g('Telepon pembeli'); if(!x.kat) x.kat=g('Kategori produk'); if(!x.vals) x.vals=ptBuildVals(x); }
+function ptBuildVals(x){ const foto=ptVal(x,'Foto produk')||'0 foto'; return [['Kategori produk',x.kat||''],['Status produk',x.stp||''],['Nama produk',x.name],['Harga',rp(x.hargaAsli||0)],['Diskon',rp(x.diskon||0)],['Harga setelah diskon',rp(x.harga||0)],['Tanggal pembelian',x.tgl||''],['Jumlah produk',String(x.q||1)],['Foto produk',foto],['Nama pembeli',x.pembeli||''],['Alamat pembeli',x.alamat||'–'],['Telepon pembeli',x.tel||'']]; }
+const ptCur=()=>(FORM&&FORM.id?D.prodTemp.find(a=>a.id===FORM.id):null)||{};
+Object.assign(ENT,{
+  ptmp:{label:'Produk dari Sales',lower:'produk dari sales',plural:'Produk dari Sales',prefix:'pt',store:()=>D.prodTemp,title:r=>r.name,
+    fields:[{k:'by',label:'Sales',type:'ro',fmt:v=>byU(v)?.name||v},{k:'toko',label:'Toko',type:'ro'},{k:'trx',label:'ID transaksi',type:'ro',fmt:v=>v||'–'},
+      {k:'kat',label:'Kategori produk',type:'select',opts:()=>[...new Set([ptCur().kat,...live('katprod').map(k=>k.name)].filter(Boolean))]},
+      {k:'stp',label:'Status produk',type:'select',opts:()=>[...new Set([ptCur().stp,...live('statprod').map(k=>k.name)].filter(Boolean))]},
+      {k:'name',label:'Nama produk',req:true},
+      {k:'hargaAsli',label:'Harga (Rp)',type:'number',req:true,validate:v=>!(v>0)?'Isi harga lebih dari nol':''},{k:'diskon',label:'Diskon (Rp)',type:'number',validate:v=>v<0?'Diskon tidak boleh minus':''},
+      {k:'harga',label:'Harga setelah diskon',type:'ro',fmt:v=>rp(v||0),hint:'Dihitung dari harga dikurangi diskon'},
+      {k:'tgl',label:'Tanggal pembelian',ph:'contoh: 26 Okt 2026'},{k:'q',label:'Jumlah produk',type:'number',req:true,validate:v=>!(v>0)||v!==Math.floor(v)?'Isi bilangan bulat lebih dari nol':''},
+      {k:'pembeli',label:'Nama pembeli'},{k:'alamat',label:'Alamat pembeli'},{k:'tel',label:'Telepon pembeli',type:'tel'},
+      {k:'foto',label:'Foto produk',type:'ro',fmt:(v,r)=>ptVal(r,'Foto produk')||'0 foto',hint:'Foto dari aplikasi tidak bisa diubah di dashboard'}],
+    validateExtra:v=>v.diskon>=v.hargaAsli&&v.hargaAsli>0?'Diskon harus lebih kecil dari harga.':'',
+    afterSave:rec=>{ rec.diskon=Number(rec.diskon)||0; rec.harga=rec.hargaAsli-rec.diskon; rec.q=Number(rec.q)||1; rec.vals=ptBuildVals(rec); const id=rec.id; setTimeout(()=>prodTempPanel(id),60); },
+    foot:(r,id)=>`${btn('Batal',{v:'card',on:`closeLayer();prodTempPanel('${id}')`})}${btn('Simpan perubahan',{v:'accent',on:'saveForm()'})}`}
+});
 function prodTempPanel(id){ const x=D.prodTemp.find(a=>a.id===id); if(!x) return; const done=!!x.master;
   const kv=[['Sales',byU(x.by)?.name||x.by],['Toko',x.toko],['Waktu input',x.when],['ID transaksi',x.trx||'–']];
   openPanel(x.name,`<div class="kv" style="margin-bottom:14px">${kv.map(([k,v])=>`<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</div>
-  ${done?callout('Produk ini sudah menjadi master. Transaksi lama tetap memakai nama yang diketik sales.'):callout('SKU dan sektor tidak ada di data sales, jadi wajib diisi saat disimpan ke master.')}
+  ${done?callout('Produk ini sudah menjadi master, jadi isiannya tidak bisa diubah lagi. Transaksi lama tetap memakai nama yang diketik sales.'):callout('Isian bisa diperbaiki lewat tombol Ubah. SKU dan sektor tidak ada di data sales, jadi wajib diisi saat disimpan ke master.')}
   ${x.vals?`<div class="xs muted" style="margin:14px 0 8px">Isian form penjualan (input manual)</div><div class="rows">${x.vals.map(([l,v])=>`<div class="rowlink" style="cursor:default;padding:8px 0"><span class="sm muted" style="flex:1">${esc(l)}</span><span class="sm fg" style="text-align:right">${esc(v||'–')}</span></div>`).join('')}</div>`:''}`,
-  done?`${btn('Tutup',{v:'card',on:'closeLayer()'})}${btn('Buka di master',{v:'accent',on:`closeLayer();go('/produk?tab=master&q=${encodeURIComponent(x.name)}')`})}`:`${btn('Tutup',{v:'card',on:'closeLayer()'})}${btn('Jadikan master',{v:'accent',on:`prodTempToMaster('${id}')`})}`,{sub:'Produk dari Sales · '+(done?'Jadi master':'Sementara')}); }
+  done?`${btn('Tutup',{v:'card',on:'closeLayer()'})}${btn('Buka di master',{v:'accent',on:`closeLayer();go('/produk?tab=master&q=${encodeURIComponent(x.name)}')`})}`:`${btn('Tutup',{v:'card',on:'closeLayer()'})}${btn('Ubah',{v:'soft',icon:'edit',on:`prodTempEdit('${id}')`})}${btn('Jadikan master',{v:'accent',on:`prodTempToMaster('${id}')`})}`,{sub:'Produk dari Sales · '+(done?'Jadi master':'Sementara')}); }
+function prodTempEdit(id){ const x=D.prodTemp.find(a=>a.id===id); if(!x||x.master) return; closeLayer(); openForm('ptmp',id); }
 function prodTempToMaster(id){ const x=D.prodTemp.find(a=>a.id===id); if(!x||x.master) return; closeLayer(); openForm('produkm',null,{name:x.name,price:x.harga,sektor:'',_tmp:id}); }
 function prTab(t){ setQ({tab:t,q:'',st:'',cl:'',tk:'',sk:''}); }
 const brandClient=name=>MD.brand.find(b=>!b.del&&b.name===name)?.client||'';
