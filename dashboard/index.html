@@ -519,7 +519,16 @@ const PRODUCTS=[
   {id:'nh1',name:'NHA LED TV 32"',sku:'NH-TV32',cat:'TV',price:2199000,lvl:'C',inc:30000,brand:'NHA',kp:'LED TV'},
   {id:'nh2',name:'NHA Kulkas 1 Pintu 150 L',sku:'NH-KL150',cat:'Kulkas',price:2399000,lvl:'C',inc:35000,brand:'NHA',kp:'1 Pintu'},
   {id:'nh3',name:'NHA Mesin Cuci Top Load 8 kg',sku:'NH-MC80',cat:'Mesin Cuci',price:2799000,lvl:'B',inc:45000,brand:'NHA',kp:'Top Load'},
-  {id:'nh4',name:'NHA AC Standar 0,5 PK',sku:'NH-AC05',cat:'AC',price:3199000,lvl:'B',inc:50000,brand:'NHA',kp:'AC Standar'}
+  {id:'nh4',name:'NHA AC Standar 0,5 PK',sku:'NH-AC05',cat:'AC',price:3199000,lvl:'B',inc:50000,brand:'NHA',kp:'AC Standar'},
+  {id:'bk1',name:'KMK Reguler Usaha Mikro',sku:'MK-KMK01',cat:'Kredit Modal Kerja',price:15000000,lvl:'B',inc:100000,brand:'MITRA KREDIT',kp:'KMK Reguler'},
+  {id:'bk2',name:'KMK Musiman Pertanian',sku:'MK-KMK02',cat:'Kredit Modal Kerja',price:25000000,lvl:'B',inc:120000,brand:'MITRA KREDIT',kp:'KMK Musiman'},
+  {id:'bk3',name:'KMG Pegawai Tetap',sku:'MK-KMG01',cat:'Kredit Multiguna',price:10000000,lvl:'C',inc:80000,brand:'MITRA KREDIT',kp:'KMG Pegawai'},
+  {id:'bk4',name:'Dana Tunai REA 12 Bulan',sku:'MD-DTN12',cat:'Dana Tunai',price:5000000,lvl:'C',inc:60000,brand:'MITRA DANA',kp:'Dana Tunai REA'},
+  {id:'mt1',name:'Kain Katun Combed 30s (per meter)',sku:'MT-KC30',cat:'Kain',price:42000,lvl:'A',inc:1500,brand:'MAJU TEX',kp:'Katun Combed'},
+  {id:'mt2',name:'Kain Katun Poplin (per meter)',sku:'MT-KP01',cat:'Kain',price:36000,lvl:'B',inc:1200,brand:'MAJU TEX',kp:'Katun'},
+  {id:'mt3',name:'Benang Katun Ne 20 (per cone)',sku:'MT-BK20',cat:'Benang',price:58000,lvl:'C',inc:1000,brand:'MAJU TEX',kp:''},
+  {id:'mt4',name:'Kemeja Katun Pria Lengan Panjang',sku:'SP-KM01',cat:'Pakaian Jadi',price:189000,lvl:'B',inc:5000,brand:'SERAT PRIMA',kp:'Kemeja'},
+  {id:'mt5',name:'Kaos Polos Cotton Unisex',sku:'SP-KS01',cat:'Pakaian Jadi',price:79000,lvl:'C',inc:2000,brand:'SERAT PRIMA',kp:'Kaos'}
 ];
 const TOKO=[
   {id:'t1',name:'Electronic City Kemang',cat:'Modern Retail',cabang:'Jakarta Selatan',dealer:'PT Sinar Elektronik',sales:['rina'],addr:'Jl. Kemang Raya No. 8'},
@@ -1891,12 +1900,12 @@ Object.assign(ENT,{
     fields:[{k:'name',label:'Nama brand kompetitor',req:true},{k:'client',label:'Client',type:'select',req:true,opts:clientOpts,hint:'Client yang dibandingkan di market share'}],
     cols:[nameCol(),{label:'Client',render:r=>cName(r.client),hide:true},{label:'Dipakai di market share',render:r=>SHARE_REP.filter(x=>x.brand===r.name).length+' toko',align:'r',hide:true},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>{ const n=SHARE_REP.filter(x=>x.brand===r.name).length; return n?`Kompetitor ini dipakai di market share ${n} toko. Nonaktifkan kompetitor jika tidak dibandingkan lagi.`:''; }},
-  katg:{src:'katprod',label:'Kategori produk',lower:'kategori produk',plural:'Kategori produk General',prefix:'kp',store:()=>MD.katprod,title:r=>r.name,search:r=>r.name+(r.parent||''),filter:r=>r.cakupan==='General',blank:()=>({cakupan:'General',brand:'',share:'Ya'}),
+  katg:{src:'katprod',label:'Kategori produk',lower:'kategori produk',plural:'Kategori produk General',prefix:'kp',store:()=>MD.katprod,title:r=>r.name,search:r=>r.name+(r.parent||''),filter:(r,q)=>r.cakupan==='General'&&katPass(r,q),blank:()=>({cakupan:'General',brand:'',share:'Ya'}),
     fields:[{k:'parent',label:'Kategori induk',type:'select',opts:()=>[['','—'],...live('katprod').filter(k=>k.cakupan==='General'&&k.id!==(FORM&&FORM.id)).map(k=>k.name)],hint:'Kosongkan untuk kategori level 1. Level dihitung otomatis dari kedalaman induk, tanpa batas.',validate:v=>katCycle(v,(document.getElementById('f_name')?.value||'').trim())?'Induk tidak boleh dirinya sendiri atau turunannya':''},
       {k:'share',label:'Dipakai untuk market share',type:'select',opts:['Ya','Tidak'],hint:'Client bisa membuat kategori sendiri untuk market share (MOM 8)'},{k:'name',label:'Nama',req:true,hint:'Kategori General berlaku untuk semua client'}],
     cols:[nameCol(r=>r.parent?'Di bawah '+r.parent:''),{label:'Level',render:r=>tag('Level '+katLevel(r),katLevel(r)===1?'accent':'neutral')},{label:'Market share',render:r=>r.share==='Tidak'?'<span class="muted">Tidak</span>':tag('Ya','success'),hide:true},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>katInUse(r)},
-  katc:{src:'katprod',label:'Kategori produk',lower:'kategori produk',plural:'Kategori produk Client',prefix:'kp',store:()=>MD.katprod,title:r=>r.name,search:r=>r.name+r.brand+(r.parent||''),filter:(r,q)=>r.cakupan==='Client'&&(!q.cl||brandClient(r.brand)===q.cl),blank:()=>({cakupan:'Client',share:'Ya'}),
+  katc:{src:'katprod',label:'Kategori produk',lower:'kategori produk',plural:'Kategori produk Client',prefix:'kp',store:()=>MD.katprod,title:r=>r.name,search:r=>r.name+r.brand+(r.parent||''),filter:(r,q)=>r.cakupan==='Client'&&(!q.cl||brandClient(r.brand)===q.cl)&&katPass(r,q),blank:()=>({cakupan:'Client',share:'Ya'}),
     fields:[{k:'client',label:'Client',type:'ro',fmt:(v,r)=>clientName(v||brandClient(r.brand)),hint:'Mengikuti client yang dipilih di filter'},
       {k:'brand',label:'Brand',type:'select',req:true,opts:()=>katcBrandOpts(katcState().cl),onchange:"katcSync('brand')",hint:'Brand milik client yang dipilih'},
       {k:'parent',label:'Kategori induk',type:'select',opts:()=>katcParentOpts(katcState().br),hint:'Kosongkan untuk kategori level 1. Level dihitung otomatis dari kedalaman induk, tanpa batas.',validate:v=>katCycle(v,(document.getElementById('f_name')?.value||'').trim())?'Induk tidak boleh dirinya sendiri atau turunannya':''},
@@ -1946,7 +1955,7 @@ function crudList(ent,q,{acts='',prefill=''}={}){
   return card(E.plural,`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
       <form style="flex:1;min-width:220px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari ${lc(E)}"></label></form>
       <div class="chips">${[['','Semua'],['Aktif','Aktif'],['Nonaktif','Nonaktif']].map(([k,l])=>`<button class="fchip ${f===k?'on':''}" onclick="setQ({st:'${k}'})">${l} <span class="n">${k?all.filter(r=>r.status===k).length:all.length}</span></button>`).join('')}</div></div>
-    ${dataTable('md_'+ent,{rows,rowClick:r=>`openForm('${ent}','${r.id}')`,acts:r=>rowActs(`openForm('${ent}','${r.id}')`,`delAsk('${ent}','${r.id}')`),cols:E.cols,empty:qq||f?`Tidak ada ${lc(E)} yang cocok. <button style="color:var(--accent-text);font-weight:600" onclick="setQ({q:'',st:'',sg:''})">Hapus filter</button>`:`Belum ada ${lc(E)}.`})}`,
+    ${dataTable('md_'+ent,{rows,rowClick:r=>`openForm('${ent}','${r.id}')`,acts:r=>rowActs(`openForm('${ent}','${r.id}')`,`delAsk('${ent}','${r.id}')`),cols:E.cols,empty:qq||f||q.br||q.lv||q.ms?`Tidak ada ${lc(E)} yang cocok. <button style="color:var(--accent-text);font-weight:600" onclick="setQ({q:'',st:'',sg:'',br:'',lv:'',ms:''})">Hapus filter</button>`:`Belum ada ${lc(E)}.`})}`,
     {acts:`${acts}${btn(ent==='user'?'Tambah dari SIM':'Tambah '+lc(E),{v:'accent',size:'sm',icon:'plus',on:addAct})}`});
 }
 
@@ -2340,13 +2349,16 @@ function posmDel(id){ const x=POSM.find(a=>a.id===id); x.del=true; audit('Mengha
 const pageRegion=q=>({title:'Region',html:`${crudList('region',q)}`});
 function brandTab(k){ setQ({tab:k==='client'?'':k,q:'',st:''}); }
 const pageBrand=q=>q.tab==='kompetitor'?pageKompetitor(q):({title:'Brand',html:`${crudList('brand',q)}<div style="margin-top:12px">${callout('Brand milik client. Brand kompetitor ada di menu <a href="#/kompetitor" style="color:var(--accent-text);font-weight:600">Kompetitor</a>.')}</div>`});
-const kpTab=t=>setQ({tab:t,q:'',st:'',cl:''});
+const kpTab=t=>setQ({tab:t,q:'',st:'',cl:'',br:'',lv:'',ms:''});
+const kpFilters=(tab,q,cl)=>{ const scope=live('katprod').filter(k=>tab==='client'?k.cakupan==='Client'&&brandClient(k.brand)===cl:k.cakupan==='General'), maxLv=Math.max(1,...scope.map(katLevel)), brs=tab==='client'?live('brand').filter(b=>b.client===cl).map(b=>[b.name,b.name]):[];
+  const f=(lbl,opts,val,key)=>`<label class="kpf"><span class="xs muted">${lbl}</span>${sel(opts,val||'',`setQ({${key}:this.value})`,{label:lbl})}</label>`;
+  return `<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin:0 0 12px">${tab==='client'?f('Brand',[['','Semua brand'],...brs],q.br,'br'):''}${f('Level',[['','Semua level'],...Array.from({length:maxLv},(_,i)=>[String(i+1),'Level '+(i+1)])],q.lv,'lv')}${f('Market share',[['','Semua'],['Ya','Ya'],['Tidak','Tidak']],q.ms,'ms')}${q.br||q.lv||q.ms?btn('Reset filter',{v:'soft',size:'sm',on:"setQ({br:'',lv:'',ms:''})"}):''}</div>`; };
 const pageKatProd=q=>{ const tab=q.tab==='client'?'client':'general', cls=clientOpts(), cl=q.cl||(cls[0]||[''])[0], gen=live('katprod').filter(k=>k.cakupan==='General').length, cli=live('katprod').filter(k=>k.cakupan==='Client').length;
   const tabs=`<div style="margin-bottom:4px">${utabs([['general','General',gen],['client','Client',cli]],tab,'kpTab')}</div>`;
   const first=katcBrandOpts(cl)[0], fb=Array.isArray(first)?'':first;
   const body=tab==='client'
-    ?`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0"><span class="sm muted">Client</span>${sel(cls,cl,"setQ({cl:this.value,q:'',st:''})",{label:'Pilih client'})}</div>${crudList('katc',{...q,cl},{prefill:`{client:'${cl}',brand:'${esc(fb)}'}`})}<div style="margin-top:12px">${callout('Kategori Client milik satu client lewat brand. Pilih client dulu, lalu brand di form. Boleh bertingkat tanpa batas level.')}</div>`
-    :`<div style="margin-top:12px">${crudList('katg',q)}</div><div style="margin-top:12px">${callout('<b>MOM 9 Nov.</b> Kategori General berlaku untuk semua client. Boleh bertingkat tanpa batas level, mengikuti pola Si Gesit.')}</div>`;
+    ?`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0"><span class="sm muted">Client</span>${sel(cls,cl,"setQ({cl:this.value,q:'',st:'',br:'',lv:'',ms:''})",{label:'Pilih client'})}</div>${kpFilters('client',q,cl)}${crudList('katc',{...q,cl},{prefill:`{client:'${cl}',brand:'${esc(fb)}'}`})}<div style="margin-top:12px">${callout('Kategori Client milik satu client lewat brand. Pilih client dulu, lalu brand di form. Boleh bertingkat tanpa batas level.')}</div>`
+    :`<div style="margin-top:12px">${kpFilters('general',q,cl)}${crudList('katg',q)}</div><div style="margin-top:12px">${callout('<b>MOM 9 Nov.</b> Kategori General berlaku untuk semua client. Boleh bertingkat tanpa batas level, mengikuti pola Si Gesit.')}</div>`;
   return {title:'Kategori produk',html:tabs+body}; };
 const pageEvent=q=>(shSet('events',MD.event),{title:'Event',html:`${crudList('event',q)}<div style="margin-top:12px">${callout('<b>Rekomendasi.</b> Rincian penjualan di event menunggu konfirmasi klien.')}</div>`});
 const pageStatProd=q=>({title:'Status produk',html:`${crudList('statprod',q)}`});
@@ -2445,6 +2457,7 @@ const katcBrandOpts=cl=>{ const b=live('brand').filter(x=>x.status==='Aktif'&&x.
 const katcParentOpts=br=>[['','—'],...live('katprod').filter(k=>k.cakupan==='Client'&&k.brand===br&&k.id!==(FORM&&FORM.id)).map(k=>k.name)];
 MD.katprod.forEach(k=>{ if(k.cakupan==='Client') k.client=brandClient(k.brand); });
 function katcSync(src){ const optHTML=a=>a.map(o=>Array.isArray(o)?o:[o,o]).map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join(''); const b=document.getElementById('f_brand'), pa=document.getElementById('f_parent'); if(src==='client') b.innerHTML=optHTML(katcBrandOpts(document.getElementById('f_client').value)); pa.innerHTML=optHTML(katcParentOpts(b.value)); }
+const katPass=(r,q)=>(!q.br||r.brand===q.br)&&(!q.lv||katLevel(r)===+q.lv)&&(!q.ms||(r.share||'Ya')===q.ms);
 const katParentOf=k=>k.parent?(MD.katprod.find(x=>!x.del&&x.name===k.parent&&x.brand===k.brand)||MD.katprod.find(x=>!x.del&&x.name===k.parent)):null;
 const katLevel=k=>{ let n=1,c=k,g=0; while(c.parent&&g++<30){ c=katParentOf(c); if(!c) break; n++; } return n; };
 const katCycle=(parent,name)=>{ let n=parent,g=0; while(n&&g++<30){ if(n===name) return true; const k=MD.katprod.find(x=>!x.del&&x.name===n); n=k?k.parent:''; } return false; };
