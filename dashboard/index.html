@@ -918,7 +918,7 @@ const NAV=[
   ['Client management',[['/client','Client','building'],['/cabang-client','Cabang client','pin'],['/mapping-outlet','Mapping outlet','store'],['/penugasan','Penugasan & jadwal','cal']]],
   ['Toko',[['/toko','Toko','store','usulan'],['/region','Region','pin'],['/kategori-toko','Kategori toko','grid']]],
   ['Master data',[['/brand','Brand','tag'],['/kompetitor','Kompetitor','tag'],['/kategori-produk','Kategori produk','grid'],['/produk','Produk & harga','pkg'],['/status-produk','Status produk','tag'],['/satuan','Satuan','sliders'],['/konversi','Konversi','grid']]],
-  ['Master data user',[['/company-sim','Company SIM Group','building'],['/user-admin','User management','shield'],['/user-sales','Sales management','usercog'],['/iam','IAM','shield']]],
+  ['Master data user',[['/company-sim','Company','building'],['/user-admin','User management','shield'],['/user-sales','Sales management','usercog'],['/iam','IAM','shield']]],
   ['Pengaturan aplikasi',[['/konfigurasi-aktivitas','Aktivitas per role','sliders'],['/form-penjualan','Form penjualan','checks'],['/parameter','Parameter','sliders']]]
 ];
 const counts=()=>({approval:D.approvals.length,leads:D.leads.filter(l=>!l.owner).length,overdue:D.overdue.length,usulan:D.usulan.filter(u=>u.status==='Menunggu verifikasi').length});
@@ -1686,7 +1686,10 @@ MD.user.push(
   {id:'bayu',nip:'SNM-21-00117',name:'Bayu Pratama',email:'bayu.p@sinergi.example',jabatan:'Area Manager',role:'r20',clients:['cl2'],cabang:'Jakarta Selatan',toko:[],ap1:'',ap2:'',akses:'Tanpa akses',face:'–',sumber:'Input manual',status:'Aktif'}
 );
 MD.user.forEach(u=>{ u.simco=u.id==='dewi'?'sg1':(u.clients||[]).includes('cl4')?'sg2':(u.clients||[]).includes('cl2')&&!(u.clients||[]).includes('cl1')?'sg3':'sg1'; });
-MD.client.forEach(c=>{ c.simco={cl1:'sg1',cl2:'sg3',cl4:'sg2',cl3:'sg1'}[c.id]||'sg1'; });
+MD.user.forEach(u=>{ u.simcos=[u.simco]; });
+['dewi','hendra'].forEach(id=>{ const u=MD.user.find(x=>x.id===id); if(u){ u.allSimco=true; u.allClients=true; } });
+{ const w=MD.user.find(x=>x.id==='wulan'); if(w) w.simcos=['sg1','sg2']; }
+MD.client.forEach(c=>{ c.simco={cl1:'sg1',cl2:'sg3',cl4:'sg2',cl3:'sg4'}[c.id]||'sg1'; });
 /* User = punya akses aplikasi. People = karyawan yang hanya didata (akses Tanpa akses). */
 const isPeople=u=>u.akses==='Tanpa akses';
 const srcTag=s=>tag(s||'Integrasi SIM',(s||'Integrasi SIM')==='Integrasi SIM'?'info':'neutral');
@@ -1705,8 +1708,8 @@ MD.role.forEach(r=>{ r.modul=MODUL_OF[r.id]||[]; });
 /* Modul yang dipakai client dihitung dari role user yang terhubung ke client itu. */
 const clientHasModul=(c,m)=>live('user').some(u=>(u.clients||[]).includes(c.id)&&(MD.role.find(r=>r.id===u.role)?.modul||[]).includes(m))||(!live('user').some(u=>(u.clients||[]).includes(c.id))&&(c.modul||[]).includes(m));
 Object.assign(MD,{
-  /* Company SIM Group: perusahaan internal SIM Group (beda dengan Company grup client). User management dan Sales management berada di company ini. */
-  simco:[{id:'sg1',code:'SIMA',name:'PT. SIM A',status:'Aktif'},{id:'sg2',code:'SIMB',name:'PT. SIM B',status:'Aktif'},{id:'sg3',code:'SIMC',name:'PT. SIM C',status:'Aktif'}],
+  /* Company: perusahaan internal SIM Group (beda dengan Company grup client). User management dan Sales management berada di company ini. */
+  simco:[{id:'sg1',code:'SIM',name:'SIM',status:'Aktif'},{id:'sg2',code:'PHL',name:'PHL',status:'Aktif'},{id:'sg3',code:'WIN',name:'WIN',status:'Aktif'},{id:'sg4',code:'DIS',name:'DIS',status:'Aktif'}],
   cabang:[{id:'cb1',name:'Jakarta Selatan',client:'cl1',kota:'Jakarta',status:'Aktif'},{id:'cb2',name:'Jakarta Barat',client:'cl1',kota:'Jakarta',status:'Aktif'},{id:'cb3',name:'Tangerang',client:'cl4',kota:'Tangerang',status:'Aktif'},{id:'cb4',name:'BPR Fatmawati',client:'cl2',kota:'Jakarta',status:'Aktif'},{id:'cb5',name:'BPR Cilandak',client:'cl2',kota:'Jakarta',status:'Aktif'}],
   region:[{id:'rg1',name:'Jakarta',client:'cl1',cabang:['Jakarta Selatan','Jakarta Barat'],status:'Aktif'},{id:'rg2',name:'Banten',client:'cl4',cabang:['Tangerang'],status:'Aktif'}],
   brand:[{id:'b1',name:'ARUNIKA',client:'cl1',status:'Aktif'},{id:'b5',name:'KIRANA',client:'cl1',status:'Aktif'}],
@@ -1740,10 +1743,13 @@ const outletMap=id=>shRead('outlet',{})[tokoNm(id)]||[...PRODUCTS.slice(0,6).map
 function outletToggle(tk,pid){ const m=outletMap(tk), on=m.includes(pid), all=shRead('outlet',{}); all[tokoNm(tk)]=on?m.filter(x=>x!==pid):[...m,pid]; shSet('outlet',all); render(false); toast(on?'Produk dilepas dari outlet':'Produk ditambahkan ke outlet',ALL_PROD().find(p=>p.id===pid).name); }
 const catF=()=>Object.fromEntries(MD.kat.filter(k=>!k.del&&k.status==='Aktif').map(k=>[k.name,k.factor]));
 const live=k=>MD[k]?MD[k].filter(r=>!r.del):TOKO.filter(r=>!r.del);
-const simcoCount=(r,kind)=>{ const n=live('user').filter(u=>u.simco===r.id&&(kind==='admin')===ADMIN_ROLES.includes(u.role)).length, path=kind==='admin'?'/user-admin':'/user-sales'; return `<span style="display:inline-flex;gap:12px;align-items:center;justify-content:flex-end" onclick="event.stopPropagation()"><span class="tabular">${n}</span>${btn('Lihat',{v:'soft',size:'sm',on:`go('${path}?sg=${r.id}')`})}</span>`; };
+const simcoCount=(r,kind)=>{ const n=live('user').filter(u=>userSimcos(u).includes(r.id)&&(kind==='admin')===ADMIN_ROLES.includes(u.role)).length, path=kind==='admin'?'/user-admin':'/user-sales'; return `<span style="display:inline-flex;gap:12px;align-items:center;justify-content:flex-end" onclick="event.stopPropagation()"><span class="tabular">${n}</span>${btn('Lihat',{v:'soft',size:'sm',on:`go('${path}?sg=${r.id}')`})}</span>`; };
+const userSimcos=u=>u.allSimco?MD.simco.map(c=>c.id):(u.simcos||[u.simco]).filter(Boolean);
+const simcoLabel=u=>u.allSimco?'Semua company':userSimcos(u).map(id=>MD.simco.find(c=>c.id===id)?.name||'–').join(', ')||'–';
+const clientLabel=u=>u.allClients?'Semua client':(u.clients||[]).map(clientName).join(', ')||'–';
 const simcoName=id=>MD.simco.find(c=>c.id===id)?.name||'–';
 const simcoOpts=()=>live('simco').filter(c=>c.status==='Aktif').map(c=>[c.id,c.name]);
-const simcoFilter=(sg,key='sg')=>`<label class="sel" style="display:flex;min-width:190px;margin-bottom:12px"><span class="sr-only">Company SIM Group</span><select aria-label="Filter Company SIM Group" style="width:100%" onchange="setQ({${key}:this.value})"><option value="">Semua company SIM</option>${live('simco').map(c=>`<option value="${c.id}" ${c.id===sg?'selected':''}>${esc(c.name)}</option>`).join('')}</select>${I('chev',16)}</label>`;
+const simcoFilter=(sg,key='sg')=>`<label class="sel" style="display:flex;min-width:190px;margin-bottom:12px"><span class="sr-only">Company</span><select aria-label="Filter Company" style="width:100%" onchange="setQ({${key}:this.value})"><option value="">Semua company</option>${live('simco').map(c=>`<option value="${c.id}" ${c.id===sg?'selected':''}>${esc(c.name)}</option>`).join('')}</select>${I('chev',16)}</label>`;
 const clientName=id=>MD.client.find(c=>c.id===id)?.name||'–';
 const userName=id=>MD.user.find(u=>u.id===id)?.name||'–';
 const roleName=id=>MD.role.find(r=>r.id===id)?.name||'–';
@@ -1755,16 +1761,17 @@ const stPill=s=>spill(s,s==='Aktif'?'success':'neutral');
 
 /* entity definitions */
 const ENT={
-  simco:{label:'Company SIM Group',lower:'company SIM Group',plural:'Daftar Company SIM Group',prefix:'sg',store:()=>MD.simco,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code,unique:'code',
-    fields:[{k:'code',label:'Kode company',req:true,ph:'contoh: SIMA',hint:'Huruf kapital, singkat'},{k:'name',label:'Nama company',req:true,ph:'contoh: PT. SIM A'}],
+  simco:{label:'Company',lower:'company',plural:'Daftar Company',prefix:'sg',store:()=>MD.simco,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code,unique:'code',afterCreate:rec=>{ MD.user.forEach(u=>{ if(u.allSimco) u.simcos=[...(u.simcos||[]),rec.id]; }); },
+    fields:[{k:'code',label:'Kode company',req:true,ph:'contoh: SIM',hint:'Huruf kapital, singkat'},{k:'name',label:'Nama company',req:true,ph:'contoh: SIM'}],
     cols:[{label:'Company',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.code)}</span>`,prim:true},
       {label:'Sales',render:r=>simcoCount(r,'sales'),align:'r'},{label:'User',render:r=>simcoCount(r,'admin'),align:'r'},{label:'Status',render:r=>stPill(r.status)}],
-    inUse:r=>{ const n=live('user').filter(u=>u.simco===r.id).length, c=live('client').filter(x=>x.simco===r.id).length; return n||c?`Company ini masih punya ${c} client dan ${n} user dan sales. Pindahkan ke company lain dulu, atau nonaktifkan company.`:''; }},
+    inUse:r=>{ const n=live('user').filter(u=>userSimcos(u).includes(r.id)).length, c=live('client').filter(x=>x.simco===r.id).length; return n||c?`Company ini masih punya ${c} client dan ${n} user dan sales. Pindahkan ke company lain dulu, atau nonaktifkan company.`:''; }},
   client:{label:'Client',plural:'Daftar client',prefix:'cl',store:()=>MD.client,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code+r.pic,unique:'code',
     blank:()=>({simco:'sg1',ind:'Elektronik',api:'Belum terhubung'}),
-    fields:[{k:'code',label:'Kode client',req:true,ph:'contoh: ARUNIKA',hint:'Huruf kapital, dipakai di nomor transaksi'},{k:'name',label:'Nama perusahaan',req:true},{k:'simco',label:'Company SIM Group',type:'select',req:true,opts:simcoOpts,hint:'Perusahaan di SIM Group yang menaungi client ini'},{k:'ind',label:'Industri',type:'select',opts:['Elektronik','Perbankan','FMCG','Tekstil','Otomotif','Lainnya'],hint:'Data industri ada di BPR 1. Cara pengambilannya belum dibahas'},
+    afterCreate:rec=>{ MD.user.forEach(u=>{ if(u.allClients) u.clients=[...(u.clients||[]),rec.id]; }); },
+    fields:[{k:'code',label:'Kode client',req:true,ph:'contoh: ARUNIKA',hint:'Huruf kapital, dipakai di nomor transaksi'},{k:'name',label:'Nama perusahaan',req:true},{k:'simco',label:'Company',type:'select',req:true,opts:simcoOpts,hint:'Perusahaan di SIM Group yang menaungi client ini'},{k:'ind',label:'Industri',type:'select',opts:['Elektronik','Perbankan','FMCG','Tekstil','Otomotif','Lainnya'],hint:'Data industri ada di BPR 1. Cara pengambilannya belum dibahas'},
       {k:'pic',label:'PIC klien',req:true},{k:'email',label:'Email PIC',type:'email',req:true},{k:'phone',label:'Telepon',type:'tel'},{k:'api',label:'Integrasi API',type:'select',opts:['Terhubung','Belum terhubung'],hint:'Kirim penjualan & tarik produk/harga (BRD 2.18)'}],
-    cols:[{label:'Client',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.code)}</span>`,prim:true},{label:'Company SIM',render:r=>esc(simcoName(r.simco))},{label:'Industri',k:'ind',hide:true},{label:'Cabang',render:r=>live('cabang').filter(c=>c.client===r.id).length,align:'r',hide:true},
+    cols:[{label:'Client',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.code)}</span>`,prim:true},{label:'Company',render:r=>esc(simcoName(r.simco))},{label:'Industri',k:'ind',hide:true},{label:'Cabang',render:r=>live('cabang').filter(c=>c.client===r.id).length,align:'r',hide:true},
       {label:'Toko',render:r=>live('toko').filter(t=>tokoClients(t).includes(r.id)).length,align:'r',hide:true},{label:'User',render:r=>live('user').filter(u=>u.clients.includes(r.id)).length,align:'r',hide:true},{label:'API',render:r=>tag(r.api,r.api==='Terhubung'?'success':'warning'),hide:true},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>{ const t=live('toko').filter(x=>x.client===r.id).length, u=live('user').filter(x=>x.clients.includes(r.id)).length, cb=live('cabang').filter(x=>x.client===r.id).length; return t||u||cb?`Client ini masih punya ${cb} cabang, ${t} toko, dan ${u} user. Pindahkan atau hapus dulu datanya, atau nonaktifkan client.`:''; }},
   cabang:{label:'Cabang client',lower:'cabang client',plural:'Daftar cabang client',prefix:'cb',store:()=>MD.cabang,title:r=>r.name,search:r=>r.name+r.kota+cName(r.client),blank:()=>({client:'cl1'}),
@@ -1789,7 +1796,7 @@ const ENT={
       {label:'Sumber',render:r=>tag(r.sumber||'Dari client',(r.sumber||'Dari client')==='Dari client'?'neutral':'info')},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>TRX.some(t=>t.toko===r.name)||(MD.order||[]).some(o=>!o.del&&o.toko===r.id)?'Toko ini punya riwayat transaksi. Data transaksi harus tetap bisa dilacak, jadi nonaktifkan toko saja (BRD 2.8.4).':'',
     afterCreate:rec=>{ rec.mapClients=[rec.client]; }},
-  user:{label:'Sales',lower:'sales',plural:'Sales management',prefix:'u',store:()=>MD.user,filter:(r,q)=>!ADMIN_ROLES.includes(r.role)&&(!q.src||r.sumber===q.src)&&(!q.sg||r.simco===q.sg),title:r=>r.name,code:r=>r.nip,search:r=>r.name+r.nip+r.email,
+  user:{label:'Sales',lower:'sales',plural:'Sales management',prefix:'u',store:()=>MD.user,filter:(r,q)=>!ADMIN_ROLES.includes(r.role)&&(!q.src||r.sumber===q.src)&&(!q.sg||userSimcos(r).includes(q.sg)),title:r=>r.name,code:r=>r.nip,search:r=>r.name+r.nip+r.email,
     fields:[{k:'sumber',label:'Sumber data',type:'ro'},{k:'nip',label:'NIP / ID pegawai',req:true,roIf:r=>r.sumber!=='Input manual'},{k:'name',label:'Nama',req:true,roIf:r=>r.sumber!=='Input manual'},{k:'email',label:'Email',type:'email',req:true,roIf:r=>r.sumber!=='Input manual'},{k:'jabatan',label:'Jabatan',req:true,roIf:r=>r.sumber!=='Input manual'},{k:'off',label:'Jadwal off (dari BPR)',type:'ro',hint:'Hari libur individu selain weekend. Sumber BPR, disinkronkan sekali sehari (rekomendasi)'},{k:'npo',label:'NPO (dari BPR)',type:'ro',hint:'Dipakai untuk NIK client'},
       {k:'simco',label:'Company',type:'select',req:true,opts:simcoOpts,hint:'Perusahaan di SIM Group, bukan perusahaan client'},
       {k:'role',label:'Role aplikasi',type:'select',req:true,opts:()=>live('role').filter(r=>r.status==='Aktif'&&!ADMIN_ROLES.includes(r.id)).map(r=>[r.id,r.name]),hint:'Menentukan menu, modul (Sales retail atau Sales automation), dan akses data (IAM). Direktur, HR, dan Manager diatur di User management'},
@@ -1802,16 +1809,17 @@ const ENT={
     inUse:r=>r.id==='dewi'?'Akun yang sedang login tidak bisa dihapus.':'',
     delNote:'Akses aplikasi dicabut. Data pegawai tetap ada di SIM (BPR1) dan riwayat absensi/penjualannya tetap tersimpan.',
     extraTop:r=>xJoin(userSrcNote(r),['r14','r15'].includes(r.role)?callout('Promotor Bantuan dan Reliever bisa dipindah client dan cabang, dengan hak akses terbatas. Ubah lewat field Client dan Cabang, aktifkan atau nonaktifkan lewat status.'):r.face==='Minta rekam ulang'?`<div class="callout">${I('face',18)}<span><b>${esc(r.name)}</b> meminta rekam ulang wajah referensi. <button type="button" style="color:var(--accent-text);font-weight:600" onclick="MD.user.find(x=>x.id==='${r.id}').face='Terekam';audit('Mengizinkan rekam ulang wajah ${esc(r.name)}');this.closest('.callout').remove();toast('Rekam ulang diizinkan','Diminta saat login berikutnya.')">Izinkan</button></span></div>`:'')},
-  admin:{src:'user',label:'User',lower:'user',plural:'User management',prefix:'u',store:()=>MD.user,filter:(r,q)=>ADMIN_ROLES.includes(r.role)&&(!q.src||r.sumber===q.src)&&(!q.sg||r.simco===q.sg)&&(!q.ak||(q.ak==='people'?isPeople(r):!isPeople(r))),title:r=>r.name,code:r=>r.email,search:r=>r.name+r.email+(r.jabatan||''),
-    blank:()=>({role:'r17',clients:['cl1'],simco:'sg1',cabang:'Kantor Pusat',toko:[],ap1:'',ap2:'',akses:'Web',face:'–',jabatan:'',sumber:'Input manual'}),
+  admin:{src:'user',label:'User',lower:'user',plural:'User management',prefix:'u',store:()=>MD.user,filter:(r,q)=>ADMIN_ROLES.includes(r.role)&&(!q.src||r.sumber===q.src)&&(!q.sg||userSimcos(r).includes(q.sg))&&(!q.ak||(q.ak==='people'?isPeople(r):!isPeople(r))),title:r=>r.name,code:r=>r.email,search:r=>r.name+r.email+(r.jabatan||''),
+    blank:()=>({role:'r17',clients:['cl1'],simcos:['sg1'],cabang:'Kantor Pusat',toko:[],ap1:'',ap2:'',akses:'Web',face:'–',jabatan:'',sumber:'Input manual'}),
     extraTop:r=>r.id?userSrcNote(r):'',
     fields:[{k:'sumber',label:'Sumber data',type:'ro'},{k:'name',label:'Nama',req:true,roIf:r=>r.sumber==='Integrasi SIM'},{k:'email',label:'Email',type:'email',req:true,roIf:r=>r.sumber==='Integrasi SIM',hint:'Dipakai untuk login. Akun di User management tidak harus terhubung ke SIM (BPR1)',validate:(v)=>MD.user.some(x=>!x.del&&x.id!==FORM.id&&String(x.email).toLowerCase()===v.toLowerCase())?'Email sudah dipakai':''},{k:'jabatan',label:'Jabatan',roIf:r=>r.sumber==='Integrasi SIM'},
-      {k:'simco',label:'Company SIM Group',type:'select',req:true,opts:simcoOpts,hint:'User ini dikelola di company SIM Group yang dipilih'},
+      {k:'simcos',label:'Company',type:'multi',req:true,all:'all',allKey:'allSimco',opts:()=>[['all','Semua company'],...simcoOpts()],hint:'Pilih Semua atau beberapa company yang boleh dikelola akun ini'},
       {k:'role',label:'Role',type:'select',req:true,opts:()=>live('role').filter(r=>r.status==='Aktif'&&ADMIN_ROLES.includes(r.id)).map(r=>[r.id,r.name]),hint:'Direktur, HR, Manager, dan admin. Admin SIM mengelola semua client, Admin Klien hanya client yang dipilih (IAM)'},
       {k:'akses',label:'Akses aplikasi',type:'select',req:true,opts:[['Web','Ya, akses dashboard web'],['Mobile & Web','Ya, akses web dan mobile'],['Tanpa akses','Tidak (people, hanya didata)']],hint:'User memakai aplikasi. People adalah karyawan yang perlu didata tapi tidak login (MOM 9 Nov bagian 5)'},
-      {k:'clients',label:'Client',type:'multi',req:true,opts:()=>live('client').map(c=>[c.id,c.name]),hint:'Client yang boleh dikelola atau dipantau akun ini'}],
+      {k:'clients',label:'Client',type:'multi',req:true,all:'all',allKey:'allClients',opts:()=>[['all','Semua client'],...live('client').map(c=>[c.id,c.name])],hint:'Pilih Semua atau beberapa client yang boleh dikelola atau dipantau akun ini'}],
+    readExtra:()=>{ const rd=id=>[...document.querySelectorAll('#'+id+' .fchip.on')].map(b=>b.dataset.v); const c=rd('f_clients'), g=rd('f_simcos'), ac=c.includes('all'), as=g.includes('all'); return {allClients:ac,clients:ac?live('client').map(x=>x.id):c,allSimco:as,simcos:as?live('simco').map(x=>x.id):g}; },
     cols:[{label:'Nama',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(r.name)}<span><span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.email)}</span></span></span>`,prim:true},
-      {label:'Role',render:r=>tag(roleName(r.role),r.role==='r1'?'info':'accent')},{label:'Company SIM',render:r=>esc(simcoName(r.simco))},{label:'Jenis',render:r=>isPeople(r)?tag('People','neutral'):tag('User','success')},{label:'Sumber',render:r=>srcTag(r.sumber),hide:true},{label:'Jabatan',render:r=>esc(r.jabatan||'–'),hide:true},{label:'Client',render:r=>r.clients.map(clientName).join(', '),hide:true},{label:'Status',render:r=>stPill(r.status)}],
+      {label:'Role',render:r=>tag(roleName(r.role),r.role==='r1'?'info':'accent')},{label:'Company',render:r=>esc(simcoLabel(r))},{label:'Jenis',render:r=>isPeople(r)?tag('People','neutral'):tag('User','success')},{label:'Sumber',render:r=>srcTag(r.sumber),hide:true},{label:'Jabatan',render:r=>esc(r.jabatan||'–'),hide:true},{label:'Client',render:r=>esc(clientLabel(r)),hide:true},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>r.id==='dewi'?'Akun yang sedang login tidak bisa dihapus.':'',
     delNote:'Akses akun ini dicabut. Riwayat aktivitasnya di log audit tetap tersimpan.'},
   role:{label:'Role',plural:'Role & hak akses',prefix:'r',store:()=>MD.role,title:r=>r.name,search:r=>r.name+r.desc,unique:'name',blank:()=>({scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',jadwal:'Tidak',perm:genPerm('none'),mperm:genMPerm('none')}),
@@ -1898,6 +1906,7 @@ function crudList(ent,q,{acts=''}={}){
 
 /* form */
 let FORM=null;
+function multiTog(b,all){ b.classList.toggle('on'); const on=b.classList.contains('on'); b.setAttribute('aria-pressed',on); if(all&&on) b.parentElement.querySelectorAll('.fchip').forEach(x=>{ if(x!==b&&(b.dataset.v===all||x.dataset.v===all)){ x.classList.remove('on'); x.setAttribute('aria-pressed','false'); } }); }
 function fieldHTML(fd,r){
   const v=r[fd.k], t=((fd.lock&&r.id&&fd.lock(r))||(fd.roIf&&fd.roIf(r)))?'ro':(fd.type||'text'), id='f_'+fd.k;
   const lab=`<span>${fd.label}${fd.req?' <b style="color:var(--danger)">*</b>':''}</span>`, hint=fd.hint?`<p class="xs muted" style="margin-top:6px">${fd.hint}</p>`:'', err=`<p class="ferr" id="e_${fd.k}"></p>`;
@@ -1905,7 +1914,7 @@ function fieldHTML(fd,r){
   let h;
   if(t==='ro') h=`<div class="field">${lab}<div class="tile" style="padding:11px 16px;color:var(--fg)">${esc(fd.fmt?fd.fmt(v,r):Array.isArray(v)?(v.map(tokoNm).join(', ')||'–'):(v||'–'))}</div>${hint}</div>`;
   else if(t==='select') h=`<label class="field">${lab}<span class="sel" style="display:flex"><select id="${id}" style="width:100%" ${fd.onchange?`onchange="${fd.onchange}"`:''}>${opts().map(([ov,ol])=>`<option value="${esc(ov)}" ${String(ov)===String(v??'')?'selected':''}>${esc(ol)}</option>`).join('')}</select>${I('chev',16)}</span>${hint}${err}</label>`;
-  else if(t==='multi') h=`<div class="field">${lab}<div class="chips" id="${id}" role="group" aria-label="${fd.label}">${opts().map(([ov,ol])=>{const on=(v||[]).includes(ov);return `<button type="button" class="fchip ${on?'on':''}" aria-pressed="${on}" data-v="${esc(ov)}" onclick="this.classList.toggle('on');this.setAttribute('aria-pressed',this.classList.contains('on'))">${esc(ol)}</button>`}).join('')}</div>${hint}${err}</div>`;
+  else if(t==='multi') h=`<div class="field">${lab}<div class="chips" id="${id}" role="group" aria-label="${fd.label}">${opts().map(([ov,ol])=>{const cur=fd.all&&r[fd.allKey]?[fd.all]:(v||[]);const on=cur.includes(ov);return `<button type="button" class="fchip ${on?'on':''}" aria-pressed="${on}" data-v="${esc(ov)}" onclick="multiTog(this${fd.all?`,'${fd.all}'`:''})">${esc(ol)}</button>`}).join('')}</div>${hint}${err}</div>`;
   else if(t==='textarea') h=`<label class="field">${lab}<textarea class="ta" id="${id}" style="min-height:70px">${esc(v||'')}</textarea>${hint}${err}</label>`;
   else h=`<label class="field">${lab}<span class="inp"><input id="${id}" type="${t==='number'?'text':t}" ${t==='number'?'inputmode="decimal"':''} value="${esc(t==='number'&&v!=null?String(v).replace('.',','):(v??''))}" placeholder="${fd.ph||''}"></span>${hint}${err}</label>`;
   return fd.only?`<div data-only="${fd.only}" ${r.type!==fd.only?'style="display:none"':''}>${h}</div>`:h;
@@ -2005,7 +2014,7 @@ function usulanPanel(id){ const u=D.usulan.find(x=>x.id===id); const done=u.stat
   done?btn('Tutup',{v:'card',on:'closeLayer()'}):`${btn('Tolak',{v:'card',on:`D.usulan.find(x=>x.id==='${id}').status='Ditolak';audit('Menolak usulan toko ${esc(u.name)}');closeLayer();render(false);toast('Usulan ditolak','Sales menerima notifikasi beserta alasannya.')`})}${btn('Setujui & aktifkan',{v:'accent',on:`approveToko('${id}')`})}`,{sub:'Usulan toko · '+byU(u.by).name}); }
 function approveToko(id){ const u=D.usulan.find(x=>x.id===id); u.status='Aktif'; TOKO.push({id:'n'+id,name:u.name,cat:u.cat,cabang:'Jakarta Selatan',dealer:u.dealer||'CV Mitra Elektrindo',sales:[u.by],addr:u.addr,client:'cl1',mapClients:['cl1'],sumber:'Input sales',status:'Aktif',radius:100,coord:'-6.3291, 106.8217'}); audit('Menyetujui usulan toko '+u.name+' (kategori '+u.cat+')'); closeLayer(); render(false); toast('Toko diaktifkan',u.name+' masuk master data, kategori '+u.cat+'.'); }
 const srcChips=(ent,q)=>{ const all=live('user').filter(r=>ENT[ent].filter(r,{})); return `<div class="chips" style="margin-bottom:12px" role="group" aria-label="Sumber data">${[['','Semua sumber'],['Integrasi SIM','Integrasi SIM'],['Input manual','Input manual']].map(([k,l])=>`<button class="fchip ${(q.src||'')===k?'on':''}" aria-pressed="${(q.src||'')===k}" onclick="setQ({src:'${k}'})">${l} <span class="n">${all.filter(r=>!k||(r.sumber||'Integrasi SIM')===k).length}</span></button>`).join('')}</div>`; };
-function pageSimco(q){ return {title:'Company SIM Group',html:`${crudList('simco',q)}<div style="margin-top:12px">${callout('Company SIM Group adalah perusahaan internal SIM Group. <a href="#/user-admin" style="color:var(--accent-text);font-weight:600">User management</a> dan <a href="#/user-sales" style="color:var(--accent-text);font-weight:600">Sales management</a> berada di company ini.')}</div>`}; }
+function pageSimco(q){ return {title:'Company',html:`${crudList('simco',q)}<div style="margin-top:12px">${callout('Company adalah perusahaan internal SIM Group. <a href="#/user-admin" style="color:var(--accent-text);font-weight:600">User management</a> dan <a href="#/user-sales" style="color:var(--accent-text);font-weight:600">Sales management</a> berada di company ini.')}</div>`}; }
 function pagePengguna(q){ return {title:'Sales management',html:`
   <div style="display:flex;gap:10px;flex-wrap:wrap">${simcoFilter(q.sg||'')}${srcChips('user',q)}</div>
   ${crudList('user',q,{acts:`${btn('Input manual',{v:'soft',size:'sm',icon:'plus',on:"openForm('user',null,{sumber:'Input manual',nip:'',name:'',email:'',jabatan:'',simco:'sg1',clients:['cl1'],cabang:'Jakarta Selatan',toko:[],role:'r14',ap1:'sari',ap2:'',akses:'Mobile',face:'Belum',off:'–',npo:'–',status:'Aktif'})"})}${btn('Sinkron dari SIM',{v:'soft',size:'sm',icon:'refresh',on:"audit('Sinkron data pegawai dari SIM (BPR1)');toast('Data pegawai tersinkron','Profil dari SIM diperbarui, 0 perubahan.')"})}`})}
@@ -2109,9 +2118,9 @@ function pagePenugasan(q){
   {
     const pills=`<div class="chips" style="margin-bottom:12px" role="group" aria-label="Tampilan">${[['sales','Per sales'],['toko','Per toko']].map(([k,l])=>`<button class="fchip ${v===k?'on':''}" aria-pressed="${v===k}" onclick="setQ({v:'${k}'})">${l}</button>`).join('')}</div>`;
     const table=v==='sales'
-      ?dataTable('pens',{rows:penSales().filter(u=>!psg||u.simco===psg).map(u=>({...u,_id:u.id})),rowClick:r=>`penSalesModal('${r.id}')`,empty:'Belum ada sales aktif.',cols:[
+      ?dataTable('pens',{rows:penSales().filter(u=>!psg||userSimcos(u).includes(psg)).map(u=>({...u,_id:u.id})),rowClick:r=>`penSalesModal('${r.id}')`,empty:'Belum ada sales aktif.',cols:[
           {label:'Sales',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(r.name)}<span><span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${esc(roleName(r.role))}</span></span></span>`,prim:true},
-          {label:'Company SIM',render:r=>esc(simcoName(r.simco)),hide:true},{label:'Cabang',k:'cabang',hide:true},
+          {label:'Company',render:r=>esc(simcoName(r.simco)),hide:true},{label:'Cabang',k:'cabang',hide:true},
           {label:'Toko',render:r=>{ const a=tokoOfU(r.id); return a.length?`<span class="tabular fg">${a.length} toko</span><span class="xs muted" style="display:block">${esc(a.slice(0,2).map(t=>t.name).join(', '))}${a.length>2?' +'+(a.length-2):''}</span>`:'<span class="muted">–</span>'; }},
           {label:'Tipe',render:r=>penTipe(tokoOfU(r.id).length)}],
         acts:r=>btn('Ubah',{v:'soft',size:'sm',icon:'edit',on:`penSalesModal('${r.id}')`})})
