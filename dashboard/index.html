@@ -1846,8 +1846,10 @@ function fxAnimate(root,full){
   if(!full) return;
   [...root.querySelectorAll(':scope > :not(.grid):not(.stats), :scope > .stats > *, :scope > .grid > *, :scope > div > .card')].forEach((el,i)=>el.animate([{opacity:0},{opacity:1}],{duration:200,delay:Math.min(i,8)*30,fill:'backwards',easing:'ease-out'}));
 }
+/* Usulan (11 Nov 2026): toko baru dari canvasser di mobile langsung aktif dan masuk Toko baru dari sales. */
+function syncTokoBaru(){ shRead('tokoBaruSales',[]).forEach(n=>{ if(TOKO.some(t=>t.id===n.id)) return; TOKO.push({id:n.id,name:n.name,cat:n.cat,cabang:'Jakarta Selatan',dealer:'–',sales:[n.u],addr:n.addr,client:'cl1',mapClients:['cl1'],sumber:'Input sales',status:'Aktif',radius:100,coord:'-6.2900, 106.8000'}); const us=MD.user.find(x=>x.id===n.u); if(us&&!(us.toko||[]).includes(n.id)) us.toko=[...(us.toko||[]),n.id]; }); }
 function render(scrollTop=true){
-  syncProducts(); refreshDerived(); syncApp();
+  syncProducts(); refreshDerived(); syncApp(); syncTokoBaru();
   const {path,q}=parse(); const app=$('#app');
   if(path==='/login'){ app.innerHTML=pageLogin(); lastPath=path; return; }
   if(!AUTHED){ ST.from=location.hash.slice(1)||'/'; location.replace('#/login'); return; }
@@ -2748,6 +2750,9 @@ MD.katprod.push({id:'kp30',name:'Elektronik Rumah Tangga',brand:'',parent:'',cak
 /* Toko: bedakan toko dari client dan toko baru dari sales; satu toko bisa dipetakan ke lebih dari satu client (menu Mapping outlet). */
 TOKO.forEach(t=>{ t.sumber=t.sumber||'Dari client'; t.mapClients=t.mapClients||[t.client]; });
 ['c3','o2'].forEach(id=>{ const t=TOKO.find(x=>x.id===id); if(t){ t.sumber='Input sales'; } });
+/* Usulan (11 Nov 2026): toko baru dari canvasser langsung aktif dan masuk Toko baru dari sales. */
+TOKO.push({id:'nb1',name:'Toko Maju Elektronik Cinere',cat:'Retail',cabang:'Jakarta Selatan',dealer:'CV Mitra Elektrindo',sales:['budi'],addr:'Jl. Cinere Raya 21',client:'cl1',mapClients:['cl1'],sumber:'Input sales',status:'Aktif',radius:100,coord:'-6.3260, 106.7790'});
+{ const b=MD.user.find(x=>x.id==='budi'); if(b) b.toko=[...(b.toko||[]),'nb1']; }
 ['c1','o1'].forEach(id=>{ const t=TOKO.find(x=>x.id===id); if(t) t.mapClients=['cl1','cl4']; });
 const tokoClients=t=>t.mapClients&&t.mapClients.length?t.mapClients:[t.client];
 const cabNames=()=>[...new Set(live('cabang').filter(c=>c.status==='Aktif').map(c=>c.name))];
@@ -3156,6 +3161,75 @@ function cbdDel(id){
   act('cbd-task/remove',{perm:'master.edit',guard:()=>cbdBlock(x),blockedTitle:'Tidak bisa dihapus',run:()=>{ x.del=true; shSet('cbdTasks',L); },audit:'Menghapus task CBD '+id,toast:['Task dihapus',x.t,'default']});
 }
 
+/* ---------- Journey plan dan frekuensi kunjungan (Usulan, 11 Nov 2026) ----------
+   Siklus 4 minggu. Plan disusun per sales per minggu dan hari, dari toko yang sudah ditempatkan di Penugasan.
+   Validasi: hari off ditolak; coverage dan kapasitas harian hanya memperingatkan. Data memakai salesapp.shared.v1. */
+const JP_ROLES=['r4','r5','r12','r13'];
+const JP_DAYS=['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const JP_WEEKS=[[1,'26 Okt – 1 Nov'],[2,'2 – 8 Nov'],[3,'9 – 15 Nov'],[4,'16 – 22 Nov']];
+const FREQ_DEFAULT={'Modern Retail':4,'Grosir':2,'Semi grosir':2,'Retail':1};
+const freqMap=()=>shRead('visitFreq',FREQ_DEFAULT);
+const jpKap=()=>shRead('jpKap',5);
+const jpSeed=(u,w,d,ts)=>ts.map((t,i)=>({id:'jp-'+u+'-'+w+'-'+d+'-'+i,u,t,n:TOKO.find(x=>x.id===t)?.name||t,w,d,o:i+1}));
+const JP_DEFAULT=[...jpSeed('budi',1,0,['c1','c2','c3']),...jpSeed('budi',1,1,['c5','c1']),...jpSeed('budi',1,2,['c2','c3','c5']),...jpSeed('budi',2,0,['c1','c2'])];
+const jpAll=()=>shRead('jpPlan',JP_DEFAULT);
+const jpItems=(u,w,d)=>jpAll().filter(x=>x.u===u&&x.w===w&&x.d===d).sort((a,b)=>a.o-b.o);
+const jpUsers=()=>live('user').filter(x=>JP_ROLES.includes(x.role)&&x.status==='Aktif');
+const jpState=()=>{ const us=jpUsers(), J=ST.jp||(ST.jp={u:'',w:1}); if(!us.find(x=>x.id===J.u)) J.u=us[0]?.id||''; return J; };
+const jpToko=id=>TOKO.find(t=>t.id===id)?.name||id;
+function jpPick(u){ ST.jp={u,w:ST.jp?.w||1}; render(false); }
+function jpWeek(w){ jpState().w=+w; render(false); }
+function jpOpen(u){ ST.jp={u,w:1}; go('/penugasan?tab=jp'); }
+function jpCoverage(u){ const all=jpAll().filter(x=>x.u===u), F=freqMap();
+  return tokoOfU(u).map(t=>{ const plan=all.filter(x=>x.t===t.id).length, need=F[t.cat]||0; return {t,plan,need,kurang:Math.max(0,need-plan)}; }); }
+function jpOver(u){ const m={}, kap=jpKap(); jpAll().filter(x=>x.u===u).forEach(x=>{ const k=x.w+'-'+x.d; m[k]=(m[k]||0)+1; });
+  return Object.entries(m).filter(([,n])=>n>kap).map(([k,n])=>{ const [w,d]=k.split('-'); return {w:+w,d:+d,n}; }); }
+function jpBody(){
+  const J=jpState(), users=jpUsers(), usr=users.find(x=>x.id===J.u);
+  if(!usr) return card('Journey plan '+tag('Usulan','accent'),'<p class="muted sm">Belum ada sales yang boleh punya journey plan.</p>');
+  const kap=jpKap(), toko=tokoOfU(usr.id), cov=jpCoverage(usr.id), over=jpOver(usr.id), ruteRole=['r4','r5','r13'].includes(usr.role);
+  const chips=(arr,cur,fn)=>`<div class="chips" style="margin-bottom:12px" role="group">${arr.map(([k,l])=>`<button class="fchip ${cur===k?'on':''}" aria-pressed="${cur===k}" onclick="${fn}('${k}')">${l}</button>`).join('')}</div>`;
+  const days=JP_DAYS.map((dn,d)=>{ const it=jpItems(usr.id,J.w,d), off=usr.off===dn;
+    return `<div class="tile" style="min-width:0"><div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:8px"><b class="fg sm">${dn}</b>${off?tag('Off','danger'):`<span class="xs muted tabular">${it.length}/${kap}</span>`}</div>
+    <div class="rows" style="margin-bottom:8px">${it.length?it.map((x,i)=>`<div class="rowlink" style="cursor:default;gap:6px"><span class="xs muted tabular" style="width:16px">${i+1}</span><span class="xs fg" style="flex:1;min-width:0">${esc(jpToko(x.t))}</span>${i>0?ibtn('arrowup','Naikkan urutan',`jpMove('${x.id}',-1)`):''}${i<it.length-1?ibtn('arrowdown','Turunkan urutan',`jpMove('${x.id}',1)`):''}${ibtn('x','Hapus dari plan',`jpDel('${x.id}')`)}</div>`).join(''):`<p class="xs muted">${off?'Hari off. Tidak bisa dijadwalkan.':'Belum ada kunjungan.'}</p>`}</div>
+    ${btn('Tambah toko',{v:'outline',size:'sm',icon:'plus',on:`jpAddModal(${d})`,dis:off||!toko.length})}</div>`; }).join('');
+  const covRows=cov.map(c=>`<div class="rowlink" style="cursor:default"><span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${esc(c.t.name)}</b><span class="xs muted">${esc(c.t.cat)} · target ${c.need} kali per 4 minggu</span></span><span class="tabular sm">${c.plan}/${c.need}</span>${spill(c.kurang?'Kurang '+c.kurang:'Terpenuhi',c.kurang?'warning':'success')}</div>`).join('');
+  const warn=[...cov.filter(c=>c.kurang).map(c=>`${esc(c.t.name)} baru ${c.plan} dari ${c.need} kunjungan`),...over.map(o=>`${JP_DAYS[o.d]} minggu ${o.w} berisi ${o.n} kunjungan, melebihi kapasitas ${kap}`)];
+  return card('Journey plan '+tag('Usulan','accent'),`${chips(users.map(u=>[u.id,esc(u.name.split(' ')[0])]),J.u,'jpPick')}${chips(JP_WEEKS.map(([w,l])=>[w,'Minggu '+w+' · '+l]),J.w,'jpWeek')}
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">${days}</div>`,{desc:esc(usr.name)+' · '+esc(roleName(usr.role))+(ruteRole?'. Urutan di tiap hari adalah rute kunjungan.':'. Urutan di tiap hari menjadi urutan kunjungan.'),acts:`<span class="xs muted">Siklus 26 Okt – 22 Nov 2026</span>`})
+    +`<div style="height:12px"></div>`+card('Ringkasan validasi',`${warn.length?callout('<b>Peringatan.</b> '+warn.join('. ')+'. Plan tetap bisa disimpan.'):callout('Coverage dan kapasitas harian terpenuhi.','blue')}<div style="height:12px"></div><div class="rows">${covRows||'<p class="muted sm" style="padding:12px">Belum ada toko yang ditempatkan. Atur di tab Penempatan toko.</p>'}</div>`,{desc:'Hari off ditolak saat menambah toko. Coverage dan kapasitas hanya memperingatkan.'});
+}
+function jpAddModal(d){ const {u,w}=jpState(), usr=live('user').find(x=>x.id===u); ST.jp.add={u,w,d};
+  const done=new Set(jpItems(u,w,d).map(x=>x.t)), list=tokoOfU(u).filter(t=>!done.has(t.id));
+  openModal(`<h2 class="pt">Tambah toko ke ${JP_DAYS[d]}<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Minggu ${w} untuk ${esc(usr.name)}. Hanya toko yang sudah ditempatkan.</p>
+  <div class="rows" style="max-height:46vh;overflow:auto">${list.length?list.map(t=>`<button class="rowlink" onclick="jpAdd('${t.id}')"><span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${esc(t.name)}</b><span class="xs muted">${esc(t.addr)} · ${esc(t.cat)}</span></span>${I('plus',16)}</button>`).join(''):'<p class="muted sm" style="padding:16px;text-align:center">Semua toko sudah ada di hari ini.</p>'}</div>
+  <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}</div>`); }
+function jpAdd(t){ const {u,w,d}=ST.jp.add, usr=live('user').find(x=>x.id===u);
+  act('jp/add',{perm:'visit.create',guard:()=>usr.off===JP_DAYS[d]?usr.name+' libur hari '+JP_DAYS[d]+' (hari off). Pilih hari lain.':'',blockedTitle:'Tidak bisa dijadwalkan',
+    run:()=>{ const o=jpItems(u,w,d).length+1; shSet('jpPlan',[...jpAll(),{id:newId('jp'),u,t,n:jpToko(t),w,d,o}]); return {o}; },
+    audit:'Menambah '+jpToko(t)+' ke journey plan '+usr.name+' ('+JP_DAYS[d]+' minggu '+w+')',
+    toast:r=>[r.o>jpKap()?'Dijadwalkan, melebihi kapasitas':'Toko dijadwalkan',jpToko(t)+' · '+JP_DAYS[d]+(r.o>jpKap()?'. Kapasitas harian '+jpKap()+' kunjungan terlewati.':'.'),'success']}); }
+function jpDel(id){ const x=jpAll().find(r=>r.id===id);
+  act('jp/remove',{perm:'visit.create',run:()=>{ const L=jpAll().filter(r=>r.id!==id); L.filter(r=>r.u===x.u&&r.w===x.w&&r.d===x.d).sort((a,b)=>a.o-b.o).forEach((r,i)=>{ r.o=i+1; }); shSet('jpPlan',L); },audit:'Menghapus '+jpToko(x.t)+' dari journey plan '+byU(x.u).name,toast:['Dihapus dari plan',jpToko(x.t),'default']}); }
+function jpMove(id,dir){ const x=jpAll().find(r=>r.id===id);
+  act('jp/order',{perm:'visit.create',run:()=>{ const L=jpAll().map(r=>({...r})), g=L.filter(r=>r.u===x.u&&r.w===x.w&&r.d===x.d).sort((a,b)=>a.o-b.o), i=g.findIndex(r=>r.id===id), j=i+dir; if(j<0||j>=g.length) return; const t=g[i].o; g[i].o=g[j].o; g[j].o=t; shSet('jpPlan',L); },audit:'Mengubah urutan rute '+byU(x.u).name,toast:['Urutan diubah',jpToko(x.t),'default'],close:false}); }
+function frekBody(){ const F=freqMap(), cats=[...new Set([...Object.keys(FREQ_DEFAULT),...TOKO.filter(t=>!t.del).map(t=>t.cat)])];
+  return card('Frekuensi kunjungan '+tag('Usulan','accent'),dataTable('frq',{rows:cats.map(c=>({_id:c,cat:c,n:F[c]??0,jml:TOKO.filter(t=>!t.del&&t.cat===c).length})),rowClick:r=>`frekModal('${r._id}')`,cols:[{label:'Kategori toko',render:r=>`<span class="fg" style="font-weight:500">${esc(r.cat)}</span>`,prim:true},{label:'Toko',render:r=>r.jml,align:'r',hide:true},{label:'Frekuensi',render:r=>`<b class="tabular fg">${r.n}</b> <span class="xs muted">kali per 4 minggu</span>`}],acts:r=>btn('Ubah',{v:'outline',size:'sm',icon:'edit',on:`frekModal('${r._id}')`})}),{desc:'Dipakai untuk memeriksa coverage journey plan. Contoh angka perlu dikonfirmasi klien.'})
+  +`<div style="height:12px"></div>`+card('Kapasitas per hari '+tag('Usulan','accent'),`<b class="tabular fg">${jpKap()} kunjungan</b><p class="xs muted" style="margin-top:6px">Maksimal kunjungan satu sales dalam satu hari. Melebihi batas hanya memperingatkan.</p>`,{acts:btn('Ubah',{v:'outline',size:'sm',on:'kapModal()'})}); }
+function frekModal(c){ openModal(`<h2 class="pt">Frekuensi ${esc(c)}<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Berapa kali toko kategori ini dikunjungi dalam satu siklus 4 minggu.</p><label class="field"><span>Kali per 4 minggu</span><span class="inp"><input id="fq_n" inputmode="numeric" value="${freqMap()[c]??0}"></span></label>
+  <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan',{v:'accent',on:`frekSave('${c}')`})}</div>`); }
+function frekSave(c){ const v=parseInt(document.getElementById('fq_n').value.replace(/\D/g,'')); if(isNaN(v)||v>12){ toast('Periksa isian','Isi angka 0 sampai 12.','danger'); return; }
+  act('jp/freq',{perm:'master.edit',run:()=>{ shSet('visitFreq',{...freqMap(),[c]:v}); },audit:'Mengubah frekuensi kunjungan '+c+' menjadi '+v+' kali per 4 minggu',toast:['Frekuensi tersimpan',c+': '+v+' kali per 4 minggu.']}); }
+function kapModal(){ openModal(`<h2 class="pt">Kapasitas per hari<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Kunjungan maksimal satu sales per hari.</p><label class="field"><span>Kunjungan per hari</span><span class="inp"><input id="kp_n" inputmode="numeric" value="${jpKap()}"></span></label>
+  <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan',{v:'accent',on:'kapSave()'})}</div>`); }
+function kapSave(){ const v=parseInt(document.getElementById('kp_n').value.replace(/\D/g,''))||0; if(v<1||v>20){ toast('Periksa isian','Isi angka 1 sampai 20.','danger'); return; }
+  act('jp/kap',{perm:'master.edit',run:()=>{ shSet('jpKap',v); },audit:'Mengubah kapasitas kunjungan menjadi '+v+' per hari',toast:['Kapasitas tersimpan',v+' kunjungan per hari.']}); }
+/* Plan vs actual hari ini (Senin minggu 1): rencana dari journey plan, realisasi dari status kunjungan. */
+function jpHariIni(){ const rows=[];
+  jpUsers().forEach(usr=>{ const plan=jpItems(usr.id,1,0), names=plan.map(p=>jpToko(p.t)), vs=visList().map(visLive).filter(v=>v.u===usr.id);
+    const done=vs.filter(v=>v.status==='Selesai'&&names.includes(v.place)).length, run=vs.filter(v=>v.status==='Berjalan'&&names.includes(v.place)).length, unpl=vs.filter(v=>v.status!=='Belum'&&!names.includes(v.place)).length;
+    if(!plan.length&&!unpl) return; rows.push({_id:usr.id,u:usr.id,plan:plan.length,done,run,sisa:plan.length-done-run,unpl}); }); return rows; }
+
 /* ---------- Aktivitas lapangan FMCG & MD ---------- */
 const FM_LOG_STATIC=[['26 Okt','Lestari Putri','Electronic City Kemang','Cek stok','Selesai','30 SKU · 2 barang tidak tersedia · 1 di luar planned product'],['26 Okt','Lestari Putri','Electronic City Kemang','Price promo','Selesai','Sabun Cair Segar 500 ml: Rp29.900 → Rp24.900 (16,7%); Teh Melati Botol 350 ml: Rp6.500 → Rp5.500 (15,4%)'],['26 Okt','Rangga Saputra','Best Denki Senayan City','Facing display','Draft','Rak Utama 86, Boot 84, Gudang –'],['26 Okt','Rangga Saputra','Best Denki Senayan City','Support task','Selesai','Bersihkan freezer · foto before dan after'],['25 Okt','Lestari Putri','Electronic City Kemang','Support task','Selesai','Rapikan etalase · foto before dan after']].map(([tgl,who,toko,jenis,status,isi],i)=>({_id:'f'+i,tgl,who,toko,jenis,status,isi}));
 const FM_JENIS_LIST=['Cek stok','Price promo','Facing display','Market share','Support task'];
@@ -3174,21 +3248,41 @@ function fmLogPanel(id){ const r=fmLogRows().find(x=>x._id===id);
 
 /* ---------- Canvassing ---------- */
 const CV_REP=[{_id:'budi',u:'budi',bawa:4800000,jual:2740000,retur:2060000,tt:'Ada'},{_id:'kevin',u:'kevin',bawa:5000000,jual:3120000,retur:1880000,tt:'Belum'}];
-const CV_PARAM={limit:shRead('canvasLimit',5000000)};
+const CV_PARAM={limit:shRead('canvasLimit',5000000),sisaJam:shRead('canvasSisaJam',24)};
+/* Usulan (11 Nov 2026): sisa barang canvassing wajib kembali ke gudang dalam batas jam sejak check-out. Check-out tetap boleh. */
+const CV_SISA=[{id:'sb1',u:'budi',item:'Blender 1 L ×2',nilai:640000,jam:30,co:'Senin 17:04'},{id:'sb2',u:'budi',item:'Rice Cooker 1,8 L ×1',nilai:520000,jam:6,co:'Selasa 17:10'},{id:'sb3',u:'kevin',item:'Kipas Angin 16 inci ×3',nilai:810000,jam:28,co:'Senin 16:48'}];
+const cvSisaDone=()=>shRead('cvSisaOk',[]);
+const cvSisaRows=()=>CV_SISA.map(r=>{ const ok=cvSisaDone().includes(r.id), sisa=CV_PARAM.sisaJam-r.jam; return {...r,_id:r.id,ok,sisa,st:ok?'Sudah dikembalikan':sisa<0?'Lewat batas':'Belum dikembalikan'}; });
+const cvSisaTone=st=>st==='Sudah dikembalikan'?'success':st==='Lewat batas'?'danger':'warning';
+const cvSisaWaktu=r=>r.ok?'–':r.sisa<0?'Lewat '+(-r.sisa)+' jam':'Sisa '+r.sisa+' jam';
+function cvSisaPanel(id){ const r=cvSisaRows().find(x=>x._id===id);
+  openPanel(r.item,`<div class="kv" style="margin-bottom:14px"><div><dt>Sales</dt><dd>${esc(byU(r.u).name)}</dd></div><div><dt>Check-out</dt><dd>${esc(r.co)}</dd></div><div><dt>Status</dt><dd>${esc(r.st)}</dd></div></div><div class="tile"><div class="xs muted">Nilai barang</div><b class="fg tabular">${rp(r.nilai)}</b></div><div style="margin-top:12px">${callout('Batas pengembalian '+CV_PARAM.sisaJam+' jam sejak check-out. Check-out tidak diblokir. Sisa yang lewat batas ditindaklanjuti Team Leader.')}</div>`,
+    (r.ok?'':btn('Tandai dikembalikan',{v:'accent',icon:'check',on:`cvSisaReturn('${id}')`}))+btn('Tutup',{v:'outline',on:'closeLayer()'}),{sub:r.co}); }
+function cvSisaReturn(id){ const r=CV_SISA.find(x=>x.id===id);
+  act('cv-sisa/return',{perm:'master.edit',run:()=>{ shSet('cvSisaOk',[...cvSisaDone(),id]); },audit:'Menandai sisa barang '+r.item+' dikembalikan',toast:['Sisa barang dikembalikan',r.item+' dari '+byU(r.u).name.split(' ')[0]+'.']}); }
+function cvSisaJamModal(){ openModal(`<h2 class="pt">Ubah batas pengembalian<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Jam maksimal sisa barang kembali ke gudang, dihitung dari check-out.</p><label class="field"><span>Batas (jam)</span><span class="inp"><input id="cv_j" inputmode="numeric" value="${CV_PARAM.sisaJam}"></span></label>
+  <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan',{v:'accent',on:'cvSisaJamSave()'})}</div>`); }
+function cvSisaJamSave(){ const v=parseInt(document.getElementById('cv_j').value.replace(/\D/g,''))||0; if(v<1||v>168){ toast('Periksa isian','Isi batas 1 sampai 168 jam.','danger'); return; }
+  act('cv-sisa/limit',{perm:'master.edit',run:()=>{ CV_PARAM.sisaJam=v; shSet('canvasSisaJam',v); },audit:'Mengubah batas pengembalian sisa barang menjadi '+v+' jam',toast:['Batas tersimpan',v+' jam sejak check-out.']}); }
 function pageCanvassing(){
   return {title:'Canvassing',html:`
   <div class="grid g-side">${card('Rekap hari ini',dataTable('cvr',{rows:CV_REP,rowClick:r=>`toast('${byU(r.u).name}','Tanda terima: ${r.tt}.')`,cols:[{label:'Sales',render:r=>byU(r.u).name,prim:true},{label:'Dibawa',render:r=>rp(r.bawa),align:'r'},{label:'Retur',render:r=>rp(r.retur),align:'r',hide:true},{label:'Terjual',render:r=>rp(r.jual),align:'r'},{label:'Tanda terima',render:r=>tag(r.tt,r.tt==='Ada'?'success':'warning'),hide:true}]}))}
   ${card('Limit per hari',`<b class="tabular fg">${rp(CV_PARAM.limit)}</b><p class="xs muted" style="margin-top:6px">Berlaku untuk semua canvasser.</p>`,{acts:btn('Ubah',{v:'outline',size:'sm',on:'cvLimitModal()'})})}</div>
+  <div class="grid g-side" style="margin-top:16px">${card('Sisa barang '+tag('Usulan','accent'),dataTable('cvs',{rows:cvSisaRows(),rowClick:r=>`cvSisaPanel('${r._id}')`,empty:'Tidak ada sisa barang.',cols:[{label:'Barang',render:r=>`<span class="fg" style="font-weight:500">${esc(r.item)}</span><span class="xs muted" style="display:block">${esc(byU(r.u).name)} · check-out ${esc(r.co)}</span>`,prim:true},{label:'Nilai',render:r=>rp(r.nilai),align:'r',hide:true},{label:'Batas',render:r=>cvSisaWaktu(r),hide:true},{label:'Status',render:r=>spill(r.st,cvSisaTone(r.st))}],acts:r=>r.ok?'':btn('Tandai dikembalikan',{v:'outline',size:'sm',icon:'check',on:`cvSisaReturn('${r._id}')`})}),{desc:'Check-out tetap boleh. Sisa barang wajib kembali ke gudang sebelum batas jam.'})}
+  ${card('Batas pengembalian '+tag('Usulan','accent'),`<b class="tabular fg">${CV_PARAM.sisaJam} jam</b><p class="xs muted" style="margin-top:6px">Sejak check-out. Berlaku untuk semua canvasser.</p>`,{acts:btn('Ubah',{v:'outline',size:'sm',on:'cvSisaJamModal()'})})}</div>
+  <div style="margin-top:12px">${callout('<b>Usulan.</b> Toko baru yang dibuat canvasser langsung aktif tanpa persetujuan admin. Toko itu tampil di menu <a href="#/toko?src=Input%20sales" style="color:var(--accent-text);font-weight:600">Toko</a> pada filter Toko baru dari sales.')}</div>
   <p class="xs muted" style="margin-top:12px">Penempatan canvasser, sales taking order, dan mobile promotor ke toko diatur di menu <a href="#/penugasan" style="color:var(--accent-text);font-weight:600">Penugasan</a>.</p>`};
 }
 /* Role yang di-assign ke toko diambil dari IAM; tambah id role di sini bila role baru juga bergerak antar toko. */
 const CV_ASSIGN_ROLES=['r4','r5','r13'];
 const cvAssignees=()=>live('user').filter(u=>CV_ASSIGN_ROLES.includes(u.role)&&u.status==='Aktif');
 function cvAssignModal(u){ ST.cvPick={u,sel:new Set(tokoOfU(u).map(t=>t.id))}; cvAssignRender(); }
-function cvAssignToggle(id){ const S=ST.cvPick.sel; S.has(id)?S.delete(id):S.add(id); cvAssignRender(); }
+function cvAssignToggle(id){ const {u,sel:S}=ST.cvPick;
+  if(!S.has(id)){ const bl=penBatas(u,S.size+1); if(bl){ toast('Tidak bisa menambah toko',bl,'danger'); return; } S.add(id); } else S.delete(id);
+  cvAssignRender(); }
 function cvAssignRender(){ const {u,sel:S}=ST.cvPick, x=live('user').find(r=>r.id===u);
   const list=live('toko').filter(t=>t.status==='Aktif'&&tokoClients(t).some(c=>(x.clients||[]).includes(c))&&!(t.cat==='Modern Retail'&&CV_ASSIGN_ROLES.includes(x.role))).sort((a,b)=>(a.cabang!==x.cabang)-(b.cabang!==x.cabang)||a.name.localeCompare(b.name));
-  openModal(`<h2 class="pt">Assign ${esc(x.name.split(' ')[0])} ke toko<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Pilih satu toko atau lebih dari client ${esc(x.clients.map(clientName).join(', '))}. Toko di cabang ${esc(x.cabang)} tampil lebih dulu.</p>
+  openModal(`<h2 class="pt">Assign ${esc(x.name.split(' ')[0])} ke toko<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">${PEN_SATU.includes(x.role)?'Pilih satu toko':'Pilih satu toko atau lebih'} dari client ${esc(x.clients.map(clientName).join(', '))}. Toko di cabang ${esc(x.cabang)} tampil lebih dulu.</p>
   <div class="rows" style="max-height:46vh;overflow:auto">${list.map(t=>`<button class="rowlink" role="checkbox" aria-checked="${S.has(t.id)}" onclick="cvAssignToggle('${t.id}')"><span class="cb ${S.has(t.id)?'on':''}">${S.has(t.id)?I('check',12,3):''}</span><span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${esc(t.name)}</b><span class="xs muted">${esc(t.addr)} · ${esc(t.cat)} · ${esc(t.cabang)}</span></span></button>`).join('')}</div>
   <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan'+(S.size?' '+S.size+' toko':''),{v:'accent',on:'cvAssignSave()',dis:!S.size})}</div>`); }
 function cvAssignSave(){ const {u,sel:S}=ST.cvPick; if(!S.size) return;
@@ -3196,7 +3290,10 @@ function cvAssignSave(){ const {u,sel:S}=ST.cvPick; if(!S.size) return;
   const rec=MD.user.find(r=>r.id===u); rec.toko=[...S];
   audit('Meng-assign '+S.size+' toko ke '+rec.name); closeLayer(); render(false); toast(S.size+' toko di-assign ke '+rec.name.split(' ')[0],'Daftar toko di aplikasi mobile ikut berubah.'); }
 /* ---------- Penugasan: penempatan sales ke toko dan jadwal kunjungan (MOM 9 Nov bagian 4) ---------- */
-const PEN_ROLES=['r3','r4','r5','r13'];
+/* Usulan (11 Nov 2026): promotor FMCG dan promotor elektronik hanya satu toko; MD, canvassing, taking order, dan mobile promotor boleh lebih dari satu. */
+const PEN_ROLES=['r3','r4','r5','r11','r12','r13'];
+const PEN_SATU=['r3','r11'];
+const penBatas=(uid,n)=>{ const u=live('user').find(x=>x.id===uid); return u&&PEN_SATU.includes(u.role)&&n>1?u.name+' berperan sebagai '+roleName(u.role)+'. Role ini hanya boleh ditempatkan di satu toko.':''; };
 const penSales=()=>live('user').filter(u=>PEN_ROLES.includes(u.role)&&u.status==='Aktif');
 const penTipe=n=>n>1?tag('Bergerak','info'):n===1?tag('Diam','neutral'):tag('Belum ditugaskan','accent');
 function penTab(t){ setQ({tab:t,q:'',cat:''}); }
@@ -3217,20 +3314,24 @@ function pagePenugasan(q){
           {label:'Cabang',k:'cabang',hide:true},{label:'Kategori',render:r=>tag(r.cat,r.cat==='Modern Retail'?'accent':'neutral'),hide:true},
           {label:'Sales ditugaskan',render:r=>r.sales.length?`<span class="fg">${esc(r.sales.map(userName).join(', '))}</span>`:tag('Belum ada sales','accent')}],
         acts:r=>btn('Ubah',{v:'outline',size:'sm',icon:'edit',on:`penTokoModal('${r.id}')`})});
-    body=card('Penempatan toko',`${callout('Satu toko berarti sales Diam, lebih dari satu berarti Bergerak. Canvasser, taking order, dan mobile promotor tidak bisa ditempatkan di toko Modern Retail. Hanya toko yang dipetakan ke client sales (menu Mapping outlet) yang bisa dipasangkan.')}<div style="height:12px"></div>${pills}${v==='sales'?simcoFilter(psg):''}${table}`);
+    body=card('Penempatan toko',`${callout('<b>Usulan.</b> Promotor FMCG dan promotor elektronik hanya satu toko. MD dan canvasser boleh lebih dari satu toko. Satu toko berarti sales Diam, lebih dari satu berarti Bergerak. Canvasser, taking order, dan mobile promotor tidak bisa ditempatkan di toko Modern Retail. Hanya toko yang dipetakan ke client sales (menu Mapping outlet) yang bisa dipasangkan.')}<div style="height:12px"></div>${pills}${v==='sales'?simcoFilter(psg):''}${table}`);
   }
-  const tab=q.tab==='jadwal'?'jadwal':'tempat';
+  const tab=['jadwal','jp','frek'].includes(q.tab)?q.tab:'tempat';
   if(tab==='jadwal'){ const vs=visList().map(visLive);
     body=card('Jadwal kunjungan',dataTable('penj',{rows:vs.map(v=>({...v,_id:v.id})),rowClick:r=>`visPanel('${r.id}')`,acts:r=>rowActs(`visForm('${r.id}')`,`visDelAsk('${r.id}')`),empty:'Belum ada jadwal.',cols:[
       {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(byU(r.u).name)}</span><span class="xs muted" style="display:block">${esc(byU(r.u).job)}</span>`,prim:true},{label:'Toko',k:'place'},
       {label:'Periode',render:r=>`${esc(perLabel(r))}<span class="xs muted" style="display:block">${r.plan}</span>`},{label:'Status',render:r=>spill(r.status,r.status==='Selesai'?'success':r.status==='Berjalan'?'accent':'neutral'),hide:true}]}),
       {acts:btn('Buat jadwal',{v:'accent',size:'sm',icon:'plus',on:'visForm()'})})+`<div style="margin-top:12px">${callout('Penugasan mencakup penjadwalan (MOM 9 Nov bagian 4). Periode mingguan dan 2 mingguan wajib memilih hari, boleh hari apa saja. Jadwal yang sama tampil di menu Kunjungan beserta hasil check-in.')}</div>`; }
-  return {title:'Penugasan & jadwal',html:`<div style="margin-bottom:4px">${utabs([['tempat','Penempatan toko'],['jadwal','Jadwal kunjungan',visList().length]],tab,'penTab')}</div>${body}`};
+  if(tab==='jp') body=jpBody();
+  if(tab==='frek') body=frekBody();
+  return {title:'Penugasan & jadwal',html:`<div style="margin-bottom:4px">${utabs([['tempat','Penempatan toko'],['jadwal','Jadwal kunjungan',visList().length],['jp','Journey plan'],['frek','Frekuensi']],tab,'penTab')}</div>${body}`};
 }
 function penSalesModal(u){ cvAssignModal(u); }
 function penTokoModal(id){
   const t=TOKO.find(x=>x.id===id); ST.penPick={t:id,sel:new Set(t.sales)}; penTokoRender(); }
-function penTokoToggle(u){ const S=ST.penPick.sel; S.has(u)?S.delete(u):S.add(u); penTokoRender(); }
+function penTokoToggle(u){ const S=ST.penPick.sel;
+  if(!S.has(u)){ const n=tokoOfU(u).filter(t=>t.id!==ST.penPick.t).length+1, bl=penBatas(u,n); if(bl){ toast('Tidak bisa menambah sales',bl+' Lepas dulu dari toko lain.','danger'); return; } S.add(u); } else S.delete(u);
+  penTokoRender(); }
 function penTokoRender(){ const {t:id,sel:S}=ST.penPick, t=TOKO.find(x=>x.id===id);
   const list=penSales().filter(u=>tokoClients(t).some(c=>u.clients.includes(c))&&!(t.cat==='Modern Retail'&&CV_ASSIGN_ROLES.includes(u.role))||S.has(u.id)).sort((a,b)=>(a.cabang!==t.cabang)-(b.cabang!==t.cabang)||a.name.localeCompare(b.name));
   openModal(`<h2 class="pt">Sales di ${esc(t.name)}<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Pilih sales yang ditugaskan di toko ini. Sales cabang ${esc(t.cabang)} tampil lebih dulu.</p>
@@ -3313,7 +3414,13 @@ function pageTracking(q){
 function pageKepatuhan(q){
   const rows=[...SALES,...FMCG_USERS].map((s,i)=>{ const plan=[22,20,24,18,21,19,23,20,16][i]||20, real=Math.max(0,plan-[1,4,2,0,6,3,1,2,0][i]), tepat=Math.max(0,real-[1,3,1,0,4,2,0,1,0][i]); return {_id:s.u,u:s.u,plan,real,tepat,pct:Math.round(real/plan*100)}; }).sort((a,b)=>a.pct-b.pct);
   const P=rows.reduce((a,r)=>a+r.plan,0), R=rows.reduce((a,r)=>a+r.real,0), T=rows.reduce((a,r)=>a+r.tepat,0);
+  const hi=jpHariIni(), hP=hi.reduce((a,r)=>a+r.plan,0), hD=hi.reduce((a,r)=>a+r.done,0), hU=hi.reduce((a,r)=>a+r.unpl,0);
+  const hariIni=card('Plan vs actual hari ini',dataTable('kph',{rows:hi,rowClick:r=>`jpOpen('${r.u}')`,empty:'Belum ada journey plan untuk hari ini.',cols:[
+    {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(byU(r.u).name)}</span><span class="xs muted" style="display:block">${esc(byU(r.u).job)}</span>`,prim:true},
+    {label:'Rencana',render:r=>r.plan,align:'r'},{label:'Selesai',render:r=>r.done,align:'r',hide:true},{label:'Berjalan',render:r=>r.run,align:'r',hide:true},{label:'Belum',render:r=>r.sisa,align:'r',hide:true},
+    {label:'Di luar rencana',render:r=>r.unpl?spill(r.unpl+' kunjungan','warning'):'<span class="muted">–</span>'}]}),{desc:'Senin 26 Okt 2026. Rencana dari journey plan, realisasi dari check-in. '+hD+' dari '+hP+' rencana selesai, '+hU+' kunjungan di luar rencana. Kunjungan di luar rencana dicatat, tidak menambah kepatuhan.'});
   return {title:'Kepatuhan kunjungan',html:`
+  ${hariIni}<div style="height:12px"></div>
   <div class="stats">${[['Rencana kunjungan',P,'Oktober 2026'],['Terealisasi',R,Math.round(R/P*100)+'% dari rencana'],['Tepat waktu',T,Math.round(T/R*100)+'% dari realisasi'],['Di bawah 85%',rows.filter(r=>r.pct<85).length,'sales perlu dipantau']].map(([l,v,sub])=>`<div class="stat"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></div>`).join('')}</div>
   ${card('Rencana vs realisasi per sales',dataTable('kpt',{rows,rowClick:r=>`go('/penugasan?tab=jadwal')`,cols:[
     {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(byU(r.u).name)}</span><span class="xs muted" style="display:block">${esc(byU(r.u).job)}</span>`,prim:true},
@@ -4169,7 +4276,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
 /* ---------- Penyimpanan data dashboard (D6) ----------
    Perubahan di dashboard disimpan sebagai snapshot berversi. Data bersama dengan mobile tetap di salesapp.shared.v1.
    Naikkan DASH_VER bila bentuk data contoh berubah, supaya snapshot lama dibuang dan data contoh baru dipakai. */
-const DASH_VER=1;
+const DASH_VER=2;
 const PARAM={};
 const dashData=()=>({D,MD,TOKO,TRX,INFO,POSM,AR,KLAIM,ATT,REK_ADJ,PARAM});
 function restoreInto(t,src){
