@@ -732,7 +732,7 @@ const tgtMonth=m=>REPU.reduce((a,u)=>a+tgtUser(m,u),0);
 const tgtRange=(m,days)=>tgtMonth(m)*days/ldCal(m);
 const tgtDay=m=>tgtRange(m,1);
 // Pemesanan (taking order) dihitung terpisah dari penjualan ritel.
-const ordTotal=o=>o.items.reduce((a,i)=>a+((PRODUCTS.find(p=>p.id===i.p)||{}).price||0)*i.q,0);
+const ordTotal=o=>o.items.reduce((a,i)=>a+priceAt(i.p,o.toko)*i.q,0);
 const ordLive=()=>(MD.order||[]).filter(o=>!o.del&&o.st!=='Dibatalkan');
 const ordOf=(u,m)=>ordLive().filter(o=>o.u===u&&o.m===m);
 const actualOf=(u,m)=>sumVal(trxIn(m).filter(t=>t.u===u))+ordOf(u,m).reduce((a,o)=>a+ordTotal(o),0);
@@ -1057,7 +1057,7 @@ function countUp(el,dur){
   setTimeout(()=>{ if(el.isConnected&&el.textContent!==txt) el.textContent=txt; },dur+150);
 }
 function render(scrollTop=true){
-  refreshDerived(); syncApp();
+  syncProducts(); refreshDerived(); syncApp();
   const {path,q}=parse(); const app=$('#app');
   if(path==='/login'){ app.innerHTML=pageLogin(); lastPath=path; return; }
   const page=(ROUTES[path]||pageNotFound)(q);
@@ -1230,7 +1230,7 @@ function ordAdvance(id){ const o=MD.order.find(x=>x.id===id); o.st=ORD_NEXT[o.st
 function ordCancel(id){ const o=MD.order.find(x=>x.id===id); o.st='Menunggu batal'; D.approvals.unshift({id:'ap'+Date.now()%1e6,type:'Batal pesanan',u:o.u,ref:o.id,detail:o.id+' · '+tokoName(o.toko)+' · '+rp(ordTotal(o)),reason:'Pengajuan dari dashboard',when:'26 Okt, '+new Date().toTimeString().slice(0,5)}); audit('Mengajukan batal pesanan '+o.id); closeLayer(); render(false); toast('Pembatalan diajukan','Menunggu approval sebelum pesanan dibatalkan.'); }
 function ordForm(){
   const sales=live('user').filter(u=>u.role==='r5'&&u.status==='Aktif'), tk=live('toko').filter(t=>t.status==='Aktif');
-  const prods=[['','Pilih produk'],...PRODUCTS.map(p=>[p.id,p.name+' · '+rp(p.price)])];
+  const prods=[['','Pilih produk'],...PRODUCTS.filter(p=>p.status!=='Nonaktif').map(p=>[p.id,p.name+' · '+rp(p.price)])];
   openModal(`<h2 class="pt" style="font-size:22px">Buat pesanan<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Pesanan sales taking order. Total dihitung dari harga produk dan tidak dihitung sebagai penjualan ritel.</p>
   <div class="grid" style="gap:12px"><div class="grid g2" style="gap:10px"><label class="field"><span>Sales</span>${sel(sales.map(u=>[u.id,u.name]),sales[0]?.id||'','',{label:'Sales',id:'of_u'})}</label>
   <label class="field"><span>Toko</span>${sel(tk.map(t=>[t.id,t.name]),tk[0]?.id||'','',{label:'Toko',id:'of_t'})}</label></div>
@@ -1265,7 +1265,7 @@ function pageDataJual(q){
 }
 function djTokoMode(v){ document.getElementById('dj_tk_m').style.display=v==='free'?'none':''; document.getElementById('dj_tk_f').style.display=v==='free'?'':'none'; }
 function djProdMode(v){ document.getElementById('dj_p_m').style.display=v==='free'?'none':''; document.getElementById('dj_p_f').style.display=v==='free'?'':'none'; if(v==='free') document.getElementById('dj_h').value=''; else djPrice(); }
-function djPrice(){ const p=PRODUCTS.find(x=>x.id===document.getElementById('dj_p').value); if(p) document.getElementById('dj_h').value=p.price; }
+function djPrice(){ const id=document.getElementById('dj_p').value, tn=document.getElementById('dj_t')?.value, tk=TOKO.find(t=>t.name===tn), m=tk&&MD.mapping.find(x=>!x.del&&x.status==='Aktif'&&x.produk===id&&x.toko===tk.id), p=PRODUCTS.find(x=>x.id===id); if(m) document.getElementById('dj_h').value=m.harga; else if(p) document.getElementById('dj_h').value=p.price; }
 function djForm(){
   const sales=SALES.filter(s=>['SPG / Promotor','Canvasing'].includes(s.job)), tk=live('toko').filter(t=>t.status==='Aktif');
   openModal(`<h2 class="pt" style="font-size:22px">Tambah penjualan<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Dipakai bila sales gagal menginput dari aplikasi. Tercatat atas nama sales, dengan jejak admin yang menginput.</p>
@@ -1273,10 +1273,10 @@ function djForm(){
     <div class="grid g2" style="gap:10px"><label class="field"><span>Sales <b style="color:var(--danger)">*</b></span>${sel(sales.map(s=>[s.u,s.name+' – '+s.job]),sales[0].u,'',{label:'Sales',id:'dj_u'})}</label>
     <label class="field"><span>Tanggal (Okt) <b style="color:var(--danger)">*</b></span><span class="inp"><input id="dj_d" inputmode="numeric" value="${LD_TODAY}"></span></label></div>
     <div class="field"><span>Toko</span><div class="chips" role="radiogroup" aria-label="Sumber toko" style="margin-bottom:8px">${[['master','Dari master'],['free','Teks bebas']].map(([k,l],i)=>`<label class="fchip"><input type="radio" name="dj_tm" value="${k}" ${i?'':'checked'} onchange="djTokoMode(this.value)" style="margin-right:6px">${l}</label>`).join('')}</div>
-      <div id="dj_tk_m">${sel(tk.map(t=>[t.name,t.name]),tk[0]?.name||'','',{label:'Toko',id:'dj_t'})}</div>
+      <div id="dj_tk_m">${sel(tk.map(t=>[t.name,t.name]),tk[0]?.name||'','djPrice()',{label:'Toko',id:'dj_t'})}</div>
       <div id="dj_tk_f" style="display:none"><span class="inp"><input id="dj_tf" placeholder="Nama toko, contoh: Warung Elektronik Bu Siti"></span></div></div>
     <div class="field"><span>Produk <b style="color:var(--danger)">*</b></span><div class="chips" role="radiogroup" aria-label="Sumber produk" style="margin-bottom:8px">${[['master','Dari master'],['free','Di luar master (teks bebas)']].map(([k,l],i)=>`<label class="fchip"><input type="radio" name="dj_pm" value="${k}" ${i?'':'checked'} onchange="djProdMode(this.value)" style="margin-right:6px">${l}</label>`).join('')}</div>
-      <div class="grid" style="gap:10px;grid-template-columns:1fr 90px"><div><div id="dj_p_m">${sel(PRODUCTS.map(p=>[p.id,p.name]),PRODUCTS[0].id,'djPrice()',{label:'Produk',id:'dj_p'})}</div><div id="dj_p_f" style="display:none"><span class="inp"><input id="dj_pf" placeholder="Nama produk, contoh: Setrika Uap Mini"></span></div></div><label class="field"><span class="sr-only">Jumlah</span><span class="inp"><input id="dj_q" inputmode="numeric" value="1" aria-label="Jumlah"></span></label></div>
+      <div class="grid" style="gap:10px;grid-template-columns:1fr 90px"><div><div id="dj_p_m">${sel(PRODUCTS.filter(p=>p.status!=='Nonaktif').map(p=>[p.id,p.name]),PRODUCTS[0].id,'djPrice()',{label:'Produk',id:'dj_p'})}</div><div id="dj_p_f" style="display:none"><span class="inp"><input id="dj_pf" placeholder="Nama produk, contoh: Setrika Uap Mini"></span></div></div><label class="field"><span class="sr-only">Jumlah</span><span class="inp"><input id="dj_q" inputmode="numeric" value="1" aria-label="Jumlah"></span></label></div>
       <p class="xs muted" style="margin-top:6px">Produk di luar master tetap tercatat sebagai penjualan dan masuk daftar Produk dari sales (sementara).</p></div>
     <label class="field"><span>Harga satuan (Rp) <b style="color:var(--danger)">*</b></span><span class="inp"><input id="dj_h" inputmode="numeric" value="${PRODUCTS[0].price}"></span></label>
     <label class="field"><span>Alasan input dari dashboard <b style="color:var(--danger)">*</b></span>${sel(DJ_ALASAN,DJ_ALASAN[0],'',{label:'Alasan',id:'dj_a'})}</label>
@@ -1792,7 +1792,7 @@ Object.assign(MD,{
   region:[{id:'rg1',name:'Jakarta',client:'cl1',cabang:['Jakarta Selatan','Jakarta Barat'],status:'Aktif'},{id:'rg2',name:'Banten',client:'cl4',cabang:['Tangerang'],status:'Aktif'}],
   brand:[{id:'b1',name:'ARUNIKA',client:'cl1',status:'Aktif'},{id:'b5',name:'KIRANA',client:'cl1',status:'Aktif'},{id:'b6',name:'NHA',client:'cl4',status:'Aktif'},{id:'b7',name:'VISTARA',client:'cl1',status:'Aktif'},{id:'b8',name:'MITRA KREDIT',client:'cl2',status:'Aktif'},{id:'b9',name:'MITRA DANA',client:'cl2',status:'Aktif'},{id:'b10',name:'MAJU TEX',client:'cl3',status:'Aktif'},{id:'b11',name:'SERAT PRIMA',client:'cl3',status:'Aktif'},{id:'b12',name:'NUSA COOL',client:'cl4',status:'Aktif'},{id:'b13',name:'NUSA KITCHEN',client:'cl4',status:'Aktif'},{id:'b14',name:'SAMUDRA',client:'cl5',status:'Aktif'},{id:'b15',name:'LAJU',client:'cl5',status:'Aktif'},{id:'b16',name:'SEGAR',client:'cl6',status:'Aktif'},{id:'b17',name:'GURIH NUSA',client:'cl6',status:'Aktif'},{id:'b18',name:'BERSIH',client:'cl6',status:'Aktif'},{id:'b19',name:'MULTIGUNA PLUS',client:'cl7',status:'Aktif'},{id:'b20',name:'AUTO PINJAM',client:'cl7',status:'Aktif'},{id:'b21',name:'DANA SIAGA',client:'cl7',status:'Aktif'}],
   kompetitor:[{id:'k1',name:'Samsung',client:'cl1',status:'Aktif'},{id:'k2',name:'LG',client:'cl1',status:'Aktif'},{id:'k3',name:'Polytron',client:'cl1',status:'Aktif'}],
-  katprod:[{id:'kp1',name:'TV',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp2',name:'Smart TV',brand:'ARUNIKA',parent:'TV',status:'Aktif'},{id:'kp3',name:'LED TV',brand:'ARUNIKA',parent:'TV',status:'Aktif'},{id:'kp4',name:'Kulkas',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp5',name:'2 Pintu',brand:'ARUNIKA',parent:'Kulkas',status:'Aktif'},{id:'kp6',name:'Mesin Cuci',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp7',name:'Top Load',brand:'ARUNIKA',parent:'Mesin Cuci',status:'Aktif'},{id:'kp8',name:'AC',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp9',name:'Air Purifier',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp10',name:'Small Appliances',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp11',name:'Google TV',brand:'ARUNIKA',parent:'Smart TV',status:'Aktif'},{id:'kp12',name:'Android TV',brand:'ARUNIKA',parent:'Smart TV',status:'Aktif'},{id:'kp13',name:'1 Pintu',brand:'ARUNIKA',parent:'Kulkas',status:'Aktif'},{id:'kp14',name:'Inverter',brand:'ARUNIKA',parent:'2 Pintu',status:'Aktif'},{id:'kp15',name:'Non inverter',brand:'ARUNIKA',parent:'2 Pintu',status:'Aktif'},{id:'kp16',name:'Front Load',brand:'ARUNIKA',parent:'Mesin Cuci',status:'Aktif'},{id:'kp17',name:'AC Inverter',brand:'ARUNIKA',parent:'AC',status:'Aktif'},{id:'kp18',name:'AC Standar',brand:'ARUNIKA',parent:'AC',status:'Aktif'},{id:'kp19',name:'Peralatan Dapur',brand:'KIRANA',parent:'',status:'Aktif'},{id:'kp20',name:'Rice Cooker',brand:'KIRANA',parent:'Peralatan Dapur',status:'Aktif'},{id:'kp21',name:'Blender',brand:'KIRANA',parent:'Peralatan Dapur',status:'Aktif'},{id:'kp22',name:'Dispenser',brand:'KIRANA',parent:'Peralatan Dapur',status:'Aktif'},{id:'kp23',name:'Perawatan Rumah',brand:'KIRANA',parent:'',status:'Aktif'},{id:'kp24',name:'Setrika',brand:'KIRANA',parent:'Perawatan Rumah',status:'Aktif'},{id:'kp25',name:'Kipas Angin',brand:'KIRANA',parent:'Perawatan Rumah',status:'Aktif'}],
+  katprod:[{id:'kp1',name:'TV',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp2',name:'Smart TV',brand:'ARUNIKA',parent:'TV',status:'Aktif'},{id:'kp3',name:'LED TV',brand:'ARUNIKA',parent:'TV',status:'Aktif'},{id:'kp4',name:'Kulkas',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp5',name:'2 Pintu',brand:'ARUNIKA',parent:'Kulkas',status:'Aktif'},{id:'kp6',name:'Mesin Cuci',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp7',name:'Top Load',brand:'ARUNIKA',parent:'Mesin Cuci',status:'Aktif'},{id:'kp8',name:'AC',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp9',name:'Air Purifier',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp10',name:'Small Appliances',brand:'ARUNIKA',parent:'',status:'Aktif'},{id:'kp11',name:'Google TV',brand:'ARUNIKA',parent:'Smart TV',status:'Aktif'},{id:'kp12',name:'Android TV',brand:'ARUNIKA',parent:'Smart TV',status:'Aktif'},{id:'kp13',name:'1 Pintu',brand:'ARUNIKA',parent:'Kulkas',status:'Aktif'},{id:'kp14',name:'Inverter',brand:'ARUNIKA',parent:'2 Pintu',status:'Aktif'},{id:'kp15',name:'Non inverter',brand:'ARUNIKA',parent:'2 Pintu',status:'Aktif'},{id:'kp16',name:'Front Load',brand:'ARUNIKA',parent:'Mesin Cuci',status:'Aktif'},{id:'kp17',name:'AC Inverter',brand:'ARUNIKA',parent:'AC',status:'Aktif'},{id:'kp18',name:'AC Standar',brand:'ARUNIKA',parent:'AC',status:'Aktif'},{id:'kp19',name:'Peralatan Dapur',brand:'KIRANA',parent:'Small Appliances',status:'Aktif'},{id:'kp20',name:'Rice Cooker',brand:'KIRANA',parent:'Peralatan Dapur',status:'Aktif'},{id:'kp21',name:'Blender',brand:'KIRANA',parent:'Peralatan Dapur',status:'Aktif'},{id:'kp22',name:'Dispenser',brand:'KIRANA',parent:'Peralatan Dapur',status:'Aktif'},{id:'kp23',name:'Perawatan Rumah',brand:'KIRANA',parent:'Small Appliances',status:'Aktif'},{id:'kp24',name:'Setrika',brand:'KIRANA',parent:'Perawatan Rumah',status:'Aktif'},{id:'kp25',name:'Kipas Angin',brand:'KIRANA',parent:'Perawatan Rumah',status:'Aktif'}],
   event:shRead('events',[{id:'ev1',name:'Pameran Elektronik Kota Kasablanka',lokasi:'Atrium Lt. 1',start:'2026-10-24',end:'2026-10-26',client:'cl1',cabang:'Jakarta Selatan',status:'Aktif'},{id:'ev2',name:'Bazar Akhir Tahun Alam Sutera',lokasi:'Plaza Utama',start:'2026-12-05',end:'2026-12-07',client:'cl1',cabang:'Tangerang',status:'Aktif'}]),
   statprod:[{id:'sp1',name:'Unit baru',code:'BARU',status:'Aktif'},{id:'sp2',name:'Unit display',code:'DISP',status:'Aktif'},{id:'sp3',name:'Cuci gudang',code:'CUGU',status:'Aktif'},{id:'sp4',name:'Bundling',code:'BNDL',status:'Aktif'}],
   satuan:[{id:'sa2',name:'Dus',code:'DUS',dipakai:40,status:'Aktif'},{id:'sa3',name:'Pack',code:'PAK',dipakai:3,status:'Aktif'},{id:'sa4',name:'Unit',code:'UNT',dipakai:0,status:'Aktif'},{id:'sa1',name:'Pcs',code:'PCS',dasar:true,dipakai:120,status:'Aktif'}],
@@ -2063,7 +2063,7 @@ let FORM=null;
 function multiTog(b,all){ b.classList.toggle('on'); const on=b.classList.contains('on'); b.setAttribute('aria-pressed',on); if(all&&on) b.parentElement.querySelectorAll('.fchip').forEach(x=>{ if(x!==b&&(b.dataset.v===all||x.dataset.v===all)){ x.classList.remove('on'); x.setAttribute('aria-pressed','false'); } }); }
 function fieldHTML(fd,r){
   const v=r[fd.k], t=((fd.lock&&r.id&&fd.lock(r))||(fd.roIf&&fd.roIf(r)))?'ro':(fd.type||'text'), id='f_'+fd.k;
-  const lab=`<span>${fd.label}${fd.req?' <b style="color:var(--danger)">*</b>':''}</span>`, hint=fd.hint?`<p class="xs muted" style="margin-top:6px">${fd.hint}</p>`:'', err=`<p class="ferr" id="e_${fd.k}"></p>`;
+  const lab=`<span>${fd.label}${fd.req?' <b style="color:var(--danger)">*</b>':''}</span>`, hint=(ht=>ht?`<p class="xs muted" style="margin-top:6px">${ht}</p>`:'')(typeof fd.hint==='function'?fd.hint(r):fd.hint), err=`<p class="ferr" id="e_${fd.k}"></p>`;
   const opts=()=>(typeof fd.opts==='function'?fd.opts():fd.opts).map(o=>Array.isArray(o)?o:[o,o]);
   let h;
   if(t==='ro') h=`<div class="field">${lab}<div class="tile" style="padding:11px 16px;color:var(--fg)">${esc(fd.fmt?fd.fmt(v,r):Array.isArray(v)?(v.map(tokoNm).join(', ')||'–'):(v||'–'))}</div>${hint}</div>`;
@@ -2529,18 +2529,32 @@ const SEKTOR=['Elektronik','FMCG','Kendaraan','Multi Finance','Tekstil','Lainnya
 const IND_SEKTOR={Elektronik:'Elektronik',FMCG:'FMCG',Otomotif:'Kendaraan',Perbankan:'Multi Finance','Multi Finance':'Multi Finance',Tekstil:'Tekstil'};
 const codeNext=(pre,arr)=>pre+'-'+String(arr.reduce((m,r)=>Math.max(m,+String(r.code||'').split('-')[1]||0),0)+1).padStart(4,'0');
 MD.produk=[]; MD.mapping=[];
-const mkProd=(name,sku,sektor)=>{ const r={id:'prd'+(MD.produk.length+1),name,sku,sektor,status:'Aktif'}; r.code=codeNext('MD',MD.produk); MD.produk.push(r); return r; };
+MD.katprod.push({id:'kp143',name:'Small Appliances',brand:'KIRANA',parent:'',cakupan:'Client',client:'cl1',share:'Ya',status:'Aktif'},{id:'kp140',name:'Telepon Seluler',brand:'',parent:'',cakupan:'General',share:'Ya',status:'Aktif'},{id:'kp141',name:'Smartphone',brand:'',parent:'Telepon Seluler',cakupan:'General',share:'Ya',status:'Aktif'},{id:'kp142',name:'Produk FMCG Umum',brand:'',parent:'',cakupan:'General',share:'Ya',status:'Aktif'});
+const mkProd=(name,sku,sektor,ex={})=>{ const r={id:ex.id||'prd'+(MD.produk.length+1),name,sku,sektor,kategori:ex.kategori||'',price:ex.price||0,lvl:ex.lvl||'C',inc:ex.inc||0,status:'Aktif'}; r.code=codeNext('MD',MD.produk); MD.produk.push(r); return r; };
 const mkMap=(produk,client,toko,harga)=>{ const r={id:'mpt'+(MD.mapping.length+1),produk,client,toko,harga,foto:'',status:'Aktif'}; r.code=codeNext('MPT',MD.mapping); MD.mapping.push(r); return r; };
-{ const flag=mkProd('Ponsel Flagship X Pro Max','PX-PM-256','Elektronik');
+{ const flag=mkProd('Ponsel Flagship X Pro Max','PX-PM-256','Elektronik',{kategori:'kp141',price:24999000,lvl:'A',inc:100000});
   mkMap(flag.id,'cl8','dg_a',24999000); mkMap(flag.id,'cl8','dg_b',25499000); mkMap(flag.id,'cl9','dg_c',24799000);
   const pmOf={}, all=ALL_PROD();
-  all.forEach(p=>{ pmOf[p.id]=mkProd(p.name,p.sku,p.cat==='FMCG'?'FMCG':IND_SEKTOR[(MD.client.find(c=>c.id===prodClient(p))||{}).ind]||'Lainnya').id; });
+  all.forEach(p=>{ const kt=MD.katprod.find(k=>k.cakupan==='Client'&&k.brand===p.brand&&k.name===(p.kp||p.cat))||MD.katprod.find(k=>k.brand===p.brand&&k.name===p.cat)||(p.cat==='FMCG'?{id:'kp142'}:{});
+    pmOf[p.id]=mkProd(p.name,p.sku,p.cat==='FMCG'?'FMCG':IND_SEKTOR[(MD.client.find(c=>c.id===prodClient(p))||{}).ind]||'Lainnya',{id:p.id,kategori:kt.id||'',price:p.price||0,lvl:p.lvl||'C',inc:p.inc||0}).id; });
   TOKO.forEach(t=>{ if(['dg_a','dg_b','dg_c'].includes(t.id)) return; const fk=catF()[t.cat]||1;
     outletMap(t.id).forEach(pid=>{ const p=all.find(x=>x.id===pid); if(p) mkMap(pmOf[pid],prodClient(p)||t.client,t.id,Math.round(p.price*fk/1000)*1000); }); }); }
+/* Kategori produk di master: jalur, level, dan jumlah level pohonnya. Laporan membaca PRODUCTS yang diturunkan dari master produk. */
+const katChain=k=>{ const c=[k]; let g=0; while(c[0].parent&&g++<30){ const up=katParentOf(c[0]); if(!up) break; c.unshift(up); } return c; };
+const katPathText=k=>katChain(k).map(x=>x.name).join(' › ');
+const katScope=k=>k.cakupan==='General'?'General':(k.brand||'Client');
+const katTreeLevels=k=>{ const root=katChain(k)[0]; return Math.max(1,...live('katprod').filter(x=>x.cakupan===root.cakupan&&x.brand===root.brand&&katChain(x)[0].id===root.id).map(katLevel)); };
+const pmKatInfo=id=>{ const k=MD.katprod.find(x=>x.id===id&&!x.del); if(!k) return 'Pilih kategori untuk melihat levelnya.'; return `<b class="fg">Level ${katLevel(k)}</b> · ${esc(katPathText(k))}. Pohon kategori ${esc(katChain(k)[0].name)} memiliki <b class="fg">${katTreeLevels(k)} level</b>.`; };
+function pmKatSync(){ const v=document.getElementById('f_kategori').value, el=document.getElementById('pm_kinfo'); if(el) el.innerHTML=pmKatInfo(v); }
+const katOpts=()=>[['','Pilih kategori'],...live('katprod').filter(k=>k.status==='Aktif').map(k=>[k.id,katScope(k)+' › '+katPathText(k)+' (Level '+katLevel(k)+')']).sort((a,b)=>a[1].localeCompare(b[1]))];
+function syncProducts(){ const fm=new Set(FM_PROD.map(x=>x.id)); PRODUCTS.length=0;
+  live('produk').filter(m=>!fm.has(m.id)).forEach(m=>{ const k=MD.katprod.find(x=>x.id===m.kategori)||{}; PRODUCTS.push({id:m.id,name:m.name,sku:m.sku||'–',cat:k.name?katChain(k)[0].name:'–',price:m.price||0,lvl:m.lvl||'C',inc:m.inc||0,brand:k.brand||'',kp:k.parent?k.name:'',sektor:m.sektor,status:m.status}); }); }
+const priceAt=(pid,tokoId)=>{ const m=MD.mapping.find(x=>!x.del&&x.status==='Aktif'&&x.produk===pid&&x.toko===tokoId); return m?m.harga:((PRODUCTS.find(p=>p.id===pid)||{}).price||0); };
 const pmOne=id=>MD.produk.find(p=>p.id===id)||{};
 const pmName=id=>pmOne(id).name||'–', pmCode=id=>pmOne(id).code||'–';
 const mptState=()=>{ const rec=FORM&&FORM.id?MD.mapping.find(m=>m.id===FORM.id):null, pre=(FORM&&FORM.prefill)||{}; return rec?{cl:rec.client,pm:rec.produk}:{cl:pre.client||'',pm:''}; };
 const mptTokoOpts=cl=>cl?[['','Pilih toko'],...live('toko').filter(t=>t.status==='Aktif'&&tokoClients(t).includes(cl)).map(t=>[t.id,t.name])]:[['','Pilih client dulu']];
+function mptPick(){ const h=document.getElementById('f_harga'), id=document.getElementById('f_produk').value, m=pmOne(id); if(h&&!h.value.trim()&&m.price) h.value=String(m.price); }
 function mptSync(){ const c=document.getElementById('f_client').value, t=document.getElementById('f_toko'); t.innerHTML=mptTokoOpts(c).map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join(''); }
 let MPT_FOTO='';
 const mptFotoHTML=()=>MPT_FOTO?`<div style="display:flex;gap:12px;align-items:center"><img src="${MPT_FOTO}" alt="Foto produk" style="width:72px;height:72px;object-fit:cover;border-radius:14px;border:1px solid var(--line)">${btn('Ganti foto',{v:'soft',size:'sm',attrs:'type="button"',on:"document.getElementById('mp_file').click()"})}${btn('Hapus foto',{v:'soft',size:'sm',attrs:'type="button"',on:'mptFotoClear()'})}</div>`:btn('Pilih foto',{v:'soft',size:'sm',icon:'up',attrs:'type="button"',on:"document.getElementById('mp_file').click()"});
@@ -2548,16 +2562,21 @@ function mptFotoPick(inp){ const f=inp.files&&inp.files[0]; if(!f) return; if(!/
   const rd=new FileReader(); rd.onload=()=>{ MPT_FOTO=rd.result; document.getElementById('mp_fwrap').innerHTML=mptFotoHTML(); }; rd.readAsDataURL(f); }
 function mptFotoClear(){ MPT_FOTO=''; document.getElementById('mp_fwrap').innerHTML=mptFotoHTML(); }
 Object.assign(ENT,{
-  produkm:{src:'produk',label:'Produk',lower:'produk',plural:'Master produk',prefix:'prd',store:()=>MD.produk,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code+(r.sku||'')+r.sektor,unique:'name',filter:(r,q)=>!q.sk||r.sektor===q.sk,blank:()=>({sektor:'Elektronik'}),
+  produkm:{src:'produk',label:'Produk',lower:'produk',plural:'Master produk',prefix:'prd',store:()=>MD.produk,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code+(r.sku||'')+r.sektor+katPathText(MD.katprod.find(k=>k.id===r.kategori)||{name:'',parent:''}),unique:'name',filter:(r,q)=>!q.sk||r.sektor===q.sk,blank:()=>({sektor:'Elektronik',lvl:'C',inc:0}),
     afterCreate:rec=>{ rec.code=codeNext('MD',MD.produk.filter(x=>x!==rec)); },
-    fields:[{k:'code',label:'ID produk',type:'ro',hint:'Dibuat otomatis saat disimpan'},{k:'name',label:'Nama produk',req:true,ph:'contoh: Ponsel Flagship X Pro Max',hint:'Satu produk hanya satu baris di master. Client, toko, harga, dan foto diatur di Mapping produk toko'},{k:'sku',label:'SKU atau model (opsional)'},{k:'sektor',label:'Sektor',type:'select',req:true,opts:SEKTOR}],
-    cols:[{label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.code)}</span>`,prim:true},{label:'Sektor',render:r=>tag(r.sektor,r.sektor==='Elektronik'?'info':r.sektor==='FMCG'?'accent':'neutral')},{label:'SKU',render:r=>esc(r.sku||'–'),hide:true},
+    fields:[{k:'code',label:'ID produk',type:'ro',hint:'Dibuat otomatis saat disimpan'},{k:'name',label:'Nama produk',req:true,ph:'contoh: Ponsel Flagship X Pro Max',hint:'Satu produk hanya satu baris di master. Client, toko, harga toko, dan foto diatur di Mapping produk toko'},{k:'sku',label:'SKU atau model (opsional)'},{k:'sektor',label:'Sektor',type:'select',req:true,opts:SEKTOR},
+      {k:'kategori',label:'Kategori produk',type:'select',req:true,opts:katOpts,onchange:'pmKatSync()',hint:r=>`<span id="pm_kinfo">${pmKatInfo(r.kategori)}</span>`},
+      {k:'price',label:'Harga dasar (Rp)',type:'number',req:true,validate:v=>!(v>0)?'Isi harga lebih dari nol':'',hint:'Acuan laporan dan harga awal saat produk dipetakan ke toko'},
+      {k:'lvl',label:'Level insentif',type:'select',opts:['A','B','C'],hint:'Dipakai laporan insentif dan grading'},{k:'inc',label:'Insentif per unit (Rp)',type:'number',hint:'Boleh 0'}],
+    cols:[{label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.code)}</span>`,prim:true},{label:'Sektor',render:r=>tag(r.sektor,r.sektor==='Elektronik'?'info':r.sektor==='FMCG'?'accent':'neutral')},
+      {label:'Kategori',render:r=>{ const k=MD.katprod.find(x=>x.id===r.kategori); return k?`<span class="fg">${esc(k.name)}</span><span class="xs muted" style="display:block">Level ${katLevel(k)} dari ${katTreeLevels(k)} · ${esc(katScope(k))}</span>`:'<span class="muted">–</span>'; }},
+      {label:'Harga dasar',render:r=>`<span class="tabular">${rp(r.price||0)}</span>`,align:'r',hide:true},{label:'SKU',render:r=>esc(r.sku||'–'),hide:true},
       {label:'Dipetakan',render:r=>live('mapping').filter(m=>m.produk===r.id).length+' toko',align:'r'},{label:'Status',render:r=>stPill(r.status)}],
-    inUse:r=>{ const n=live('mapping').filter(m=>m.produk===r.id).length; return n?`Produk ini dipetakan di ${n} toko. Hapus mappingnya dulu, atau nonaktifkan produk.`:''; }},
+    inUse:r=>{ const n=live('mapping').filter(m=>m.produk===r.id).length, t=appTrx().filter(x=>x.p===r.id).length; return n||t?`Produk ini dipetakan di ${n} toko dan dipakai ${t} transaksi aplikasi. Hapus mappingnya dulu, atau nonaktifkan produk.`:''; }},
   mpt:{src:'mapping',label:'Mapping',lower:'mapping produk toko',plural:'Mapping produk toko',prefix:'mpt',store:()=>MD.mapping,title:r=>pmName(r.produk)+' · '+tokoName(r.toko),code:r=>r.code,search:r=>r.code+pmName(r.produk)+pmCode(r.produk)+clientName(r.client)+tokoName(r.toko),filter:(r,q)=>(!q.cl||r.client===q.cl)&&(!q.tk||r.toko===q.tk),blank:()=>({}),
     afterCreate:rec=>{ rec.code=codeNext('MPT',MD.mapping.filter(x=>x!==rec)); },
     fields:[{k:'code',label:'ID mapping',type:'ro',hint:'Dibuat otomatis saat disimpan'},
-      {k:'produk',label:'Produk',type:'select',req:true,opts:()=>[['','Pilih produk'],...live('produk').filter(p=>p.status==='Aktif'||p.id===mptState().pm).map(p=>[p.id,p.code+' · '+p.name])],hint:'Dari master produk'},
+      {k:'produk',label:'Produk',type:'select',req:true,opts:()=>[['','Pilih produk'],...live('produk').filter(p=>p.status==='Aktif'||p.id===mptState().pm).map(p=>[p.id,p.code+' · '+p.name])],onchange:'mptPick()',hint:'Dari master produk'},
       {k:'client',label:'Client',type:'select',req:true,opts:()=>[['','Pilih client'],...live('client').filter(c=>c.status==='Aktif'||c.id===mptState().cl).map(c=>[c.id,c.name])],onchange:'mptSync()'},
       {k:'toko',label:'Toko',type:'select',req:true,opts:()=>mptTokoOpts(mptState().cl),hint:'Toko dari client yang dipilih'},
       {k:'harga',label:'Harga (Rp)',type:'number',req:true,validate:v=>!(v>0)?'Isi harga lebih dari nol':''}],
@@ -2599,7 +2618,7 @@ function pageProduk(q){
 function prTab(t){ setQ({tab:t,q:'',st:'',cl:'',tk:'',sk:''}); }
 /* Produk teks bebas dari sales → master Produk & harga (konfirmasi klien 10 Nov). */
 const brandClient=name=>MD.brand.find(b=>!b.del&&b.name===name)?.client||'';
-const katInUse=r=>{ const n=live('katprod').filter(k=>k.parent===r.name).length, p=PRODUCTS.filter(x=>x.cat===r.name||x.sub===r.name).length; return n||p?`Kategori ini dipakai ${n} sub kategori dan ${p} produk. Pindahkan dulu, atau nonaktifkan kategori.`:''; };
+const katInUse=r=>{ const n=live('katprod').filter(k=>k.parent===r.name).length, p=live('produk').filter(x=>x.kategori===r.id).length; return n||p?`Kategori ini dipakai ${n} sub kategori dan ${p} produk. Pindahkan dulu, atau nonaktifkan kategori.`:''; };
 const katcState=()=>{ const rec=FORM&&FORM.id?MD.katprod.find(k=>k.id===FORM.id):null, pre=(FORM&&FORM.prefill)||{}; return rec?{cl:brandClient(rec.brand),br:rec.brand}:{cl:pre.client||'',br:pre.brand||''}; };
 const katcBrandOpts=cl=>{ const b=live('brand').filter(x=>x.status==='Aktif'&&x.client===cl).map(x=>x.name); return b.length?b:[['','Belum ada brand']]; };
 const katcParentOpts=br=>[['','—'],...live('katprod').filter(k=>k.cakupan==='Client'&&k.brand===br&&k.id!==(FORM&&FORM.id)).map(k=>k.name)];
@@ -2625,7 +2644,7 @@ function prodTempSave(id){ const x=D.prodTemp.find(a=>a.id===id), g=k=>document.
   if(!name||!sku){ e.textContent='Isi nama produk dan SKU.'; return; } if(!kp){ e.textContent='Brand ini belum punya kategori produk.'; return; }
   if(!(price>0)){ e.textContent='Isi harga dasar lebih dari nol.'; return; }
   if(PRODUCTS.some(p=>p.sku===sku)){ e.textContent='SKU sudah dipakai produk lain.'; return; }
-  const pid='pm'+Date.now()%1e6; PRODUCTS.push({id:pid,name,sku,cat:katRoot(brand,kp),price,lvl:g('pt_l').value,inc:0,brand,kp}); x.master=pid; mkProd(name,sku,IND_SEKTOR[(MD.client.find(c=>c.id===brandClient(brand))||{}).ind]||'Lainnya');
+  const kat=MD.katprod.find(k=>k.brand===brand&&k.name===kp), pm=mkProd(name,sku,IND_SEKTOR[(MD.client.find(c=>c.id===brandClient(brand))||{}).ind]||'Lainnya',{kategori:kat?kat.id:'',price,lvl:g('pt_l').value,inc:0}); x.master=pm.id;
   audit('Menjadikan produk '+name+' sebagai master (dari input sales)'); closeLayer(); render(false); toast('Produk masuk master',name+' · '+sku+'. Bisa dipilih sales di aplikasi.'); }
 const FACING_DEFAULT=[{id:'fc1',name:'Rak Utama',kind:'Facing display',acuan:'Susunan facing di rak utama sesuai brief'},{id:'fc2',name:'Boot',kind:'Facing display',acuan:'Susunan facing di boot sesuai brief'},{id:'fc3',name:'Gudang',kind:'Facing display',acuan:'Susunan barang di gudang sesuai brief'}];
 const facingAll=()=>shRead('facing',FACING_DEFAULT).filter(x=>!x.del);
