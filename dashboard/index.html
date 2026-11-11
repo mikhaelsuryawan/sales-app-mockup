@@ -253,6 +253,7 @@ main{flex:1;min-height:0;overflow-y:auto;padding:2px 2px 8px;outline:none;positi
 .spin{animation:spin .8s linear infinite} @keyframes spin{to{transform:rotate(360deg)}}
 .row-acts{display:flex;gap:6px;justify-content:flex-end;flex-wrap:nowrap}
 .tbl td.acts-c{width:1%;white-space:nowrap}
+.btn.blocked{pointer-events:auto;cursor:not-allowed}
 .btn.b-ghost.danger-i{color:var(--danger)} .btn.b-ghost.danger-i:hover{background:var(--danger-soft)}
 .bell{position:relative}
 .bell i{position:absolute;top:-4px;right:-4px;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:var(--accent-strong);color:#fff;font-style:normal;font-size:10.5px;font-weight:700;display:grid;place-items:center;box-shadow:0 0 0 2px var(--canvas)}
@@ -913,7 +914,8 @@ const delta=(v,goodUp=true)=>{const good=goodUp?v>=0:v<0;return `<span class="de
 /* nilai angka: tone mengikuti angka (nol = baik, ada = perlu perhatian) */
 const toneNum=(n,{warnAt=Infinity,dangerAt=Infinity,okTone='success'}={})=>n>=dangerAt?'danger':n>=warnAt?'warning':n>0?'warning':okTone;
 
-const btn=(label,{v='card',size='',icon=null,on='',attrs='',dis=false,href='',loading=false,full=false}={})=>{
+const btn=(label,{v='card',size='',icon=null,on='',attrs='',dis=false,href='',loading=false,full=false,perm=''}={})=>{
+  if(perm&&!can(perm)) return '';
   const cls=`btn b-${v} ${size} ${full?'full':''}`, ic=loading?I('loader',16).replace('<svg','<svg class="spin"'):icon?I(icon,16):'', inner=ic+label;
   if(href) return `<a class="${cls}" href="${href}" ${attrs}>${inner}</a>`;
   return `<button type="button" class="${cls}" ${on?`onclick="${on}"`:''} ${attrs} ${(dis||loading)?'disabled':''} ${loading?'aria-busy="true"':''}>${inner}</button>`;
@@ -932,7 +934,7 @@ const swc=(on,fn,label,{sm=false,dis=false}={})=>`<button type="button" class="s
 const progressBar=(v,{tone='',size='',label='',caption=''}={})=>{ const p=Math.max(0,Math.min(100,Math.round(v))); return `<div class="bar ${size}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p}" aria-valuetext="${p}%" ${label?`aria-label="${esc(label)}"`:''}><i class="${tone?'t-'+tone:''}" style="width:${p}%"></i></div>${caption?`<div class="bar-cap">${caption}</div>`:''}`; };
 const SEG_COLORS=['var(--fg)','var(--info)','var(--accent-strong)','var(--warning)','var(--success)','var(--chart-muted)'];
 const segmentBar=(segs,{legend=true,size='',label=''}={})=>{ const tot=segs.reduce((a,s)=>a+s.value,0); return `<div class="segbar ${size}" role="img" aria-label="${esc(label||segs.map(s=>s.label+': '+s.value).join(', '))}">${segs.filter(s=>s.value>0).map((s,i)=>`<i style="flex-grow:${s.value};background:${s.color||SEG_COLORS[i%6]}" title="${esc(s.label)}: ${s.value}"></i>`).join('')}</div>${legend?`<div class="segleg">${segs.map((s,i)=>`<span><i class="dotc" style="background:${s.color||SEG_COLORS[i%6]}"></i>${s.label} <b class="fg tabular">${s.value}</b></span>`).join('')}</div>`:''}`; };
-const rowActs=(editOn,delOn,{del=true,edit=true,block=''}={})=>`${edit?ibtn('edit','Edit',editOn,{size:'icon-sm'}):''}${del?`<button type="button" class="btn b-ghost icon-sm danger-i" aria-label="Hapus" data-tip="${esc(block||'Hapus')}" ${block?'aria-disabled="true"':''} onclick="${delOn}">${I('trash',16)}</button>`:''}`;
+const rowActs=(editOn,delOn,{del=true,edit=true,block=''}={})=>{ const why=String(block||'').replace(/<[^>]+>/g,''); return `${edit?ibtn('edit','Ubah',editOn,{size:'icon-sm'}):''}${del?`<button type="button" class="btn b-ghost icon-sm danger-i ${block?'blocked':''}" aria-label="Hapus${why?`, tidak bisa: ${esc(why)}`:''}" data-tip="${esc(why?'Tidak bisa dihapus: '+why:'Hapus')}" ${block?'aria-disabled="true"':''} onclick="${delOn}">${I('trash',16)}</button>`:''}`; };
 const card=(title,body,{acts='',cls='',icon='',desc='',count=0}={})=>`<section class="card ${cls}">${title?`<div class="ch"><div><h2>${icon?I(icon,18):''}${title}${countBadge(count)}</h2>${desc?`<p class="d">${desc}</p>`:''}</div>${acts?`<div class="acts">${acts}</div>`:''}</div>`:''}${body}</section>`;
 const BICON={info:'bulb',warning:'alert',danger:'alert',success:'check',accent:'bulb',neutral:'bulb'};
 const banner=({tone='info',title='',body='',icon,actions='',dismiss=false,raw='',cls=''}={})=>`<div class="banner ${tone} ${cls}" role="${tone==='danger'?'alert':'status'}"><span class="bi">${I(icon||BICON[tone],16)}</span><div class="bt">${raw||`${title?`<b>${title}</b>`:''}${body?`<p>${body}</p>`:''}`}</div>${actions?`<div class="ba">${actions}</div>`:''}${dismiss?ibtn('x','Tutup',"this.closest('.banner').remove()",{size:'icon-sm'}):''}</div>`;
@@ -1629,7 +1631,20 @@ const NAV=[
   ['Pengaturan aplikasi',[['/konfigurasi-aktivitas','Aktivitas per role','sliders'],['/form-penjualan','Form penjualan','checks'],['/parameter','Parameter','sliders']]],
   ['Sistem',[['/pengaturan','Pengaturan','settings']]]
 ];
-const ME={name:'Dewi Kartika',role:'Admin SIM',email:'dewi.k@sim.co.id'};
+/* Sesi demo dan izin. Penjaga di UI hanya kenyamanan: backend yang memutuskan izin sebenarnya. Role Supervisor berlabel Usulan. */
+const ACCOUNTS=[{id:'dewi',user:'dewi.kartika',name:'Dewi Kartika',role:'Admin SIM',key:'admin',email:'dewi.k@sim.co.id'},{id:'rudi',user:'rudi.hartono',name:'Rudi Hartono',role:'Supervisor',key:'spv',email:'rudi.h@sim.co.id'}];
+const PERMS={admin:['*'],spv:['approval.decide','leads.assign','visit.create','info.create','order.create','sales.input']};
+const SESSION_KEY='salesapp.dashboard.session';
+let ME=ACCOUNTS[0], AUTHED=false;
+const can=perm=>{ const p=PERMS[ME.key]||[]; return p.includes('*')||p.includes(perm); };
+function loadSession(){ try{ const a=ACCOUNTS.find(x=>x.id===JSON.parse(localStorage.getItem(SESSION_KEY)||'{}').id); if(a){ ME=a; AUTHED=true; } }catch(e){} }
+function startSession(a){ ME=a; AUTHED=true; store.set(SESSION_KEY,JSON.stringify({id:a.id})); }
+function doLogin(f){ const u=f.u.value.trim().toLowerCase(), a=ACCOUNTS.find(x=>x.user===u); if(!u||!f.p.value){ toast('Isi username dan password','Keduanya wajib diisi.','danger'); return; } if(!a){ toast('Username tidak dikenal','Pakai akun demo yang tersedia di halaman ini.','danger'); return; } startSession(a); toast('Berhasil masuk','Selamat datang, '+a.name.split(' ')[0]+'.'); const to=ST.from||'/'; ST.from=''; go(to); }
+function loginAs(id){ const a=ACCOUNTS.find(x=>x.id===id); startSession(a); toast('Berhasil masuk','Selamat datang, '+a.name.split(' ')[0]+'.'); const to=ST.from||'/'; ST.from=''; go(to); }
+function logout(){ AUTHED=false; try{ localStorage.removeItem(SESSION_KEY); }catch(e){} closePops(); if(layerOpen()) closeLayerCore(); logout(); }
+function switchAccount(id){ const a=ACCOUNTS.find(x=>x.id===id); startSession(a); closeLayer(); toast('Akun diganti',a.name+' · '+a.role+'. Menu menyesuaikan hak akses.','default'); render(false); }
+function accountPick(){ openModal(`<h2 class="pt">Ganti akun demo</h2><p class="dlg-d">Tiap akun memakai hak akses berbeda. Penjaga di layar hanya kenyamanan; izin sebenarnya diputuskan backend.</p><div class="dlg-b rows">${ACCOUNTS.map(a=>`<button type="button" class="rowlink lr" onclick="switchAccount('${a.id}')">${av(a.name,'md')}<span style="flex:1;min-width:0"><span class="t">${a.name}</span><span class="m">${a.role}${a.key==='spv'?' · Usulan':''}</span></span>${a.id===ME.id?`<span style="color:var(--accent-strong)">${I('check',16,2.4)}</span>`:''}</button>`).join('')}</div>`,{size:448}); }
+function noAccess(){ toast('Tidak punya akses','Tindakan ini hanya untuk Admin SIM.','danger'); }
 const counts=()=>({approval:D.approvals.length,leads:D.leads.filter(l=>!l.owner).length,overdue:D.overdue.length,usulan:D.usulan.filter(u=>u.status==='Menunggu verifikasi').length});
 const secCount=items=>{ const c=counts(); return items.reduce((a,it)=>a+(it[3]?c[it[3]]||0:0),0); };
 /* Satu sumber NAV untuk rail, tab seksi, bar bawah, sheet More, dan judul header */
@@ -1664,13 +1679,13 @@ const popSide=where=>where==='rail'?{right:false,cls:'pop-rt'}:{right:true,cls:'
 
 /* ---------- Menu Buat: hanya alur buat yang sudah ada ---------- */
 const createItems=()=>[
-  {label:'Pesanan baru',desc:'Catat pesanan dealer',icon:'file',on:'ordForm()'},
-  {label:'Input penjualan',desc:'Catat transaksi dari dashboard',icon:'chart',on:'djForm()'},
-  {label:'Jadwal kunjungan',desc:'Atur kunjungan sales ke toko',icon:'cal',on:'visForm()'},
-  {label:'Promo baru',desc:'Ajukan promo untuk approval',icon:'tag',on:'promoForm()'},
-  {label:'Pengumuman',desc:'Kirim info ke sales lapangan',icon:'bell',on:'infoForm()'},
-  {label:'Toko baru',desc:'Tambah toko ke master data',icon:'store',on:"openForm('toko')"}
-].filter(Boolean);
+  {perm:'order.create',label:'Pesanan baru',desc:'Catat pesanan dealer',icon:'file',on:'ordForm()'},
+  {perm:'sales.input',label:'Input penjualan',desc:'Catat transaksi dari dashboard',icon:'chart',on:'djForm()'},
+  {perm:'visit.create',label:'Jadwal kunjungan',desc:'Atur kunjungan sales ke toko',icon:'cal',on:'visForm()'},
+  {perm:'promo.create',label:'Promo baru',desc:'Ajukan promo untuk approval',icon:'tag',on:'promoForm()'},
+  {perm:'info.create',label:'Pengumuman',desc:'Kirim info ke sales lapangan',icon:'bell',on:'infoForm()'},
+  {perm:'master.edit',label:'Toko baru',desc:'Tambah toko ke master data',icon:'store',on:"openForm('toko')"}
+].filter(i=>can(i.perm));
 function openCreate(el,where){ const items=createItems(); if(!items.length) return; const pos=popSide(where||'header'); openPop(el,menuItems([{header:'Buat'},...items]),{...pos,title:'Buat'}); }
 
 /* ---------- Pencarian global ---------- */
@@ -1718,8 +1733,8 @@ function notifOpen(i){ const n=notifItems()[i]; if(!n) return; const r=readSet()
 function notifReadAll(){ const r=readSet(); notifItems().forEach(n=>r.add(n.id)); store.set(readKey(),JSON.stringify([...r])); closePops(); if(layerOpen()) closeLayerCore(); render(false); }
 
 /* ---------- Menu pengguna dan workspace ---------- */
-function userPop(el){ openPop(el,`<div style="display:flex;gap:10px;align-items:center;padding:8px 12px 10px">${av(ME.name,'md')}<div style="min-width:0"><b class="fg sm" style="display:block">${ME.name}</b><span class="xs muted">${ME.role} · ${ME.email}</span></div></div>`+menuItems(['-',{label:'Pengaturan',icon:'settings',href:'#/pengaturan'},{label:ST.theme==='dark'?'Tema terang':'Tema gelap',icon:ST.theme==='dark'?'sun':'moon',on:'setTheme()'},{label:'Aplikasi mobile sales',icon:'mobile',href:'../mobile/'},'-',{label:'Keluar',icon:'logout',on:"go('/login')"}]),{title:ME.name}); }
-function wsPop(el){ const col=el.closest('.sidebar')?.classList.contains('collapsed'); openPop(el,menuItems([{header:'Pindah workspace'},...wsList().map(([k,l])=>({label:`<span style="display:flex;align-items:center;gap:8px">${l}${ST.ws===k?`<span style="margin-left:auto;color:var(--accent-strong)">${I('check',16,2.4)}</span>`:''}</span>`,icon:k==='all'?'dash':'store',on:`ST.ws='${k}';toast('Workspace diganti','Menampilkan ${l}. Data mockup tetap sama.');render(false)`})),'-',{label:'Aplikasi mobile sales',icon:'mobile',href:'../mobile/'},{label:'Keluar',icon:'logout',on:"go('/login')"}]),{right:false,cls:col?'pop-rt':'pop-top',title:'Workspace'}); }
+function userPop(el){ openPop(el,`<div style="display:flex;gap:10px;align-items:center;padding:8px 12px 10px">${av(ME.name,'md')}<div style="min-width:0"><b class="fg sm" style="display:block">${ME.name}</b><span class="xs muted">${ME.role} · ${ME.email}</span></div></div>`+menuItems(['-',{label:'Pengaturan',icon:'settings',href:'#/pengaturan'},{label:ST.theme==='dark'?'Tema terang':'Tema gelap',icon:ST.theme==='dark'?'sun':'moon',on:'setTheme()'},{label:'Ganti akun demo',icon:'users',on:'accountPick()'},{label:'Aplikasi mobile sales',icon:'mobile',href:'../mobile/'},'-',{label:'Keluar',icon:'logout',on:"logout()"}]),{title:ME.name}); }
+function wsPop(el){ const col=el.closest('.sidebar')?.classList.contains('collapsed'); openPop(el,menuItems([{header:'Pindah workspace'},...wsList().map(([k,l])=>({label:`<span style="display:flex;align-items:center;gap:8px">${l}${ST.ws===k?`<span style="margin-left:auto;color:var(--accent-strong)">${I('check',16,2.4)}</span>`:''}</span>`,icon:k==='all'?'dash':'store',on:`ST.ws='${k}';toast('Workspace diganti','Menampilkan ${l}. Data mockup tetap sama.');render(false)`})),'-',{label:'Aplikasi mobile sales',icon:'mobile',href:'../mobile/'},{label:'Keluar',icon:'logout',on:"logout()"}]),{right:false,cls:col?'pop-rt':'pop-top',title:'Workspace'}); }
 
 /* ---------- Tab seksi (di bawah 1280px atau saat rail diciutkan) ---------- */
 function secTabs(path){ const l=leafOf(path); if(l.items.length<2||l.it[0]!==path) return ''; const c=counts();
@@ -1740,7 +1755,7 @@ function openMore(){
   mountLayer(`<div class="overlay" onclick="closeLayer()"></div><div class="drawer" role="dialog" aria-modal="true" aria-label="Semua halaman" tabindex="-1"><h2 class="sr-only">Semua halaman</h2>
     <div class="mr-s"><label class="mr-in">${I('search',16)}<input type="search" placeholder="Cari halaman" autocomplete="off" oninput="moreFilter(this.value)" aria-label="Cari halaman"></label></div>
     <div class="mr-b" id="more-body"></div>
-    <div class="mr-f">${av(ME.name,'md')}<span style="flex:1;min-width:0"><b class="mr-n">${ME.name}</b><small>${ME.role}</small></span>${btn('Keluar',{v:'onink',size:'sm',on:"closeLayer();go('/login')"})}</div></div>`,'.drawer');
+    <div class="mr-f">${av(ME.name,'md')}<span style="flex:1;min-width:0"><b class="mr-n">${ME.name}</b><small>${ME.role}</small></span>${btn('Keluar',{v:'onink',size:'sm',on:"closeLayer();logout()"})}</div></div>`,'.drawer');
   drawMore(); document.querySelector('.bb-more')?.classList.add('on');
 }
 function moreFilter(v){ MORE.q=v; drawMore(); }
@@ -1774,6 +1789,7 @@ function render(scrollTop=true){
   syncProducts(); refreshDerived(); syncApp();
   const {path,q}=parse(); const app=$('#app');
   if(path==='/login'){ app.innerHTML=pageLogin(); lastPath=path; return; }
+  if(!AUTHED){ ST.from=location.hash.slice(1)||'/'; location.replace('#/login'); return; }
   const page=(ROUTES[path]||pageNotFound)(q);
   if(ST.sidebar===null){ const s=store.get(KEY.rail,null,'sim-sidebar'); ST.sidebar=s===null?true:s==='1'; }
   const railCollapsed=!ST.sidebar||innerWidth<1280;
@@ -1812,10 +1828,10 @@ function pageLogin(){
     <div style="background:#fff;border-radius:16px;padding:10px 14px;display:inline-flex;width:max-content;position:relative"><img src="${LOGO}" alt="SIMGROUP" style="height:34px"></div>
     <div><h2>Sales Console<span style="color:#F6C29C">.</span></h2><p>Pantau absensi, penjualan, leads pinjaman, dan insentif tim lapangan SIM dalam satu tempat.</p></div>
     <p class="xs" style="opacity:.7">PT Swakarya Insan Mandiri · Data pegawai tersinkron dari SIM (BPR1)</p></div>
-  <div class="login-form"><form class="card" onsubmit="event.preventDefault();go('/');toast('Berhasil masuk','Selamat datang, Dewi.')">
+  <div class="login-form"><form class="card" onsubmit="event.preventDefault();doLogin(this)">
     <h1 class="pt" style="font-size:26px">Masuk<i>.</i></h1><p class="muted" style="margin:6px 0 20px">Gunakan akun pegawai SIMGROUP.</p>
-    <label class="field" style="margin-bottom:14px"><span>Username</span><span class="inp">${I('users',16)}<input value="dewi.kartika" autocomplete="username"></span></label>
-    <label class="field" style="margin-bottom:8px"><span>Password</span><span class="inp">${I('settings',16)}<input type="password" value="sim12345" autocomplete="current-password"></span></label>
+    <label class="field" style="margin-bottom:14px"><span>Username</span><span class="inp">${I('users',16)}<input name="u" value="dewi.kartika" autocomplete="username"></span></label>
+    <label class="field" style="margin-bottom:8px"><span>Password</span><span class="inp">${I('settings',16)}<input name="p" type="password" value="sim12345" autocomplete="current-password"></span></label>
     <div style="text-align:right;margin-bottom:18px"><button type="button" class="xs" style="color:var(--accent-text);font-weight:600" onclick="toast('Link reset terkirim','Cek email yang terdaftar di data pegawai SIM.')">Lupa password?</button></div>
     <button class="btn b-accent" style="width:100%" type="submit">Masuk</button>
     <p class="xs muted" style="margin-top:16px;text-align:center">Hak akses mengikuti role: Admin SIM melihat semua klien, Supervisor hanya timnya.</p>
@@ -1969,9 +1985,16 @@ function ordPanel(id){ const o=MD.order.find(x=>x.id===id), tot=ordTotal(o), st=
   <div class="steps">${[['Pesanan dibuat',o.date+' · '+byU(o.u).name,'done'],['Dikirim','',['Dikirim','Lunas'].includes(st)?'done':'up'],['Pembayaran lunas','',st==='Lunas'?'done':st==='Dikirim'?'cur':'up']].map(([t,sub,k])=>`<div class="step"><span class="sd ${k==='done'?'done':k==='cur'?'cur':'up'}"></span><span><b class="fg sm">${t}</b>${sub?`<span class="xs muted" style="display:block">${sub}</span>`:''}</span></div>`).join('')}</div>
   ${st==='Menunggu batal'?callout('Sales mengajukan pembatalan. Persetujuan ada di menu Approval (BRD 2.15.3).'):''}${st==='Dibatalkan'?callout('Pesanan dibatalkan dan tidak dihitung di pencapaian target sales.'):''}`,
   st==='Menunggu batal'?btn('Buka approval',{v:'accent',on:"closeLayer();go('/approval?type=Batal pesanan')"}):`${st==='Dibuat'?btn('Ajukan batal',{v:'danger',on:`ordCancel('${id}')`}):''}<span style="flex:1"></span>${btn('Tutup',{v:'card',on:'closeLayer()'})}${ORD_NEXT[st]?btn('Tandai '+ORD_NEXT[st].toLowerCase(),{v:'accent',on:`ordAdvance('${id}')`}):''}`,{sub:'Pesanan (taking order)'}); }
-function ordAdvance(id){ const o=MD.order.find(x=>x.id===id); o.st=ORD_NEXT[o.st]; audit('Mengubah status pesanan '+o.id+' menjadi '+o.st); closeLayer(); render(false); toast('Status pesanan diperbarui',o.id+' kini '+o.st.toLowerCase()+'.'); }
-function ordCancel(id){ const o=MD.order.find(x=>x.id===id); o.st='Menunggu batal'; D.approvals.unshift({id:newId('ap'),type:'Batal pesanan',u:o.u,ref:o.id,detail:o.id+' · '+tokoName(o.toko)+' · '+rp(ordTotal(o)),reason:'Pengajuan dari dashboard',when:'26 Okt, '+new Date().toTimeString().slice(0,5)}); audit('Mengajukan batal pesanan '+o.id); closeLayer(); render(false); toast('Pembatalan diajukan','Menunggu approval sebelum pesanan dibatalkan.'); }
-function ordForm(){
+function ordAdvance(id){
+  const o=MD.order.find(x=>x.id===id);
+  act('order/advance',{run:()=>{ o.st=ORD_NEXT[o.st]; },audit:()=>'Mengubah status pesanan '+o.id+' menjadi '+o.st,toast:()=>['Status pesanan diperbarui',o.id+' kini '+o.st.toLowerCase()+'.']});
+}
+function ordCancel(id){
+  const o=MD.order.find(x=>x.id===id);
+  act('order/request-cancel',{run:()=>{ o.st='Menunggu batal'; D.approvals.unshift({id:newId('ap'),type:'Batal pesanan',u:o.u,ref:o.id,detail:o.id+' · '+tokoName(o.toko)+' · '+rp(ordTotal(o)),reason:'Pengajuan dari dashboard',when:nowStamp()}); },
+    audit:'Mengajukan batal pesanan '+o.id,toast:['Pembatalan diajukan',o.id+' menunggu approval sebelum dibatalkan.','default']});
+}
+function ordForm(){ if(!can('order.create')) return noAccess();
   const sales=live('user').filter(u=>u.role==='r5'&&u.status==='Aktif'), tk=live('toko').filter(t=>t.status==='Aktif');
   const prods=[['','Pilih produk'],...PRODUCTS.filter(p=>p.status!=='Nonaktif').map(p=>[p.id,p.name+' · '+rp(p.price)])];
   openModal(`<h2 class="pt" style="font-size:22px">Buat pesanan<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Pesanan sales taking order. Total dihitung dari harga produk dan tidak dihitung sebagai penjualan ritel.</p>
@@ -2009,7 +2032,7 @@ function pageDataJual(q){
 function djTokoMode(v){ document.getElementById('dj_tk_m').style.display=v==='free'?'none':''; document.getElementById('dj_tk_f').style.display=v==='free'?'':'none'; }
 function djProdMode(v){ document.getElementById('dj_p_m').style.display=v==='free'?'none':''; document.getElementById('dj_p_f').style.display=v==='free'?'':'none'; if(v==='free') document.getElementById('dj_h').value=''; else djPrice(); }
 function djPrice(){ const id=document.getElementById('dj_p').value, tn=document.getElementById('dj_t')?.value, tk=TOKO.find(t=>t.name===tn), m=tk&&MD.mapping.find(x=>!x.del&&x.status==='Aktif'&&x.produk===id&&x.toko===tk.id), p=PRODUCTS.find(x=>x.id===id); if(m) document.getElementById('dj_h').value=effHarga(m); else if(p) document.getElementById('dj_h').value=p.price; }
-function djForm(){
+function djForm(){ if(!can('sales.input')) return noAccess();
   const sales=SALES.filter(s=>['SPG / Promotor','Canvasing'].includes(s.job)), tk=live('toko').filter(t=>t.status==='Aktif');
   openModal(`<h2 class="pt" style="font-size:22px">Tambah penjualan<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Dipakai bila sales gagal menginput dari aplikasi. Tercatat atas nama sales, dengan jejak admin yang menginput.</p>
   <div class="grid" style="gap:12px">
@@ -2021,11 +2044,16 @@ function djForm(){
     <div class="field"><span>Produk <b class="req" aria-hidden="true">*</b></span><div class="chips" role="radiogroup" aria-label="Sumber produk" style="margin-bottom:8px">${[['master','Dari master'],['free','Di luar master (teks bebas)']].map(([k,l],i)=>`<label class="fchip"><input type="radio" name="dj_pm" value="${k}" ${i?'':'checked'} onchange="djProdMode(this.value)" style="margin-right:6px">${l}</label>`).join('')}</div>
       <div class="grid" style="gap:10px;grid-template-columns:1fr 90px"><div><div id="dj_p_m">${sel(PRODUCTS.filter(p=>p.status!=='Nonaktif').map(p=>[p.id,p.name]),PRODUCTS[0].id,'djPrice()',{label:'Produk',id:'dj_p'})}</div><div id="dj_p_f" style="display:none"><span class="inp"><input id="dj_pf" placeholder="Nama produk, contoh: Setrika Uap Mini"></span></div></div><label class="field"><span class="sr-only">Jumlah</span><span class="inp"><input id="dj_q" inputmode="numeric" value="1" aria-label="Jumlah"></span></label></div>
       <p class="xs muted" style="margin-top:6px">Produk di luar master tetap tercatat sebagai penjualan dan masuk daftar Produk dari sales (sementara).</p></div>
-    <label class="field"><span>Harga satuan (Rp) <b class="req" aria-hidden="true">*</b></span><span class="inp"><input id="dj_h" inputmode="numeric" value="${PRODUCTS[0].price}"></span></label>
+    <label class="field"><span>Harga satuan (Rp) <b class="req" aria-hidden="true">*</b></span><span class="inp"><input id="dj_h" inputmode="numeric" value="${PRODUCTS[0].price}" oninput="djNote()" aria-describedby="dj_note"><span class="unit">Rp</span></span></label><div id="dj_note" aria-live="polite"></div>
     <label class="field"><span>Alasan input dari dashboard <b class="req" aria-hidden="true">*</b></span>${sel(DJ_ALASAN,DJ_ALASAN[0],'',{label:'Alasan',id:'dj_a'})}</label>
     <label class="field"><span>Catatan</span><textarea class="ta" id="dj_n" style="min-height:60px" placeholder="contoh: nomor nota toko, konfirmasi Team Leader"></textarea></label>
     <p class="ferr" id="dj_e"></p></div>
   <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Simpan penjualan',{v:'accent',on:'djSave()'})}</div>`); }
+/* Aturan yang akan terpicu oleh isian tampil sebagai banner yang naik tingkat saat mengetik */
+function djNote(){ const box=document.getElementById('dj_note'); if(!box) return; const pf=document.querySelector('input[name="dj_pm"]:checked')?.value==='free'; if(pf){ box.innerHTML=banner({tone:'info',body:'Produk di luar master belum punya harga sistem, jadi harga ini tidak dibandingkan.'}); return; }
+  const h=parseInt((document.getElementById('dj_h').value||'').replace(/\D/g,''),10), tn=document.getElementById('dj_t')?.value, tk=TOKO.find(t=>t.name===tn), pid=document.getElementById('dj_p')?.value, ref=priceAt(pid,tk?.id);
+  if(!h||!ref){ box.innerHTML=''; return; } const d=Math.round((h-ref)/ref*1000)/10, ab=Math.abs(d);
+  box.innerHTML=ab<.5?'':banner({tone:ab>=INV_TOL?'warning':'info',title:ab>=INV_TOL?'Selisih melewati batas':'Harga berbeda dari harga sistem',body:`Harga ${d>0?'lebih tinggi':'lebih rendah'} ${num(ab,1)}% dari harga sistem ${rp(ref)}.${ab>=INV_TOL?' Transaksi ditandai untuk diperiksa.':''}`}); }
 function djSave(){
   const g=id=>document.getElementById(id), err=g('dj_e'), clean=s=>s.replace(/['"<>`]/g,'').trim();
   const free=document.querySelector('input[name="dj_tm"]:checked')?.value==='free', toko=free?clean(g('dj_tf').value):g('dj_t').value;
@@ -2110,7 +2138,7 @@ const DAYS7=['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
 const needDays=p=>p==='Mingguan'||p==='2 mingguan';
 const perLabel=v=>(v.period||'Sekali')+(needDays(v.period)&&(v.days||[]).length?' · '+v.days.join(', '):'');
 function visDaysSync(){ const e=document.getElementById('vf_days'); if(e) e.style.display=needDays(document.getElementById('vf_r').value)?'':'none'; }
-function visForm(id){
+function visForm(id){ if(!can('visit.create')) return noAccess();
   const v=id?D.visits.find(x=>x.id===id):{u:'tari',place:'Electronic City Kemang',plan:'09:00',period:'Sekali',tasks:''};
   if(id&&v.status!=='Belum'){ openModal(`<h2 class="pt" style="font-size:22px">Tidak bisa diubah<i>.</i></h2><p class="sm" style="margin:10px 0 18px;line-height:1.6">Kunjungan yang sudah berjalan atau selesai tidak bisa diubah lagi.</p><div style="display:flex;justify-content:flex-end">${btn('Tutup',{v:'card',on:'closeLayer()'})}</div>`); return; }
   const people=[...SALES,...FMCG_USERS];
@@ -2144,22 +2172,37 @@ function pageApproval(q){
   const S=ST.sel.apr||(ST.sel.apr=new Set()); [...S].forEach(id=>{ if(!D.approvals.find(a=>a.id===id)) S.delete(id); });
   return {title:'Approval',html:`
   <div class="chips" style="margin-bottom:16px"><button class="fchip ${!t?'on':''}" onclick="setQ({type:''})">Semua <span class="n">${D.approvals.length}</span></button>${types.map(x=>`<button class="fchip ${t===x?'on':''}" onclick="setQ({type:'${x}'})">${x} <span class="n">${D.approvals.filter(a=>a.type===x).length}</span></button>`).join('')}</div>
-  ${card('',`${S.size?`<div class="bulk"><span style="flex:1">${S.size} dipilih</span>${btn('Tolak',{v:'onpop',size:'sm',on:`rejectModal([${[...S].map(i=>`'${i}'`).join(',')}])`})}${btn('Setujui',{v:'accent',size:'sm',on:`approve([${[...S].map(i=>`'${i}'`).join(',')}])`})}</div>`:''}
+  ${card('',`${S.size?`<div class="bulk"><span style="flex:1">${S.size} dipilih</span>${btn('Tolak',{perm:'approval.decide',v:'onpop',size:'sm',on:`rejectModal([${[...S].map(i=>`'${i}'`).join(',')}])`})}${btn('Setujui',{perm:'approval.decide',v:'accent',size:'sm',on:`approve([${[...S].map(i=>`'${i}'`).join(',')}])`})}</div>`:''}
     ${dataTable('apr',{rows,select:true,rowClick:r=>`aprPanel('${r.id}')`,empty:'Semua pengajuan sudah diproses.',cols:[
       {label:'Pengaju',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(r.u?byU(r.u).name:r.by)}<span><span class="fg" style="font-weight:500">${r.u?byU(r.u).name:r.by}</span><span class="xs muted" style="display:block">${r.when}</span></span></span>`,prim:true},
       {label:'Jenis',render:r=>tag(r.type,r.type==='Promo baru'?'info':'accent')},{label:'Detail',k:'detail'},{label:'Alasan',render:r=>`<span class="muted">“${esc(r.reason)}”</span>`,hide:true},
-      {label:'',render:r=>`<span style="display:flex;gap:6px;justify-content:flex-end" onclick="event.stopPropagation()">${btn('Tolak',{v:'outline',size:'sm',on:`rejectModal(['${r.id}'])`})}${btn('Setujui',{v:'solid',size:'sm',on:`approve(['${r.id}'])`})}</span>`,align:'r'}]})}`)}`};
+      {label:'',render:r=>`<span style="display:flex;gap:6px;justify-content:flex-end" onclick="event.stopPropagation()">${btn('Tolak',{perm:'approval.decide',v:'outline',size:'sm',on:`rejectModal(['${r.id}'])`})}${btn('Setujui',{perm:'approval.decide',v:'solid',size:'sm',on:`approve(['${r.id}'])`})}</span>`,align:'r'}]})}`)}`};
 }
-function approve(ids){ D.approvals.filter(a=>ids.includes(a.id)).forEach(a=>{ if(a.type==='Hapus penjualan'){ const t=TRX.find(x=>x.id===a.ref); if(t) t.st='Dihapus'; } if(a.type==='Batal pesanan'){ const o=(MD.order||[]).find(x=>x.id===a.ref); if(o) o.st='Dibatalkan'; } }); D.approvals=D.approvals.filter(a=>!ids.includes(a.id)); ids.forEach(i=>ST.sel.apr?.delete(i)); closeLayer(); render(false); toast(ids.length>1?ids.length+' pengajuan disetujui':'Pengajuan disetujui','Notifikasi terkirim ke pengaju.'); }
-function rejectModal(ids){ openModal(`<h2 class="pt" style="font-size:22px">Tolak ${ids.length>1?ids.length+' pengajuan':'pengajuan'}<i>.</i></h2><p class="muted sm" style="margin:6px 0 14px">Alasan wajib diisi dan dikirim ke pengaju.</p>
-  <textarea class="ta" id="rj" placeholder="Tulis alasan penolakan"></textarea><div id="rjerr"></div>
-  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Tolak',{v:'danger',on:`doReject([${ids.map(i=>`'${i}'`).join(',')}])`})}</div>`); }
-function doReject(ids){ if(!$('#rj').value.trim()){ $('#rjerr').innerHTML='<p class="xs" style="color:var(--danger);margin-top:6px;font-weight:600">Alasan wajib diisi.</p>'; return; } D.approvals.filter(a=>ids.includes(a.id)).forEach(a=>{ if(a.type==='Hapus penjualan'){ const t=TRX.find(x=>x.id===a.ref); if(t) t.st='Terkirim'; } if(a.type==='Batal pesanan'){ const o=(MD.order||[]).find(x=>x.id===a.ref); if(o) o.st='Dibuat'; } }); D.approvals=D.approvals.filter(a=>!ids.includes(a.id)); ids.forEach(i=>ST.sel.apr?.delete(i)); closeLayer(); render(false); toast('Pengajuan ditolak','Alasan terkirim ke pengaju.'); }
+function approve(ids){
+  const rows=D.approvals.filter(a=>ids.includes(a.id)), who=a=>(a.u&&byU(a.u)?.name)||a.by||'';
+  act('approval/approve',{perm:'approval.decide',
+    run:()=>{ rows.forEach(a=>{ if(a.type==='Hapus penjualan'){ const t=TRX.find(x=>x.id===a.ref); if(t) t.st='Dihapus'; } if(a.type==='Batal pesanan'){ const o=(MD.order||[]).find(x=>x.id===a.ref); if(o) o.st='Dibatalkan'; } }); D.approvals=D.approvals.filter(a=>!ids.includes(a.id)); ids.forEach(i=>ST.sel.apr?.delete(i)); },
+    audit:`Menyetujui ${rows.length} pengajuan`,
+    toast:[ids.length>1?`${ids.length} pengajuan disetujui`:'Pengajuan disetujui',rows.length===1?`${rows[0].type} · ${who(rows[0])}. Pengaju diberi tahu.`:'Pengaju diberi tahu di aplikasi.']});
+}
+function rejectModal(ids){
+  if(!can('approval.decide')) return noAccess();
+  confirmAsk({title:ids.length>1?`Tolak ${ids.length} pengajuan?`:'Tolak pengajuan ini?',desc:'Pengaju menerima alasan penolakan di aplikasi.',confirmLabel:'Tolak',destructive:true,needs:'#rj',
+    body:'<label class="field"><span><label for="rj">Alasan penolakan</label><b class="req" aria-hidden="true">*</b></span><textarea class="ta short" id="rj" placeholder="Tulis alasan penolakan" aria-required="true"></textarea></label>',
+    on:`doReject([${ids.map(i=>`'${i}'`).join(',')}])`});
+}
+function doReject(ids){
+  if(!$('#rj').value.trim()) return;
+  const rows=D.approvals.filter(a=>ids.includes(a.id));
+  act('approval/reject',{perm:'approval.decide',
+    run:()=>{ rows.forEach(a=>{ if(a.type==='Hapus penjualan'){ const t=TRX.find(x=>x.id===a.ref); if(t) t.st='Terkirim'; } if(a.type==='Batal pesanan'){ const o=(MD.order||[]).find(x=>x.id===a.ref); if(o) o.st='Dibuat'; } }); D.approvals=D.approvals.filter(a=>!ids.includes(a.id)); ids.forEach(i=>ST.sel.apr?.delete(i)); },
+    audit:`Menolak ${rows.length} pengajuan`,toast:[ids.length>1?`${ids.length} pengajuan ditolak`:'Pengajuan ditolak','Alasan terkirim ke pengaju.','default']});
+}
 function aprPanel(id){ const a=D.approvals.find(x=>x.id===id); const who=a.u?byU(a.u):null;
   openPanel(a.type,`<a class="rowlink" ${who?`href="#/absensi?q=${encodeURIComponent(who.name)}" onclick="closeLayer()"`:''} style="margin-bottom:12px">${av(who?who.name:a.by,'md')}<span style="flex:1"><b class="fg sm" style="display:block">${who?who.name:a.by}</b><span class="xs muted">${who?who.job+' · '+who.cabang:'Admin'} · ${a.when}</span></span></a>
   <div class="tile" style="margin-bottom:12px"><div class="xs muted">Detail</div><b class="fg">${a.detail}</b></div>
   <div class="tile"><div class="xs muted">Alasan</div><span class="fg">“${esc(a.reason)}”</span></div>`,
-  `${btn('Tolak',{v:'card',on:`rejectModal(['${id}'])`})}${btn('Setujui',{v:'accent',on:`approve(['${id}'])`})}`,{sub:'Pengajuan'}); }
+  `${btn('Tolak',{perm:'approval.decide',v:'card',on:`rejectModal(['${id}'])`})}${btn('Setujui',{perm:'approval.decide',v:'accent',on:`approve(['${id}'])`})}`,{sub:'Pengajuan'}); }
 
 /* ---------- Target & sell-in ---------- */
 function pageTarget(q){
@@ -2213,7 +2256,7 @@ function pagePromo(q){
   ${card('Daftar promo',dataTable('prm',{rows,rowClick:r=>`promoPanel('${r.id}')`,acts:r=>rowActs(`promoPanel('${r.id}')`,`promoDelAsk('${r.id}')`),cols:[
     {label:'Promo',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="xs muted" style="display:block">${r.id}</span>`,prim:true},{label:'Jenis',render:r=>tag(r.type,'info')},{label:'Produk',k:'prod',hide:true},{label:'Periode',k:'period',hide:true},
     {label:'Gabung',render:r=>r.combine?tag('Bisa','success'):tag('Tidak','warning')},{label:'Dipakai',render:r=>r.used+'×',align:'r',hide:true},{label:'Status',render:r=>spill(r.status,r.status==='Aktif'?'success':r.status==='Draft'?'neutral':'warning')}]}),
-    {acts:`${btn('Upload',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Promo')"})}${btn('Buat promo',{v:'accent',size:'sm',icon:'plus',on:'promoForm()'})}`})}`};
+    {acts:`${btn('Upload',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Promo')"})}${btn('Buat promo',{perm:'promo.create',v:'accent',size:'sm',icon:'plus',on:'promoForm()'})}`})}`};
 }
 function promoPanel(id){ const p=D.promos.find(x=>x.id===id);
   openPanel(p.name,`<div class="kv" style="margin-bottom:14px"><div><dt>Jenis</dt><dd>${p.type}</dd></div><div><dt>Periode</dt><dd>${p.period}</dd></div><div><dt>Dipakai</dt><dd>${p.used}×</dd></div></div>
@@ -2224,7 +2267,7 @@ function promoPanel(id){ const p=D.promos.find(x=>x.id===id);
 function promoDelAsk(id){ const p=D.promos.find(x=>x.id===id);
   openModal(`<h2 class="pt" style="font-size:22px">Ajukan hapus ${esc(p.name)}?<i>.</i></h2><p class="sm muted" style="margin:10px 0 18px;line-height:1.6">Menghapus promo perlu approval (BRD III.2.9). Promo tetap aktif sampai disetujui, lalu disembunyikan dan tetap tersimpan untuk audit (soft delete).</p><div style="display:flex;gap:10px;justify-content:flex-end">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Ajukan hapus',{v:'danger',icon:'trash',on:`promoDel('${id}')`})}</div>`); }
 function promoDel(id){ const p=D.promos.find(x=>x.id===id); p.status='Menunggu approval'; audit('Mengajukan hapus promo '+p.name); closeLayer(); render(false); toast('Penghapusan diajukan','Menunggu approval sebelum promo dihapus.'); }
-function promoForm(){ openPanel('Buat promo',`<div class="grid" style="gap:14px">
+function promoForm(){ if(!can('promo.create')) return noAccess(); openPanel('Buat promo',`<div class="grid" style="gap:14px">
   <label class="field"><span>Nama promo</span><span class="inp"><input placeholder="contoh: Diskon akhir tahun VISTARA"></span></label>
   <label class="field"><span>Jenis</span>${sel(['Diskon','Free gift','Free product','Cashback e-wallet'],'Diskon','',{label:'Jenis'})}</label>
   <label class="field"><span>Produk</span>${sel(PRODUCTS.map(p=>p.name),PRODUCTS[0].name,'',{label:'Produk'})}</label>
@@ -2308,7 +2351,7 @@ function pageLeads(q){
   </div>
   ${card('Daftar leads',`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px"><form style="flex:1;min-width:220px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari nasabah</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari nama nasabah"></label></form>
       <div class="chips">${[['','Semua'],['Baru','Baru'],['Prospect','Prospect'],['Deal','Deal'],['Belum Tertarik','Belum Tertarik']].map(([k,l])=>`<button class="fchip ${f===k?'on':''}" onclick="setQ({f:'${k}'})">${l}</button>`).join('')}</div></div>
-    ${S.size?`<div class="bulk"><span style="flex:1">${S.size} leads dipilih</span>${btn('Assign '+S.size+' leads',{v:'accent',size:'sm',icon:'users',on:"assignModal('',[...ST.sel.lds])"})}</div>`:''}
+    ${S.size?`<div class="bulk"><span style="flex:1">${S.size} leads dipilih</span>${btn('Assign '+S.size+' leads',{perm:'leads.assign',v:'accent',size:'sm',icon:'users',on:"assignModal('',[...ST.sel.lds])"})}</div>`:''}
     ${dataTable('lds',{rows,select:true,rowClick:r=>`leadPanel('${r.id}')`,empty:'Tidak ada leads dengan filter ini.',cols:[
       {label:'Nasabah',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="mono muted" style="display:block">${r.id}</span>`,prim:true},{label:'Produk',k:'prod',hide:true},
       {label:'Cabang',render:r=>leadCab(r),hide:true},{label:'Pengajuan',render:r=>rp(r.amount),align:'r'},{label:'Goal',render:r=>r.goal?`<b class="fg tabular">${rp(r.goal)}</b>`:'–',align:'r',hide:true},
@@ -2363,14 +2406,16 @@ function assignRender(){ const {u,sel:S}=ST.asg;
   <div class="tile" style="display:flex;gap:10px;align-items:center;margin-bottom:12px">${av(x.name)}<span style="flex:1;min-width:0"><span class="xs muted" style="display:block">Assign ke</span><b class="fg sm">${esc(x.name)}</b><span class="xs muted" style="display:block">${esc(x.job)}</span></span>${btn('Ganti',{v:'outline',size:'sm',on:"ST.asg.u='';assignRender()"})}</div>
   ${list.length?`<div class="rows" style="max-height:44vh;overflow:auto">${list.map(l=>`<button class="rowlink" role="checkbox" aria-checked="${S.has(l.id)}" onclick="assignToggle('${l.id}')"><span class="cb ${S.has(l.id)?'on':''}">${S.has(l.id)?I('check',12,3):''}</span><span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${esc(l.name)}</b><span class="xs muted">${l.id} · ${esc(l.prod)} · ${rp(l.amount)}${l.owner?' · sekarang '+esc(byU(l.owner).name):''}</span></span></button>`).join('')}</div>`:`<p class="sm muted">Semua leads di cabang ${esc(cab)} sudah di-assign.</p>`}
   <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Assign '+(S.size||'')+' leads',{v:'accent',on:'assignSave()',dis:!S.size})}</div>`); }
-function assignSave(){ const {u,sel:S}=ST.asg; if(!u||!S.size) return; D.leads.forEach(l=>{ if(S.has(l.id)) l.owner=u; }); const n=S.size, who=byU(u).name;
-  ST.sel.lds?.clear(); audit('Meng-assign '+n+' leads ke '+who); closeLayer(); render(false); toast(n+' leads di-assign ke '+who.split(' ')[0],'Penerima leads mendapat notifikasi di aplikasi.'); }
+function assignSave(){
+  const {u,sel:S}=ST.asg; if(!u||!S.size) return; const n=S.size, who=byU(u).name;
+  act('leads/assign',{perm:'leads.assign',run:()=>{ D.leads.forEach(l=>{ if(S.has(l.id)) l.owner=u; }); ST.sel.lds?.clear(); },audit:`Meng-assign ${n} leads ke ${who}`,toast:[`${n} leads di-assign ke ${who.split(' ')[0]}`,'Penerima leads mendapat notifikasi di aplikasi.']});
+}
 function leadPanel(id){ const l=D.leads.find(x=>x.id===id);
   openPanel(l.name,`<div class="kv" style="margin-bottom:14px"><div><dt>Pengajuan</dt><dd>${rp(l.amount)}</dd></div><div><dt>Tenor</dt><dd>${l.tenor} bulan</dd></div><div><dt>Goal</dt><dd>${l.goal?rp(l.goal):'–'}</dd></div></div>
   <div class="tile" style="margin-bottom:12px"><div class="xs muted">Produk</div><b class="fg">${l.prod}</b></div>
   ${l.status==='Deal'?`<div class="tile" style="margin-bottom:12px"><div class="xs muted">Dokumen Deal</div><b class="fg">Bukti approve terunggah · Persetujuan pencairan ${l.owner==='nina'&&l.goal>10e6?'terunggah':'belum'} · Serah terima dana ${l.owner==='nina'&&l.goal>10e6?'terunggah':'belum'}</b></div>`:''}
-  <div class="steps">${[['Upload backend',l.date+' 2026 · 06:00','done'],['Assign ke sales',l.owner?byU(l.owner).name:'Belum',l.owner?'done':'cur'],['Verifikasi (telepon / WA)',l.status==='Baru'?'Belum':'Selesai',l.status==='Baru'?(l.owner?'cur':'up'):'done'],['Hasil: '+(l.sub?l.status+' · '+l.sub:l.status),l.status==='Deal'?'Goal '+rp(l.goal):l.status==='Prospect'?'Follow up 29 Okt':l.sub==='Rejected'?'Tidak memenuhi syarat':'Belum',l.status==='Deal'||l.sub==='Rejected'?'done':l.status==='Prospect'?'cur':'up'],['Kirim ke SIM',l.sync?'Terkirim':'—',l.sync?'done':'up']].map(([t,s,k])=>`<div class="step"><span class="sd ${k}">${k==='done'?I('check',14,2.6):''}</span><div><b>${t}</b><small>${s}</small></div></div>`).join('')}</div>`,
-  !l.owner?`${btn('Tutup',{v:'card',on:'closeLayer()'})}${btn('Assign',{v:'accent',on:`closeLayer();assignModal('',['${id}'])`})}`:btn('Tutup',{v:'card',on:'closeLayer()'}),{sub:l.id}); }
+  <div class="steps">${[['Upload backend',l.date+' 2026 · 06:00','done'],['Assign ke sales',l.owner?byU(l.owner).name:'Belum',l.owner?'done':'cur'],['Verifikasi (telepon / WA)',l.status==='Baru'?'Belum':'Selesai',l.status==='Baru'?(l.owner?'cur':'up'):'done'],['Hasil: '+(l.sub?l.status+' · '+l.sub:l.status),l.status==='Deal'?'Goal '+rp(l.goal):l.status==='Prospect'?'Follow up 29 Okt':l.sub==='Rejected'?'Tidak memenuhi syarat':'Belum',l.status==='Deal'||l.sub==='Rejected'?'done':l.status==='Prospect'?'cur':'up'],['Kirim ke SIM',l.sync?'Terkirim':'–',l.sync?'done':'up']].map(([t,s,k])=>`<div class="step"><span class="sd ${k}">${k==='done'?I('check',14,2.6):''}</span><div><b>${t}</b><small>${s}</small></div></div>`).join('')}</div>`,
+  !l.owner?`${btn('Tutup',{v:'card',on:'closeLayer()'})}${btn('Assign',{perm:'leads.assign',v:'accent',on:`closeLayer();assignModal('',['${id}'])`})}`:btn('Tutup',{v:'card',on:'closeLayer()'}),{sub:l.id}); }
 
 /* ---------- Overdue ---------- */
 function pageOverdue(q){
@@ -2650,7 +2695,16 @@ let ID_SEQ=0;
 const newId=p=>p+'-'+String(++ID_SEQ).padStart(4,'0');
 const nowMs=()=>APP_NOW0+(Date.now()-APP_T0);
 const nowStamp=()=>{ const d=new Date(nowMs()+7*36e5); return '26 Okt, '+String(d.getUTCHours()).padStart(2,'0')+':'+String(d.getUTCMinutes()).padStart(2,'0'); };
-function audit(what){ MD.log.unshift({when:nowStamp(),who:'Dewi Kartika',what}); }
+function audit(what,type=''){ MD.log.unshift({when:nowStamp(),who:ME.name,what,type}); }
+/* Semua perubahan data lewat act(): guard (blocker yang sama dengan UI), perubahan, audit bercap pelaku dan jam, simpan, render, toast.
+   Tipe aksi berbentuk entitas/kata kerja supaya mudah dipetakan ke endpoint nanti. */
+function act(type,{perm='',guard=null,blockedTitle='Tidak bisa diproses',run,audit:au='',toast:t=null,close=true}){
+  if(perm&&!can(perm)){ noAccess(); return false; }
+  const bl=guard&&guard(); if(bl){ toast(blockedTitle,bl,'danger'); return false; }
+  const res=run(); const text=typeof au==='function'?au(res):au; if(text) audit(text,type);
+  if(close) closeLayerCore(); render(false);
+  if(t){ const x=typeof t==='function'?t(res):t; toast(x[0],x[1]||'',x[2]||'success'); } return true;
+}
 const stPill=s=>spill(s,s==='Aktif'?'success':'neutral');
 
 /* entity definitions */
@@ -2747,7 +2801,7 @@ Object.assign(ENT,{
     cols:[nameCol(),{label:'Client',render:r=>cName(r.client),hide:true},{label:'Dipakai di market share',render:r=>SHARE_REP.filter(x=>x.brand===r.name).length+' toko',align:'r',hide:true},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>{ const n=SHARE_REP.filter(x=>x.brand===r.name).length; return n?`Kompetitor ini dipakai di market share ${n} toko. Nonaktifkan kompetitor jika tidak dibandingkan lagi.`:''; }},
   katg:{src:'katprod',label:'Kategori produk',lower:'kategori produk',plural:'Kategori produk General',prefix:'kp',store:()=>MD.katprod,title:r=>r.name,search:r=>r.name+(r.parent||''),filter:(r,q)=>r.cakupan==='General'&&katPass(r,q),blank:()=>({cakupan:'General',brand:'',share:'Ya'}),
-    fields:[{k:'parent',label:'Kategori induk',type:'select',opts:()=>[['','—'],...live('katprod').filter(k=>k.cakupan==='General'&&k.id!==(FORM&&FORM.id)).map(k=>k.name)],hint:'Kosongkan untuk kategori level 1. Level dihitung otomatis dari kedalaman induk, tanpa batas.',validate:v=>katCycle(v,(document.getElementById('f_name')?.value||'').trim())?'Induk tidak boleh dirinya sendiri atau turunannya':''},
+    fields:[{k:'parent',label:'Kategori induk',type:'select',opts:()=>[['','–'],...live('katprod').filter(k=>k.cakupan==='General'&&k.id!==(FORM&&FORM.id)).map(k=>k.name)],hint:'Kosongkan untuk kategori level 1. Level dihitung otomatis dari kedalaman induk, tanpa batas.',validate:v=>katCycle(v,(document.getElementById('f_name')?.value||'').trim())?'Induk tidak boleh dirinya sendiri atau turunannya':''},
       {k:'share',label:'Dipakai untuk market share',type:'select',opts:['Ya','Tidak'],hint:'Client bisa membuat kategori sendiri untuk market share (MOM 8)'},{k:'name',label:'Nama',req:true,hint:'Kategori General berlaku untuk semua client'}],
     cols:[nameCol(r=>r.parent?'Di bawah '+r.parent:''),{label:'Level',render:r=>tag('Level '+katLevel(r),katLevel(r)===1?'accent':'neutral')},{label:'Market share',render:r=>r.share==='Tidak'?'<span class="muted">Tidak</span>':tag('Ya','success'),hide:true},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>katInUse(r)},
@@ -2782,7 +2836,7 @@ Object.assign(ENT,{
     fields:[{k:'kode',label:'Kode mitra',req:true},{k:'name',label:'Nama mitra',req:true},{k:'cbd',label:'CBD',type:'select',req:true,opts:()=>live('user').filter(u=>u.role==='r9').map(u=>[u.id,u.name]),hint:'Mitra melekat pada satu CBD'},{k:'client',label:'Client',type:'select',req:true,opts:clientOpts},{k:'cabang',label:'Cabang',type:'select',req:true,opts:CABANG.slice(1)},{k:'phone',label:'Telepon',type:'tel'},{k:'addr',label:'Alamat'}],
     cols:[nameCol(r=>(r.kode||'')+' · '+(r.phone||'')),{label:'CBD',render:r=>userName(r.cbd)},{label:'Client',render:r=>cName(r.client),hide:true},{label:'Cabang',k:'cabang',hide:true},{label:'Status',render:r=>stPill(r.status)}]},
   struct:{label:'Struktur approval',lower:'struktur',plural:'Sales Structure Approval',prefix:'st',store:()=>MD.struct,title:r=>r.job,search:r=>r.job+r.a1+r.a2,unique:'job',blank:()=>({a2:''}),
-    fields:[{k:'job',label:'Job',type:'select',req:true,opts:()=>live('role').filter(r=>r.id!=='r1').map(r=>r.name)},{k:'a1',label:'Approver tingkat 1',type:'select',req:true,opts:()=>live('role').filter(r=>['r2','r7','r8'].includes(r.id)).map(r=>r.name)},{k:'a2',label:'Approver tingkat 2',type:'select',opts:()=>[['','—'],...live('role').filter(r=>['r2','r7'].includes(r.id)).map(r=>r.name)]}],
+    fields:[{k:'job',label:'Job',type:'select',req:true,opts:()=>live('role').filter(r=>r.id!=='r1').map(r=>r.name)},{k:'a1',label:'Approver tingkat 1',type:'select',req:true,opts:()=>live('role').filter(r=>['r2','r7','r8'].includes(r.id)).map(r=>r.name)},{k:'a2',label:'Approver tingkat 2',type:'select',opts:()=>[['','–'],...live('role').filter(r=>['r2','r7'].includes(r.id)).map(r=>r.name)]}],
     cols:[{label:'Job',k:'job',prim:true},{label:'Approver 1',k:'a1'},{label:'Approver 2',render:r=>r.a2||'<span class="muted">–</span>'},{label:'Status',render:r=>stPill(r.status)}]},
   grform:{label:'Formula grading',plural:'Formula grading',prefix:'gf',store:()=>MD.grform,title:r=>cName(r.client)+' · '+roleName(r.role),search:r=>cName(r.client)+roleName(r.role),blank:()=>({client:'cl1',role:'r3',jual:40,absen:20,quiz:15,sku:15,share:10}),
     fields:[{k:'client',label:'Klien',type:'select',req:true,opts:clientOpts},{k:'role',label:'Role',type:'select',req:true,opts:()=>live('role').filter(r=>r.id!=='r1').map(r=>[r.id,r.name]),hint:'Primary key formula: klien dan role',validate:(v,vals)=>MD.grform.some(x=>!x.del&&x.id!==FORM.id&&x.client===vals.client&&x.role===v)?'Formula klien dan role ini sudah ada':''},
@@ -2798,11 +2852,11 @@ function crudList(ent,q,{acts='',prefill=''}={}){
   const E=ENT[ent], f=q.st||'', qq=(q.q||'').toLowerCase(), all=live(E.src||ent).filter(r=>E.filter?E.filter(r,q):true);
   const rows=all.filter(r=>!f||r.status===f).filter(r=>!qq||E.search(r).toLowerCase().includes(qq)).map(r=>({...r,_id:r.id}));
   const addAct=ent==='user'?'simImport()':`openForm('${ent}'${prefill?`,null,${prefill}`:''})`;
-  return card(E.plural,`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+  return card(E.plural,`${can('master.edit')?'':banner({tone:'neutral',body:'Anda hanya dapat melihat data ini. Perubahan dilakukan oleh Admin SIM.',cls:'mb'})}<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
       <form style="flex:1;min-width:220px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari ${lc(E)}"></label></form>
       <div class="chips">${[['','Semua'],['Aktif','Aktif'],['Nonaktif','Nonaktif']].map(([k,l])=>`<button class="fchip ${f===k?'on':''}" onclick="setQ({st:'${k}'})">${l} <span class="n">${k?all.filter(r=>r.status===k).length:all.length}</span></button>`).join('')}</div></div>
-    ${dataTable('md_'+ent,{rows,rowClick:r=>`openForm('${ent}','${r.id}')`,acts:r=>rowActs(`openForm('${ent}','${r.id}')`,`delAsk('${ent}','${r.id}')`),cols:E.cols,empty:qq||f||q.br||q.lv||q.ms||q.sk||q.tk?`Tidak ada ${lc(E)} yang cocok. <button style="color:var(--accent-text);font-weight:600" onclick="setQ({q:'',st:'',sg:'',br:'',lv:'',ms:'',sk:'',tk:''})">Hapus filter</button>`:`Belum ada ${lc(E)}.`})}`,
-    {acts:`${acts}${btn(ent==='user'?'Tambah dari SIM':'Tambah '+lc(E),{v:'accent',size:'sm',icon:'plus',on:addAct})}`});
+    ${dataTable('md_'+ent,{rows,rowClick:r=>`openForm('${ent}','${r.id}')`,acts:can('master.edit')?(r=>rowActs(`openForm('${ent}','${r.id}')`,`delAsk('${ent}','${r.id}')`,{block:E.inUse?.(r)||''})):null,cols:E.cols,empty:qq||f||q.br||q.lv||q.ms||q.sk||q.tk?`Tidak ada ${lc(E)} yang cocok. <button style="color:var(--accent-text);font-weight:600" onclick="setQ({q:'',st:'',sg:'',br:'',lv:'',ms:'',sk:'',tk:''})">Hapus filter</button>`:`Belum ada ${lc(E)}.`})}`,
+    {acts:`${acts}${btn(ent==='user'?'Tambah dari SIM':'Tambah '+lc(E),{v:'accent',size:'sm',icon:'plus',on:addAct,perm:'master.edit'})}`});
 }
 
 /* form */
@@ -2817,8 +2871,8 @@ function fieldHTML(fd,r){
   if(t==='ro') h=`<div class="field">${lab}<div class="tile" style="padding:11px 16px;color:var(--fg)">${esc(fd.fmt?fd.fmt(v,r):Array.isArray(v)?(v.map(tokoNm).join(', ')||'–'):(v||'–'))}</div>${hint}</div>`;
   else if(t==='select') h=`<label class="field">${lab}<span class="sel" style="display:flex"><select id="${id}" style="width:100%" ${fd.onchange?`onchange="${fd.onchange}"`:''}>${opts().map(([ov,ol])=>`<option value="${esc(ov)}" ${String(ov)===String(v??'')?'selected':''}>${esc(ol)}</option>`).join('')}</select>${I('chev',16)}</span>${hint}${err}</label>`;
   else if(t==='multi') h=`<div class="field">${lab}<div class="chips" id="${id}" role="group" aria-label="${fd.label}">${opts().map(([ov,ol])=>{const cur=fd.all&&r[fd.allKey]?[fd.all]:(v||[]);const on=cur.includes(ov);return `<button type="button" class="fchip ${on?'on':''}" aria-pressed="${on}" data-v="${esc(ov)}" onclick="multiTog(this${fd.all?`,'${fd.all}'`:''})">${esc(ol)}</button>`}).join('')}</div>${hint}${err}</div>`;
-  else if(t==='textarea') h=`<label class="field">${lab}<textarea class="ta" id="${id}" style="min-height:70px">${esc(v||'')}</textarea>${hint}${err}</label>`;
-  else h=`<label class="field">${lab}<span class="inp"><input id="${id}" type="${t==='number'?'text':t}" ${t==='number'?'inputmode="decimal"':''} value="${esc(t==='number'&&v!=null?String(v).replace('.',','):(v??''))}" placeholder="${fd.ph||''}"></span>${hint}${err}</label>`;
+  else if(t==='textarea') h=`<label class="field">${lab}<textarea class="ta short" id="${id}" aria-describedby="e_${fd.k}">${esc(v||'')}</textarea>${hint}${err}</label>`;
+  else h=`<label class="field">${lab}<span class="inp"><input id="${id}" aria-describedby="e_${fd.k}" type="${t==='number'?'text':t}" ${t==='number'?'inputmode="decimal"':''} value="${esc(t==='number'&&v!=null?String(v).replace('.',','):(v??''))}" placeholder="${fd.ph||''}"></span>${hint}${err}</label>`;
   return fd.only?`<div data-only="${fd.only}" ${r.type!==fd.only?'style="display:none"':''}>${h}</div>`:h;
 }
 function openForm(ent,id,prefill){
@@ -2826,43 +2880,64 @@ function openForm(ent,id,prefill){
   FORM={ent,id:id||null,prefill};
   const body=`${E.extraTop?E.extraTop(r):''}<form id="mdform" onsubmit="event.preventDefault();saveForm()" class="grid" style="gap:14px;margin-top:${E.extraTop&&E.extraTop(r)?'14px':'0'}">${E.fields.map(fd=>fieldHTML(fd,r)).join('')}${E.extra?E.extra(r):''}<button type="submit" hidden></button></form>`;
   const foot=E.foot?E.foot(r,id):id?`${btn('Hapus',{v:'danger',icon:'trash',on:`delAsk('${ent}','${id}')`})}<span style="flex:1"></span>${btn(r.status==='Aktif'?'Nonaktifkan':'Aktifkan',{v:'card',on:`toggleStatus('${ent}','${id}')`})}${btn('Simpan perubahan',{v:'accent',on:'saveForm()'})}`
-    :`${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Simpan',{v:'accent',on:'saveForm()'})}`;
+    :`${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn(ent==='user'?'Daftarkan user':'Tambah '+lc(E),{v:'accent',on:'saveForm()'})}`;
+  const ro=!can('master.edit');
   openPanel(id?E.title(r):(ent==='user'?'Daftarkan user':'Tambah '+lc(E)),body,foot,{sub:id?`${E.label}${E.code?' · '+E.code(r):''} · ${r.status}`:E.label+' baru'});
+  if(ro){ document.querySelectorAll('#mdform input,#mdform select,#mdform textarea,#mdform .fchip').forEach(e=>{ e.disabled=true; e.style.pointerEvents='none'; }); const f=document.querySelector('#layer .panel-f'); if(f) f.innerHTML=btn('Tutup',{v:'outline',on:'closeLayer()'}); }
 }
 function saveForm(mode){
   const {ent,id,prefill}=FORM, E=ENT[ent]; const vals={}, errs={}; const cur0=id?E.store().find(x=>x.id===id):null, base=cur0||{...(E.blank?E.blank():{}),...(prefill||{})};
   E.fields.forEach(fd=>{ if(fd.type==='ro'||(fd.lock&&cur0&&fd.lock(cur0))||(fd.roIf&&fd.roIf(base))) return; const el=document.getElementById('f_'+fd.k); let v;
     if(fd.type==='multi') v=[...el.querySelectorAll('.fchip.on')].map(b=>b.dataset.v);
-    else if(fd.type==='number'){ const raw=el.value.trim().replace(/\./g,'').replace(',','.'); v=raw===''?'':Number(raw); if(raw!==''&&isNaN(v)) errs[fd.k]='Isi dengan angka'; }
+    else if(fd.type==='number'){ const raw=el.value.trim().replace(/\./g,'').replace(',','.'); v=raw===''?'':Number(raw); if(raw!==''&&isNaN(v)) errs[fd.k]=fd.label+' harus berupa angka.'; }
     else v=el.value.trim();
     if(fd.num&&v!=='') v=Number(v);
     if(fd.k==='code'&&typeof v==='string') v=v.toUpperCase();
     vals[fd.k]=v;
-    if((typeof fd.req==='function'?fd.req():fd.req)&&(v===''||v==null||(Array.isArray(v)&&!v.length))) errs[fd.k]=fd.type==='multi'?'Pilih minimal satu':'Wajib diisi';
-    else if(fd.type==='email'&&v&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) errs[fd.k]='Format email tidak valid';
+    if((typeof fd.req==='function'?fd.req():fd.req)&&(v===''||v==null||(Array.isArray(v)&&!v.length))) errs[fd.k]=fd.type==='multi'?'Pilih minimal satu '+fd.label.toLowerCase()+'.':fd.label+' wajib diisi.';
+    else if(fd.type==='email'&&v&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) errs[fd.k]='Format email tidak valid. Contoh: nama@perusahaan.co.id.';
     else if(!errs[fd.k]&&fd.validate&&v!==''){ const m=fd.validate(v,vals); if(m) errs[fd.k]=m; }
   });
   const ex=E.readExtra?E.readExtra():{}; const exErr=E.validateExtra?E.validateExtra({...vals,...ex}):''; if(exErr) errs.__extra=exErr;
-  if(E.unique&&vals[E.unique]&&E.store().some(x=>!x.del&&x.id!==id&&String(x[E.unique]).toLowerCase()===String(vals[E.unique]).toLowerCase())) errs[E.unique]=(E.unique==='code'?'Kode':'Nama')+' sudah dipakai';
-  document.querySelectorAll('.ferr').forEach(e=>e.textContent='');
+  if(E.unique&&vals[E.unique]&&E.store().some(x=>!x.del&&x.id!==id&&String(x[E.unique]).toLowerCase()===String(vals[E.unique]).toLowerCase())) errs[E.unique]=(E.unique==='code'?'Kode':'Nama')+' sudah dipakai data lain. Pakai yang berbeda.';
   const keys=Object.keys(errs);
-  if(keys.length){ keys.forEach(k=>{ const e=document.getElementById('e_'+k); if(e) e.textContent=errs[k]; }); document.getElementById('f_'+keys[0])?.focus?.(); toast('Periksa isian',errs.__extra||'Ada '+keys.length+' field yang perlu diperbaiki.','danger'); return; }
+  if(mode==='check'){ showFormErrs(errs); return; }
+  if(!can('master.edit')){ noAccess(); return; }
+  showFormErrs(errs);
+  if(keys.length){ FORM.tried=true; document.getElementById('f_'+keys[0])?.focus?.(); toast('Periksa isian',errs.__extra||'Ada '+keys.length+' isian yang perlu diperbaiki.','danger'); return; }
   Object.assign(vals,ex);
   let rec;
-  if(id){ rec=E.store().find(x=>x.id===id); if(E.onRename&&rec.name!==vals.name) E.onRename(rec.name,vals.name); Object.assign(rec,vals); E.afterSave?.(rec); audit(`Mengubah ${lc(E)} ${E.title(rec)}`); }
-  else { rec={status:'Aktif',...(E.blank?E.blank():{}),...(prefill||{}),...vals,id:newId(E.prefix)}; E.store().push(rec); E.afterCreate?.(rec); audit(`Menambahkan ${lc(E)} ${E.title(rec)}`); }
-  if(mode==='publish'){ rec.status='Terbit'; E.onPublish?.(rec); audit(`Menerbitkan ${lc(E)} ${E.title(rec)}`); }
-  const tl=E.toastLabel?E.toastLabel(rec):E.label;
-  closeLayer(); render(false); toast(`${tl} ${mode==='publish'?'diterbitkan':id?'diperbarui':'ditambahkan'}`,E.title(rec));
+  act(`${ent}/${mode==='publish'?'publish':id?'update':'create'}`,{
+    run:()=>{
+      if(id){ rec=E.store().find(x=>x.id===id); if(E.onRename&&rec.name!==vals.name) E.onRename(rec.name,vals.name); Object.assign(rec,vals); E.afterSave?.(rec); }
+      else { rec={status:'Aktif',...(E.blank?E.blank():{}),...(prefill||{}),...vals,id:newId(E.prefix)}; E.store().push(rec); E.afterCreate?.(rec); }
+      if(mode==='publish'){ rec.status='Terbit'; E.onPublish?.(rec); }
+    },
+    audit:()=>mode==='publish'?`Menerbitkan ${lc(E)} ${E.title(rec)}`:id?`Mengubah ${lc(E)} ${E.title(rec)}`:`Menambahkan ${lc(E)} ${E.title(rec)}`,
+    toast:()=>[`${E.toastLabel?E.toastLabel(rec):E.label} ${mode==='publish'?'diterbitkan':id?'diperbarui':'ditambahkan'}`,E.title(rec)]
+  });
 }
-function toggleStatus(ent,id){ const E=ENT[ent], r=E.store().find(x=>x.id===id); const lk=E.lockStatus?.(r); if(lk){ toast('Tidak bisa diubah',lk,'danger'); return; } r.status=r.status==='Aktif'?'Nonaktif':'Aktif'; audit(`${r.status==='Aktif'?'Mengaktifkan':'Menonaktifkan'} ${lc(E)} ${E.title(r)}`); closeLayer(); render(false); toast(`${E.label} ${r.status==='Aktif'?'diaktifkan':'dinonaktifkan'}`,E.title(r)); }
+/* Pesan galat tampil setelah submit pertama, lalu diperbarui langsung saat pengguna mengetik */
+function showFormErrs(errs){ document.querySelectorAll('#mdform .ferr').forEach(e=>{ const k=e.id.slice(2), m=errs[k]||''; e.textContent=m; const el=document.getElementById('f_'+k); if(el){ if(m) el.setAttribute('aria-invalid','true'); else el.removeAttribute('aria-invalid'); el.closest('.inp')?.classList.toggle('bad',!!m); } }); }
+document.addEventListener('input',e=>{ if(FORM&&FORM.tried&&e.target.closest?.('#mdform')) saveForm('check'); });
+document.addEventListener('change',e=>{ if(FORM&&FORM.tried&&e.target.closest?.('#mdform')) saveForm('check'); });
+function toggleStatus(ent,id){
+  const E=ENT[ent], r=E.store().find(x=>x.id===id);
+  act(`${ent}/${r.status==='Aktif'?'deactivate':'activate'}`,{perm:'master.edit',guard:()=>E.lockStatus?.(r),blockedTitle:'Tidak bisa diubah',
+    run:()=>{ r.status=r.status==='Aktif'?'Nonaktif':'Aktif'; },
+    audit:()=>`${r.status==='Aktif'?'Mengaktifkan':'Menonaktifkan'} ${lc(E)} ${E.title(r)}`,
+    toast:()=>[`${E.label} ${r.status==='Aktif'?'diaktifkan':'dinonaktifkan'}`,E.title(r),r.status==='Aktif'?'success':'default']});
+}
 function delAsk(ent,id){
+  if(!can('master.edit')) return noAccess();
   const E=ENT[ent], r=E.store().find(x=>x.id===id), block=E.inUse?.(r);
-  if(block) return openModal(`<h2 class="pt" style="font-size:22px">Tidak bisa dihapus<i>.</i></h2><p class="sm" style="margin:10px 0 18px;line-height:1.6">${block}</p><div style="display:flex;gap:10px;justify-content:flex-end">${btn('Tutup',{v:'card',on:'closeLayer()'})}${E.alt?E.alt(r,id):r.status==='Aktif'&&r.id!=='dewi'?btn('Nonaktifkan saja',{v:'accent',on:`toggleStatus('${ent}','${id}')`}):''}</div>`);
-  openModal(`<h2 class="pt" style="font-size:22px">Hapus ${esc(E.title(r))}?<i>.</i></h2><p class="sm muted" style="margin:10px 0 18px;line-height:1.6">${E.delNote||'Data disembunyikan dari daftar dan tidak bisa dipakai lagi, tapi tetap tersimpan untuk audit (soft delete).'}</p>
-  <div style="display:flex;gap:10px;justify-content:flex-end">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Hapus',{v:'danger',icon:'trash',on:`doDel('${ent}','${id}')`})}</div>`);
+  if(block) return openModal(`<h2 class="pt">Tidak bisa dihapus</h2><p class="dlg-d">${block}</p><div class="dlg-f">${btn('Tutup',{v:'outline',on:'closeLayer()'})}${E.alt?E.alt(r,id):r.status==='Aktif'&&r.id!=='dewi'?btn('Nonaktifkan saja',{v:'accent',on:`toggleStatus('${ent}','${id}')`}):''}</div>`,{size:448,alert:true});
+  confirmAsk({title:`Hapus ${esc(E.title(r))}?`,desc:E.delNote||'Data disembunyikan dari daftar dan tidak bisa dipakai lagi, tapi tetap tersimpan untuk audit (soft delete).',confirmLabel:`Hapus ${lc(E)}`,destructive:true,on:`doDel('${ent}','${id}')`});
 }
-function doDel(ent,id){ const E=ENT[ent], r=E.store().find(x=>x.id===id); r.del=true; audit(`Menghapus ${lc(E)} ${E.title(r)}`); closeLayer(); render(false); toast(`${E.label} dihapus`,E.title(r)); }
+function doDel(ent,id){
+  const E=ENT[ent], r=E.store().find(x=>x.id===id);
+  act(`${ent}/remove`,{perm:'master.edit',guard:()=>E.inUse?.(r),blockedTitle:'Tidak bisa dihapus',run:()=>{ r.del=true; },audit:`Menghapus ${lc(E)} ${E.title(r)}`,toast:[`${E.label} dihapus`,E.title(r),'default']});
+}
 function simImport(){
   const reg=new Set(MD.user.filter(u=>!u.del).map(u=>u.nip)); const list=MD.sim.filter(s=>!reg.has(s.nip));
   openModal(`<h2 class="pt" style="font-size:22px">Tambah dari SIM<i>.</i></h2><p class="sm muted" style="margin:6px 0 14px">Pilih pegawai dari direktori SIM (BPR1). Hanya pegawai terdaftar yang bisa login ke aplikasi.</p>
@@ -2913,7 +2988,7 @@ function usulanPanel(id){ const u=D.usulan.find(x=>x.id===id); const done=u.stat
   <div class="tile" style="margin-bottom:14px"><div class="xs muted">Alamat (GPS -6.3291, 106.8217)</div><b class="fg">${u.addr}</b></div>
   ${done?callout(`Status: <b>${u.status}</b>${u.status==='Aktif'?', kategori '+u.cat+'. Toko sudah masuk master dan muncul di aplikasi sales.':'.'}`):`<div class="grid g2" style="gap:10px"><label class="field"><span>Kategori final</span>${sel(live('kat').filter(k=>k.status==='Aktif').map(k=>k.name),u.cat,`D.usulan.find(x=>x.id==='${id}').cat=this.value`,{label:'Kategori final'})}</label><label class="field"><span>Dealer</span>${sel(dealerNames(),dealerNames()[0]||'',`D.usulan.find(x=>x.id==='${id}').dealer=this.value`,{label:'Dealer'})}</label></div>
   <div style="margin-top:12px">${callout('Setelah disetujui, toko masuk master dan muncul di daftar toko '+byU(u.by).name+'.')}</div>`}`,
-  done?btn('Tutup',{v:'card',on:'closeLayer()'}):`${btn('Tolak',{v:'card',on:`D.usulan.find(x=>x.id==='${id}').status='Ditolak';audit('Menolak usulan toko ${esc(u.name)}');closeLayer();render(false);toast('Usulan ditolak','Sales menerima notifikasi beserta alasannya.')`})}${btn('Setujui & aktifkan',{v:'accent',on:`approveToko('${id}')`})}`,{sub:'Usulan toko · '+byU(u.by).name}); }
+  done?btn('Tutup',{v:'card',on:'closeLayer()'}):`${btn('Tolak',{perm:'approval.decide',v:'card',on:`D.usulan.find(x=>x.id==='${id}').status='Ditolak';audit('Menolak usulan toko ${esc(u.name)}');closeLayer();render(false);toast('Usulan ditolak','Sales menerima notifikasi beserta alasannya.')`})}${btn('Setujui & aktifkan',{v:'accent',on:`approveToko('${id}')`})}`,{sub:'Usulan toko · '+byU(u.by).name}); }
 function approveToko(id){ const u=D.usulan.find(x=>x.id===id); u.status='Aktif'; TOKO.push({id:'n'+id,name:u.name,cat:u.cat,cabang:'Jakarta Selatan',dealer:u.dealer||'CV Mitra Elektrindo',sales:[u.by],addr:u.addr,client:'cl1',mapClients:['cl1'],sumber:'Input sales',status:'Aktif',radius:100,coord:'-6.3291, 106.8217'}); audit('Menyetujui usulan toko '+u.name+' (kategori '+u.cat+')'); closeLayer(); render(false); toast('Toko diaktifkan',u.name+' masuk master data, kategori '+u.cat+'.'); }
 const srcChips=(ent,q)=>{ const all=live('user').filter(r=>ENT[ent].filter(r,{})); return `<div class="chips" style="margin-bottom:12px" role="group" aria-label="Sumber data">${[['','Semua sumber'],['Integrasi SIM','Integrasi SIM'],['Input manual','Input manual']].map(([k,l])=>`<button class="fchip ${(q.src||'')===k?'on':''}" aria-pressed="${(q.src||'')===k}" onclick="setQ({src:'${k}'})">${l} <span class="n">${all.filter(r=>!k||(r.sumber||'Integrasi SIM')===k).length}</span></button>`).join('')}</div>`; };
 function pageSimco(q){ return {title:'Company',html:`${crudList('simco',q)}<div style="margin-top:12px">${callout('Company adalah perusahaan internal SIM Group. <a href="#/user-admin" style="color:var(--accent-text);font-weight:600">User management</a> dan <a href="#/user-sales" style="color:var(--accent-text);font-weight:600">Sales management</a> berada di company ini.')}</div>`}; }
@@ -3105,9 +3180,11 @@ function klaimPanel(id){ const k=KLAIM.find(x=>x.id===id), over=k.n>klaimLimit(k
   openPanel(k.jenis+' · '+rp(k.n),`<div class="kv" style="margin-bottom:14px"><div><dt>Sales</dt><dd>${esc(byU(k.u).name)}</dd></div><div><dt>Kunjungan</dt><dd>${esc(k.toko)}</dd></div><div><dt>Status</dt><dd>${k.st}</dd></div></div>
   <div class="xs muted" style="margin-bottom:8px">Foto bukti</div><div class="thumbs" style="margin-bottom:14px"><div class="thumb">${I('image',22)}</div></div>
   ${over?callout('Nominal melebihi limit '+k.jenis+' ('+rp(klaimLimit(k.jenis))+'). Periksa bukti sebelum menyetujui.'):''}`,
-  k.st==='Menunggu'?`${btn('Tolak',{v:'card',on:`klaimSet('${id}','Ditolak')`})}${btn('Setujui',{v:'accent',on:`klaimSet('${id}','Disetujui')`})}`:btn('Tutup',{v:'card',on:'closeLayer()'}),{sub:k.tgl}); }
-function klaimSet(id,st){ const k=KLAIM.find(x=>x.id===id); k.st=st; audit((st==='Disetujui'?'Menyetujui':'Menolak')+' klaim '+k.jenis+' '+byU(k.u).name); closeLayer(); render(false); toast('Klaim '+st.toLowerCase(),byU(k.u).name+' · '+rp(k.n)); }
-
+  k.st==='Menunggu'?`${btn('Tolak',{perm:'approval.decide',v:'card',on:`klaimSet('${id}','Ditolak')`})}${btn('Setujui',{perm:'approval.decide',v:'accent',on:`klaimSet('${id}','Disetujui')`})}`:btn('Tutup',{v:'card',on:'closeLayer()'}),{sub:k.tgl}); }
+function klaimSet(id,st){
+  const k=KLAIM.find(x=>x.id===id);
+  act('claim/'+(st==='Disetujui'?'approve':'reject'),{perm:'approval.decide',run:()=>{ k.st=st; },audit:`${st==='Disetujui'?'Menyetujui':'Menolak'} klaim ${k.jenis} ${byU(k.u).name}`,toast:['Klaim '+st.toLowerCase(),byU(k.u).name+' · '+rp(k.n),st==='Disetujui'?'success':'default']});
+}
 const TRACK=[['rina','Di toko','Electronic City Kemang','13:42',84,[120,150]],['sinta','Di toko','Best Denki Senayan City','13:40',61,[95,70]],['budi','Perjalanan','Menuju Toko Berkah Elektronik','13:44',47,[170,205]],['dimas','Di toko','Toko Abadi Jaya','13:38',72,[60,190]],['kevin','Perjalanan','Menuju Toko Jaya Abadi Kembangan','13:41',33,[40,95]],['putri','Offline','Terakhir di Electronic Solution Puri','11:05',12,[30,60]],['tari','Di toko','Electronic City Kemang','13:43',90,[128,158]]].map(([u,st,loc,ping,bat,xy])=>({u,st,loc,ping,bat,xy}));
 const TR_TONE={'Di toko':'success','Perjalanan':'accent','Offline':'neutral'};
 function pageTracking(q){
@@ -3142,7 +3219,7 @@ function pagePengumuman(){
     {label:'Dibaca',render:r=>`<span class="tabular">${r.baca}/${r.dari}</span>`,align:'r'}]}),{acts:btn('Buat pengumuman',{v:'accent',size:'sm',icon:'plus',on:'infoForm()'})})}
   <div style="margin-top:12px">${usulanNote('Pengumuman muncul sebagai notifikasi dan di Beranda aplikasi untuk role dan client yang dipilih. Admin melihat berapa sales yang sudah membaca.')}</div>`};
 }
-function infoForm(id){ const x=id?INFO.find(a=>a.id===id):{judul:'',isi:'',to:['SPG / Promotor'],cl:'cl1'}, roles=['SPG / Promotor','Canvasing','Taking Order','Promotor FMCG','Mobile Promotor','REA / SPG Multi Finance','CBD / Mediator'];
+function infoForm(id){ if(!can('info.create')) return noAccess(); const x=id?INFO.find(a=>a.id===id):{judul:'',isi:'',to:['SPG / Promotor'],cl:'cl1'}, roles=['SPG / Promotor','Canvasing','Taking Order','Promotor FMCG','Mobile Promotor','REA / SPG Multi Finance','CBD / Mediator'];
   openModal(`<h2 class="pt" style="font-size:22px">${id?'Edit':'Buat'} pengumuman<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Dikirim sebagai notifikasi ke aplikasi sales.</p>
   <div class="grid" style="gap:12px"><label class="field"><span>Judul</span><span class="inp"><input id="in_j" value="${esc(x.judul)}"></span></label><label class="field"><span>Isi</span><textarea class="ta" id="in_i" style="min-height:80px">${esc(x.isi)}</textarea></label>
   <label class="field"><span>Client</span>${sel(clientOpts(),x.cl,'',{label:'Client',id:'in_c'})}</label>
@@ -3484,7 +3561,7 @@ const brandClient=name=>MD.brand.find(b=>!b.del&&b.name===name)?.client||'';
 const katInUse=r=>{ const n=live('katprod').filter(k=>k.parent===r.name).length, p=live('mapping').filter(x=>x.kategori===r.id).length; return n||p?`Kategori ini dipakai ${n} sub kategori dan ${p} mapping produk toko. Pindahkan dulu, atau nonaktifkan kategori.`:''; };
 const katcState=()=>{ const rec=FORM&&FORM.id?MD.katprod.find(k=>k.id===FORM.id):null, pre=(FORM&&FORM.prefill)||{}; return rec?{cl:brandClient(rec.brand),br:rec.brand}:{cl:pre.client||'',br:pre.brand||''}; };
 const katcBrandOpts=cl=>{ const b=live('brand').filter(x=>x.status==='Aktif'&&x.client===cl).map(x=>x.name); return b.length?b:[['','Belum ada brand']]; };
-const katcParentOpts=br=>[['','—'],...live('katprod').filter(k=>k.cakupan==='Client'&&k.brand===br&&k.id!==(FORM&&FORM.id)).map(k=>k.name)];
+const katcParentOpts=br=>[['','–'],...live('katprod').filter(k=>k.cakupan==='Client'&&k.brand===br&&k.id!==(FORM&&FORM.id)).map(k=>k.name)];
 MD.katprod.forEach(k=>{ if(k.cakupan==='Client') k.client=brandClient(k.brand); });
 function katcSync(src){ const optHTML=a=>a.map(o=>Array.isArray(o)?o:[o,o]).map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join(''); const b=document.getElementById('f_brand'), pa=document.getElementById('f_parent'); if(src==='client') b.innerHTML=optHTML(katcBrandOpts(document.getElementById('f_client').value)); pa.innerHTML=optHTML(katcParentOpts(b.value)); }
 const katPass=(r,q)=>(!q.br||r.brand===q.br)&&(!q.lv||katLevel(r)===+q.lv)&&(!q.ms||(r.share||'Ya')===q.ms);
@@ -3612,9 +3689,9 @@ function pagePengaturan(){
   return {title:'Pengaturan',html:`<div class="grid g2">
     ${card('Profil',`<div style="display:flex;gap:14px;align-items:center;margin-bottom:16px">${av('Dewi Kartika','lg')}<div><b class="fg">Dewi Kartika</b><div class="xs muted">Admin SIM · Jakarta</div></div></div>
       <div class="grid" style="gap:12px"><label class="field"><span>Nama</span><span class="inp"><input value="Dewi Kartika"></span></label><label class="field"><span>Email</span><span class="inp"><input value="dewi.k@sim.co.id"></span></label></div>`)}
-    ${card('Data demo bersama',`<p class="sm muted">Task SKU, task CBD, limit canvassing, event, item facing display, harga sebelum promo, jadwal kunjungan FMCG, pertanyaan monitoring mitra, status tugas dan log aktivitas FMCG, produk difoto, dan izin jadwal per role dibagi dengan aplikasi mobile lewat browser ini.</p>`,{acts:btn('Reset data demo',{v:'outline',size:'sm',icon:'refresh',on:'resetAsk()'})})}
+    ${card('Data demo bersama',`<p class="sm muted">Task SKU, task CBD, limit canvassing, event, item facing display, harga sebelum promo, jadwal kunjungan FMCG, pertanyaan monitoring mitra, status tugas dan log aktivitas FMCG, produk difoto, dan izin jadwal per role dibagi dengan aplikasi mobile lewat browser ini.</p>`,{acts:btn('Reset data demo',{v:'outline',size:'sm',icon:'refresh',on:'resetAsk()',perm:'settings.manage'})})}
     ${card('Tampilan',`<div class="field"><span>Tema</span>${pills([['light','Terang'],['dark','Gelap']],ST.theme,'setTheme')}</div><p class="xs muted" style="margin-top:10px">Pilihan tersimpan di browser ini.</p>`)}
-    ${card('Notifikasi',`<div class="rows">${[['Approval baru','Kirim email saat ada pengajuan'],['Leads baru dari backend','Ringkasan setiap upload'],['Selisih rekonsiliasi','Saat file klien tidak cocok']].map(([l,h],i)=>`<div class="rowlink" style="cursor:default"><span style="flex:1"><b class="fg sm" style="display:block">${l}</b><span class="xs muted">${h}</span></span>${swc(i!==1,"this.setAttribute('aria-checked',this.getAttribute('aria-checked')!=='true')",l)}</div>`).join('')}</div>`)}
+    ${card('Notifikasi',`<div class="rows">${[['Approval baru','Kirim email saat ada pengajuan'],['Leads baru dari backend','Ringkasan setiap upload'],['Selisih rekonsiliasi','Saat file klien tidak cocok']].map(([l,h],i)=>`<div class="rowlink" style="cursor:default"><span style="flex:1"><b class="fg sm" style="display:block">${l}</b><span class="xs muted">${h}</span></span>${swc(i!==1,"const on=this.getAttribute('aria-checked')!=='true';this.setAttribute('aria-checked',on);toast('Notifikasi '+(on?'dinyalakan':'dimatikan'),'"+l+"','default')",l)}</div>`).join('')}</div>`)}
   </div>
   <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">${btn('Reset',{v:'card',on:"toast('Pengaturan dikembalikan')"})}${btn('Simpan pengaturan',{v:'accent',on:"toast('Pengaturan disimpan')"})}</div>`};
 }
@@ -3624,8 +3701,8 @@ function pagePengaturan(){
    Yang tetap di kode hanya kemampuan aplikasi: modul aktivitas yang bisa dirender, tipe field form, dan metrik target. */
 const AKT_MOD=[['jual','Catat penjualan'],['sku','SKU display'],['share','Market share'],['stok','Stock opname'],['posm','Campaign, POSM & planogram']];
 const FTYPE=[['text','Teks'],['number','Angka'],['money','Rupiah'],['date','Tanggal'],['select','Dropdown'],['photo','Foto'],['tel','Telepon'],['calc','Hitung (rumus)']];
-const FSRC=[['','—'],['katprod','Master Kategori produk'],['statprod','Master Status produk'],['produk','Master Produk'],['manual','Opsi manual']];
-const FPERAN=[['','—'],['kategori','Kategori transaksi'],['produk','Nama produk transaksi'],['harga','Harga satuan transaksi'],['qty','Jumlah unit'],['pembeli','Nama pembeli']];
+const FSRC=[['','–'],['katprod','Master Kategori produk'],['statprod','Master Status produk'],['produk','Master Produk'],['manual','Opsi manual']];
+const FPERAN=[['','–'],['kategori','Kategori transaksi'],['produk','Nama produk transaksi'],['harga','Harga satuan transaksi'],['qty','Jumlah unit'],['pembeli','Nama pembeli']];
 const METRIK=[['qty','Quantity (unit)'],['nominal','Nominal (Rp)'],['akuisisi','Akuisisi pelanggan baru']];
 const SKU_METODE=[['qr','Scan QR'],['manual','Input manual']];
 const lbl=(L,k)=>(L.find(x=>x[0]===k)||[k,k])[1];
@@ -3901,7 +3978,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
   const vd=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value');
   Object.defineProperty(HTMLSelectElement.prototype,'value',{configurable:true,get(){return vd.get.call(this)},set(v){ vd.set.call(this,v); if(this._ddPaint) this._ddPaint(); }});
   const label=sel=>{ const l=sel.closest('label'); const sp=l&&l.querySelector('span'); return (sel.getAttribute('aria-label')||(sp&&!sp.querySelector('select,.sel')?sp.textContent:'')||'').replace(/\s*\*\s*$/,'').trim(); };
-  function paint(sel){ const b=sel._ddBtn; if(!b) return; const o=sel.options[sel.selectedIndex], t=o?o.text:'', ph=!o||o.value===''&&(!t||t==='—'); const tt=b.querySelector('.dd-t'); tt.textContent=ph?(sel.dataset.ph||'Pilih'):t; tt.classList.toggle('ph',!!ph); const n=label(sel); b.setAttribute('aria-label',(n?n+': ':'')+(ph?'Pilih':t)); b.disabled=sel.disabled; }
+  function paint(sel){ const b=sel._ddBtn; if(!b) return; const o=sel.options[sel.selectedIndex], t=o?o.text:'', ph=!o||o.value===''&&(!t||t==='–'); const tt=b.querySelector('.dd-t'); tt.textContent=ph?(sel.dataset.ph||'Pilih'):t; tt.classList.toggle('ph',!!ph); const n=label(sel); b.setAttribute('aria-label',(n?n+': ':'')+(ph?'Pilih':t)); b.disabled=sel.disabled; }
   function enhance(sel){ if(sel._dd||sel.hasAttribute('multiple')||sel.size>1) return; sel._dd=1;
     const b=document.createElement('button'); b.type='button'; b.className='dd-btn'; b.setAttribute('role','combobox'); b.setAttribute('aria-haspopup','listbox'); b.setAttribute('aria-expanded','false'); b.innerHTML='<span class="dd-t"></span>'+I('chev',16);
     if(sel.style.width) b.style.width=sel.style.width;
@@ -3934,7 +4011,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
     function draw(){ const words=st.q.trim().toLowerCase().split(/\s+/).filter(Boolean); st.items=all().filter(x=>words.every(w=>(x.t+' '+x.desc).toLowerCase().includes(w)));
       st.hi=Math.min(Math.max(st.hi,0),Math.max(0,st.items.length-1)); if(st.items[st.hi]?.dis){ const n=enabledFrom(st.hi,1); st.hi=n<0?st.hi:n; }
       const view=st.items.slice(0,CAP);
-      list.innerHTML=view.length?view.map((x,g)=>{ const on=x.i===sel.selectedIndex; return `<button type="button" tabindex="-1" role="option" id="${pid}-o${g}" class="dd-opt ${g===st.hi?'hi':''}" aria-selected="${on}" ${x.dis?'aria-disabled="true"':''} data-g="${g}"><span class="dd-tx"><span>${esc(x.t||'—')}</span>${x.why||x.desc?`<small>${esc(x.dis&&x.why?x.why:x.desc)}</small>`:''}</span>${on?`<span class="dd-ck">${I('check',16,2.5)}</span>`:''}</button>`; }).join(''):`<div class="dd-empty">${st.q.trim()?`Tidak ada hasil untuk "${esc(st.q.trim())}"`:'Tidak ada pilihan'}</div>`;
+      list.innerHTML=view.length?view.map((x,g)=>{ const on=x.i===sel.selectedIndex; return `<button type="button" tabindex="-1" role="option" id="${pid}-o${g}" class="dd-opt ${g===st.hi?'hi':''}" aria-selected="${on}" ${x.dis?'aria-disabled="true"':''} data-g="${g}"><span class="dd-tx"><span>${esc(x.t||'–')}</span>${x.why||x.desc?`<small>${esc(x.dis&&x.why?x.why:x.desc)}</small>`:''}</span>${on?`<span class="dd-ck">${I('check',16,2.5)}</span>`:''}</button>`; }).join(''):`<div class="dd-empty">${st.q.trim()?`Tidak ada hasil untuk "${esc(st.q.trim())}"`:'Tidak ada pilihan'}</div>`;
       cntr.textContent=total>20?`${st.items.length} dari ${total}`:'';
       foot.hidden=st.items.length<=CAP; foot.innerHTML=`<span>Menampilkan ${CAP} dari ${st.items.length}. Ketik untuk mempersempit.</span>`;
       inp.setAttribute('aria-activedescendant',view.length?`${pid}-o${st.hi}`:''); place();
@@ -3978,6 +4055,7 @@ function saveDash(){ clearTimeout(dashT); dashT=setTimeout(()=>{ const json=JSON
 function resetAsk(){ openModal(`<h2 class="pt" style="font-size:18px">Reset data demo?</h2><p class="sm muted" style="margin:10px 0 18px;line-height:1.6">Semua perubahan di dashboard dan data bersama dengan aplikasi mobile di browser ini dihapus, lalu halaman dimuat ulang dengan data contoh awal.</p><div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Reset data demo',{v:'danger',icon:'refresh',on:'resetDemo()'})}</div>`); }
 function resetDemo(){ try{ Object.keys(localStorage).filter(k=>k.startsWith('salesapp.')||k.startsWith('sim-')).forEach(k=>localStorage.removeItem(k)); }catch(e){} clearTimeout(dashT); location.reload(); }
 loadDash();
+loadSession();
 render(true);
 </script>
 </body>

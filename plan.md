@@ -216,4 +216,12 @@ Semua butir lampiran masuk ke satu fase atau tercatat tidak berlaku.
   - Tab seksi muncul di bawah 1280px atau saat rail diciutkan. Bar bawah: Overview, Approval, Buat (bulat), Absensi, Leads, More; More aktif saat sheet terbuka. Sheet More: pencarian, Terakhir dibuka, seksi yang bisa dilipat, grid tiga kolom, footer akun. Menu, bel, dan pencarian menjadi bottom sheet di ponsel.
   - Riwayat: tombol Back menutup dialog, scroll `main` dipulihkan saat Back (Navigation API), halaman tabel kembali ke 1 saat pindah rute. Tabel di ponsel menampilkan empat kolom pertama, sisanya di panel rincian.
   - Tidak dikerjakan: panel di URL (`?id=`) dan `?new=1`. Panel dibuka oleh puluhan fungsi dengan argumen berbeda, jadi deep link-nya perlu registri per panel. Dicatat sebagai sisa di fase 8.
-- Fase berikutnya: fase 5, aturan perilaku.
+- Fase 5 selesai 11 Nov 2026. Aturan perilaku:
+  - Sesi demo dengan dua akun (Admin SIM, Supervisor berlabel Usulan), penjaga masuk (`#/approval` tanpa sesi dialihkan ke login lalu kembali), menu "Ganti akun demo", `can(perm)` yang menyembunyikan tombol dan item menu Buat. Penjaga di layar hanya kenyamanan, dicatat di UI.
+  - `act(tipe,{perm,guard,run,audit,toast})` menjadi satu pintu: guard yang sama dengan UI, perubahan, audit bercap pelaku dan jam aplikasi, simpan, render, toast. Dipakai oleh approve, tolak, status entitas, hapus, simpan form, status pesanan, batal pesanan, assign leads, dan keputusan klaim. Tipe aksi berbentuk `entitas/kata-kerja`; folder `docs/03-contracts` belum berisi kontrak, jadi belum ada nama yang harus diikuti.
+  - Tombol Hapus master data diblokir dengan alasan (tooltip dan modal), aksi menolak ulang bila data masih dipakai. Master data tampil baca saja untuk non-admin.
+  - Konfirmasi berupa pertanyaan dengan konsekuensi satu kalimat; Tolak menahan tombol sampai alasan diisi. Toast: default untuk hapus, batal, nonaktif, tolak; sakelar notifikasi kini memberi toast.
+  - Form: galat berupa kalimat utuh, tampil setelah submit pertama lalu diperbarui saat mengetik, `aria-invalid` dan `aria-describedby`, tombol submit bernama kata kerja, tanda wajib biru. Input penjualan menampilkan banner yang naik dari info ke peringatan saat harga melewati toleransi.
+  - Salinan: tanpa em dash.
+  - Tidak dikerjakan: filter workspace pada data (butuh field klien di tiap koleksi transaksi), objek `paths` (jalur sudah satu sumber di NAV), alasan pada opsi picker yang tidak bisa dipilih (dukungan `data-reason` sudah ada, belum ada opsi yang memakainya), chip filter yang menghapus diri saat diklik ulang, satuan di slot kanan, picker bergantung "Pilih X dulu". Dicatat sebagai sisa di fase 8.
+- Fase berikutnya: fase 6, Overview dan halaman daftar.
