@@ -524,7 +524,6 @@ const shSet=(k,v)=>{try{const o=shGet();o[k]=v;localStorage.setItem(SHARE_KEY,JS
 const shReset=()=>{try{localStorage.removeItem(SHARE_KEY)}catch(e){}};
 const SKU_TASK_DEFAULT=[{id:'T-11',prod:'kl2p',toko:'Electronic City Kemang',by:'Rina Marlina',st:'Sedang diperbaiki'},{id:'T-12',prod:'ap30',toko:'Best Denki Alam Sutera',by:'Fajar Nugroho',st:'Menunggu assign'},{id:'T-09',prod:'tv43',toko:'Electronic Solution Puri',by:'Putri Ayuningtyas',st:'Closed'}];
 const CBD_DEFAULT=[{id:'CT-3',t:'Alasan leads tidak goal',to:'Tono Hidayat',qs:['Kenapa nasabah menolak?','Produk apa yang lebih diminati?'],st:'Menunggu jawaban'},{id:'CT-2',t:'Minat produk Dana Tunai',to:'Tono Hidayat',qs:['Produk apa yang paling diminati?','Berapa nominal yang dibutuhkan?','Kapan dibutuhkan?'],st:'Terjawab'}];
-const PFOTO_DEFAULT=['tv50','tv43','kl2p','mc85'];
 const SALES=[
   {u:'rina',name:'Rina Marlina',job:'SPG / Promotor',cabang:'Jakarta Selatan',toko:'Electronic City Kemang',nip:'SIM-24-01187'},
   {u:'budi',name:'Budi Santoso',job:'Canvasing',cabang:'Jakarta Selatan',nip:'SIM-23-00912'},
@@ -631,7 +630,7 @@ const FM_TASK_KEYS=[['stok','Cek stok'],['promo','Price promo'],['facing','Facin
 const D={
   usulan:[{id:'u1',name:'Toko Sumber Makmur',by:'budi',owner:'Pak Hasan',phone:'0812-7781-2290',addr:'Jl. Moh. Kahfi I No. 21, Jagakarsa',cat:'Retail',when:'26 Okt, 13:20',status:'Menunggu verifikasi'}],
   /* Produk free text dari sales: tabel sementara, TIDAK masuk master Produk & harga (MOM 9 Nov bagian 6). */
-  prodTemp:[{id:'pt1',name:'Setrika Uap Mini',harga:249000,note:'Barang titipan toko, belum ada di katalog',by:'budi',toko:'Warung Elektronik Bu Siti',when:'26 Okt, 10:20'},{id:'pt2',name:'Stop kontak 4 lubang',harga:65000,note:'Diminta pembeli, merek lokal',by:'kevin',toko:'Toko Listrik Barokah',when:'24 Okt, 11:15'}],
+  prodTemp:[{id:'pt1',name:'Setrika Uap Mini',harga:249000,q:1,kat:'Small Appliances',by:'budi',toko:'Warung Elektronik Bu Siti',when:'26 Okt, 10:20',trx:'TRX-2610-0121',vals:[['Kategori produk','Small Appliances'],['Status produk','Unit baru'],['Nama produk','Setrika Uap Mini'],['Harga','Rp249.000'],['Diskon','Rp0'],['Harga setelah diskon','Rp249.000'],['Tanggal pembelian','26 Okt 2026'],['Jumlah produk','1'],['Foto produk','2 foto'],['Nama pembeli','Siti Rahmawati'],['Alamat pembeli','–'],['Telepon pembeli','0812-3000-1101']]},{id:'pt2',name:'Stop kontak 4 lubang',harga:65000,q:2,kat:'Small Appliances',by:'kevin',toko:'Toko Listrik Barokah',when:'24 Okt, 11:15',trx:'TRX-2410-0098',vals:[['Kategori produk','Small Appliances'],['Status produk','Unit baru'],['Nama produk','Stop kontak 4 lubang'],['Harga','Rp65.000'],['Diskon','Rp0'],['Harga setelah diskon','Rp65.000'],['Tanggal pembelian','24 Okt 2026'],['Jumlah produk','2'],['Foto produk','1 foto'],['Nama pembeli','Hendra Wijaya'],['Alamat pembeli','Jl. Kembangan Raya 12'],['Telepon pembeli','0812-3000-2202']]}],
   approvals:[
     {id:'a1',type:'Absen terlambat',u:'budi',detail:'Masuk 08:21, terlambat 21 menit',reason:'Ban motor bocor di Jl. TB Simatupang',when:'26 Okt, 08:22'},
     {id:'a2',type:'Cuti',u:'dimas',detail:'Cuti tahunan 27–28 Okt 2026 (2 hari)',reason:'Acara keluarga di Bandung',when:'25 Okt, 19:10'},
@@ -1912,8 +1911,6 @@ TOKO.forEach(t=>{ t.sumber=t.sumber||'Dari client'; t.mapClients=t.mapClients||[
 const tokoClients=t=>t.mapClients&&t.mapClients.length?t.mapClients:[t.client];
 const cabNames=()=>[...new Set(live('cabang').filter(c=>c.status==='Aktif').map(c=>c.name))];
 const FM_PROD=[{id:'f1',name:'Sabun Cair Segar 500 ml',sku:'FM-SC500'},{id:'f2',name:'Mi Instan Rasa Soto',sku:'FM-MI75'},{id:'f3',name:'Teh Melati Botol 350 ml',sku:'FM-TM350'},{id:'f4',name:'Kopi Sachet Susu',sku:'FM-KS25'},{id:'f5',name:'Biskuit Kelapa 120 g',sku:'FM-BK120'}];
-MD.pcek=shRead('pcek',['f1','f3']);
-function pcekToggle(id){ const on=MD.pcek.includes(id); MD.pcek=on?MD.pcek.filter(x=>x!==id):[...MD.pcek,id]; shSet('pcek',MD.pcek); audit('Mengubah produk price promo'); render(false); toast(on?'Produk dilepas dari price promo':'Produk masuk price promo',FM_PROD.find(p=>p.id===id).name); }
 const SUBK={tv50:'Smart TV',tv43:'LED TV',kl2p:'2 Pintu',mc85:'Top Load'};
 const ALL_PROD=()=>[...PRODUCTS,...FM_PROD.map(p=>({...p,cat:'FMCG',client:'cl1'}))];
 const tokoNm=id=>(TOKO.find(x=>x.id===id)||{}).name||id;
@@ -2094,9 +2091,10 @@ function crudList(ent,q,{acts='',prefill=''}={}){
 /* form */
 let FORM=null;
 function multiTog(b,all){ b.classList.toggle('on'); const on=b.classList.contains('on'); b.setAttribute('aria-pressed',on); if(all&&on) b.parentElement.querySelectorAll('.fchip').forEach(x=>{ if(x!==b&&(b.dataset.v===all||x.dataset.v===all)){ x.classList.remove('on'); x.setAttribute('aria-pressed','false'); } }); }
+const fromSales=()=>!!(FORM&&FORM.prefill&&FORM.prefill._tmp);
 function fieldHTML(fd,r){
   const v=r[fd.k], t=((fd.lock&&r.id&&fd.lock(r))||(fd.roIf&&fd.roIf(r)))?'ro':(fd.type||'text'), id='f_'+fd.k;
-  const lab=`<span>${fd.label}${fd.req?' <b style="color:var(--danger)">*</b>':''}</span>`, hint=(ht=>ht?`<p class="xs muted" style="margin-top:6px">${ht}</p>`:'')(typeof fd.hint==='function'?fd.hint(r):fd.hint), err=`<p class="ferr" id="e_${fd.k}"></p>`;
+  const lab=`<span>${fd.label}${(typeof fd.req==='function'?fd.req(r):fd.req)?' <b style="color:var(--danger)">*</b>':''}</span>`, hint=(ht=>ht?`<p class="xs muted" style="margin-top:6px">${ht}</p>`:'')(typeof fd.hint==='function'?fd.hint(r):fd.hint), err=`<p class="ferr" id="e_${fd.k}"></p>`;
   const opts=()=>(typeof fd.opts==='function'?fd.opts():fd.opts).map(o=>Array.isArray(o)?o:[o,o]);
   let h;
   if(t==='ro') h=`<div class="field">${lab}<div class="tile" style="padding:11px 16px;color:var(--fg)">${esc(fd.fmt?fd.fmt(v,r):Array.isArray(v)?(v.map(tokoNm).join(', ')||'–'):(v||'–'))}</div>${hint}</div>`;
@@ -2123,7 +2121,7 @@ function saveForm(mode){
     if(fd.num&&v!=='') v=Number(v);
     if(fd.k==='code'&&typeof v==='string') v=v.toUpperCase();
     vals[fd.k]=v;
-    if(fd.req&&(v===''||v==null||(Array.isArray(v)&&!v.length))) errs[fd.k]=fd.type==='multi'?'Pilih minimal satu':'Wajib diisi';
+    if((typeof fd.req==='function'?fd.req():fd.req)&&(v===''||v==null||(Array.isArray(v)&&!v.length))) errs[fd.k]=fd.type==='multi'?'Pilih minimal satu':'Wajib diisi';
     else if(fd.type==='email'&&v&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) errs[fd.k]='Format email tidak valid';
     else if(!errs[fd.k]&&fd.validate&&v!==''){ const m=fd.validate(v,vals); if(m) errs[fd.k]=m; }
   });
@@ -2660,11 +2658,11 @@ Object.assign(ENT,{
     inUse:r=>{ const c=live('client').filter(x=>x.ind===r.name).length, p=live('produk').filter(x=>x.sektor===r.name).length; return c||p?`Sektor ini dipakai ${c} client dan ${p} produk. Pindahkan dulu ke sektor lain, atau nonaktifkan sektor.`:''; },
     lockStatus:r=>{ const c=live('client').filter(x=>x.ind===r.name).length, p=live('produk').filter(x=>x.sektor===r.name).length; return r.status==='Aktif'&&(c||p)?`Sektor ini dipakai ${c} client dan ${p} produk. Pindahkan dulu ke sektor lain.`:''; }},
   produkm:{src:'produk',label:'Produk',lower:'produk',plural:'Master produk',prefix:'prd',store:()=>MD.produk,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code+(r.sku||'')+r.sektor,unique:'name',filter:(r,q)=>!q.sk||r.sektor===q.sk,blank:()=>({sektor:'Elektronik',lvl:'C',inc:0}),
-    afterCreate:rec=>{ rec.code=codeNext('MD',MD.produk.filter(x=>x!==rec)); },
-    extraTop:r=>r.id?fotoDetail(r.foto,'pm',r.id,''):'',
+    afterCreate:rec=>{ rec.code=codeNext('MD',MD.produk.filter(x=>x!==rec)); if(rec._tmp){ const x=D.prodTemp.find(a=>a.id===rec._tmp); if(x) x.master=rec.id; delete rec._tmp; } },
+    extraTop:r=>(fromSales()?callout('<b>Dari input sales.</b> Nama dan harga diambil dari aplikasi. SKU dan sektor tidak ada di data sales, jadi wajib diisi.')+'<div style="height:12px"></div>':'')+(r.id?fotoDetail(r.foto,'pm',r.id,''):''),
     extra:r=>fotoField('pm',r.foto,'Foto utama produk. Dipakai di semua mapping yang tidak punya foto sendiri. Maksimal 2 MB.'),
     readExtra:()=>({foto:FOTO.pm}),
-    fields:[{k:'code',label:'ID produk',type:'ro',hint:'Dibuat otomatis saat disimpan'},{k:'name',label:'Nama produk',req:true,ph:'contoh: Ponsel Flagship X Pro Max',hint:'Satu produk hanya satu baris di master. Client, toko, kategori, harga toko, dan foto diatur di Mapping produk toko'},{k:'sku',label:'SKU atau model (opsional)'},{k:'sektor',label:'Sektor',type:'select',req:true,opts:()=>sektorNames()},
+    fields:[{k:'code',label:'ID produk',type:'ro',hint:'Dibuat otomatis saat disimpan'},{k:'name',label:'Nama produk',req:true,ph:'contoh: Ponsel Flagship X Pro Max',hint:'Satu produk hanya satu baris di master. Client, toko, kategori, harga toko, dan foto diatur di Mapping produk toko'},{k:'sku',label:'SKU atau model',req:()=>fromSales(),hint:()=>fromSales()?'':'Opsional'},{k:'sektor',label:'Sektor',type:'select',req:true,opts:()=>[...(fromSales()?[['','Pilih sektor']]:[]),...sektorNames().map(n=>[n,n])]},
       {k:'price',label:'Harga dasar (Rp)',type:'number',req:true,validate:v=>!(v>0)?'Isi harga lebih dari nol':'',hint:'Acuan laporan dan harga awal saat produk dipetakan ke toko'},
       {k:'lvl',label:'Level insentif',type:'select',opts:['A','B','C'],hint:'Dipakai laporan insentif dan grading'},{k:'inc',label:'Insentif per unit (Rp)',type:'number',hint:'Boleh 0'}],
     cols:[{label:'Produk',render:r=>`<span style="display:flex;gap:10px;align-items:center">${r.foto?fotoThumb(r.foto,40,'pm',r.id):''}<span><span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.code)}</span></span></span>`,prim:true},{label:'Sektor',render:r=>tag(r.sektor,r.sektor==='Elektronik'?'info':r.sektor==='FMCG'?'accent':'neutral')},
@@ -2690,11 +2688,11 @@ Object.assign(ENT,{
 
 /* ---------- Produk & harga ---------- */
 /* Penjualan mobile dengan nama produk di luar master (p kosong) otomatis masuk tabel produk sementara. */
-function prodTempSync(){ appTrx().forEach(t=>{ if(t.p||!t.pname||t.src==='Dashboard'||t.st==='Dihapus') return; const n=t.pname.toLowerCase(); if(PRODUCTS.some(p=>p.name.toLowerCase()===n)||D.prodTemp.some(x=>x.name.toLowerCase()===n)) return; D.prodTemp.unshift({id:'pt'+hash(t.id),name:t.pname,harga:Math.round(t.total/(t.q||1)),note:'Dari penjualan aplikasi '+t.id,by:t.u,toko:t.toko,when:t.date}); }); }
+function prodTempSync(){ appTrx().forEach(t=>{ if(t.p||!t.pname||t.src==='Dashboard'||t.st==='Dihapus') return; const n=t.pname.toLowerCase(); if(PRODUCTS.some(p=>p.name.toLowerCase()===n)||D.prodTemp.some(x=>x.name.toLowerCase()===n)) return; D.prodTemp.unshift({id:'pt'+hash(t.id),name:t.pname,harga:Math.round(t.total/(t.q||1)),q:t.q||1,kat:t.kat||'',by:t.u,toko:t.toko,when:t.date,trx:t.id,vals:t.vals||null}); }); }
 function pageProduk(q){
   prodTempSync();
-  const tab=['master','mapping','temp','mf','foto','facing','promo'].includes(q.tab)?q.tab:'master';
-  const tabsHTML=utabs([['master','Master produk',live('produk').length],['mapping','Mapping produk toko',live('mapping').length],['promo','Produk price promo'],['foto','Produk difoto'],['facing','Facing display'],['mf','Produk Multi Finance'],['temp','Dari sales (sementara)',D.prodTemp.length]],tab,'prTab');
+  const tab=['master','mapping','temp'].includes(q.tab)?q.tab:'master';
+  const tabsHTML=utabs([['master','Master produk',live('produk').length],['mapping','Mapping produk toko',live('mapping').length],['temp','Produk dari Sales',D.prodTemp.length]],tab,'prTab');
   if(tab==='master') return {title:'Produk & harga',html:`<div style="margin-bottom:4px">${tabsHTML}</div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0"><span class="sm muted">Sektor</span>${sel([['','Semua sektor'],...live('sektor').map(x=>[x.name,x.name])],q.sk||'',"setQ({sk:this.value})",{label:'Filter sektor'})}</div>
   ${crudList('produkm',q,{acts:btn('Upload',{v:'soft',size:'sm',icon:'up',on:"uploadModal('Master produk')"})})}
@@ -2704,20 +2702,21 @@ function pageProduk(q){
   <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0"><span class="sm muted">Client</span>${sel([['','Semua client'],...clients.map(c=>[c.id,c.name])],cl,"setQ({cl:this.value,tk:''})",{label:'Filter client'})}<span class="sm muted">Toko</span>${sel([['','Semua toko'],...tokos.map(t=>[t.id,t.name])],tk,"setQ({tk:this.value})",{label:'Filter toko'})}</div>
   ${crudList('mpt',q,{acts:btn('Upload',{v:'soft',size:'sm',icon:'up',on:"uploadModal('Mapping produk toko')"}),prefill:`{client:'${cl}',toko:'${tk}'}`})}
   <div style="margin-top:12px">${callout('Satu produk master bisa dipetakan ke banyak toko dan client. Setiap mapping punya harga sendiri, dan foto bersifat opsional.')}</div>`}; }
-  return {title:'Produk & harga',html:`
-  ${card(tab==='promo'?'Produk price promo':tab==='foto'?'Produk yang wajib difoto':tab==='facing'?'Item facing display':tab==='mf'?'Produk Multi Finance':tab==='temp'?'Produk dari sales (sementara)':'Produk price promo',`${tabsHTML}
-    ${tab==='temp'?`<p class="xs muted" style="margin-bottom:10px">Sales bisa mencatat penjualan produk yang belum ada di master dengan teks bebas: nama produk, harga, dan catatan. Penjualannya tetap tercatat. Produk ini disimpan di tabel sementara dan admin bisa menjadikannya master Produk &amp; harga.</p>${dataTable('ptmp',{rows:D.prodTemp.map(x=>({...x,_id:x.id})),rowClick:r=>r.master?`toast('${esc(r.name)}','Sudah menjadi master produk.')`:`prodTempPromote('${r.id}')`,acts:r=>r.master?'':btn('Jadikan master',{v:'soft',size:'sm',icon:'plus',on:`prodTempPromote('${r.id}')`}),empty:'Belum ada produk dari sales.',cols:[
-      {label:'Produk (teks bebas)',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${esc(r.note)}</span>`,prim:true},{label:'Harga',render:r=>rp(r.harga),align:'r'},
-      {label:'Dicatat oleh',render:r=>`${esc(byU(r.by)?.name||r.by)}<span class="xs muted" style="display:block">${esc(r.toko)} · ${r.when}</span>`,hide:true},{label:'Status',render:r=>r.master?spill('Jadi master','success'):spill('Sementara','warning')}]})}<div style="margin-top:12px">${callout('Toko dan produk dari teks bebas sama-sama boleh dijadikan master (konfirmasi klien, 10 Nov). Menjadikan master tidak mengubah transaksi lama: transaksi tetap memakai nama yang diketik sales.')}</div>`
-    :tab==='mf'?`<p class="xs muted" style="margin-bottom:10px">Master data produk Multi Finance sudah tersedia dari client dan dipakai di leads (MOM 3). Daftar ini hanya dibaca.</p>${dataTable('pmf',{rows:[['KMK','Kredit Modal Kerja','6 sampai 36 bulan'],['KMG','Kredit Multiguna','12 sampai 60 bulan'],['DTN','Dana Tunai (REA)','6 sampai 24 bulan']].map(([k,n,tn])=>({_id:k,k,n,tn})),rowClick:r=>`toast('${r.n}','Tenor ${r.tn}.')`,cols:[{label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${r.n}</span><span class="mono muted" style="display:block">${r.k}</span>`,prim:true},{label:'Tenor',k:'tn'},{label:'Sumber',render:()=>tag('Dari client','info'),hide:true}]})}`
-    :tab==='foto'?`<p class="xs muted" style="margin-bottom:10px">Produk yang wajib difoto sales di toko. Admin menentukan daftarnya, sales menginput datanya di lokasi (MOM 6.2). Muncul di SKU display mobile.</p>${dataTable('pft',{rows:PRODUCTS.map(p=>({...p,_id:p.id})),rowClick:r=>`pfotoToggle('${r.id}')`,cols:[{label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="mono muted" style="display:block">${r.sku}</span>`,prim:true},{label:'Kategori',k:'cat',hide:true},{label:'Wajib difoto',render:r=>shRead('pfoto',PFOTO_DEFAULT).includes(r.id)?tag('Ya','success'):tag('Tidak','neutral')}]})}`
-    :tab==='facing'?`<p class="xs muted" style="margin-bottom:10px">Item yang difoto Promotor FMCG di Facing display. Isi menunya sama dengan Campaign, POSM & planogram: foto lokasi, lalu dinilai terhadap acuan (MOM 10.2). Perubahan tampil di aplikasi mobile.</p>${dataTable('fcg',{rows:facingAll().map(x=>({...x,_id:x.id})),rowClick:r=>`facingModal('${r.id}')`,acts:r=>rowActs(`facingModal('${r.id}')`,`facingDelAsk('${r.id}')`),empty:'Belum ada item facing display.',cols:[{label:'Item',k:'name',prim:true},{label:'Acuan penilaian',k:'acuan',hide:true},{label:'Status',render:r=>stPill(r.status||'Aktif')}]})}`
-    :`<p class="xs muted" style="margin-bottom:10px">Produk yang dicek Promotor FMCG sesuai setup admin (MOM 10.2). Admin mengisi harga sebelum promo. Harga promo diinput sendiri oleh promotor, persen diskon dihitung otomatis di aplikasi.</p>${dataTable('pcek',{rows:FM_PROD.map(p=>({...p,_id:p.id})),rowClick:r=>`pcekModal('${r.id}')`,acts:r=>rowActs(`pcekModal('${r.id}')`,`pcekToggle('${r.id}')`,{del:MD.pcek.includes(r.id)}),cols:[{label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="mono muted" style="display:block">${r.sku}</span>`,prim:true},{label:'Harga sebelum promo',render:r=>`<span class="tabular">${rp(fmPriceB(r.id))}</span>`,align:'r'},{label:'Dicek di price promo',render:r=>MD.pcek.includes(r.id)?tag('Ya','success'):tag('Tidak','neutral')}]})}`
-}`,
-    {acts:`${tab==='facing'?btn('Tambah item',{v:'accent',size:'sm',icon:'plus',on:'facingModal()'}):''}`})}`};
+  return {title:'Produk & harga',html:`<div style="margin-bottom:4px">${tabsHTML}</div>
+  <div style="margin-top:12px">${card('Produk dari Sales',`<p class="xs muted" style="margin-bottom:10px">Sales mencatat penjualan produk yang belum ada di master lewat form Input manual di aplikasi. Klik baris untuk melihat isiannya, lalu jadikan master bila perlu.</p>${dataTable('ptmp',{rows:D.prodTemp.map(x=>({...x,_id:x.id})),rowClick:r=>`prodTempPanel('${r.id}')`,empty:'Belum ada produk dari sales.',cols:[
+      {label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${esc(r.toko)}</span>`,prim:true},
+      {label:'Kategori',render:r=>esc(ptVal(r,'Kategori produk')||r.kat||'–'),hide:true},{label:'Harga',render:r=>`<span class="tabular">${rp(r.harga)}</span>`,align:'r'},{label:'Jumlah',render:r=>r.q||1,align:'r',hide:true},
+      {label:'Dicatat oleh',render:r=>`${esc(byU(r.by)?.name||r.by)}<span class="xs muted" style="display:block">${esc(r.when)}</span>`,hide:true},{label:'Status',render:r=>r.master?spill('Jadi master','success'):spill('Sementara','warning')}]})}`)}</div>`};
 }
+const ptVal=(r,label)=>((r.vals||[]).find(v=>v[0]===label)||[])[1]||'';
+function prodTempPanel(id){ const x=D.prodTemp.find(a=>a.id===id); if(!x) return; const done=!!x.master;
+  const kv=[['Sales',byU(x.by)?.name||x.by],['Toko',x.toko],['Waktu input',x.when],['ID transaksi',x.trx||'–']];
+  openPanel(x.name,`<div class="kv" style="margin-bottom:14px">${kv.map(([k,v])=>`<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</div>
+  ${done?callout('Produk ini sudah menjadi master. Transaksi lama tetap memakai nama yang diketik sales.'):callout('SKU dan sektor tidak ada di data sales, jadi wajib diisi saat disimpan ke master.')}
+  ${x.vals?`<div class="xs muted" style="margin:14px 0 8px">Isian form penjualan (input manual)</div><div class="rows">${x.vals.map(([l,v])=>`<div class="rowlink" style="cursor:default;padding:8px 0"><span class="sm muted" style="flex:1">${esc(l)}</span><span class="sm fg" style="text-align:right">${esc(v||'–')}</span></div>`).join('')}</div>`:''}`,
+  done?`${btn('Tutup',{v:'card',on:'closeLayer()'})}${btn('Buka di master',{v:'accent',on:`closeLayer();go('/produk?tab=master&q=${encodeURIComponent(x.name)}')`})}`:`${btn('Tutup',{v:'card',on:'closeLayer()'})}${btn('Jadikan master',{v:'accent',on:`prodTempToMaster('${id}')`})}`,{sub:'Produk dari Sales · '+(done?'Jadi master':'Sementara')}); }
+function prodTempToMaster(id){ const x=D.prodTemp.find(a=>a.id===id); if(!x||x.master) return; closeLayer(); openForm('produkm',null,{name:x.name,price:x.harga,sektor:'',_tmp:id}); }
 function prTab(t){ setQ({tab:t,q:'',st:'',cl:'',tk:'',sk:''}); }
-/* Produk teks bebas dari sales → master Produk & harga (konfirmasi klien 10 Nov). */
 const brandClient=name=>MD.brand.find(b=>!b.del&&b.name===name)?.client||'';
 const katInUse=r=>{ const n=live('katprod').filter(k=>k.parent===r.name).length, p=live('mapping').filter(x=>x.kategori===r.id).length; return n||p?`Kategori ini dipakai ${n} sub kategori dan ${p} mapping produk toko. Pindahkan dulu, atau nonaktifkan kategori.`:''; };
 const katcState=()=>{ const rec=FORM&&FORM.id?MD.katprod.find(k=>k.id===FORM.id):null, pre=(FORM&&FORM.prefill)||{}; return rec?{cl:brandClient(rec.brand),br:rec.brand}:{cl:pre.client||'',br:pre.brand||''}; };
@@ -2729,56 +2728,6 @@ const katPass=(r,q)=>(!q.br||r.brand===q.br)&&(!q.lv||katLevel(r)===+q.lv)&&(!q.
 const katParentOf=k=>k.parent?(MD.katprod.find(x=>!x.del&&x.name===k.parent&&x.brand===k.brand)||MD.katprod.find(x=>!x.del&&x.name===k.parent)):null;
 const katLevel=k=>{ let n=1,c=k,g=0; while(c.parent&&g++<30){ c=katParentOf(c); if(!c) break; n++; } return n; };
 const katCycle=(parent,name)=>{ let n=parent,g=0; while(n&&g++<30){ if(n===name) return true; const k=MD.katprod.find(x=>!x.del&&x.name===n); n=k?k.parent:''; } return false; };
-const katRoot=(brand,name)=>{ let n=name,g=0; while(g++<20){ const k=MD.katprod.find(x=>!x.del&&x.brand===brand&&x.name===n); if(!k||!k.parent) return n; n=k.parent; } return n; };
-function ptKatOpts(){ const b=document.getElementById('pt_b').value, s=document.getElementById('pt_k'); s.innerHTML=live('katprod').filter(k=>k.brand===b&&k.status==='Aktif').map(k=>`<option value="${esc(k.name)}">${esc(k.parent?k.parent+' › '+k.name:k.name)}</option>`).join(''); }
-function prodTempPromote(id){ const x=D.prodTemp.find(a=>a.id===id); if(!x||x.master) return;
-  const brands=live('brand').filter(b=>b.status==='Aktif'), b0=brands[0]?.name||'';
-  openModal(`<h2 class="pt" style="font-size:22px">Jadikan master produk<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Dari input ${esc(byU(x.by)?.name||x.by)} di ${esc(x.toko)}. Lengkapi data master sebelum disimpan.</p>
-  <div class="grid" style="gap:12px"><label class="field"><span>Nama produk</span><span class="inp"><input id="pt_n" value="${esc(x.name)}"></span></label>
-    <div class="grid g2" style="gap:10px"><label class="field"><span>Brand</span>${sel(brands.map(b=>[b.name,b.name+' · '+cName(b.client)]),b0,'ptKatOpts()',{label:'Brand',id:'pt_b'})}</label>
-    <label class="field"><span>Kategori produk</span><span class="sel" style="display:flex"><select id="pt_k" style="width:100%">${live('katprod').filter(k=>k.brand===b0&&k.status==='Aktif').map(k=>`<option value="${esc(k.name)}">${esc(k.parent?k.parent+' › '+k.name:k.name)}</option>`).join('')}</select>${I('chev',16)}</span></label></div>
-    <div class="grid g2" style="gap:10px"><label class="field"><span>SKU</span><span class="inp"><input id="pt_s" placeholder="contoh: KR-ST01"></span></label><label class="field"><span>Harga dasar (Rp)</span><span class="inp"><input id="pt_h" inputmode="numeric" value="${x.harga}"></span></label></div>
-    <label class="field"><span>Level insentif</span>${sel(['A','B','C'],'C','',{label:'Level insentif',id:'pt_l'})}</label><p class="ferr" id="pt_e"></p></div>
-  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Simpan ke master',{v:'accent',on:`prodTempSave('${id}')`})}</div>`); }
-function prodTempSave(id){ const x=D.prodTemp.find(a=>a.id===id), g=k=>document.getElementById(k), clean=s=>s.replace(/['"<>`]/g,'').trim(), e=g('pt_e');
-  const name=clean(g('pt_n').value), brand=g('pt_b').value, kp=g('pt_k').value, sku=clean(g('pt_s').value).toUpperCase(), price=parseInt(g('pt_h').value.replace(/\D/g,''),10);
-  if(!name||!sku){ e.textContent='Isi nama produk dan SKU.'; return; } if(!kp){ e.textContent='Brand ini belum punya kategori produk.'; return; }
-  if(!(price>0)){ e.textContent='Isi harga dasar lebih dari nol.'; return; }
-  if(PRODUCTS.some(p=>p.sku===sku)){ e.textContent='SKU sudah dipakai produk lain.'; return; }
-  const kat=MD.katprod.find(k=>k.brand===brand&&k.name===kp), pm=mkProd(name,sku,sektorOfClient(brandClient(brand)),{price,lvl:g('pt_l').value,inc:0}), tk=TOKO.find(t=>t.name===x.toko&&tokoClients(t).includes(brandClient(brand))); if(tk&&kat) mkMap(pm.id,brandClient(brand),tk.id,price,kat.id); x.master=pm.id;
-  audit('Menjadikan produk '+name+' sebagai master (dari input sales)'); closeLayer(); render(false); toast('Produk masuk master',name+' · '+sku+'. Bisa dipilih sales di aplikasi.'); }
-const FACING_DEFAULT=[{id:'fc1',name:'Rak Utama',kind:'Facing display',acuan:'Susunan facing di rak utama sesuai brief'},{id:'fc2',name:'Boot',kind:'Facing display',acuan:'Susunan facing di boot sesuai brief'},{id:'fc3',name:'Gudang',kind:'Facing display',acuan:'Susunan barang di gudang sesuai brief'}];
-const facingAll=()=>shRead('facing',FACING_DEFAULT).filter(x=>!x.del);
-function facingModal(id){ const x=id?facingAll().find(a=>a.id===id):{name:'',acuan:'',status:'Aktif'};
-  openModal(`<h2 class="pt" style="font-size:22px">${id?'Edit':'Tambah'} item facing display<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Item ini muncul di Facing display aplikasi mobile Promotor FMCG dan MD.</p>
-  <div class="grid" style="gap:12px"><label class="field"><span>Nama item</span><span class="inp"><input id="fc_n" value="${esc(x.name)}" placeholder="contoh: Rak Utama"></span></label><label class="field"><span>Acuan penilaian</span><span class="inp"><input id="fc_a" value="${esc(x.acuan)}" placeholder="contoh: Susunan facing sesuai brief"></span></label>
-  <label class="field"><span>Status</span>${sel(['Aktif','Nonaktif'],x.status||'Aktif','',{label:'Status',id:'fc_s'})}</label></div>
-  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Simpan',{v:'accent',on:`facingSave('${id||''}')`})}</div>`); }
-function facingSave(id){ const n=document.getElementById('fc_n').value.replace(/['"<>`]/g,'').trim(), a=document.getElementById('fc_a').value.replace(/['"<>`]/g,'').trim(), st=document.getElementById('fc_s').value;
-  if(!n){ toast('Periksa isian','Isi nama item.','danger'); return; }
-  const L=JSON.parse(JSON.stringify(shRead('facing',FACING_DEFAULT)));
-  if(L.some(x=>!x.del&&x.id!==id&&x.name.toLowerCase()===n.toLowerCase())){ toast('Periksa isian','Nama item sudah dipakai.','danger'); return; }
-  if(id){ Object.assign(L.find(x=>x.id===id),{name:n,acuan:a||'Sesuai brief',status:st}); audit('Mengubah item facing display '+n); }
-  else { L.push({id:'fc'+Date.now()%1e6,name:n,kind:'Facing display',acuan:a||'Sesuai brief',status:st}); audit('Menambahkan item facing display '+n); }
-  shSet('facing',L); closeLayer(); render(false); toast(id?'Item diperbarui':'Item ditambahkan',n); }
-function facingDelAsk(id){ const x=facingAll().find(a=>a.id===id), act=facingAll().filter(a=>(a.status||'Aktif')==='Aktif');
-  if(act.length<=1&&(x.status||'Aktif')==='Aktif') return openModal(`<h2 class="pt" style="font-size:22px">Tidak bisa dihapus<i>.</i></h2><p class="sm" style="margin:10px 0 18px;line-height:1.6">Ini satu-satunya item aktif. Facing display butuh minimal satu item. Tambah item lain dulu.</p><div style="display:flex;justify-content:flex-end">${btn('Tutup',{v:'card',on:'closeLayer()'})}</div>`);
-  openModal(`<h2 class="pt" style="font-size:22px">Hapus ${esc(x.name)}?<i>.</i></h2><p class="sm muted" style="margin:10px 0 18px;line-height:1.6">Item tidak lagi muncul di aplikasi mobile. Data disembunyikan dari daftar dan tetap tersimpan untuk audit (soft delete).</p><div style="display:flex;gap:10px;justify-content:flex-end">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Hapus',{v:'danger',icon:'trash',on:`facingDel('${id}')`})}</div>`); }
-function facingDel(id){ const L=JSON.parse(JSON.stringify(shRead('facing',FACING_DEFAULT))), x=L.find(a=>a.id===id); x.del=true; shSet('facing',L); audit('Menghapus item facing display '+x.name); closeLayer(); render(false); toast('Item dihapus',x.name); }
-const FM_PRICE_DEFAULT={f1:29900,f2:4000,f3:6500,f4:2000,f5:11900};
-const fmPriceB=id=>shRead('fmPrice',FM_PRICE_DEFAULT)[id]||0;
-function pcekModal(id){ const p=FM_PROD.find(x=>x.id===id), on=MD.pcek.includes(id);
-  openModal(`<h2 class="pt" style="font-size:22px">Edit price promo<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">${esc(p.name)} · ${p.sku}</p>
-  <div class="grid" style="gap:12px"><label class="field"><span>Harga sebelum promo (Rp)</span><span class="inp"><input id="pc_b" inputmode="numeric" value="${fmPriceB(id)}"></span></label>
-  <label class="field"><span>Dicek di price promo</span>${sel(['Ya','Tidak'],on?'Ya':'Tidak','',{label:'Dicek di price promo',id:'pc_s'})}</label></div>
-  <p class="xs muted" style="margin-top:10px">Harga promo diinput promotor di aplikasi. Persen diskon dihitung otomatis dari dua harga ini.</p>
-  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">${btn('Batal',{v:'card',on:'closeLayer()'})}${btn('Simpan',{v:'accent',on:`pcekSave('${id}')`})}</div>`); }
-function pcekSave(id){ const b=parseInt(document.getElementById('pc_b').value.replace(/\D/g,''),10); if(!(b>0)){ toast('Periksa isian','Isi harga sebelum promo lebih dari nol.','danger'); return; }
-  const P={...shRead('fmPrice',FM_PRICE_DEFAULT),[id]:b}; shSet('fmPrice',P);
-  const on=document.getElementById('pc_s').value==='Ya'; MD.pcek=on?[...new Set([...MD.pcek,id])]:MD.pcek.filter(x=>x!==id); shSet('pcek',MD.pcek);
-  audit('Mengubah price promo '+FM_PROD.find(x=>x.id===id).name); closeLayer(); render(false); toast('Price promo tersimpan',FM_PROD.find(x=>x.id===id).name+' · '+rp(b)); }
-function pfotoToggle(id){ const L=shRead('pfoto',PFOTO_DEFAULT), on=L.includes(id); shSet('pfoto',on?L.filter(x=>x!==id):[...L,id]); audit('Mengubah produk wajib difoto'); render(false); toast(on?'Produk tidak lagi wajib difoto':'Produk wajib difoto',PRODUCTS.find(p=>p.id===id).name); }
-
 /* ---------- Parameter ---------- */
 function pageParameter(){
   const p=(l,v,h)=>`<div class="rowlink" style="cursor:default"><span style="flex:1"><b class="fg sm" style="display:block">${l}</b><span class="xs muted">${h}</span></span><b class="fg tabular">${v}</b>${ibtn('edit','Ubah '+l,`toast('Parameter disimpan','${l}')`,{v:'soft',size:'icon-sm'})}</div>`;
