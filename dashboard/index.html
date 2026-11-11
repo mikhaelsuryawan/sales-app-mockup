@@ -974,7 +974,7 @@ const NAV=[
   ['Usulan SFA',[['/penagihan','Penagihan & piutang','wallet'],['/klaim-biaya','Klaim biaya','file'],['/live-tracking','Live tracking','pin'],['/kepatuhan-kunjungan','Kepatuhan kunjungan','checks'],['/pengumuman','Pengumuman','bell'],['/sinkron','Status sinkron','refresh']]],
   ['Client management',[['/client','Client','building'],['/cabang-client','Cabang client','pin'],['/mapping-outlet','Mapping outlet','store'],['/penugasan','Penugasan & jadwal','cal']]],
   ['Toko',[['/toko','Toko','store','usulan'],['/region','Region','pin'],['/kategori-toko','Kategori toko','grid']]],
-  ['Master data',[['/brand','Brand','tag'],['/kompetitor','Kompetitor','tag'],['/kategori-produk','Kategori produk','grid'],['/produk','Produk & harga','pkg'],['/status-produk','Status produk','tag'],['/satuan','Satuan','sliders'],['/konversi','Konversi','grid']]],
+  ['Master data',[['/sektor','Sektor','grid'],['/brand','Brand','tag'],['/kompetitor','Kompetitor','tag'],['/kategori-produk','Kategori produk','grid'],['/produk','Produk & harga','pkg'],['/status-produk','Status produk','tag'],['/satuan','Satuan','sliders'],['/konversi','Konversi','grid']]],
   ['Master data user',[['/company-sim','Company','building'],['/user-admin','User management','shield'],['/user-sales','Sales management','usercog'],['/iam','IAM','shield']]],
   ['Pengaturan aplikasi',[['/konfigurasi-aktivitas','Aktivitas per role','sliders'],['/form-penjualan','Form penjualan','checks'],['/parameter','Parameter','sliders']]]
 ];
@@ -1678,7 +1678,7 @@ const MD={
     {id:'cl2',code:'BPRMU',name:'BPR Mitra Usaha',ind:'Perbankan',modul:['Sales automation'],pic:'Ratih Kusuma',email:'ratih@bprmitrausaha.co.id',phone:'021-7654-3210',api:'Terhubung',status:'Aktif'},
     {id:'cl4',code:'NHA',name:'PT Nusantara Home Appliances',ind:'Elektronik',modul:['Sales retail'],pic:'Yulia Andriani',email:'yulia@nha.co.id',phone:'021-5551-2020',api:'Terhubung',status:'Aktif'},
     {id:'cl3',code:'MTI',name:'PT Maju Tekstil Indonesia',ind:'Tekstil',modul:['Sales retail'],pic:'Hendro Wijaya',email:'hendro@majutekstil.co.id',phone:'022-555-7788',api:'Belum terhubung',status:'Nonaktif'},
-    {id:'cl5',code:'SMI',name:'PT Samudra Motor Indonesia',ind:'Otomotif',modul:['Sales retail'],pic:'Andika Prasetyo',email:'andika@samudramotor.example',phone:'021-5522-8800',api:'Terhubung',status:'Aktif'},
+    {id:'cl5',code:'SMI',name:'PT Samudra Motor Indonesia',ind:'Kendaraan',modul:['Sales retail'],pic:'Andika Prasetyo',email:'andika@samudramotor.example',phone:'021-5522-8800',api:'Terhubung',status:'Aktif'},
     {id:'cl6',code:'BPS',name:'PT Bumi Pangan Sejahtera',ind:'FMCG',modul:['Sales retail'],pic:'Lestari Wulandari',email:'lestari@bumipangan.example',phone:'021-4488-2211',api:'Terhubung',status:'Aktif'},
     {id:'cl7',code:'MFM',name:'PT Mitra Finansia Multiguna',ind:'Multi Finance',modul:['Sales automation'],pic:'Rudi Hartanto',email:'rudi@mitrafinansia.example',phone:'021-7799-3300',api:'Terhubung',status:'Aktif'},
     {id:'cl8',code:'NGD',name:'PT Nusa Gadget',ind:'Elektronik',modul:['Sales retail'],pic:'Maya Kusumawati',email:'maya@nusagadget.example',phone:'021-3300-4410',api:'Terhubung',status:'Aktif'},
@@ -1916,9 +1916,9 @@ const ENT={
   client:{label:'Client',plural:'Daftar client',prefix:'cl',store:()=>MD.client,filter:(r,q)=>!q.sg||r.simco===q.sg,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code+r.pic,unique:'code',
     blank:()=>({simco:'sg1',ind:'Elektronik',api:'Belum terhubung'}),
     afterCreate:rec=>{ MD.user.forEach(u=>{ if(u.allClients) u.clients=[...(u.clients||[]),rec.id]; }); },
-    fields:[{k:'code',label:'Kode client',req:true,ph:'contoh: ARUNIKA',hint:'Huruf kapital, dipakai di nomor transaksi'},{k:'name',label:'Nama perusahaan',req:true},{k:'simco',label:'Company',type:'select',req:true,opts:simcoOpts,hint:'Perusahaan di SIM Group yang menaungi client ini'},{k:'ind',label:'Industri',type:'select',opts:['Elektronik','Perbankan','Multi Finance','FMCG','Tekstil','Otomotif','Lainnya'],hint:'Data industri ada di BPR 1. Cara pengambilannya belum dibahas'},
+    fields:[{k:'code',label:'Kode client',req:true,ph:'contoh: ARUNIKA',hint:'Huruf kapital, dipakai di nomor transaksi'},{k:'name',label:'Nama perusahaan',req:true},{k:'simco',label:'Company',type:'select',req:true,opts:simcoOpts,hint:'Perusahaan di SIM Group yang menaungi client ini'},{k:'ind',label:'Sektor',type:'select',opts:()=>sektorNames(),hint:'Dari master Sektor'},
       {k:'pic',label:'PIC klien',req:true},{k:'email',label:'Email PIC',type:'email',req:true},{k:'phone',label:'Telepon',type:'tel'},{k:'api',label:'Integrasi API',type:'select',opts:['Terhubung','Belum terhubung'],hint:'Kirim penjualan & tarik produk/harga (BRD 2.18)'}],
-    cols:[{label:'Client',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.code)}</span>`,prim:true},{label:'Company',render:r=>esc(simcoName(r.simco))},{label:'Industri',k:'ind',hide:true},{label:'Cabang',render:r=>live('cabang').filter(c=>c.client===r.id).length,align:'r',hide:true},
+    cols:[{label:'Client',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.code)}</span>`,prim:true},{label:'Company',render:r=>esc(simcoName(r.simco))},{label:'Sektor',k:'ind',hide:true},{label:'Cabang',render:r=>live('cabang').filter(c=>c.client===r.id).length,align:'r',hide:true},
       {label:'Toko',render:r=>live('toko').filter(t=>tokoClients(t).includes(r.id)).length,align:'r',hide:true},{label:'User',render:r=>live('user').filter(u=>u.clients.includes(r.id)).length,align:'r',hide:true},{label:'API',render:r=>tag(r.api,r.api==='Terhubung'?'success':'warning'),hide:true},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>{ const t=live('toko').filter(x=>x.client===r.id).length, u=live('user').filter(x=>x.clients.includes(r.id)).length, cb=live('cabang').filter(x=>x.client===r.id).length; return t||u||cb?`Client ini masih punya ${cb} cabang, ${t} toko, dan ${u} user. Pindahkan atau hapus dulu datanya, atau nonaktifkan client.`:''; }},
   cabang:{label:'Cabang client',lower:'cabang client',plural:'Daftar cabang client',prefix:'cb',store:()=>MD.cabang,title:r=>r.name,search:r=>r.name+r.kota+cName(r.client),blank:()=>({client:'cl1'}),
@@ -2460,6 +2460,7 @@ const pageKatProd=q=>{ const tab=q.tab==='client'?'client':'general', cls=client
     :`<div style="margin-top:12px">${kpFilters('general',q,cl)}${crudList('katg',q)}</div><div style="margin-top:12px">${callout('<b>MOM 9 Nov.</b> Kategori General berlaku untuk semua client. Boleh bertingkat tanpa batas level, mengikuti pola Si Gesit.')}</div>`;
   return {title:'Kategori produk',html:tabs+body}; };
 const pageEvent=q=>(shSet('events',MD.event),{title:'Event',html:`${crudList('event',q)}<div style="margin-top:12px">${callout('<b>Rekomendasi.</b> Rincian penjualan di event menunggu konfirmasi klien.')}</div>`});
+const pageSektor=q=>({title:'Sektor',html:`${crudList('sektor',q)}<div style="margin-top:12px">${callout('Sektor dipakai di <a href="#/client" style="color:var(--accent-text);font-weight:600">Client</a> dan <a href="#/produk" style="color:var(--accent-text);font-weight:600">Master produk</a>. Mengubah nama sektor ikut memperbarui keduanya.')}</div>`});
 const pageStatProd=q=>({title:'Status produk',html:`${crudList('statprod',q)}`});
 const pageSatuan=q=>({title:'Satuan',html:`${crudList('satuan',q,{acts:btn('Buka konversi',{v:'soft',size:'sm',on:"go('/konversi')"})})}`});
 const satOf=id=>MD.satuan.find(s=>s.id===id), satName=id=>(satOf(id)||{}).name||'–', prodNm=id=>(kvProds().find(p=>p.id===id)||{}).name||'–';
@@ -2525,8 +2526,18 @@ function sharePanel(id){ const r=SHARE_REP.find(x=>x._id===id);
 
 /* ---------- Master produk dan mapping produk toko ----------
    Master produk: satu baris per produk, berlaku lintas sektor dan client. Mapping produk toko: produk + client + toko + harga + foto (opsional). */
-const SEKTOR=['Elektronik','FMCG','Kendaraan','Multi Finance','Tekstil','Lainnya'];
-const IND_SEKTOR={Elektronik:'Elektronik',FMCG:'FMCG',Otomotif:'Kendaraan',Perbankan:'Multi Finance','Multi Finance':'Multi Finance',Tekstil:'Tekstil'};
+const sektorNames=()=>live('sektor').filter(x=>x.status==='Aktif').map(x=>x.name);
+const sektorOfClient=id=>(MD.client.find(c=>c.id===id)||{}).ind||'Lainnya';
+MD.sektor=[
+  {id:'sk1',code:'ELK',name:'Elektronik',desc:'Televisi, kulkas, mesin cuci, ponsel, dan peralatan rumah tangga elektronik.',status:'Aktif'},
+  {id:'sk2',code:'FMC',name:'FMCG',desc:'Makanan, minuman, dan kebutuhan rumah tangga yang cepat habis.',status:'Aktif'},
+  {id:'sk3',code:'KND',name:'Kendaraan',desc:'Mobil, sepeda motor, suku cadang, dan aksesori kendaraan.',status:'Aktif'},
+  {id:'sk4',code:'MFN',name:'Multi Finance',desc:'Pembiayaan multiguna, kendaraan, dan dana tunai.',status:'Aktif'},
+  {id:'sk5',code:'PRB',name:'Perbankan',desc:'Kredit dan simpanan dari bank atau BPR.',status:'Aktif'},
+  {id:'sk6',code:'TKS',name:'Tekstil',desc:'Kain, benang, dan pakaian jadi.',status:'Aktif'},
+  {id:'sk7',code:'KSH',name:'Kesehatan',desc:'Obat bebas, suplemen, dan alat kesehatan rumah tangga.',status:'Aktif'},
+  {id:'sk8',code:'LNY',name:'Lainnya',desc:'Sektor di luar daftar. Pindahkan ke sektor yang tepat bila sudah ada.',status:'Aktif'}
+];
 const codeNext=(pre,arr)=>pre+'-'+String(arr.reduce((m,r)=>Math.max(m,+String(r.code||'').split('-')[1]||0),0)+1).padStart(4,'0');
 MD.produk=[]; MD.mapping=[];
 MD.katprod.push({id:'kp143',name:'Small Appliances',brand:'KIRANA',parent:'',cakupan:'Client',client:'cl1',share:'Ya',status:'Aktif'},{id:'kp140',name:'Telepon Seluler',brand:'',parent:'',cakupan:'General',share:'Ya',status:'Aktif'},{id:'kp141',name:'Smartphone',brand:'',parent:'Telepon Seluler',cakupan:'General',share:'Ya',status:'Aktif'},{id:'kp142',name:'Produk FMCG Umum',brand:'',parent:'',cakupan:'General',share:'Ya',status:'Aktif'});
@@ -2536,7 +2547,7 @@ const mkMap=(produk,client,toko,harga)=>{ const r={id:'mpt'+(MD.mapping.length+1
   mkMap(flag.id,'cl8','dg_a',24999000); mkMap(flag.id,'cl8','dg_b',25499000); mkMap(flag.id,'cl9','dg_c',24799000);
   const pmOf={}, all=ALL_PROD();
   all.forEach(p=>{ const kt=MD.katprod.find(k=>k.cakupan==='Client'&&k.brand===p.brand&&k.name===(p.kp||p.cat))||MD.katprod.find(k=>k.brand===p.brand&&k.name===p.cat)||(p.cat==='FMCG'?{id:'kp142'}:{});
-    pmOf[p.id]=mkProd(p.name,p.sku,p.cat==='FMCG'?'FMCG':IND_SEKTOR[(MD.client.find(c=>c.id===prodClient(p))||{}).ind]||'Lainnya',{id:p.id,kategori:kt.id||'',price:p.price||0,lvl:p.lvl||'C',inc:p.inc||0}).id; });
+    pmOf[p.id]=mkProd(p.name,p.sku,p.cat==='FMCG'?'FMCG':sektorOfClient(prodClient(p)),{id:p.id,kategori:kt.id||'',price:p.price||0,lvl:p.lvl||'C',inc:p.inc||0}).id; });
   TOKO.forEach(t=>{ if(['dg_a','dg_b','dg_c'].includes(t.id)) return; const fk=catF()[t.cat]||1;
     outletMap(t.id).forEach(pid=>{ const p=all.find(x=>x.id===pid); if(p) mkMap(pmOf[pid],prodClient(p)||t.client,t.id,Math.round(p.price*fk/1000)*1000); }); }); }
 /* Kategori produk di master: jalur, level, dan jumlah level pohonnya. Laporan membaca PRODUCTS yang diturunkan dari master produk. */
@@ -2562,9 +2573,16 @@ function mptFotoPick(inp){ const f=inp.files&&inp.files[0]; if(!f) return; if(!/
   const rd=new FileReader(); rd.onload=()=>{ MPT_FOTO=rd.result; document.getElementById('mp_fwrap').innerHTML=mptFotoHTML(); }; rd.readAsDataURL(f); }
 function mptFotoClear(){ MPT_FOTO=''; document.getElementById('mp_fwrap').innerHTML=mptFotoHTML(); }
 Object.assign(ENT,{
+  sektor:{label:'Sektor',lower:'sektor',plural:'Master sektor',prefix:'sk',store:()=>MD.sektor,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code+(r.desc||''),unique:'name',
+    onRename:(old,nw)=>{ MD.client.forEach(c=>{ if(c.ind===old) c.ind=nw; }); MD.produk.forEach(p=>{ if(p.sektor===old) p.sektor=nw; }); },
+    fields:[{k:'code',label:'Kode sektor',req:true,ph:'contoh: ELK',hint:'Huruf kapital, 3 sampai 5 karakter',validate:v=>!/^[A-Za-z]{3,5}$/.test(v)?'Isi 3 sampai 5 huruf':MD.sektor.some(x=>!x.del&&x.id!==(FORM&&FORM.id)&&String(x.code).toLowerCase()===v.toLowerCase())?'Kode sudah dipakai':''},{k:'name',label:'Nama sektor',req:true,ph:'contoh: Elektronik'},{k:'desc',label:'Keterangan',type:'textarea'}],
+    cols:[{label:'Sektor',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.code)}</span>`,prim:true},{label:'Keterangan',render:r=>`<span class="xs muted">${esc(r.desc||'–')}</span>`,hide:true},
+      {label:'Client',render:r=>live('client').filter(c=>c.ind===r.name).length,align:'r'},{label:'Produk',render:r=>live('produk').filter(p=>p.sektor===r.name).length,align:'r'},{label:'Status',render:r=>stPill(r.status)}],
+    inUse:r=>{ const c=live('client').filter(x=>x.ind===r.name).length, p=live('produk').filter(x=>x.sektor===r.name).length; return c||p?`Sektor ini dipakai ${c} client dan ${p} produk. Pindahkan dulu ke sektor lain, atau nonaktifkan sektor.`:''; },
+    lockStatus:r=>{ const c=live('client').filter(x=>x.ind===r.name).length, p=live('produk').filter(x=>x.sektor===r.name).length; return r.status==='Aktif'&&(c||p)?`Sektor ini dipakai ${c} client dan ${p} produk. Pindahkan dulu ke sektor lain.`:''; }},
   produkm:{src:'produk',label:'Produk',lower:'produk',plural:'Master produk',prefix:'prd',store:()=>MD.produk,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code+(r.sku||'')+r.sektor+katPathText(MD.katprod.find(k=>k.id===r.kategori)||{name:'',parent:''}),unique:'name',filter:(r,q)=>!q.sk||r.sektor===q.sk,blank:()=>({sektor:'Elektronik',lvl:'C',inc:0}),
     afterCreate:rec=>{ rec.code=codeNext('MD',MD.produk.filter(x=>x!==rec)); },
-    fields:[{k:'code',label:'ID produk',type:'ro',hint:'Dibuat otomatis saat disimpan'},{k:'name',label:'Nama produk',req:true,ph:'contoh: Ponsel Flagship X Pro Max',hint:'Satu produk hanya satu baris di master. Client, toko, harga toko, dan foto diatur di Mapping produk toko'},{k:'sku',label:'SKU atau model (opsional)'},{k:'sektor',label:'Sektor',type:'select',req:true,opts:SEKTOR},
+    fields:[{k:'code',label:'ID produk',type:'ro',hint:'Dibuat otomatis saat disimpan'},{k:'name',label:'Nama produk',req:true,ph:'contoh: Ponsel Flagship X Pro Max',hint:'Satu produk hanya satu baris di master. Client, toko, harga toko, dan foto diatur di Mapping produk toko'},{k:'sku',label:'SKU atau model (opsional)'},{k:'sektor',label:'Sektor',type:'select',req:true,opts:()=>sektorNames()},
       {k:'kategori',label:'Kategori produk',type:'select',req:true,opts:katOpts,onchange:'pmKatSync()',hint:r=>`<span id="pm_kinfo">${pmKatInfo(r.kategori)}</span>`},
       {k:'price',label:'Harga dasar (Rp)',type:'number',req:true,validate:v=>!(v>0)?'Isi harga lebih dari nol':'',hint:'Acuan laporan dan harga awal saat produk dipetakan ke toko'},
       {k:'lvl',label:'Level insentif',type:'select',opts:['A','B','C'],hint:'Dipakai laporan insentif dan grading'},{k:'inc',label:'Insentif per unit (Rp)',type:'number',hint:'Boleh 0'}],
@@ -2595,7 +2613,7 @@ function pageProduk(q){
   const tab=['master','mapping','temp','mf','foto','facing','promo'].includes(q.tab)?q.tab:'master';
   const tabsHTML=utabs([['master','Master produk',live('produk').length],['mapping','Mapping produk toko',live('mapping').length],['promo','Produk price promo'],['foto','Produk difoto'],['facing','Facing display'],['mf','Produk Multi Finance'],['temp','Dari sales (sementara)',D.prodTemp.length]],tab,'prTab');
   if(tab==='master') return {title:'Produk & harga',html:`<div style="margin-bottom:4px">${tabsHTML}</div>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0"><span class="sm muted">Sektor</span>${sel([['','Semua sektor'],...SEKTOR.map(x=>[x,x])],q.sk||'',"setQ({sk:this.value})",{label:'Filter sektor'})}</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0"><span class="sm muted">Sektor</span>${sel([['','Semua sektor'],...live('sektor').map(x=>[x.name,x.name])],q.sk||'',"setQ({sk:this.value})",{label:'Filter sektor'})}</div>
   ${crudList('produkm',q,{acts:btn('Upload',{v:'soft',size:'sm',icon:'up',on:"uploadModal('Master produk')"})})}
   <div style="margin-top:12px">${callout('Master produk berlaku untuk semua sektor. Satu produk hanya satu baris. Client, toko, harga, dan foto diatur di tab <a href="#/produk?tab=mapping" style="color:var(--accent-text);font-weight:600">Mapping produk toko</a>.')}</div>`};
   if(tab==='mapping'){ const cl=q.cl||'', tk=q.tk||'', clients=live('client'), tokos=live('toko').filter(t=>!cl||tokoClients(t).includes(cl));
@@ -2644,7 +2662,7 @@ function prodTempSave(id){ const x=D.prodTemp.find(a=>a.id===id), g=k=>document.
   if(!name||!sku){ e.textContent='Isi nama produk dan SKU.'; return; } if(!kp){ e.textContent='Brand ini belum punya kategori produk.'; return; }
   if(!(price>0)){ e.textContent='Isi harga dasar lebih dari nol.'; return; }
   if(PRODUCTS.some(p=>p.sku===sku)){ e.textContent='SKU sudah dipakai produk lain.'; return; }
-  const kat=MD.katprod.find(k=>k.brand===brand&&k.name===kp), pm=mkProd(name,sku,IND_SEKTOR[(MD.client.find(c=>c.id===brandClient(brand))||{}).ind]||'Lainnya',{kategori:kat?kat.id:'',price,lvl:g('pt_l').value,inc:0}); x.master=pm.id;
+  const kat=MD.katprod.find(k=>k.brand===brand&&k.name===kp), pm=mkProd(name,sku,sektorOfClient(brandClient(brand)),{kategori:kat?kat.id:'',price,lvl:g('pt_l').value,inc:0}); x.master=pm.id;
   audit('Menjadikan produk '+name+' sebagai master (dari input sales)'); closeLayer(); render(false); toast('Produk masuk master',name+' · '+sku+'. Bisa dipilih sales di aplikasi.'); }
 const FACING_DEFAULT=[{id:'fc1',name:'Rak Utama',kind:'Facing display',acuan:'Susunan facing di rak utama sesuai brief'},{id:'fc2',name:'Boot',kind:'Facing display',acuan:'Susunan facing di boot sesuai brief'},{id:'fc3',name:'Gudang',kind:'Facing display',acuan:'Susunan barang di gudang sesuai brief'}];
 const facingAll=()=>shRead('facing',FACING_DEFAULT).filter(x=>!x.del);
@@ -3078,7 +3096,7 @@ function pageAktivitas(q){
   return {title:'Aktivitas lapangan',html:`<div style="margin-bottom:14px">${pills([['sales','Hasil kerja per sales'],['log','Log aktivitas toko']],tab,'aktTab')}</div>`+v.html};
 }
 
-const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi,'/kunjungan':pageKunjungan,'/approval':pageApproval,'/target':pageTarget,'/promo':pagePromo,'/insentif':pageInsentif,'/grading':pageGrading,'/leads':pageLeads,'/overdue':pageOverdue,'/company-sim':pageSimco,'/client':pageClient,'/kategori-toko':pageKategori,'/toko':pageToko,'/iam':pageIAM,'/produk':pageProduk,'/penugasan':pagePenugasan,'/pemesanan':pagePemesanan,'/sell-in':pageSellin,'/user-sales':pagePengguna,'/user-admin':pageAdmin,'/parameter':pageParameter,'/task-pending':pageTaskPending,'/aktivitas':pageAktivitas,'/canvassing':pageCanvassing,'/posm':pagePosm,'/region':pageRegion,'/brand':pageBrand,'/kategori-produk':pageKatProd,'/kompetitor':pageKompetitor,'/cabang-client':pageCabang,'/mapping-outlet':pageMapOutlet,'/data-penjualan':pageDataJual,'/penagihan':pagePenagihan,'/klaim-biaya':pageKlaim,'/live-tracking':pageTracking,'/kepatuhan-kunjungan':pageKepatuhan,'/pengumuman':pagePengumuman,'/sinkron':pageSinkron,'/satuan':pageSatuan,'/konversi':pageKonversi,'/konfigurasi-aktivitas':pageAktCfg,'/form-penjualan':pageFormJual,'/status-produk':pageStatProd,'/event':pageEvent,'/mitra':pageMitra,'/sku-display':pageSkuDisplay,'/market-share':pageMarketShare,'/quiz':q=>pageKonten(q,'Quiz'),'/survey':q=>pageKonten(q,'Survey'),'/pengaturan':pagePengaturan};
+const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi,'/kunjungan':pageKunjungan,'/approval':pageApproval,'/target':pageTarget,'/promo':pagePromo,'/insentif':pageInsentif,'/grading':pageGrading,'/leads':pageLeads,'/overdue':pageOverdue,'/company-sim':pageSimco,'/sektor':pageSektor,'/client':pageClient,'/kategori-toko':pageKategori,'/toko':pageToko,'/iam':pageIAM,'/produk':pageProduk,'/penugasan':pagePenugasan,'/pemesanan':pagePemesanan,'/sell-in':pageSellin,'/user-sales':pagePengguna,'/user-admin':pageAdmin,'/parameter':pageParameter,'/task-pending':pageTaskPending,'/aktivitas':pageAktivitas,'/canvassing':pageCanvassing,'/posm':pagePosm,'/region':pageRegion,'/brand':pageBrand,'/kategori-produk':pageKatProd,'/kompetitor':pageKompetitor,'/cabang-client':pageCabang,'/mapping-outlet':pageMapOutlet,'/data-penjualan':pageDataJual,'/penagihan':pagePenagihan,'/klaim-biaya':pageKlaim,'/live-tracking':pageTracking,'/kepatuhan-kunjungan':pageKepatuhan,'/pengumuman':pagePengumuman,'/sinkron':pageSinkron,'/satuan':pageSatuan,'/konversi':pageKonversi,'/konfigurasi-aktivitas':pageAktCfg,'/form-penjualan':pageFormJual,'/status-produk':pageStatProd,'/event':pageEvent,'/mitra':pageMitra,'/sku-display':pageSkuDisplay,'/market-share':pageMarketShare,'/quiz':q=>pageKonten(q,'Quiz'),'/survey':q=>pageKonten(q,'Survey'),'/pengaturan':pagePengaturan};
 render(true);
 </script>
 </body>
