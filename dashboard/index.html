@@ -251,6 +251,15 @@ main{flex:1;min-height:0;overflow-y:auto;padding:0 32px 40px;outline:none;positi
 .dd-foot .pgn{display:flex;align-items:center;gap:6px}
 .dd-foot button{width:28px;height:28px;border-radius:99px;border:1px solid var(--line-strong);background:var(--raised);display:inline-flex;align-items:center;justify-content:center;color:var(--fg)}
 .dd-foot button:disabled{opacity:.4;cursor:not-allowed}
+.foto-t{padding:0;border:0;background:none;cursor:zoom-in;border-radius:8px;display:inline-flex;flex:none}
+.foto-t:focus-visible,.foto-lg:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.foto-lg{padding:0;border:1px solid var(--line);background:var(--raised);border-radius:var(--r-panel);cursor:zoom-in;display:flex;align-items:center;justify-content:center;width:100%;height:190px;overflow:hidden}
+.foto-lg img{max-width:100%;max-height:100%;object-fit:contain}
+.foto-ov{position:fixed;inset:0;z-index:300;background:rgb(10 12 18 / .78);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;animation:rise .15s}
+.foto-ov .fo-img{max-width:min(92vw,720px);max-height:76vh;border-radius:18px;background:#fff;box-shadow:var(--shadow-float);object-fit:contain}
+.foto-ov .fo-cap{color:#fff;font-size:13px;text-align:center;max-width:90vw}
+.foto-ov .fo-x{position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:99px;background:rgb(255 255 255 / .16);color:#fff;display:inline-flex;align-items:center;justify-content:center}
+.foto-ov .fo-x:hover{background:rgb(255 255 255 / .28)}
 textarea.ta{width:100%;min-height:90px;border-radius:var(--r-panel);border:1px solid var(--line-strong);background:var(--raised);padding:12px 14px;resize:vertical;outline:none;color:var(--fg)}
 textarea.ta:focus{outline:2px solid var(--accent);outline-offset:2px}
 .switch{position:relative;width:48px;height:28px;border-radius:99px;background:var(--control);box-shadow:inset 0 0 0 1px var(--line-strong);flex:none;transition:background-color .15s}
@@ -2626,12 +2635,22 @@ const mptTokoOpts=cl=>cl?[['','Pilih toko'],...live('toko').filter(t=>t.status==
 function mptPick(){ const el=document.getElementById('mp_hb'), id=document.getElementById('f_produk').value; if(el) el.textContent=id?rp(pmOne(id).price||0):''; }
 function mptSync(){ const c=document.getElementById('f_client').value, t=document.getElementById('f_toko'), k=document.getElementById('f_kategori'), oh=a=>a.map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join(''); t.innerHTML=oh(mptTokoOpts(c)); k.innerHTML=oh(katOptsFor(c)); pmKatSync(); }
 const FOTO={mp:'',pm:''};
-const fotoHTML=k=>FOTO[k]?`<div style="display:flex;gap:12px;align-items:center"><img src="${FOTO[k]}" alt="Foto produk" style="width:72px;height:72px;object-fit:cover;border-radius:14px;border:1px solid var(--line)">${btn('Ganti foto',{v:'soft',size:'sm',attrs:'type="button"',on:`document.getElementById('${k}_file').click()`})}${btn('Hapus foto',{v:'soft',size:'sm',attrs:'type="button"',on:`fotoClear('${k}')`})}</div>`:btn('Pilih foto',{v:'soft',size:'sm',icon:'up',attrs:'type="button"',on:`document.getElementById('${k}_file').click()`});
+const fotoHTML=k=>FOTO[k]?`<div style="display:flex;gap:12px;align-items:center"><button type="button" class="foto-t" style="border-radius:14px" aria-label="Lihat foto lebih besar" onclick="fotoShow('${k}')"><img src="${FOTO[k]}" alt="Foto produk" style="width:72px;height:72px;object-fit:cover;border-radius:14px;border:1px solid var(--line)"></button>${btn('Ganti foto',{v:'soft',size:'sm',attrs:'type="button"',on:`document.getElementById('${k}_file').click()`})}${btn('Hapus foto',{v:'soft',size:'sm',attrs:'type="button"',on:`fotoClear('${k}')`})}</div>`:btn('Pilih foto',{v:'soft',size:'sm',icon:'up',attrs:'type="button"',on:`document.getElementById('${k}_file').click()`});
 function fotoPick(inp,k){ const f=inp.files&&inp.files[0]; if(!f) return; if(!/^image\//.test(f.type)){ toast('Bukan gambar','Pilih berkas JPG atau PNG.','danger'); return; } if(f.size>2*1024*1024){ toast('Foto terlalu besar','Maksimal 2 MB.','danger'); return; }
   const rd=new FileReader(); rd.onload=()=>{ FOTO[k]=rd.result; document.getElementById(k+'_fwrap').innerHTML=fotoHTML(k); }; rd.readAsDataURL(f); }
 function fotoClear(k){ FOTO[k]=''; document.getElementById(k+'_fwrap').innerHTML=fotoHTML(k); }
 const fotoField=(k,val,note)=>{ FOTO[k]=val||''; return `<div class="field"><span>Foto produk (opsional)</span><div id="${k}_fwrap">${fotoHTML(k)}</div><input id="${k}_file" type="file" accept="image/*" style="display:none" onchange="fotoPick(this,'${k}')"><p class="xs muted" style="margin-top:6px">${note}</p></div>`; };
-const fotoThumb=(src,sz=36)=>src?`<img src="${src}" alt="" style="width:${sz}px;height:${sz}px;object-fit:cover;border-radius:8px">`:'';
+const fotoSrcOf=(kind,id)=>{ if(kind==='pm') return pmOne(id).foto||''; const m=MD.mapping.find(x=>x.id===id)||{}; return m.foto||pmOne(m.produk).foto||''; };
+const fotoTitleOf=(kind,id)=>{ if(kind==='pm') return pmName(id); const m=MD.mapping.find(x=>x.id===id)||{}; return pmName(m.produk)+' · '+tokoName(m.toko); };
+const fotoThumb=(src,sz=36,kind='',id='')=>{ if(!src) return ''; const img=`<img src="${src}" alt="" style="width:${sz}px;height:${sz}px;object-fit:cover;border-radius:8px">`; return kind?`<button type="button" class="foto-t" aria-label="Lihat foto ${esc(fotoTitleOf(kind,id))}" onclick="event.stopPropagation();fotoPrev('${kind}','${id}')">${img}</button>`:img; };
+const fotoDetail=(src,kind,id,note)=>src?`<div style="margin-bottom:14px"><button type="button" class="foto-lg" aria-label="Lihat foto lebih besar" onclick="fotoPrev('${kind}','${id}')"><img src="${src}" alt="Foto ${esc(fotoTitleOf(kind,id))}"></button>${note?`<p class="xs muted" style="margin-top:6px">${note}</p>`:''}</div>`:'';
+function fotoPreview(src,title){ if(!src) return; document.querySelectorAll('.foto-ov').forEach(n=>n.remove()); const ov=document.createElement('div'); ov.className='foto-ov'; ov.setAttribute('role','dialog'); ov.setAttribute('aria-modal','true'); ov.setAttribute('aria-label','Pratinjau foto produk');
+  ov.innerHTML=`<button type="button" class="fo-x" aria-label="Tutup pratinjau">${I('x',20)}</button><img class="fo-img" src="${src}" alt="${esc(title||'Foto produk')}"><div class="fo-cap">${esc(title||'')}</div>`;
+  const close=()=>{ ov.remove(); document.removeEventListener('keydown',key,true); prev&&prev.focus&&prev.focus({preventScroll:true}); }, prev=document.activeElement;
+  const key=e=>{ if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); close(); } };
+  ov.addEventListener('click',e=>{ if(e.target.classList.contains('fo-img')) return; close(); }); document.addEventListener('keydown',key,true); document.body.appendChild(ov); ov.querySelector('.fo-x').focus({preventScroll:true}); }
+const fotoPrev=(kind,id)=>fotoPreview(fotoSrcOf(kind,id),fotoTitleOf(kind,id));
+const fotoShow=k=>fotoPreview(FOTO[k],(document.getElementById('f_name')?.value||'Foto produk'));
 Object.assign(ENT,{
   sektor:{label:'Sektor',lower:'sektor',plural:'Master sektor',prefix:'sk',store:()=>MD.sektor,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code+(r.desc||''),unique:'name',
     onRename:(old,nw)=>{ MD.client.forEach(c=>{ if(c.ind===old) c.ind=nw; }); MD.produk.forEach(p=>{ if(p.sektor===old) p.sektor=nw; }); },
@@ -2642,12 +2661,13 @@ Object.assign(ENT,{
     lockStatus:r=>{ const c=live('client').filter(x=>x.ind===r.name).length, p=live('produk').filter(x=>x.sektor===r.name).length; return r.status==='Aktif'&&(c||p)?`Sektor ini dipakai ${c} client dan ${p} produk. Pindahkan dulu ke sektor lain.`:''; }},
   produkm:{src:'produk',label:'Produk',lower:'produk',plural:'Master produk',prefix:'prd',store:()=>MD.produk,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code+(r.sku||'')+r.sektor,unique:'name',filter:(r,q)=>!q.sk||r.sektor===q.sk,blank:()=>({sektor:'Elektronik',lvl:'C',inc:0}),
     afterCreate:rec=>{ rec.code=codeNext('MD',MD.produk.filter(x=>x!==rec)); },
+    extraTop:r=>r.id?fotoDetail(r.foto,'pm',r.id,''):'',
     extra:r=>fotoField('pm',r.foto,'Foto utama produk. Dipakai di semua mapping yang tidak punya foto sendiri. Maksimal 2 MB.'),
     readExtra:()=>({foto:FOTO.pm}),
     fields:[{k:'code',label:'ID produk',type:'ro',hint:'Dibuat otomatis saat disimpan'},{k:'name',label:'Nama produk',req:true,ph:'contoh: Ponsel Flagship X Pro Max',hint:'Satu produk hanya satu baris di master. Client, toko, kategori, harga toko, dan foto diatur di Mapping produk toko'},{k:'sku',label:'SKU atau model (opsional)'},{k:'sektor',label:'Sektor',type:'select',req:true,opts:()=>sektorNames()},
       {k:'price',label:'Harga dasar (Rp)',type:'number',req:true,validate:v=>!(v>0)?'Isi harga lebih dari nol':'',hint:'Acuan laporan dan harga awal saat produk dipetakan ke toko'},
       {k:'lvl',label:'Level insentif',type:'select',opts:['A','B','C'],hint:'Dipakai laporan insentif dan grading'},{k:'inc',label:'Insentif per unit (Rp)',type:'number',hint:'Boleh 0'}],
-    cols:[{label:'Produk',render:r=>`<span style="display:flex;gap:10px;align-items:center">${r.foto?fotoThumb(r.foto,40):''}<span><span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.code)}</span></span></span>`,prim:true},{label:'Sektor',render:r=>tag(r.sektor,r.sektor==='Elektronik'?'info':r.sektor==='FMCG'?'accent':'neutral')},
+    cols:[{label:'Produk',render:r=>`<span style="display:flex;gap:10px;align-items:center">${r.foto?fotoThumb(r.foto,40,'pm',r.id):''}<span><span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.code)}</span></span></span>`,prim:true},{label:'Sektor',render:r=>tag(r.sektor,r.sektor==='Elektronik'?'info':r.sektor==='FMCG'?'accent':'neutral')},
       {label:'Harga dasar',render:r=>`<span class="tabular">${rp(r.price||0)}</span>`,align:'r',hide:true},{label:'SKU',render:r=>esc(r.sku||'–'),hide:true},
       {label:'Dipetakan',render:r=>live('mapping').filter(m=>m.produk===r.id).length+' toko',align:'r'},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>{ const n=live('mapping').filter(m=>m.produk===r.id).length, t=appTrx().filter(x=>x.p===r.id).length; return n||t?`Produk ini dipetakan di ${n} toko dan dipakai ${t} transaksi aplikasi. Hapus mappingnya dulu, atau nonaktifkan produk.`:''; }},
@@ -2659,12 +2679,13 @@ Object.assign(ENT,{
       {k:'toko',label:'Toko',type:'select',req:true,opts:()=>mptTokoOpts(mptState().cl),hint:'Toko dari client yang dipilih'},
       {k:'kategori',label:'Kategori produk',type:'select',req:true,opts:()=>katOptsFor(mptState().cl),onchange:'pmKatSync()',hint:r=>`<span id="pm_kinfo">${pmKatInfo(r.kategori)}</span>`},
       {k:'harga',label:'Harga toko (Rp), opsional',type:'number',ph:'Kosong = ikut harga master',validate:v=>!(v>0)?'Isi harga lebih dari nol, atau kosongkan':'',hint:r=>`Kosongkan untuk memakai harga dasar dari master produk <b class="fg" id="mp_hb">${r.produk?rp(pmOne(r.produk).price||0):''}</b>`}],
+    extraTop:r=>r.id?fotoDetail(r.foto||pmOne(r.produk).foto,'mpt',r.id,r.foto?'Foto khusus mapping ini.':pmOne(r.produk).foto?'Foto dari master produk.':''):'',
     extra:r=>fotoField('mp',r.foto,'Kosongkan untuk memakai foto dari master produk. Maksimal 2 MB.'),
     readExtra:()=>({foto:FOTO.mp}),
     validateExtra:v=>{ const t=TOKO.find(x=>x.id===v.toko); if(t&&!tokoClients(t).includes(v.client)) return 'Toko ini bukan milik client yang dipilih.'; const kt=MD.katprod.find(k=>k.id===v.kategori); if(kt&&kt.cakupan!=='General'&&brandClient(kt.brand)!==v.client) return 'Kategori ini bukan milik client yang dipilih.'; return MD.mapping.some(m=>!m.del&&m.id!==(FORM&&FORM.id)&&m.produk===v.produk&&m.toko===v.toko)?'Produk ini sudah dipetakan di toko tersebut.':''; },
     cols:[{label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${esc(pmName(r.produk))}</span><span class="mono muted" style="display:block">${esc(pmCode(r.produk))}</span>`,prim:true},{label:'ID mapping',render:r=>`<span class="mono">${esc(r.code)}</span>`},{label:'Client',render:r=>esc(clientName(r.client))},{label:'Toko',render:r=>esc(tokoName(r.toko))},
       {label:'Kategori',render:r=>{ const k=MD.katprod.find(x=>x.id===r.kategori); return k?`<span class="fg">${esc(k.name)}</span><span class="xs muted" style="display:block">Level ${katLevel(k)} dari ${katTreeLevels(k)}</span>`:'<span class="muted">–</span>'; },hide:true},
-      {label:'Harga',render:r=>`<span class="tabular">${rp(effHarga(r))}</span>${r.harga>0?'':'<span class="xs muted" style="display:block">Ikut master</span>'}`,align:'r'},{label:'Foto',render:r=>r.foto?fotoThumb(r.foto):pmOne(r.produk).foto?`<span style="opacity:.6" title="Dari master produk">${fotoThumb(pmOne(r.produk).foto)}</span>`:'<span class="muted">–</span>',hide:true},{label:'Status',render:r=>stPill(r.status)}]}
+      {label:'Harga',render:r=>`<span class="tabular">${rp(effHarga(r))}</span>${r.harga>0?'':'<span class="xs muted" style="display:block">Ikut master</span>'}`,align:'r'},{label:'Foto',render:r=>r.foto?fotoThumb(r.foto,36,'mpt',r.id):pmOne(r.produk).foto?`<span style="opacity:.6" title="Dari master produk">${fotoThumb(pmOne(r.produk).foto,36,'mpt',r.id)}</span>`:'<span class="muted">–</span>',hide:true},{label:'Status',render:r=>stPill(r.status)}]}
 });
 
 /* ---------- Produk & harga ---------- */
