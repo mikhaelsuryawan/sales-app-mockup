@@ -33,7 +33,12 @@ Menjalankan: `python3 -m http.server 5173`, lalu buka `http://localhost:5173/` (
 ## 3. Keputusan desain
 
 - **Mobile:** biru cerah dengan gradient (#21CFF7 → #0A92F2 → #3466FF), aksen tan/peach (#EFA477) dari logo SIMGROUP, gaya **glassmorphic** (kartu transparan blur, latar mesh gradient). Font Plus Jakarta Sans. Di desktop tampil sebagai frame iPhone dengan panel demo.
-- **Dashboard:** sejak 11 Nov 2026 memakai gaya skill `wit-mes-frontend` (WIT MES) dengan **aksen tetap biru mobile**. Rail ink mengambang (bisa diciutkan di ≥1280px, ikon saja di tablet), header berisi breadcrumb, judul bertitik aksen, pencarian, notifikasi, dan menu akun. Overview dibuka dengan kartu "Perlu tindakan", kartu hero ink sell-out hari ini, dan kartu aksen approval. Kartu putih tanpa border, kontrol pill, ikon stroke 2. Di HP: bar bawah ink (Overview, Penjualan, Approval, Absensi, Leads, Semua menu) dan menu lengkap sebagai bottom sheet. Font DM Sans. Tema terang dan gelap. Rute, data, dan aksi tidak berubah.
+- **Dashboard:** sejak 11 Nov 2026 mengikuti skill `wit-mes-frontend` (WIT MES) dengan **aksen tetap biru mobile**. Plan fase dan matriks cakupan ada di `plan.md`; audit butir per butir di `docs/wit-mes/`.
+  - Kerangka: rail ink mengambang dengan satu baris per seksi (sub-halaman terbuka di tempat, ikon saja di tablet), header 18px dengan pencarian global langsung, tombol Buat, notifikasi turunan, dan menu akun. Di bawah 1280px halaman seksi tampil sebagai tab pill. Di HP: bar bawah ink dan semua menu sebagai bottom sheet.
+  - Komponen dan perilaku: kit di bagian "KIT KOMPONEN" file dashboard (tombol, badge, form, combobox, tabel, dialog, menu, toast). Semua perubahan data lewat `act()` yang mencatat audit bercap pelaku dan jam aplikasi (26 Okt 2026, 09.41 WIB).
+  - Izin: dua akun demo, Admin SIM dan Supervisor (Usulan). Penjaga di layar hanya kenyamanan; backend yang memutuskan izin.
+  - Penyimpanan: kunci `salesapp.dashboard.*` (tema, rail, sesi, status baca, data) dan `salesapp.shared.v1` (dibagi dengan mobile). Reset demo di Pengaturan menghapus semuanya dan memuat ulang.
+  - Aksen tetap biru, tan sebagai warna kedua, merah hanya untuk status bahaya.
 - Fitur di luar BRD/URD diberi label **"Usulan"** di panel demo mobile, supaya client dapat membedakan.
 - Warna merah hanya untuk status bahaya (ditolak, overdue, error).
 
@@ -149,3 +154,17 @@ Catatan: klien sudah mengesahkan MOM pertama. MOM hasil review di meeting beriku
 - Dashboard: router hash (`#/penjualan?tab=klien`), `ROUTES`, `ENT` (definisi CRUD generik: `openForm`, `saveForm`, `delAsk`), `dataTable`, `openPanel`, `card`, chart SVG buatan sendiri (`columnChart`, `donut`, `lineChart`).
 - Preview di browser pane Claude memakai snapshot file sehingga navigasi hash tidak jalan; gunakan server lokal.
 - Skill WIT (`wit-code-agent-2`) berasal dari `wit-skills.zip` milik tim dan tidak disertakan di sini.
+
+
+## 7. Skrip perjalanan demo (verifikasi manual)
+
+Jalankan `python3 -m http.server 5173`, buka `http://localhost:5173/dashboard/`. Cek tiap langkah di lebar 1440, 768, dan 375, tema terang dan gelap.
+
+1. Masuk sebagai Dewi Kartika (Admin SIM) lewat tombol akun demo. Overview menampilkan kartu "Perlu tindakan".
+2. Buka Approval. Setujui satu pengajuan: konfirmasi muncul, toast menyebut jenis dan pengaju. Tolak satu pengajuan: tombol Tolak tidak aktif sampai alasan diisi.
+3. Dari Overview buka "Leads belum di-assign": banner "Daftar dipersempit" muncul, "Tampilkan semua" melepasnya. Assign leads ke manager: toast menyebut jumlah dan penerima.
+4. Buka Master data > Sektor. Tombol hapus pada sektor yang dipakai tidak aktif dan tooltip menyebut alasannya. Tambah sektor dengan kode kosong: galat berupa kalimat dan hilang saat mengetik.
+5. Buka Pesanan, pilih satu pesanan: hero ink, tahapan, dan riwayat tampil. Ajukan batal untuk pesanan berstatus Dibuat: toast bernada default, pengajuan muncul di Approval.
+6. Ganti akun ke Rudi Hartono (Supervisor) lewat menu akun. Menu Buat lebih pendek, master data tampil baca saja, dan Pengaturan tidak menampilkan Reset data demo.
+7. Di lebar 375: bar bawah, menu Buat dan More sebagai bottom sheet, panel rincian membuka dari bawah dan tombol Back peramban menutupnya.
+8. Pengaturan > Reset data demo: konfirmasi, halaman dimuat ulang dengan data awal.
