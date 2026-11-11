@@ -1848,10 +1848,10 @@ function fxAnimate(root,full){
   if(!full) return;
   [...root.querySelectorAll(':scope > :not(.grid):not(.stats), :scope > .stats > *, :scope > .grid > *, :scope > div > .card')].forEach((el,i)=>el.animate([{opacity:0},{opacity:1}],{duration:200,delay:Math.min(i,8)*30,fill:'backwards',easing:'ease-out'}));
 }
-/* Usulan (11 Nov 2026): toko baru dari canvasser di mobile langsung aktif dan masuk Toko baru dari sales. */
+/* Usulan (11 Nov 2026): toko baru dari canvasser di mobile langsung aktif dan masuk Toko Sementara (status Takeout). */
 /* Hari off sales dibaca mobile untuk menyembunyikan hari itu saat jadwal ulang. */
 function syncUserOff(){ try{ const m={}; MD.user.forEach(u=>{ if(u.off) m[u.id]=u.off; }); if(JSON.stringify(shRead('userOff',{}))!==JSON.stringify(m)) shSet('userOff',m); }catch(e){} }
-function syncTokoBaru(){ shRead('tokoBaruSales',[]).forEach(n=>{ if(TOKO.some(t=>t.id===n.id)) return; TOKO.push({id:n.id,name:n.name,cat:n.cat,cabang:'Jakarta Selatan',dealer:'–',sales:[n.u],addr:n.addr,client:'cl1',mapClients:['cl1'],sumber:'Input sales',status:'Aktif',radius:100,coord:'-6.2900, 106.8000'}); const us=MD.user.find(x=>x.id===n.u); if(us&&!(us.toko||[]).includes(n.id)) us.toko=[...(us.toko||[]),n.id]; }); }
+function syncTokoBaru(){ shRead('tokoBaruSales',[]).forEach(n=>{ if(TOKO.some(t=>t.id===n.id)) return; TOKO.push({id:n.id,name:n.name,cat:n.cat,cabang:'Jakarta Selatan',dealer:'–',sales:[n.u],addr:n.addr,client:'cl1',mapClients:['cl1'],sumber:'Input sales',status:'Takeout',radius:100,coord:'-6.2900, 106.8000'}); const us=MD.user.find(x=>x.id===n.u); if(us&&!(us.toko||[]).includes(n.id)) us.toko=[...(us.toko||[]),n.id]; }); }
 function render(scrollTop=true){
   syncProducts(); refreshDerived(); syncApp(); syncTokoBaru(); syncUserOff();
   const {path,q}=parse(); const app=$('#app');
@@ -2753,9 +2753,9 @@ MD.katprod.push({id:'kp30',name:'Elektronik Rumah Tangga',brand:'',parent:'',cak
   {id:'kp134',name:'Jaminan Sertifikat',brand:'DANA SIAGA',parent:'Dana Tunai Jaminan',cakupan:'Client',share:'Tidak',status:'Aktif'});
 /* Toko: bedakan toko dari client dan toko baru dari sales; satu toko bisa dipetakan ke lebih dari satu client (menu Mapping outlet). */
 TOKO.forEach(t=>{ t.sumber=t.sumber||'Dari client'; t.mapClients=t.mapClients||[t.client]; });
-['c3','o2'].forEach(id=>{ const t=TOKO.find(x=>x.id===id); if(t){ t.sumber='Input sales'; } });
-/* Usulan (11 Nov 2026): toko baru dari canvasser langsung aktif dan masuk Toko baru dari sales. */
-TOKO.push({id:'nb1',name:'Toko Maju Elektronik Cinere',cat:'Retail',cabang:'Jakarta Selatan',dealer:'CV Mitra Elektrindo',sales:['budi'],addr:'Jl. Cinere Raya 21',client:'cl1',mapClients:['cl1'],sumber:'Input sales',status:'Aktif',radius:100,coord:'-6.3260, 106.7790'});
+['c3','o2'].forEach(id=>{ const t=TOKO.find(x=>x.id===id); if(t){ t.sumber='Input sales'; t.status='Takeout'; } });
+/* Usulan (11 Nov 2026): toko baru dari canvasser langsung aktif dan masuk Toko Sementara (status Takeout). */
+TOKO.push({id:'nb1',name:'Toko Maju Elektronik Cinere',cat:'Retail',cabang:'Jakarta Selatan',dealer:'CV Mitra Elektrindo',sales:['budi'],addr:'Jl. Cinere Raya 21',client:'cl1',mapClients:['cl1'],sumber:'Input sales',status:'Takeout',radius:100,coord:'-6.3260, 106.7790'});
 { const b=MD.user.find(x=>x.id==='budi'); if(b) b.toko=[...(b.toko||[]),'nb1']; }
 ['c1','o1'].forEach(id=>{ const t=TOKO.find(x=>x.id===id); if(t) t.mapClients=['cl1','cl4']; });
 const tokoClients=t=>t.mapClients&&t.mapClients.length?t.mapClients:[t.client];
@@ -2800,7 +2800,7 @@ function act(type,{perm='',guard=null,blockedTitle='Tidak bisa diproses',run,aud
   if(close) closeLayerCore(); render(false);
   if(t){ const x=typeof t==='function'?t(res):t; toast(x[0],x[1]||'',x[2]||'success'); } return true;
 }
-const stPill=s=>spill(s,s==='Aktif'?'success':'neutral');
+const stPill=s=>spill(s,s==='Aktif'?'success':s==='Takeout'?'warning':'neutral');
 
 /* entity definitions */
 const ENT={
@@ -2827,9 +2827,9 @@ const ENT={
       {label:'Toko',render:r=>live('toko').filter(t=>t.cat===r.name).length,align:'r'},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>{ const n=live('toko').filter(t=>t.cat===r.name).length; return n?`Kategori ini dipakai ${n} toko. Pindahkan tokonya ke kategori lain dulu, atau nonaktifkan kategori (BRD 2.4.4).`:''; },
     onRename:(old,nw)=>TOKO.forEach(t=>{ if(t.cat===old) t.cat=nw; })},
-  toko:{label:'Toko',plural:'Daftar toko',prefix:'t',store:()=>TOKO,title:r=>r.name,search:r=>r.name+r.addr+r.cabang+r.cat,unique:'name',filter:(r,q)=>!q.src||(r.sumber||'Dari client')===q.src,blank:()=>({client:'cl1',cat:'Retail',cabang:'Jakarta Selatan',dealer:dealerNames()[0],radius:100,sales:[],coord:'',sumber:'Dari client'}),
+  toko:{label:'Toko',plural:'Daftar toko',prefix:'t',store:()=>TOKO,title:r=>r.name,search:r=>r.name+r.addr+r.cabang+r.cat,unique:'name',stChips:q=>q.src==='Input sales'?['Takeout']:q.src==='Dari client'?['Aktif','Nonaktif']:['Aktif','Nonaktif','Takeout'],promote:{label:'Simpan ke Toko Client',fn:'tokoToClient'},filter:(r,q)=>!q.src||(r.sumber||'Dari client')===q.src,blank:()=>({client:'cl1',cat:'Retail',cabang:'Jakarta Selatan',dealer:dealerNames()[0],radius:100,sales:[],coord:'',sumber:'Dari client'}),
     fields:[{k:'name',label:'Nama toko',req:true},{k:'client',label:'Client pemilik data',type:'select',req:true,opts:()=>{ const cur=FORM&&FORM.id?(TOKO.find(t=>t.id===FORM.id)||{}).client:''; return live('client').filter(c=>c.status==='Aktif'||c.id===cur).map(c=>[c.id,c.name]); },hint:'Client lain yang dilayani toko ini diatur di menu Mapping outlet'},
-      {k:'sumber',label:'Sumber toko',type:'select',req:true,opts:['Dari client','Input sales'],hint:'Dari client: master toko dari client. Input sales: toko baru hasil input sales di lapangan'},
+      {k:'sumber',label:'Sumber toko',type:'ro',fmt:v=>v==='Input sales'?'Toko Sementara (input sales)':'Toko Client',hint:'Toko Sementara adalah hasil input sales di lapangan. Ubah jadi Toko Client lewat tombol Simpan ke Toko Client'},
       {k:'cat',label:'Kategori toko',type:'select',req:true,opts:()=>live('kat').filter(k=>k.status==='Aktif').map(k=>k.name)},
       {k:'cabang',label:'Cabang client',type:'select',req:true,opts:()=>cabNames()},{k:'dealer',label:'Dealer',type:'select',opts:()=>dealerNames()},{k:'addr',label:'Alamat',req:true},
       {k:'coord',label:'Koordinat GPS',req:true,ph:'-6.2607, 106.8142',hint:'Titik acuan absen WFO dan check-in kunjungan',validate:v=>/^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/.test(v)?'':'Format: lintang, bujur'},
@@ -2949,7 +2949,7 @@ function crudList(ent,q,{acts='',prefill=''}={}){
   const addAct=ent==='user'?'simImport()':`openForm('${ent}'${prefill?`,null,${prefill}`:''})`;
   return card(E.plural,`${can('master.edit')?'':banner({tone:'neutral',body:'Anda hanya dapat melihat data ini. Perubahan dilakukan oleh Admin SIM.',cls:'mb'})}<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
       <form style="flex:1;min-width:220px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari ${lc(E)}"></label></form>
-      <div class="chips">${[['','Semua'],['Aktif','Aktif'],['Nonaktif','Nonaktif']].map(([k,l])=>`<button class="fchip ${f===k?'on':''}" onclick="setQ({st:'${k}'})">${l} <span class="n">${k?all.filter(r=>r.status===k).length:all.length}</span></button>`).join('')}</div></div>
+      <div class="chips">${[['','Semua'],...(E.stChips?E.stChips(q):['Aktif','Nonaktif']).map(x=>[x,x])].map(([k,l])=>`<button class="fchip ${f===k?'on':''}" onclick="setQ({st:'${k}'})">${l} <span class="n">${k?all.filter(r=>r.status===k).length:all.length}</span></button>`).join('')}</div></div>
     ${dataTable('md_'+ent,{rows,rowClick:r=>`openForm('${ent}','${r.id}')`,acts:can('master.edit')?(r=>rowActs(`openForm('${ent}','${r.id}')`,`delAsk('${ent}','${r.id}')`,{block:E.inUse?.(r)||''})):null,cols:E.cols,empty:qq||f||q.br||q.lv||q.ms||q.sk||q.tk?`Tidak ada ${lc(E)} yang cocok. <button style="color:var(--accent-text);font-weight:600" onclick="setQ({q:'',st:'',sg:'',br:'',lv:'',ms:'',sk:'',tk:''})">Hapus filter</button>`:`Belum ada ${lc(E)}.`})}`,
     {acts:`${acts}${btn(ent==='user'?'Tambah dari SIM':'Tambah '+lc(E),{v:'accent',size:'sm',icon:'plus',on:addAct,perm:'master.edit'})}`});
 }
@@ -2974,7 +2974,7 @@ function openForm(ent,id,prefill){
   const E=ENT[ent]; const r=id?E.store().find(x=>x.id===id):{status:'Aktif',...(E.blank?E.blank():{}),...(prefill||{})};
   FORM={ent,id:id||null,prefill};
   const body=`${E.extraTop?E.extraTop(r):''}<form id="mdform" onsubmit="event.preventDefault();saveForm()" class="grid" style="gap:14px;margin-top:${E.extraTop&&E.extraTop(r)?'14px':'0'}">${E.fields.map(fd=>fieldHTML(fd,r)).join('')}${E.extra?E.extra(r):''}<button type="submit" hidden></button></form>`;
-  const foot=E.foot?E.foot(r,id):id?`${btn('Hapus',{v:'danger',icon:'trash',on:`delAsk('${ent}','${id}')`})}<span style="flex:1"></span>${btn(r.status==='Aktif'?'Nonaktifkan':'Aktifkan',{v:'card',on:`toggleStatus('${ent}','${id}')`})}${btn('Simpan perubahan',{v:'accent',on:'saveForm()'})}`
+  const foot=E.foot?E.foot(r,id):id?`${btn('Hapus',{v:'danger',icon:'trash',on:`delAsk('${ent}','${id}')`})}<span style="flex:1"></span>${E.promote&&r.status==='Takeout'?btn(E.promote.label,{v:'card',on:`${E.promote.fn}('${id}')`}):btn(r.status==='Aktif'?'Nonaktifkan':'Aktifkan',{v:'card',on:`toggleStatus('${ent}','${id}')`})}${btn('Simpan perubahan',{v:'accent',on:'saveForm()'})}`
     :`${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn(ent==='user'?'Daftarkan user':'Tambah '+lc(E),{v:'accent',on:'saveForm()'})}`;
   const ro=!can('master.edit');
   openPanel(id?E.title(r):(ent==='user'?'Daftarkan user':'Tambah '+lc(E)),body,foot,{sub:id?`${E.label}${E.code?' · '+E.code(r):''} · ${r.status}`:E.label+' baru'});
@@ -3070,12 +3070,16 @@ function pageKategori(q){ return {title:'Kategori toko',html:`${crudList('kat',q
 function pageToko(q){
   const tab=q.tab||'daftar'; const pend=D.usulan.filter(u=>u.status==='Menunggu verifikasi');
   const tabs=utabs([['daftar','Daftar toko',live('toko').length],['usulan','Usulan dari lapangan',pend.length]],tab,'tkTab');
-  const srcChips=`<div class="chips" style="margin:12px 0 4px" role="group" aria-label="Sumber toko">${[['','Semua sumber'],['Dari client','Toko dari client'],['Input sales','Toko baru dari sales']].map(([k,l])=>`<button class="fchip ${(q.src||'')===k?'on':''}" aria-pressed="${(q.src||'')===k}" onclick="setQ({src:'${k}'})">${l} <span class="n">${live('toko').filter(t=>!k||(t.sumber||'Dari client')===k).length}</span></button>`).join('')}</div>`;
+  const srcChips=`<div class="chips" style="margin:12px 0 4px" role="group" aria-label="Sumber toko">${[['','Semua sumber'],['Dari client','Toko Client'],['Input sales','Toko Sementara']].map(([k,l])=>`<button class="fchip ${(q.src||'')===k?'on':''}" aria-pressed="${(q.src||'')===k}" onclick="setQ({src:'${k}'})">${l} <span class="n">${live('toko').filter(t=>!k||(t.sumber||'Dari client')===k).length}</span></button>`).join('')}</div>`;
   return {title:'Toko',html:`
   <div style="margin-bottom:4px">${tabs}</div>
-  ${tab==='daftar'?srcChips+crudList('toko',q,{acts:`${btn('Template',{v:'outline',size:'sm',icon:'down',on:"toast('Template diunduh','template_toko.xlsx')"})}${btn('Upload',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Toko')"})}`})+`<div style="margin-top:12px">${callout('Sales yang ditugaskan tidak diatur di halaman ini, tapi di menu <a href="#/penugasan" style="color:var(--accent-text);font-weight:600">Penugasan &amp; jadwal</a>. Client lain yang dilayani toko diatur di <a href="#/mapping-outlet" style="color:var(--accent-text);font-weight:600">Mapping outlet</a>.')}</div>`
+  ${tab==='daftar'?srcChips+((q.src||'')==='Input sales'?`<div style="margin:4px 0 12px">${callout('<b>Toko Sementara</b> adalah toko hasil input sales di lapangan dan berstatus Takeout. Admin bisa melengkapi datanya, lalu menyimpannya ke Toko Client lewat detail toko.')}</div>`:'')+crudList('toko',q,{acts:`${btn('Template',{v:'outline',size:'sm',icon:'down',on:"toast('Template diunduh','template_toko.xlsx')"})}${btn('Upload',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Toko')"})}`})+`<div style="margin-top:12px">${callout('Sales yang ditugaskan tidak diatur di halaman ini, tapi di menu <a href="#/penugasan" style="color:var(--accent-text);font-weight:600">Penugasan &amp; jadwal</a>. Client lain yang dilayani toko diatur di <a href="#/mapping-outlet" style="color:var(--accent-text);font-weight:600">Mapping outlet</a>.')}</div>`
   :card('Usulan dari lapangan',D.usulan.length?`<div class="rows">${D.usulan.map(u=>`<button class="rowlink" onclick="usulanPanel('${u.id}')"><span class="thumb" style="width:56px;height:56px;border-radius:14px">${I('store',22)}</span><span style="flex:1;min-width:0"><b class="fg" style="display:block">${esc(u.name)}</b><span class="xs muted">${u.addr} · diusulkan ${byU(u.by).name}</span><span class="xs muted" style="display:block">Tanggal input: <b class="fg">${u.when}</b></span></span>${spill(u.status,u.status==='Aktif'?'success':u.status==='Ditolak'?'danger':'warning')}</button>`).join('')}</div>`:'<p class="muted">Belum ada usulan.</p>')}`};
 }
+function tokoToClient(id){ const t=TOKO.find(x=>x.id===id); if(!t||t.status!=='Takeout') return;
+  confirmAsk({title:`Simpan ${esc(t.name)} ke Toko Client?`,desc:'Toko ini pindah dari Toko Sementara ke Toko Client dan berstatus Aktif. Perubahan di form yang belum disimpan tidak ikut.',confirmLabel:'Simpan ke Toko Client',on:`tokoToClientDo('${id}')`}); }
+function tokoToClientDo(id){ const t=TOKO.find(x=>x.id===id);
+  act('toko/promote',{perm:'master.edit',run:()=>{ t.sumber='Dari client'; t.status='Aktif'; },audit:`Menyimpan toko sementara ${t.name} ke Toko Client`,toast:['Toko disimpan ke Toko Client',t.name]}); }
 function tkTab(t){ setQ({tab:t,q:'',st:'',src:''}); }
 function usulanPanel(id){ const u=D.usulan.find(x=>x.id===id); if(!u) return panelMissing('Usulan toko'); const done=u.status!=='Menunggu verifikasi';
   openPanel(u.name,`<div class="grid g2" style="gap:10px;margin-bottom:14px"><div class="thumb" style="width:100%;height:140px;border-radius:18px">${I('store',34)}</div><div class="mapbox" style="height:140px"><svg viewBox="0 0 200 140" width="100%" height="100%"><g stroke="#fff" stroke-width="10"><path d="M-10 80 L210 50M70 -10 L90 150"/></g><circle cx="110" cy="70" r="7" fill="#0A92F2" stroke="#fff" stroke-width="3"/></svg></div></div>
@@ -3086,8 +3090,8 @@ function usulanPanel(id){ const u=D.usulan.find(x=>x.id===id); if(!u) return pan
   done?btn('Tutup',{v:'outline',on:'closeLayer()'}):`${btn('Tolak',{perm:'approval.decide',v:'card',on:`usulanAsk('${id}','reject')`})}${btn('Setujui & aktifkan',{v:'accent',perm:'approval.decide',on:`usulanAsk('${id}','approve')`})}`,{sub:'Usulan toko · '+byU(u.by).name}); }
 function approveToko(id){
   const u=D.usulan.find(x=>x.id===id);
-  act('store-proposal/approve',{perm:'approval.decide',run:()=>{ u.status='Aktif'; TOKO.push({id:'n'+id,name:u.name,cat:u.cat,cabang:'Jakarta Selatan',dealer:u.dealer||'CV Mitra Elektrindo',sales:[u.by],addr:u.addr,client:'cl1',mapClients:['cl1'],sumber:'Input sales',status:'Aktif',radius:100,coord:'-6.3291, 106.8217'}); },
-    audit:`Menyetujui usulan toko ${u.name} (kategori ${u.cat})`,toast:['Toko diaktifkan',`${u.name} masuk master data, kategori ${u.cat}.`]});
+  act('store-proposal/approve',{perm:'approval.decide',run:()=>{ u.status='Aktif'; TOKO.push({id:'n'+id,name:u.name,cat:u.cat,cabang:'Jakarta Selatan',dealer:u.dealer||'CV Mitra Elektrindo',sales:[u.by],addr:u.addr,client:'cl1',mapClients:['cl1'],sumber:'Input sales',status:'Takeout',radius:100,coord:'-6.3291, 106.8217'}); },
+    audit:`Menyetujui usulan toko ${u.name} (kategori ${u.cat})`,toast:['Toko sementara dibuat',`${u.name} masuk Toko Sementara, kategori ${u.cat}.`]});
 }
 function usulanAsk(id,kind){
   if(!can('approval.decide')) return noAccess();
@@ -3307,7 +3311,7 @@ function pageCanvassing(){
   ${card('Limit per hari',`<b class="tabular fg">${rp(CV_PARAM.limit)}</b><p class="xs muted" style="margin-top:6px">Berlaku untuk semua canvasser.</p>`,{acts:btn('Ubah',{v:'outline',size:'sm',on:'cvLimitModal()'})})}</div>
   <div class="grid g-side" style="margin-top:16px">${card('Sisa barang '+tag('Usulan','accent'),dataTable('cvs',{rows:cvSisaRows(),rowClick:r=>`cvSisaPanel('${r._id}')`,empty:'Tidak ada sisa barang.',cols:[{label:'Barang',render:r=>`<span class="fg" style="font-weight:500">${esc(r.item)}</span><span class="xs muted" style="display:block">${esc(byU(r.u).name)} · check-out ${esc(r.co)}</span>`,prim:true},{label:'Nilai',render:r=>rp(r.nilai),align:'r',hide:true},{label:'Batas',render:r=>cvSisaWaktu(r),hide:true},{label:'Status',render:r=>spill(r.st,cvSisaTone(r.st))}],acts:r=>r.ok?'':btn('Tandai dikembalikan',{v:'outline',size:'sm',icon:'check',on:`cvSisaReturn('${r._id}')`})}),{desc:'Check-out tetap boleh. Sisa barang wajib kembali ke gudang sebelum batas jam.'})}
   ${card('Batas pengembalian '+tag('Usulan','accent'),`<b class="tabular fg">${CV_PARAM.sisaJam} jam</b><p class="xs muted" style="margin-top:6px">Sejak check-out. Berlaku untuk semua canvasser.</p>`,{acts:btn('Ubah',{v:'outline',size:'sm',on:'cvSisaJamModal()'})})}</div>
-  <div style="margin-top:12px">${callout('<b>Usulan.</b> Toko baru yang dibuat canvasser langsung aktif tanpa persetujuan admin. Toko itu tampil di menu <a href="#/toko?src=Input%20sales" style="color:var(--accent-text);font-weight:600">Toko</a> pada filter Toko baru dari sales.')}</div>
+  <div style="margin-top:12px">${callout('<b>Usulan.</b> Toko baru yang dibuat canvasser langsung aktif tanpa persetujuan admin. Toko itu tampil di menu <a href="#/toko?src=Input%20sales" style="color:var(--accent-text);font-weight:600">Toko</a> pada filter Toko Sementara.')}</div>
   <p class="xs muted" style="margin-top:12px">Penempatan canvasser, sales taking order, dan mobile promotor ke toko diatur di menu <a href="#/penugasan" style="color:var(--accent-text);font-weight:600">Penugasan</a>.</p>`};
 }
 /* Role yang di-assign ke toko diambil dari IAM; tambah id role di sini bila role baru juga bergerak antar toko. */
