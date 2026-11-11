@@ -1413,7 +1413,7 @@ SCR['toko-baru'] = p => {
   const cat=p.cat||'Retail', ph=p.ph||0;
   return {note:'<span class="tagx">Usulan</span><b>Usulkan toko baru</b> dari lapangan untuk mendukung target akuisisi (BRD 2.9.5). Toko tetap master data di Web (BRD 2.8): usulan diverifikasi admin, admin menetapkan kategori (yang menentukan harga, BRD 2.13), lalu toko aktif dan muncul di daftar sales.',
   html:`${appbar('Usulkan toko baru')}<main class="content">
-    <div class="banner blue" style="margin-bottom:14px">${I('alert',18)}<span>${role()==='canvas'?'Toko baru langsung aktif dan masuk daftar kunjunganmu. Admin melihatnya di Toko baru dari sales dan menetapkan kategori final.':'Toko baru diverifikasi admin dulu. Setelah disetujui, toko masuk ke daftarmu dan harga mengikuti kategori yang ditetapkan admin.'}</span></div>
+    <div class="banner blue" style="margin-bottom:14px">${I('alert',18)}<span>${role()==='canvas'?'Toko baru langsung aktif dan masuk daftar kunjunganmu. Admin melihatnya di Toko Sementara dan menetapkan kategori final.':'Toko baru diverifikasi admin dulu. Setelah disetujui, toko masuk ke daftarmu dan harga mengikuti kategori yang ditetapkan admin.'}</span></div>
     <div class="card" style="padding:0;overflow:hidden"><div class="map" style="height:150px">${mapSvg('WFA',true,true)}</div>
       <div class="row" style="padding:12px 16px"><div class="grow small"><b>Lokasi terdeteksi</b><div class="muted">Jl. Moh. Kahfi I No. 21, Jagakarsa</div></div><button class="btn sec sm" onclick="toast('Lokasi diperbarui','pin')">${I('refresh',16)} Perbarui</button></div></div>
     <div style="height:14px"></div>
@@ -1431,14 +1431,14 @@ function submitToko(){
   const direct=role()==='canvas', t={id:'n'+Date.now(),name,addr:val('ta')||'Jagakarsa',owner:val('to'),phone,cat:p.cat||'Retail',status:direct?'Aktif':'Menunggu verifikasi',role:role()};
   if(direct) t.isNew=true;
   S.newToko.push(t);
-  if(direct){ /* Usulan: canvasser tidak perlu persetujuan admin. Toko masuk Toko baru dari sales di dashboard. */
+  if(direct){ /* Usulan: canvasser tidak perlu persetujuan admin. Toko masuk Toko Sementara di dashboard. */
     shSet('tokoBaruSales',[...shRead('tokoBaruSales',[]),{id:t.id,name,addr:t.addr,cat:t.cat,u:fmUk()}]);
     S.visits.canvas.push({id:'nv'+Date.now(),place:name,time:'Sekarang',tasks:['Penjualan'],status:'Belum',photos:{},own:true,unplanned:true});
     shSet('visitExc',[...shRead('visitExc',[]),{id:'ex'+Date.now(),u:fmUk(),place:name,type:'Unplanned',untuk:'',alasan:'Toko baru dari canvasser',tgl:'26 Okt'}]); }
   replace('toko-terkirim',{name,direct});
 }
-SCR['toko-terkirim'] = p => ({note:p.direct?'Toko baru dari canvasser langsung aktif tanpa persetujuan admin. Toko masuk Toko baru dari sales di Web.':'Usulan toko masuk ke antrean verifikasi admin di Web. Sales dapat notifikasi saat disetujui atau ditolak.',
-  html:`<div class="result" style="padding-top:var(--sb)">${bigRing('#009DC7',p.direct?'check':'send')}<h2>${p.direct?'Toko tersimpan':'Usulan toko terkirim'}</h2><p>${p.direct?`<b>${esc(p.name)}</b> sudah aktif dan masuk daftar kunjunganmu. Admin melihatnya di Toko baru dari sales.`:`<b>${esc(p.name)}</b> sedang diverifikasi admin. Kamu akan dapat notifikasi setelah disetujui, lalu toko muncul di daftar pilihan toko.`}</p></div>
+SCR['toko-terkirim'] = p => ({note:p.direct?'Toko baru dari canvasser langsung aktif tanpa persetujuan admin. Toko masuk Toko Sementara di Web.':'Usulan toko masuk ke antrean verifikasi admin di Web. Sales dapat notifikasi saat disetujui atau ditolak.',
+  html:`<div class="result" style="padding-top:var(--sb)">${bigRing('#009DC7',p.direct?'check':'send')}<h2>${p.direct?'Toko tersimpan':'Usulan toko terkirim'}</h2><p>${p.direct?`<b>${esc(p.name)}</b> sudah aktif dan masuk daftar kunjunganmu. Admin melihatnya di Toko Sementara.`:`<b>${esc(p.name)}</b> sedang diverifikasi admin. Kamu akan dapat notifikasi setelah disetujui, lalu toko muncul di daftar pilihan toko.`}</p></div>
   <footer class="actions"><button class="btn" onclick="back()">Selesai</button></footer>`});
 function cartCalc(){
   if(S.cart.inv){ const L=S.cart.inv.lines, sub=L.reduce((a,l)=>a+l.q*l.price,0), sys=L.reduce((a,l)=>a+l.q*l.sys,0); return {sub,disc:0,total:sub,sys,promos:[],count:L.reduce((a,l)=>a+l.q,0),needCust:false,inv:true}; }
