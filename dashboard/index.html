@@ -83,13 +83,13 @@ main.loading :is(.stat,.card)::after{content:"";position:absolute;inset:0;backgr
 main.loading :is(.stat,.card) *{color:transparent!important;border-color:transparent!important;box-shadow:none!important;text-shadow:none!important;transition:none!important}
 /* Placeholder input tidak ikut color:transparent turunan, jadi disembunyikan sendiri agar tidak menimpa blok skeleton */
 main.loading :is(.stat,.card) ::placeholder{color:transparent!important;opacity:0!important}
-main.loading :is(.stat,.card) .pills *{background:none!important} main.loading :is(.stat,.card) :is(.dotc,.capkey){background:var(--sk)!important}
+main.loading :is(.stat,.card) :is(.pills,.utabs,.fchip) *{background:none!important} main.loading :is(.stat,.card) :is(.dotc,.capkey){background:var(--sk)!important}
 main.loading :is(.stat,.card) svg:not(.lc svg):not(.donut svg){opacity:0}
-main.loading :is(.stat,.card) :is(h2,small,b,p,a,span:not(:has(*)),dd,dt,.tag,.btn,.pills,.inp,.sel,.si,.av,.thumb,.cb){background:var(--sk)!important;border-radius:8px}
+main.loading :is(.stat,.card) :is(h2,small,b,p,a,span:not(:has(*)),dd,dt,.tag,.btn,.pills,.utabs,.fchip,.inp,.sel,.si,.av,.thumb,.cb){background:var(--sk)!important;border-radius:8px}
 main.loading :is(.stat,.card) :is(td,th){background:linear-gradient(var(--sk),var(--sk)) left center/72% 12px no-repeat!important}
 main.loading.loading :is(.stat,.card) :is(td,th) *{background:none!important}
 /* Satu blok skeleton per komponen: elemen di dalam blok skeleton tidak boleh menggambar blok sendiri, supaya tidak saling menimpa */
-main.loading.loading :is(.stat,.card) :is(h2,small,b,p,a,span:not(:has(*)),dd,dt,.tag,.btn,.pills,.inp,.sel,.si,.av,.thumb,.cb) *{background:none!important}
+main.loading.loading :is(.stat,.card) :is(h2,small,b,p,a,span:not(:has(*)),dd,dt,.tag,.btn,.pills,.utabs,.fchip,.inp,.sel,.si,.av,.thumb,.cb) *{background:none!important}
 main.loading :is(.stat,.card) :is(.stat,.card)::after{display:none}
 main.loading :is(.stat,.card) :is(.cc,.lc,.meter,.bar){background:var(--sk)!important;border-radius:14px}
 main.loading :is(.stat,.card) :is(.cc,.lc,.meter,.bar)>*{visibility:hidden}
@@ -1860,7 +1860,7 @@ function fxReveal(){ const mode=FX.mode; FX.mode=null; fxApply(); const m=$('mai
 function fxAnimate(root,full){
   // Gerak dibatasi (D3): komponen hanya memudar masuk; angka, batang, dan garis langsung tampil di nilai akhirnya.
   if(!full) return;
-  [...root.querySelectorAll(':scope > :not(.grid):not(.stats), :scope > .stats > *, :scope > .grid > *, :scope > div > .card')].forEach((el,i)=>el.animate([{opacity:0},{opacity:1}],{duration:200,delay:Math.min(i,8)*30,fill:'backwards',easing:'ease-out'}));
+  [...root.querySelectorAll(':scope > :not(.grid):not(.stats):not(:has(> .card)), :scope > .stats > *, :scope > .grid > *, :scope > div > .card')].forEach((el,i)=>el.animate([{opacity:0},{opacity:1}],{duration:200,delay:Math.min(i,8)*30,fill:'backwards',easing:'ease-out'}));
 }
 /* Usulan (11 Nov 2026): toko baru dari canvasser di mobile langsung aktif dan masuk Toko Sementara (status Takeout). */
 /* Hari off sales dibaca mobile untuk menyembunyikan hari itu saat jadwal ulang. */
