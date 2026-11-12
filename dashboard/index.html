@@ -1858,9 +1858,32 @@ function fxBegin(mode){ const ms=mode==='full'?480+Math.random()*260:260+Math.ra
 function fxApply(){ const m=$('main'), h=$('.hdr'); if(!m) return; const on=FX.mode&&Date.now()<FX.until; m.classList.toggle('loading',on&&FX.mode==='full'); m.classList.toggle('refetch',on&&FX.mode==='soft'); h?.classList.toggle('fetching',!!on); if(on) m.setAttribute('aria-busy','true'); else m.removeAttribute('aria-busy'); }
 function fxReveal(){ const mode=FX.mode; FX.mode=null; fxApply(); const m=$('main'); if(!m||!mode) return; fxAnimate(m,mode==='full'); }
 function fxAnimate(root,full){
-  // Gerak dibatasi (D3): komponen hanya memudar masuk; angka, batang, dan garis langsung tampil di nilai akhirnya.
+  // Gerak dibatasi (D3): komponen memudar masuk dan angka besar menghitung naik (pengecualian D3, 12 Nov 2026). Batang dan garis langsung tampil di nilai akhirnya.
   if(!full) return;
+  fxNums(root);
   [...root.querySelectorAll(':scope > :not(.grid):not(.stats):not(:has(> .card)), :scope > .stats > *, :scope > .grid > *, :scope > div > .card')].forEach((el,i)=>el.animate([{opacity:0},{opacity:1}],{duration:200,delay:Math.min(i,8)*30,fill:'backwards',easing:'ease-out'}));
+}
+/* Hitung naik angka besar saat pindah halaman. Dipilih otomatis: angka utuh di main (kartu stat, hero, donut, ringkasan) berukuran 18px ke atas, di luar tabel, tombol, dan kontrol. Angka baru di halaman mana pun ikut tanpa daftar selektor. */
+const FX_NUM=/^(?:Rp\s?)?\d[\d.,]*(?:\s?(?:%|jt|rb|M|x|×|\/\d[\d.,]*|[a-z]{1,8}))?$/i;
+const easeOut=k=>1-Math.pow(1-k,3);
+function fxNums(root){
+  let i=0;
+  root.querySelectorAll('b,.hero-n,.hero-big,.big').forEach(el=>{
+    if(el.children.length||el.closest('table,.tbl-wrap,.btn,.tag,.fchip,.utabs,.pills,.sectabs,.pager,.sel,.dd-btn,label,.n,.bar,.meter')) return;
+    const t=el.textContent.trim(); if(t.length>14||!FX_NUM.test(t)||parseFloat(getComputedStyle(el).fontSize)<18) return;
+    countUp(el,700+Math.min(i++,10)*40);
+  });
+}
+function countUp(el,dur){
+  const txt=el.textContent, m=txt.match(/\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+(?:,\d+)?/);
+  if(!m||txt.includes(':')||/^0\d/.test(m[0])) return;
+  const dec=(m[0].split(',')[1]||'').length, end=parseFloat(m[0].replace(/\./g,'').replace(',','.')); if(!end) return;
+  const fmt=v=>v.toLocaleString('id-ID',{minimumFractionDigits:dec,maximumFractionDigits:dec}), pre=txt.slice(0,m.index), post=txt.slice(m.index+m[0].length);
+  const t0=performance.now(); el.textContent=pre+fmt(0)+post;
+  const step=now=>{ if(!el.isConnected) return; const k=Math.min(1,(now-t0)/dur); el.textContent=pre+fmt(k<1?Math.round(end*easeOut(k)*10**dec)/10**dec:end)+post; if(k<1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+  /* Tab di latar belakang menahan requestAnimationFrame, jadi nilai akhir dipastikan tampil. */
+  setTimeout(()=>{ if(el.isConnected&&el.textContent!==txt) el.textContent=txt; },dur+150);
 }
 /* Usulan (11 Nov 2026): toko baru dari canvasser di mobile langsung aktif dan masuk Toko Sementara (status Takeout). */
 /* Hari off sales dibaca mobile untuk menyembunyikan hari itu saat jadwal ulang. */
