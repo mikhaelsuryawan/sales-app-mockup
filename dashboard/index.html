@@ -366,6 +366,7 @@ a.stat:hover,button.stat:hover{background:var(--raised)}
 .seg button[aria-checked=true].t-success{background:var(--success);color:#fff} .seg button[aria-checked=true].t-warning{background:var(--warning);color:#fff} .seg button[aria-checked=true].t-danger{background:var(--danger);color:#fff}
 .seg.sm button{height:32px;font-size:12px} .seg.touch{display:flex;width:100%} .seg.touch button{height:48px}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
+.fcard .frow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.fcard .frow+.frow{margin-top:12px}.fcard .fsum{margin-top:12px}
 .chips.nowrap{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;max-width:100%}
 .chips.nowrap::-webkit-scrollbar{display:none}
 .fchip{flex:none;height:40px;padding:0 16px;border-radius:99px;background:var(--card);box-shadow:var(--shadow-card);font-size:14px;font-weight:600;color:var(--body);display:inline-flex;align-items:center;gap:8px;white-space:nowrap;transition:background-color .15s,color .15s}
@@ -973,6 +974,13 @@ const SEG_COLORS=['var(--fg)','var(--info)','var(--accent-strong)','var(--warnin
 const segmentBar=(segs,{legend=true,size='',label=''}={})=>{ const tot=segs.reduce((a,s)=>a+s.value,0); return `<div class="segbar ${size}" role="img" aria-label="${esc(label||segs.map(s=>s.label+': '+s.value).join(', '))}">${segs.filter(s=>s.value>0).map((s,i)=>`<i style="flex-grow:${s.value};background:${s.color||SEG_COLORS[i%6]}" title="${esc(s.label)}: ${s.value}"></i>`).join('')}</div>${legend?`<div class="segleg">${segs.map((s,i)=>`<span><i class="dotc" style="background:${s.color||SEG_COLORS[i%6]}"></i>${s.label} <b class="fg tabular">${s.value}</b></span>`).join('')}</div>`:''}`; };
 const rowActs=(editOn,delOn,{del=true,edit=true,block=''}={})=>{ const why=String(block||'').replace(/<[^>]+>/g,''); return `${edit?ibtn('edit','Ubah',editOn,{size:'icon-sm'}):''}${del?`<button type="button" class="btn b-ghost icon-sm danger-i ${block?'blocked':''}" aria-label="Hapus${why?`, tidak bisa: ${esc(why)}`:''}" data-tip="${esc(why?'Tidak bisa dihapus: '+why:'Hapus')}" ${block?'aria-disabled="true"':''} onclick="${delOn}">${I('trash',16)}</button>`:''}`; };
 const card=(title,body,{acts='',cls='',icon='',desc='',count=0}={})=>`<section class="card ${cls}">${title?`<div class="ch"><div><h2>${icon?I(icon,18):''}${title}${countBadge(count)}</h2>${desc?`<p class="d">${desc}</p>`:''}</div>${acts?`<div class="acts">${acts}</div>`:''}</div>`:''}${body}</section>`;
+/* Kartu Filter standar: filter selalu di kartu sendiri di atas kartu tabel. top = baris periode, lalu cari, chip, select, hapus filter, dan ringkasan hasil. */
+const searchBox=(val,{ph='Cari',label='Cari',fn='setQ'}={})=>`<form style="flex:1;min-width:220px" onsubmit="event.preventDefault();${fn}({q:this.q.value})"><label class="inp h40"><span class="sr-only">${label}</span>${I('search',16)}<input name="q" value="${esc(val||'')}" placeholder="${ph}"></label></form>`;
+const filterCard=({top='',search='',chips=null,selects='',clear='',summary=''}={})=>{
+  const chipH=chips?`<div class="chips" role="group" aria-label="${chips.label||'Status'}">${chips.items.map(([k,l,n])=>`<button class="fchip ${chips.val===k?'on':''}" aria-pressed="${chips.val===k}" onclick="setQ({${chips.key||'st'}:'${k}'})">${l}${n!=null?` <span class="n">${n}</span>`:''}</button>`).join('')}</div>`:'';
+  const row2=`${search}${chipH}${selects}${clear?btn('Hapus filter',{v:'ghost',size:'sm',on:clear}):''}`;
+  return card('Filter',`${top?`<div class="frow">${top}</div>`:''}${row2?`<div class="frow">${row2}</div>`:''}${summary?`<p class="xs muted fsum">${summary}</p>`:''}`,{cls:'fcard'});
+};
 const BICON={info:'bulb',warning:'alert',danger:'alert',success:'check',accent:'bulb',neutral:'bulb'};
 const banner=({tone='info',title='',body='',icon,actions='',dismiss=false,raw='',cls=''}={})=>`<div class="banner ${tone} ${cls}" role="${tone==='danger'?'alert':'status'}"><span class="bi">${I(icon||BICON[tone],16)}</span><div class="bt">${raw||`${title?`<b>${title}</b>`:''}${body?`<p>${body}</p>`:''}`}</div>${actions?`<div class="ba">${actions}</div>`:''}${dismiss?ibtn('x','Tutup',"this.closest('.banner').remove()",{size:'icon-sm'}):''}</div>`;
 const callout=(html,cls='')=>banner({tone:cls==='blue'?'accent':'info',raw:html});
@@ -1469,17 +1477,16 @@ function repFilters(q){
   const tokoOpts=live('toko').filter(t=>t.status==='Aktif'&&(!q.cl||t.client===q.cl)&&(!q.cb||t.cabang===q.cb));
   const salesIds=[...new Set(allTrx().filter(t=>repDimOk(t,{...q,u:''})).map(t=>t.u))];
   const dirty=q.cl||q.cb||q.tk||q.u||q.from||q.to||(q.per&&q.per!=='m');
-  return card('Filter',`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">${pills(REP_PRESETS.map(x=>[x[0],x[1]]),r.preset,'repPer')}
+  return filterCard({top:`${pills(REP_PRESETS.map(x=>[x[0],x[1]]),r.preset,'repPer')}
       <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal mulai</span><input id="rf_from" type="date" min="${LD_START}" max="${LD_END}" value="${r.from}" onchange="repDate()" style="width:140px"></label>
       <span class="muted xs">sampai</span>
-      <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal akhir</span><input id="rf_to" type="date" min="${LD_START}" max="${LD_END}" value="${r.to}" onchange="repDate()" style="width:140px"></label></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-      ${sel([['','Semua klien'],...clients.map(c=>[c.id,c.name])],q.cl||'',"repSet({cl:this.value,tk:'',u:''})",{label:'Filter klien',cls:'sm'})}
+      <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal akhir</span><input id="rf_to" type="date" min="${LD_START}" max="${LD_END}" value="${r.to}" onchange="repDate()" style="width:140px"></label>`,
+    selects:`${sel([['','Semua klien'],...clients.map(c=>[c.id,c.name])],q.cl||'',"repSet({cl:this.value,tk:'',u:''})",{label:'Filter klien',cls:'sm'})}
       ${sel([['','Semua cabang'],...CABANG.slice(1)],q.cb||'',"repSet({cb:this.value,tk:'',u:''})",{label:'Filter cabang',cls:'sm'})}
       ${sel([['','Semua toko'],...tokoOpts.map(t=>[t.id,t.name])],q.tk||'',"repSet({tk:this.value,u:''})",{label:'Filter toko',cls:'sm'})}
-      ${sel([['','Semua sales'],...salesIds.map(u=>[u,(byU(u)||{}).name||u])],q.u||'',"repSet({u:this.value})",{label:'Filter sales',cls:'sm'})}
-      ${dirty?`<button class="btn b-ghost sm" onclick="repSet({cl:'',cb:'',tk:'',u:'',from:'',to:'',per:''})">Hapus filter</button>`:''}</div>
-    <p class="xs muted" style="margin-top:12px">Menampilkan <b class="fg">${repLabel(q)}</b>: ${num(n)} transaksi, ${jt(tot)}. Filter berlaku untuk grafik, rincian, komposisi, dan semua tab.</p>`);
+      ${sel([['','Semua sales'],...salesIds.map(u=>[u,(byU(u)||{}).name||u])],q.u||'',"repSet({u:this.value})",{label:'Filter sales',cls:'sm'})}`,
+    clear:dirty?"repSet({cl:'',cb:'',tk:'',u:'',from:'',to:'',per:''})":'',
+    summary:`Menampilkan <b class="fg">${repLabel(q)}</b>: ${num(n)} transaksi, ${jt(tot)}. Filter berlaku untuk grafik, rincian, komposisi, dan semua tab.`});
 }
 function salesReport(u){
   const s=byU(u), days=dailyOf(u), mt=repMonth(u), tg=tgtUser(10,u), td=days[25], mineO=trxOct().filter(t=>t.u===u), nTrx=mineO.length, avgTrx=nTrx?mt/nTrx:0, g=GRADE.find(x=>x.u===u), inc=INC.find(x=>x.u===u);
@@ -2481,17 +2488,16 @@ function ldFilters(q,base){
   const owners=[...new Set(D.leads.filter(l=>leadDimOk(l,{...q,u:''})).map(l=>l.owner).filter(Boolean))];
   const dirty=q.cl||q.cb||q.pk||q.u||q.from||q.to||(q.per&&q.per!=='m');
   const goal=base.filter(l=>l.status==='Deal').reduce((a,b)=>a+(b.goal||0),0);
-  return card('Filter',`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">${pills(REP_PRESETS.map(x=>[x[0],x[1]]),r.preset,'ldPer')}
+  return filterCard({top:`${pills(REP_PRESETS.map(x=>[x[0],x[1]]),r.preset,'ldPer')}
       <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal mulai</span><input id="ld_from" type="date" min="${LD_START}" max="${LD_END}" value="${r.from}" onchange="ldDate()" style="width:140px"></label>
       <span class="muted xs">sampai</span>
-      <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal akhir</span><input id="ld_to" type="date" min="${LD_START}" max="${LD_END}" value="${r.to}" onchange="ldDate()" style="width:140px"></label></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-      ${sel([['','Semua klien'],...clients.map(c=>[c.id,c.name])],q.cl||'',"setQ({cl:this.value})",{label:'Filter klien',cls:'sm'})}
+      <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal akhir</span><input id="ld_to" type="date" min="${LD_START}" max="${LD_END}" value="${r.to}" onchange="ldDate()" style="width:140px"></label>`,
+    selects:`${sel([['','Semua klien'],...clients.map(c=>[c.id,c.name])],q.cl||'',"setQ({cl:this.value})",{label:'Filter klien',cls:'sm'})}
       ${sel([['','Semua cabang'],...cabs],q.cb||'',"setQ({cb:this.value,u:''})",{label:'Filter cabang',cls:'sm'})}
       ${sel([['','Semua produk'],...prods],q.pk||'',"setQ({pk:this.value})",{label:'Filter produk',cls:'sm'})}
-      ${sel([['','Semua ditangani'],['__none','Belum di-assign'],...owners.map(u=>[u,leadOwnerName(u)])],q.u||'',"setQ({u:this.value})",{label:'Filter ditangani',cls:'sm'})}
-      ${dirty?btn('Hapus filter',{v:'ghost',size:'sm',on:"setQ({cl:'',cb:'',pk:'',u:'',from:'',to:'',per:''})"}):''}</div>
-    <p class="xs muted" style="margin-top:12px">Menampilkan <b class="fg">${repLabel(q)}</b>: ${base.length} leads, pengajuan ${jt(base.reduce((a,b)=>a+b.amount,0))}, goal ${jt(goal)}. Filter berlaku untuk kartu status dan daftar leads; grafik di bawah masih data contoh.</p>`);
+      ${sel([['','Semua ditangani'],['__none','Belum di-assign'],...owners.map(u=>[u,leadOwnerName(u)])],q.u||'',"setQ({u:this.value})",{label:'Filter ditangani',cls:'sm'})}`,
+    clear:dirty?"setQ({cl:'',cb:'',pk:'',u:'',from:'',to:'',per:''})":'',
+    summary:`Menampilkan <b class="fg">${repLabel(q)}</b>: ${base.length} leads, pengajuan ${jt(base.reduce((a,b)=>a+b.amount,0))}, goal ${jt(goal)}. Filter berlaku untuk kartu status dan daftar leads; grafik di bawah masih data contoh.`});
 }
 /* Assign leads mengikuti mobile: pilih user REA atau CBD dulu, lalu pilih satu leads atau lebih di cabang user itu (MOM 12.5).
    Penerima diambil dari role, bukan daftar tetap, jadi user REA atau CBD baru langsung muncul. */
