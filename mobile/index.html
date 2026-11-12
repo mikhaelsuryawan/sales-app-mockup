@@ -409,7 +409,7 @@ const USERS = {
   'spv.sari':  {name:'Sari Wulandari', init:'SW', role:'spv', roleLabel:'Team Leader (SPV 1)', nip:'CLT-TL-0208', client:'Arunika Elektronik & BPR Mitra Usaha', unit:'Cabang Jakarta Selatan', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
   'ffor.yoga': {name:'Yoga Permana', init:'YP', role:'spv', roleLabel:'FFOR (SPV 2)', nip:'SIM-18-00144', client:'Arunika Elektronik', unit:'Region Jakarta', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
   'arco.maya': {name:'Maya Anggraini', init:'MA', role:'spv', menu:'arco', roleLabel:'Arco (Leader SPG)', nip:'ARCO-0012', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
-  'cbd.tono':  {name:'Tono Hidayat', init:'TH', role:'leads', menu:'cbd', roleLabel:'CBD / Mediator', nip:'SIM-23-00871', client:'BPR Mitra Usaha', unit:'Kantor Cabang Cilandak', place:'Area Fatmawati', sched:'WFA', main:{key:'leads',label:'Leads',icon:'users'}},
+  'cbd.tono':  {name:'Tono Hidayat', init:'TH', role:'leads', menu:'cbd', vkey:'cbd', roleLabel:'CBD / Mediator', nip:'SIM-23-00871', client:'BPR Mitra Usaha', unit:'Kantor Cabang Cilandak', place:'Area Fatmawati', sched:'WFA', main:{key:'leads',label:'Leads',icon:'users'}},
   'rea.nina':  {name:'Nina Safitri', init:'NS', role:'leads', roleLabel:'REA / SPG Multi Finance', nip:'SIM-24-01322', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'leads',label:'Leads',icon:'users'}},
   'fmcg.tari': {name:'Lestari Putri', init:'LP', role:'fmcg', roleLabel:'Promotor FMCG', nip:'SIM-24-01355', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
   'md.rangga': {name:'Rangga Saputra', init:'RS', role:'fmcg', roleLabel:'Merchandising (MD)', nip:'SIM-23-01102', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
@@ -527,6 +527,7 @@ function freshState(){
       canvas:[{id:'v1',place:'Toko Sinar Jaya Elektronik',time:'09:00',tasks:['Penjualan','Ambil retur'],status:'Selesai',photos:{0:1,1:1},cin:'09:02',cout:'09:31',dur:'29 mnt'},{id:'v2',place:'Toko Makmur Abadi',time:'10:30',tasks:['Penjualan'],status:'Belum',photos:{}},{id:'v3',place:'Toko Berkah Elektronik',time:'13:00',tasks:['Penjualan','Cek display'],status:'Belum',photos:{}},{id:'v4',place:'Toko Cahaya Baru',time:'15:00',tasks:['Penjualan'],status:'Belum',photos:{}}],
       canvasE:[{id:'v1',place:'Toko Jaya Abadi Kembangan',time:'09:30',tasks:['Kunjungan'],status:'Belum',photos:{}},{id:'v2',place:'Toko Cahaya Baru',time:'13:00',tasks:['Kunjungan'],status:'Belum',photos:{}}],
       order:[{id:'v1',place:'Toko Mega Elektronik',time:'10:00',tasks:['Ambil pesanan'],status:'Selesai',photos:{0:1},cin:'10:04',cout:'10:30',dur:'26 mnt'},{id:'v2',place:'CV Sumber Rejeki Elektronik',time:'13:30',tasks:['Ambil pesanan','Penagihan'],status:'Belum',photos:{}},{id:'v3',place:'Toko Abadi Jaya',time:'15:30',tasks:['Ambil pesanan'],status:'Belum',photos:{}}],
+      cbd:[{id:'v1',place:'Agen Sejahtera Fatmawati',mid:'mt1',time:'10:00',tasks:['Monitoring mitra'],status:'Belum',photos:{}},{id:'v2',place:'Agen Berkah Cilandak',mid:'mt2',time:'14:00',tasks:['Monitoring mitra'],status:'Belum',photos:{}}],
       leads:[{id:'v1',place:'Ahmad Fauzi (nasabah)',time:'10:00',tasks:['Survey usaha'],status:'Belum',photos:{}},{id:'v2',place:'Yuliana Putri (nasabah)',time:'14:00',tasks:['Verifikasi dokumen'],status:'Belum',photos:{}}],
       fmcg:[{id:'v1',place:'Electronic City Kemang',time:'09:00',tasks:['Semua aktivitas toko'],status:'Belum',photos:{}},{id:'v2',place:'Best Denki Senayan City',time:'13:00',tasks:['Semua aktivitas toko'],status:'Belum',photos:{}}],
       spv:[{id:'v1',place:'Electronic City Kemang',time:'11:00',tasks:['Supervisi SPG'],status:'Belum',photos:{}}]
@@ -817,9 +818,14 @@ function todayVisits(){
   return `<div class="sec-title">Kunjungan hari ini <a onclick="tab('kunjungan')">Semua</a></div>
   <div class="list">${v.slice(0,3).map(x=>visitRow(x)).join('')}</div>`;
 }
+/* Jarak ke toko di daftar Hari ini (jawaban klien 12 Nov 2026, US-07). Posisi sales di mockup disimulasikan; koordinat toko dari dashboard (tokoCoord) atau data contoh. */
+const TOKO_COORD_M={'Toko Sinar Jaya Elektronik':[-6.284,106.844],'Toko Makmur Abadi':[-6.335,106.823],'Toko Berkah Elektronik':[-6.333,106.835],'Toko Cahaya Baru':[-6.25,106.8],'Toko Jaya Abadi Kembangan':[-6.224,106.653],'Electronic City Kemang':[-6.2607,106.8142],'Best Denki Senayan City':[-6.2275,106.7973],'Toko Mega Elektronik':[-6.276,106.797],'CV Sumber Rejeki Elektronik':[-6.311,106.763],'Toko Abadi Jaya':[-6.25,106.8],'Toko Maju Elektronik Cinere':[-6.326,106.779]};
+const POS_DEMO=[-6.27,106.81];
+function jarakKm(a,b){ const R=6371, rd=x=>x*Math.PI/180, dl=rd(b[0]-a[0]), dg=rd(b[1]-a[1]), h=Math.sin(dl/2)**2+Math.cos(rd(a[0]))*Math.cos(rd(b[0]))*Math.sin(dg/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
+function jarakText(place){ if(noCheckin()) return ''; const m=shRead('tokoCoord',null), c=(m&&m[place])||TOKO_COORD_M[place]; if(!c) return ''; const km=jarakKm(POS_DEMO,c); return km<1?(Math.round(km*100)*10)+' m':km.toFixed(1).replace('.',',')+' km'; }
 function visitRow(x){
-  const tone=x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':x.status==='Dijadwal ulang'?'amber':'';
-  return `<button class="li" onclick="go('kunjungan-detail',{id:'${x.id}'})"><div class="ico-tile ${x.status==='Selesai'?'green':''}">${I('pin',20)}</div><div class="grow"><div class="t">${x.place}${x.unplanned?' '+chip('Unplanned','amber'):''}</div><div class="s">${x.time} · ${x.tasks.join(', ')}</div></div>${chip(x.status,tone)}</button>`;
+  const tone=x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':x.status==='Dijadwal ulang'?'amber':x.status==='Terlewat'?'red':'';
+  return `<button class="li" onclick="go('kunjungan-detail',{id:'${x.id}'})"><div class="ico-tile ${x.status==='Selesai'?'green':''}">${I('pin',20)}</div><div class="grow"><div class="t">${x.place}${x.unplanned?' '+chip('Unplanned','amber'):''}</div><div class="s">${x.time} · ${x.tasks.join(', ')}${jarakText(x.place)?' · '+jarakText(x.place):''}</div></div>${chip(x.status,tone)}</button>`;
 }
 function spvDash(){
   const L=S.leads, c=k=>L.filter(l=>l.status===k).length;
@@ -1005,7 +1011,9 @@ const tokoDefault=()=>{ const r=role(), u=uid();
   return U()?.place?[U().place]:[]; };
 const tokoDitugaskan=()=>{ const m=shRead('penugasanToko',null); return (m&&m[uid()])?m[uid()]:tokoDefault(); };
 const spvJadwal=()=>shRead('roleJadwal',JADWAL_DEFAULT)[RID[S.user]]==='Ya';
-const canSchedule = () => role()==='spv'?spvJadwal():(role()==='leads'?spvJadwal():tokoDitugaskan().length>1);
+/* Usulan: atribut role Boleh menambah kunjungan sendiri (IAM, Role) dibagikan dashboard lewat userTambah. */
+const bisaTambah=()=>{ const m=shRead('userTambah',null); if(m&&m[uid()]!==undefined) return !!m[uid()]; return ['canvas','order'].includes(role())||uid()==='rangga'; };
+const canSchedule = () => role()==='spv'?spvJadwal():(role()==='leads'?spvJadwal():(bisaTambah()&&tokoDitugaskan().length>1));
 const apprChain = u => { const r=RID[u]; if(['r6','r8','r10'].includes(r)) return 'Arco → Team Leader'; if(['r3','r4','r5','r13'].includes(r)) return 'Team Leader → FFOR'; return 'Team Leader'; };
 SCR.kunjungan = p => {
   const seg=p.seg||'hari', r=role();
@@ -1020,7 +1028,7 @@ SCR.kunjungan = p => {
     ${seg==='hari'?`<div class="card" style="margin-bottom:14px"><div class="row between"><b>Progres hari ini</b><span class="num small muted">${v.filter(x=>x.status==='Selesai').length} dari ${v.length} selesai</span></div><div class="bar" style="margin-top:10px"><i style="width:${Math.max(3,v.filter(x=>x.status==='Selesai').length/(v.length||1)*100)}%"></i></div></div><div class="list">${v.map(visitRow).join('')}</div>${teamV}`:
     `<div class="list">${S.plans.map(x=>`<div class="li"><div class="ico-tile tan">${I('calendar',20)}</div><div class="grow"><div class="t">${x.place}</div><div class="s">${x.date}</div></div>${chip(x.status,x.status==='Disetujui'?'green':'amber')}</div>`).join('')}
     <div class="li"><div class="ico-tile">${I('refresh',20)}</div><div class="grow"><div class="t">Kunjungan rutin mingguan</div><div class="s">Setiap Senin & Kamis · Okt – Des 2026</div></div>${chip('Berkala','blue')}</div></div>`}
-    ${canSchedule(r)?`<button class="btn sec" style="margin-top:16px" onclick="act(()=>go('kunjungan-form',{spv:${r==='spv'?1:0}}))">${I('plus',20)} ${r==='spv'?'Tugaskan ke tim':'Tambah kunjungan'}${isLocked()?' '+I('lock',16):''}</button>`:''}${(r==='canvas'||r==='order')?`<button class="btn sec" style="margin-top:12px" onclick="act(()=>unplSheet())">${I('plus',20)} Kunjungan di luar rencana</button>`:''}${canSchedule(r)?'':`<p class="hint" style="margin-top:14px">${r==='spv'?'':'Kamu ditugaskan di satu toko saja, jadi jadwal kunjungan mengikuti Team Leader.'}</p>`}
+    ${canSchedule(r)?`<button class="btn sec" style="margin-top:16px" onclick="act(()=>go('kunjungan-form',{spv:${r==='spv'?1:0}}))">${I('plus',20)} ${r==='spv'?'Tugaskan ke tim':'Tambah kunjungan'}${isLocked()?' '+I('lock',16):''}</button>`:''}${(r!=='spv'&&r!=='leads'&&bisaTambah())?`<button class="btn sec" style="margin-top:12px" onclick="act(()=>unplSheet())">${I('plus',20)} Kunjungan di luar rencana</button>`:''}${canSchedule(r)?'':`<p class="hint" style="margin-top:14px">${r==='spv'?'':(bisaTambah()?'Kamu ditugaskan di satu toko saja, jadi jadwal kunjungan mengikuti Team Leader.':'Role kamu tidak menambah kunjungan sendiri. Jadwal kunjungan mengikuti Team Leader.')}</p>`}
   </main>`};
 };
 SCR['kunjungan-detail'] = p => {
@@ -1028,16 +1036,18 @@ SCR['kunjungan-detail'] = p => {
   if(!x) return SCR.kunjungan({});
   const lk=isLocked();
   let foot;
-  if(x.status==='Dijadwal ulang') foot=`<button class="btn" disabled>Dijadwal ulang ke ${x.resched?x.resched.hari+' '+x.resched.tgl:''}</button>`;
+  if(x.status==='Terlewat') foot=`<button class="btn" disabled>Terlewat. Check-in hanya di hari yang sama</button>`;
+  else if(x.status==='Dijadwal ulang') foot=`<button class="btn" disabled>Dijadwal ulang ke ${x.resched?x.resched.hari+' '+x.resched.tgl:''}</button>`;
+  else if(vk()==='cbd'&&x.mid) foot=x.status==='Selesai'?`<button class="btn" disabled>Monitoring selesai</button>`:`<button class="btn" onclick="go('mitra-detail',{id:'${x.mid}'})">Isi monitoring mitra</button>`;
   else if(noCheckin()) foot=x.status==='Selesai'?`<button class="btn" disabled>Kunjungan selesai</button>`:`<button class="btn" onclick="act(()=>{leadDone('${x.id}')})">${I('check',18,2.2)} Tandai selesai</button>`;
   else if(x.status==='Selesai') foot=role()==='fmcg'?`<button class="btn ${lk?'locked':''}" onclick="act(()=>repeatVisit('${x.id}'))">${I(lk?'lock':'pin',18)} Check-in lagi di lokasi ini</button>`:`<button class="btn" disabled>Kunjungan selesai</button>`;
   else if(!x.cin) foot=`<button class="btn ghost" style="width:auto" onclick="toast('Membuka Google Maps…','route')">${I('route',18)} Rute</button><button class="btn ${lk?'locked':''}" onclick="act(()=>startCheckin('${x.id}'))">${I(lk?'lock':'pin',18)} Check-in di lokasi</button>`;
   else foot=`<button class="btn ${lk?'locked':''}" onclick="act(()=>${role()==='fmcg'?`fmOut('${x.id}')`:`go('kunjungan-foto',{id:'${x.id}',mode:'out'})`})">${I(lk?'lock':'check',18,2.2)} Check-out & selesai</button>`;
   return {note:'Check-in dan check-out wajib 1 foto ber-watermark, catatan opsional (MOM 5.2). Untuk Promotor FMCG dan MD, tugas selalu semua aktivitas toko kecuali support task, dan check-out baru bisa setelah semua tugas hijau. Check-in dan check-out harus di lokasi yang sama, dan Promotor FMCG boleh berulang kali dalam sehari. Lupa check-out ditutup otomatis saat check-in di toko berikutnya atau saat absen pulang. Sales Canvasing dan Taking Order wajib check-in dan check-out di tiap toko, hanya di dalam radius toko. Jika keluar radius tanpa check-out, muncul notifikasi belum check-out. Saat check-in di toko berikutnya, sales boleh check-out toko sebelumnya tanpa harus berada di radius toko itu (revisi Nov 2026).',
   html:`${appbar('Detail kunjungan',{right:(canResched(x)?`<button class="ib" onclick="act(()=>reschedSheet('${x.id}'))" aria-label="Jadwal ulang">${I('calendar',22)}</button>`:'')+(!x.cin&&x.status!=='Selesai'&&(role()==='spv'||x.own)&&canSchedule(role())?`<button class="ib" onclick="act(()=>delVisitSheet('${x.id}'))" aria-label="Hapus kunjungan">${I('trash',20)}</button>`:'')})}<main class="content">
-    <div class="card"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t" style="font-weight:800;font-size:16px">${x.place}${x.unplanned?' '+chip('Unplanned','amber'):''}</div><div class="small muted">Sen, 26 Okt 2026 · ${x.time}</div></div>${chip(x.status,x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':x.status==='Dijadwal ulang'?'amber':'')}</div>
+    <div class="card"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t" style="font-weight:800;font-size:16px">${x.place}${x.unplanned?' '+chip('Unplanned','amber'):''}</div><div class="small muted">Sen, 26 Okt 2026 · ${x.time}</div></div>${chip(x.status,x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':x.status==='Dijadwal ulang'?'amber':x.status==='Terlewat'?'red':'')}</div>
       ${x.cin?`<div class="kv" style="margin-top:8px"><span>Check-in</span><span class="num">${x.cin} · 24 m dari titik toko</span></div>${x.cout?`<div class="kv"><span>Check-out</span><span class="num">${x.cout} · durasi ${x.dur}${x.remoteOut?' · dari luar radius':''}</span></div>`:''}`
-      :noCheckin()?`<div class="banner blue" style="margin-top:12px">${I('alert',18)}<span>Multi Finance, REA, dan CBD tidak memakai check-in dan check-out ke nasabah. Isi hasil kunjungan lalu tandai selesai.</span></div>`:`<div class="banner blue" style="margin-top:12px">${I('pin',18)}<span>Check-in saat sudah sampai. Lokasi kamu dicocokkan dengan titik toko (radius 100 m).</span></div>`}</div>
+      :noCheckin()?`<div class="banner blue" style="margin-top:12px">${I('alert',18)}<span>Multi Finance, REA, dan CBD tidak memakai check-in dan check-out ke nasabah. Isi hasil kunjungan lalu tandai selesai.</span></div>`:`<div class="banner blue" style="margin-top:12px">${I('pin',18)}<span>Check-in saat sudah sampai. Lokasi kamu dicocokkan dengan titik toko (radius 100 m). Check-in kunjungan bisa kapan saja sampai pukul 23.59.</span></div>`}</div>
     <div class="sec-title">Tugas${x.sesi>1?' · sesi ke-'+x.sesi:''}</div>
     ${role()==='fmcg'?fmTaskSummary(x):`<div class="list">${x.tasks.map(t=>/^(Quiz|Survey)$/.test(t)?`<button class="li" onclick="go('${t.toLowerCase()}')"><div class="ico-tile tan">${I(t==='Quiz'?'quiz':'survey',18,2)}</div><div class="grow"><div class="t">${t}</div><div class="s">Dikerjakan di dalam kunjungan</div></div>${I('right',18)}</button>`:`<div class="li"><div class="ico-tile">${I('check',18,2.2)}</div><div class="grow"><div class="t">${t}</div></div></div>`).join('')}</div>`}
     ${x.cin?`<div class="sec-title">Foto check-in</div><div class="thumbs">${visitPhotos(x,'in')}</div>`:''}
@@ -1060,6 +1070,7 @@ function visitFormHTML(x){
 }
 function visitAction(id){
   const v=visitById(id);
+  if(v.status==='Terlewat'){ toast('Kunjungan ke '+v.place+' terlewat. Isi alasan di tab Kunjungan','alert'); return; }
   if(v.status==='Dijadwal ulang'){ toast('Kunjungan ini dijadwal ulang ke '+(v.resched?v.resched.hari+' '+v.resched.tgl:'hari lain'),'alert'); return; }
   if(v.status==='Selesai'){ if(role()==='fmcg') repeatVisit(id); else toast('Kunjungan ke '+v.place+' sudah selesai'); return; }
   if(!v.cin) startCheckin(id);
@@ -1071,7 +1082,7 @@ function visitEntry(){ act(()=>{
   if(!L.length){ toast('Belum ada kunjungan terjadwal','alert'); return; }
   if(L.length===1){ visitAction(L[0].id); return; }
   sheet(`<h3 style="font-size:18px;font-weight:800">Pilih toko</h3><p class="muted small" style="margin:6px 0 12px;line-height:1.5">Pilih toko yang mau di-check-in atau di-check-out.</p>
-  <div class="list">${L.map(v=>{ const open=v.cin&&!v.cout, done=(v.status==='Selesai'&&role()!=='fmcg')||v.status==='Dijadwal ulang';
+  <div class="list">${L.map(v=>{ const open=v.cin&&!v.cout, done=(v.status==='Selesai'&&role()!=='fmcg')||v.status==='Dijadwal ulang'||v.status==='Terlewat';
     return `<button class="li" ${done?'disabled':''} onclick="closeSheet();visitAction('${v.id}')"><div class="ico-tile ${v.status==='Selesai'?'green':''}">${I('pin',20)}</div><div class="grow"><div class="t">${v.place}</div><div class="s">${v.time}</div></div>${chip(open?'Check-out':v.status==='Selesai'?(role()==='fmcg'?'Check-in lagi':'Selesai'):'Check-in',open?'blue':v.status==='Selesai'?'green':'')}</button>`; }).join('')}</div>`);
 }); }
 function repeatVisit(id){ const v=visitById(id); v.sesi=(v.sesi||1)+1; v.cin=null; v.cout=null; v.dur=null; v.status='Belum'; render(false,true); toast('Sesi ke-'+v.sesi+' siap, check-in di lokasi yang sama','pin'); }
@@ -1115,7 +1126,9 @@ function fmSyncVisits(){
 }
 /* Usulan (11 Nov 2026): Hari ini canvassing dan taking order membaca journey plan dari dashboard (jpPlan, minggu 1 hari Senin).
    Urutan plan menjadi urutan rute. Tanpa plan untuk sales ini, daftar tidak berubah. */
-const JP_PLAN_DEFAULT=[{u:'budi',n:'Toko Sinar Jaya Elektronik',w:1,d:0,o:1},{u:'budi',n:'Toko Makmur Abadi',w:1,d:0,o:2},{u:'budi',n:'Toko Berkah Elektronik',w:1,d:0,o:3}];
+const JP_PLAN_DEFAULT=[{u:'budi',n:'Toko Sinar Jaya Elektronik',w:1,d:0,o:1},{u:'budi',n:'Toko Makmur Abadi',w:1,d:0,o:2},{u:'budi',n:'Toko Berkah Elektronik',w:1,d:0,o:3},{u:'budi',n:'Toko Cahaya Baru',w:1,d:1,o:1},{u:'budi',n:'Toko Sinar Jaya Elektronik',w:1,d:1,o:2}];
+/* Pengingat H-1 berbasis journey plan (jawaban klien 12 Nov 2026): dikirim ke sales yang punya kunjungan besok, jam dari Parameter (h1Jam, bawaan 17.00). */
+const h1Plan=()=>shRead('jpPlan',JP_PLAN_DEFAULT).filter(x=>x.u===fmUk()&&x.w===1&&x.d===1&&x.n).sort((a,b)=>a.o-b.o).map(x=>x.n);
 function jpSyncVisits(){
   const r=role(); if(r!=='canvas'&&r!=='order') return;
   const plan=shRead('jpPlan',JP_PLAN_DEFAULT).filter(x=>x.u===fmUk()&&x.w===1&&x.d===0&&x.n).sort((a,b)=>a.o-b.o);
@@ -1199,40 +1212,64 @@ function saveVisitPhotos(){
    Dicatat di salesapp.shared.v1 (visitExc) dan tampil di dashboard, Kepatuhan kunjungan. Hari off dibaca dari userOff (ditulis dashboard). */
 const RS_ALASAN=['Toko tutup','Toko minta jadwal lain','Sales berhalangan','Kendala perjalanan','Lainnya'];
 const MS_ALASAN=['Toko tutup','Kendala perjalanan','Sales berhalangan','Waktu tidak cukup','Lainnya'];
-const RS_HARI=[['Selasa','27 Okt'],['Rabu','28 Okt'],['Kamis','29 Okt'],['Jumat','30 Okt'],['Sabtu','31 Okt']];
+/* Jadwal ulang (jawaban klien 12 Nov 2026): hari kerja non-off mana pun dalam siklus yang sama, maksimal satu kali per kunjungan.
+   Siklus (jpSiklus), hari off (userOff), cuti (cutiDisetujui), dan hari libur dibaca dari dashboard; tanpa itu dipakai data contoh. */
+const RS_BLN=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'], RS_DAYN=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const LIBUR_M=[['2026-10-30','Stock opname ARUNIKA'],['2026-12-25','Hari Natal']];
+const CUTI_M=[{u:'budi',dari:'2026-11-04',sampai:'2026-11-04'}];
+function rsHari(){ const u=fmUk(), n=shRead('jpSiklus',{})[u]||4, off=shRead('userOff',USER_OFF_DEFAULT)[u], cuti=shRead('cutiDisetujui',CUTI_M).filter(c=>c.u===u), out=[];
+  for(let i=1;i<7*n;i++){ const d=new Date(Date.UTC(2026,9,26+i)), dow=d.getUTCDay(); if(dow===0) continue; const nm=RS_DAYN[dow]; if(nm===off) continue;
+    const iso=d.toISOString().slice(0,10); if(cuti.some(c=>c.dari<=iso&&iso<=c.sampai)) continue;
+    const tgl=d.getUTCDate()+' '+RS_BLN[d.getUTCMonth()], lb=LIBUR_M.find(l=>l[0]===iso);
+    out.push({key:iso,hari:nm,tgl,label:nm+' '+tgl+(lb?' (libur: '+lb[1]+')':'')}); }
+  return out; }
 const USER_OFF_DEFAULT={budi:'Kamis',dimas:'Jumat',kevin:'Kamis'};
 const MISSED_DEFAULT=[{id:'ms1',u:'budi',place:'Toko Cahaya Baru',tgl:'Sab, 24 Okt'}];
-const canResched=x=>(role()==='canvas'||role()==='order')&&!x.cin&&x.status==='Belum';
-const missedOpen=()=>{ if(role()!=='canvas'&&role()!=='order') return []; const done=shRead('visitExc',[]).filter(e=>e.type==='Terlewat').map(e=>e.ref); return MISSED_DEFAULT.filter(m=>m.u===fmUk()&&!done.includes(m.id)); };
+const canResched=x=>(role()==='canvas'||role()==='order')&&!x.cin&&x.status==='Belum'&&!shRead('visitExc',[]).some(e=>e.u===fmUk()&&e.place===x.place&&e.type==='Dijadwal ulang');
+/* Terlewat: contoh kemarin (MISSED_DEFAULT) ditambah hasil scheduler 23.59 yang menunggu alasan sales. */
+const missedOpen=()=>{ if(role()==='leads'||role()==='spv') return []; const ex=shRead('visitExc',[]), done=ex.filter(e=>e.type==='Terlewat'&&e.ref).map(e=>e.ref);
+  const st=(role()==='canvas'||role()==='order')?MISSED_DEFAULT.filter(m=>m.u===fmUk()&&!done.includes(m.id)):[];
+  const auto=ex.filter(e=>e.type==='Terlewat'&&e.auto&&e.u===fmUk()&&!e.alasan).map(e=>({id:e.id,u:e.u,place:e.place,tgl:e.tgl==='26 Okt'?'Sen, 26 Okt':e.tgl,auto:true}));
+  return [...st,...auto]; };
+/* CBD hanya mengunjungi mitra (bawahan). Kunjungan Selesai saat jawaban monitoring disubmit (R11). */
+function cbdSync(){ if(vk()!=='cbd') return; const a=shRead('mitraAns',{}); (S.visits.cbd||[]).forEach(v=>{ if(v.mid&&a[v.mid]) v.status='Selesai'; }); }
+function eodSync(){ const L=S.visits[vk()]; if(!L) return; const ex=shRead('visitExc',[]); L.forEach(v=>{ if(v.status==='Belum'&&!v.cin&&ex.some(e=>e.u===fmUk()&&e.place===v.place&&e.type==='Terlewat'&&e.tgl==='26 Okt')) v.status='Terlewat'; }); }
+/* Simulasi scheduler 23.59 untuk akun yang sedang login. Di sistem asli scheduler berjalan di backend untuk semua sales. */
+function eodRunMobile(){ if(!S.user) return; if(noCheckin()){ toast('REA dan CBD tidak memakai check-in','alert'); return; }
+  const L=S.visits[vk()]||[], ex=shRead('visitExc',[]), add=[];
+  L.forEach(v=>{ if(v.status==='Belum'&&!v.cin&&!ex.some(e=>e.u===fmUk()&&e.place===v.place&&['Terlewat','Dijadwal ulang'].includes(e.type)&&e.tgl==='26 Okt')) add.push({id:'eod-'+fmUk()+'-'+v.place.replace(/\W+/g,'').toLowerCase(),u:fmUk(),place:v.place,type:'Terlewat',untuk:'',alasan:'',tgl:'26 Okt',auto:true}); });
+  shSet('visitExc',[...ex,...add]); render(false); toast(add.length+' kunjungan menjadi Terlewat','clock'); }
 function reschedSheet(id){ S.rs={id,hari:'',alasan:'',note:''}; reschedRender(); }
 function reschedRender(){ const r=S.rs, x=visitById(r.id), off=shRead('userOff',USER_OFF_DEFAULT)[fmUk()];
-  sheet(`<h3 style="font-size:18px;font-weight:800">Jadwal ulang ${esc(x.place)}</h3><p class="muted small" style="margin:6px 0 14px;line-height:1.5">Pilih hari baru dalam siklus yang sama. Alasan wajib diisi. Team Leader melihatnya di dashboard.</p>
-  <div class="field"><span>Hari baru</span><div class="opts">${RS_HARI.filter(h=>h[0]!==off).map(h=>`<button class="opt ${r.hari===h[0]?'on':''}" onclick="rsSet('hari','${h[0]}')">${h[0]} ${h[1]}</button>`).join('')}</div>${off?`<div class="hint">${off} tidak ditampilkan karena hari off kamu.</div>`:''}</div>
+  sheet(`<h3 style="font-size:18px;font-weight:800">Jadwal ulang ${esc(x.place)}</h3><p class="muted small" style="margin:6px 0 14px;line-height:1.5">Pilih hari kerja baru dalam siklus yang sama. Satu kunjungan hanya bisa dijadwal ulang satu kali. Alasan wajib diisi. Team Leader melihatnya di dashboard.</p>
+  <label class="field"><span>Hari baru</span><select class="input" id="rsd" onchange="S.rs.hari=this.value"><option value="">Pilih hari</option>${rsHari().map(h=>`<option value="${h.key}" ${r.hari===h.key?'selected':''}>${esc(h.label)}</option>`).join('')}</select><div class="hint">Hari off${off?' ('+off+')':''}, cuti, dan hari Minggu tidak ditampilkan. Hari libur diberi tanda.</div></label>
   <div class="field"><span>Alasan</span><div class="opts">${RS_ALASAN.map(a=>`<button class="opt ${r.alasan===a?'on':''}" onclick="rsSet('alasan','${a}')">${a}</button>`).join('')}</div></div>
   <label class="field"><span>Catatan (opsional)</span><textarea class="input" id="rsn">${esc(r.note)}</textarea></label><div id="rserr"></div>
   <button class="btn" onclick="reschedSave()">Jadwal ulang</button>`); }
-function rsSet(k,v){ S.rs.note=val('rsn'); S.rs[k]=v; reschedRender(); }
-function reschedSave(){ const r=S.rs; S.rs.note=val('rsn');
+function rsSet(k,v){ S.rs.note=val('rsn'); S.rs.hari=($('#rsd')||{}).value||S.rs.hari; S.rs[k]=v; reschedRender(); }
+function reschedSave(){ const r=S.rs; S.rs.note=val('rsn'); S.rs.hari=($('#rsd')||{}).value||r.hari;
   if(!r.hari||!r.alasan){ $('#rserr').innerHTML='<div class="err">Pilih hari baru dan alasan.</div>'; return; }
   const x=visitById(r.id); if(!x||!canResched(x)) return;
-  const tgl=RS_HARI.find(h=>h[0]===r.hari)[1];
+  const pick=rsHari().find(h=>h.key===r.hari); if(!pick){ $('#rserr').innerHTML='<div class="err">Hari yang dipilih tidak tersedia.</div>'; return; }
+  const tgl=pick.tgl; r.hari=pick.hari;
   x.status='Dijadwal ulang'; x.resched={hari:r.hari,tgl};
   shSet('visitExc',[...shRead('visitExc',[]),{id:'ex'+Date.now(),u:fmUk(),place:x.place,type:'Dijadwal ulang',untuk:r.hari+' '+tgl,alasan:r.alasan+(r.note?': '+r.note:''),tgl:'26 Okt'}]);
   closeSheet(); render(false); toast('Dijadwal ulang ke '+r.hari+' '+tgl); }
 function missedSheet(id){ S.ms={id,alasan:'',note:''}; missedRender(); }
-function missedRender(){ const m=MISSED_DEFAULT.find(x=>x.id===S.ms.id);
+function missedRender(){ const m=missedOpen().find(x=>x.id===S.ms.id)||MISSED_DEFAULT.find(x=>x.id===S.ms.id);
   sheet(`<h3 style="font-size:18px;font-weight:800">Kenapa ${esc(m.place)} terlewat?</h3><p class="muted small" style="margin:6px 0 14px;line-height:1.5">Kunjungan ${m.tgl} tanpa check-in. Alasanmu masuk ke laporan kepatuhan.</p>
   <div class="field"><span>Alasan</span><div class="opts">${MS_ALASAN.map(a=>`<button class="opt ${S.ms.alasan===a?'on':''}" onclick="msSet('${a}')">${a}</button>`).join('')}</div></div>
   <label class="field"><span>Catatan (opsional)</span><textarea class="input" id="msn">${esc(S.ms.note)}</textarea></label><div id="mserr"></div>
   <button class="btn" onclick="missedSave()">Simpan alasan</button>`); }
 function msSet(a){ S.ms.note=val('msn'); S.ms.alasan=a; missedRender(); }
 function missedSave(){ S.ms.note=val('msn'); if(!S.ms.alasan){ $('#mserr').innerHTML='<div class="err">Pilih alasan.</div>'; return; }
-  const m=MISSED_DEFAULT.find(x=>x.id===S.ms.id);
-  shSet('visitExc',[...shRead('visitExc',[]),{id:'ex'+Date.now(),ref:m.id,u:m.u,place:m.place,type:'Terlewat',untuk:'',alasan:S.ms.alasan+(S.ms.note?': '+S.ms.note:''),tgl:m.tgl}]);
+  const m=missedOpen().find(x=>x.id===S.ms.id)||MISSED_DEFAULT.find(x=>x.id===S.ms.id), alasan=S.ms.alasan+(S.ms.note?': '+S.ms.note:'');
+  if(m.auto) shSet('visitExc',shRead('visitExc',[]).map(e=>e.id===m.id?{...e,alasan}:e));
+  else shSet('visitExc',[...shRead('visitExc',[]),{id:'ex'+Date.now(),ref:m.id,u:m.u,place:m.place,type:'Terlewat',untuk:'',alasan,tgl:m.tgl}]);
   closeSheet(); render(false); toast('Alasan tersimpan'); }
 /* Usulan (11 Nov 2026): kunjungan di luar rencana untuk canvassing dan taking order. Alasan wajib, ditandai Unplanned, tidak menambah kepatuhan. */
 const UP_ALASAN=['Toko minta dikunjungi','Peluang order mendadak','Searah dengan rute hari ini','Pengganti kunjungan yang gagal','Lainnya'];
-const unplToko=()=>{ const r=role(), have=(S.visits[vk()]||[]).map(v=>v.place); return [...(TOKO[vk()]||TOKO[r]),...S.newToko.filter(t=>t.role===r&&t.status==='Aktif')].filter(t=>!have.includes(t.name)); };
+const unplToko=()=>{ const r=role(), have=(S.visits[vk()]||[]).map(v=>v.place); const base=TOKO[vk()]||TOKO[r]||tokoDitugaskan().map(n=>({id:'u:'+n,name:n})); return [...base,...S.newToko.filter(t=>t.role===r&&t.status==='Aktif')].filter(t=>!have.includes(t.name)); };
 function unplSheet(){ S.up={toko:'',alasan:'',note:''}; unplRender(); }
 function unplRender(){ const L=unplToko(), u=S.up;
   sheet(`<h3 style="font-size:18px;font-weight:800">Kunjungan di luar rencana</h3><p class="muted small" style="margin:6px 0 14px;line-height:1.5">Toko ini tidak ada di daftar hari ini. Dicatat sebagai Unplanned dan tidak menambah angka kepatuhan. Alasan wajib diisi.</p>
@@ -1244,7 +1281,9 @@ function upSet(k,v){ S.up.note=val('upn'); S.up[k]=v; unplRender(); }
 function unplSave(){ const u=S.up; u.note=val('upn');
   if(!u.toko||!u.alasan){ $('#uperr').innerHTML='<div class="err">Pilih toko dan alasan.</div>'; return; }
   const t=unplToko().find(x=>x.id===u.toko); if(!t) return;
-  S.visits[vk()].push({id:'up'+Date.now(),place:t.name,time:'Sekarang',tasks:role()==='canvas'?['Penjualan']:['Ambil pesanan'],status:'Belum',photos:{},own:true,unplanned:true});
+  const tk=role()==='canvas'?['Penjualan']:role()==='fmcg'?['Semua aktivitas toko']:['Ambil pesanan'], uidv='up'+Date.now();
+  S.visits[vk()].push({id:uidv,place:t.name,time:'Sekarang',tasks:tk,status:'Belum',photos:{},own:true,unplanned:true});
+  if(role()==='fmcg') shSet('fmOwnVisits',[...shRead('fmOwnVisits',[]),{id:uidv,u:fmUk(),place:t.name,time:'Sekarang'}]);
   shSet('visitExc',[...shRead('visitExc',[]),{id:'ex'+Date.now(),u:fmUk(),place:t.name,type:'Unplanned',untuk:'',alasan:u.alasan+(u.note?': '+u.note:''),tgl:'26 Okt'}]);
   closeSheet(); render(false); toast('Dicatat sebagai Unplanned'); }
 /* R11: REA dan CBD tanpa check-in. Hasil yang disubmit dikirim ke dashboard (leadVisitDone) untuk kepatuhan. */
@@ -2530,7 +2569,7 @@ SCR.notif = () => {
   const r=role();
   const n = r==='spv'?[['check','amber','Budi Santoso absen terlambat','Perlu approval · 08:22'],['users','blue','4 leads baru masuk dari backend','Siap di-assign · 06:00'],['alert','red','4 nasabah lewat jatuh tempo','Data overdue diperbarui · 06:00']]
   : r==='leads'?[['clock','amber','Jangan lupa absen pulang','Pengingat otomatis setelah jam kerja 17:00'],['users','blue','2 leads baru di-assign ke kamu','Dari Sari Wulandari · 07:30'],['calendar','tan','Pengingat: kunjungan Ahmad Fauzi','Hari ini, 10:00'],['check','green','Deal Hendra Saputra diterima SIM','23 Okt']]
-  : [['clock','amber','Jangan lupa absen pulang','Pengingat otomatis setelah jam kerja 17:00'],['calendar','tan','Pengingat kunjungan besok','Notifikasi H-1 · 27 Okt'],['check','green','Absen terlambat 23 Okt disetujui','Oleh Sari Wulandari'],['quiz','blue','Quiz baru: Product knowledge VISTARA','Berlaku s.d. 31 Okt']];
+  : [['clock','amber','Jangan lupa absen pulang','Pengingat otomatis setelah jam kerja 17:00'],(h1Plan().length?['calendar','tan','Pengingat: besok ada '+h1Plan().length+' kunjungan',h1Plan().join(', ')+' · H-1, dikirim '+shRead('h1Jam','17:00')]:['calendar','tan','Pengingat kunjungan besok','Notifikasi H-1 · 27 Okt']),['check','green','Absen terlambat 23 Okt disetujui','Oleh Sari Wulandari'],['quiz','blue','Quiz baru: Product knowledge VISTARA','Berlaku s.d. 31 Okt']];
   if(S.leftOpen&&visitById(S.leftOpen)&&!visitById(S.leftOpen).cout) n.unshift(['alert','amber','Belum check-out dari '+visitById(S.leftOpen).place,'Kamu keluar dari radius toko · sekarang']);
   return {note:'Notifikasi: pengingat absen pulang (BRD 1.10.20), approval, penugasan H-1 (BRD 4.1.14), leads baru, quiz.',
   html:`${appbar('Notifikasi')}<main class="content"><div class="list">${n.map(x=>`<div class="li"><div class="ico-tile ${x[1]}">${I(x[0],20)}</div><div class="grow"><div class="t">${x[2]}</div><div class="s">${x[3]}</div></div></div>`).join('')}</div></main>`};
@@ -2582,6 +2621,7 @@ function render(scrollTop=true, keepScroll=false){
   const c=cur(); if(!c) return;
   if(S.user&&role()==='fmcg'){ fmSyncVisits(); fmPushState(); }
   else if(S.user) jpSyncVisits();
+  if(S.user){ cbdSync(); eodSync(); }
   const content=$('#view .content'); const st=keepScroll&&content?content.scrollTop:0;
   const def=SCR[c.name](c.p);
   $('#view').innerHTML=def.html;
@@ -2621,6 +2661,7 @@ function renderPanel(){
     <a href="../dashboard/" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-4px 0 14px;padding:10px 12px;border-radius:12px;background:var(--blue-50);color:var(--blue-700);font-size:12.5px;font-weight:700">Buka dashboard web ${I('right',16,2.2)}</a>
     <div class="pgroup"><h3>Login sebagai</h3><div class="ulist">${Object.entries(USERS).map(([k,x])=>`<button class="${u===k?'on':''}" onclick="loginAs('${k}');togglePanel(false)"><span class="av blue">${x.init}</span><span><b>${x.name}</b><small>${x.roleLabel}</small></span></button>`).join('')}</div></div>
     <div class="pgroup"><h3>Data bersama dengan dashboard</h3><button class="btn ghost sm" onclick="shReset();toast('Data bersama direset','refresh')">Reset data bersama</button></div>
+    <div class="pgroup"><h3>Scheduler kunjungan 23.59</h3><button class="btn ghost sm" onclick="eodRunMobile()">Jalankan simulasi 23.59</button><div class="hint" style="margin-top:6px">Kunjungan yang belum check-in menjadi Terlewat. Hanya untuk kunjungan, bukan absensi.</div></div>
     <div class="pgroup"><h3>Jadwal hari ini</h3><div class="seg"><button class="${m==='WFO'?'on':''}" onclick="demoSet('mode','WFO')">WFO</button><button class="${m==='WFA'?'on':''}" onclick="demoSet('mode','WFA')">WFA</button><button class="${m==='OFF'?'on':''}" onclick="demoSet('mode','OFF')">OFF</button></div></div>
     <div class="pgroup"><h3>Posisi GPS (untuk WFO)</h3><div class="seg"><button class="${d.inRadius?'on':''}" onclick="demoSet('inRadius',true)">Dalam radius</button><button class="${!d.inRadius?'on':''}" onclick="demoSet('inRadius',false)">Luar radius</button></div></div>
     <div class="pgroup"><h3>Hasil baca invoice (OCR)</h3><div class="seg"><button class="${d.ocr!=='bad'?'on':''}" onclick="demoSet('ocr','ok')">Berhasil</button><button class="${d.ocr==='bad'?'on':''}" onclick="demoSet('ocr','bad')">Foto buram</button></div></div>
