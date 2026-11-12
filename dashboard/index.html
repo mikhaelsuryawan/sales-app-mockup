@@ -3099,11 +3099,12 @@ function mapOutletToggle(tid,cl){ const t=TOKO.find(x=>x.id===tid), cur=tokoClie
   audit((on?'Melepas ':'Memetakan ')+t.name+(on?' dari ':' ke ')+cName(cl)); render(false); toast(on?'Toko dilepas dari client':'Toko dipetakan ke client',t.name+' · '+cName(cl)); }
 function pageKategori(q){ return {title:'Kategori toko',html:`${crudList('kat',q,{acts:btn('Upload',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Kategori toko')"})})}`}; }
 function pageToko(q){
-  const srcChips=`<div class="chips" role="group" aria-label="Sumber toko">${[['','Semua sumber'],['Dari client','Toko Client'],['Input sales','Toko Sementara']].map(([k,l])=>`<button class="fchip ${(q.src||'')===k?'on':''}" aria-pressed="${(q.src||'')===k}" onclick="setQ({src:'${k}'})">${l} <span class="n">${live('toko').filter(t=>!k||(t.sumber||'Dari client')===k).length}</span></button>`).join('')}</div>`;
+  const srcChips=utabs([['','Semua sumber',live('toko').length],['Dari client','Toko Client',live('toko').filter(t=>(t.sumber||'Dari client')==='Dari client').length],['Input sales','Toko Sementara',live('toko').filter(t=>t.sumber==='Input sales').length]],q.src||'','tkSrc');
   return {title:'Toko',html:`
-  <div style="margin-bottom:16px">${srcChips}</div>
+  ${srcChips}
   ${crudList('toko',q,{ban:(q.src||'')==='Input sales'?`<div style="margin-bottom:12px">${callout('<b>Toko Sementara</b> adalah toko hasil input sales di lapangan dan berstatus Takeout. Admin bisa melengkapi datanya, lalu menyimpannya ke Toko Client lewat detail toko.')}</div>`:'',acts:`${btn('Template',{v:'outline',size:'sm',icon:'down',on:"toast('Template diunduh','template_toko.xlsx')"})}${btn('Upload',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Toko')"})}`})}<div style="margin-top:12px">${callout('Sales yang ditugaskan tidak diatur di halaman ini, tapi di menu <a href="#/penugasan" style="color:var(--accent-text);font-weight:600">Penugasan &amp; jadwal</a>. Client lain yang dilayani toko diatur di <a href="#/mapping-outlet" style="color:var(--accent-text);font-weight:600">Mapping outlet</a>.')}</div>`};
 }
+function tkSrc(k){ setQ({src:k}); }
 function tkTab(t){ setQ({tab:t,q:'',st:'',src:''}); }
 function usulanPanel(id){ const u=D.usulan.find(x=>x.id===id); if(!u) return panelMissing('Usulan toko'); const done=u.status!=='Menunggu verifikasi';
   openPanel(u.name,`<div class="grid g2" style="gap:10px;margin-bottom:14px"><div class="thumb" style="width:100%;height:140px;border-radius:18px">${I('store',34)}</div><div class="mapbox" style="height:140px"><svg viewBox="0 0 200 140" width="100%" height="100%"><g stroke="#fff" stroke-width="10"><path d="M-10 80 L210 50M70 -10 L90 150"/></g><circle cx="110" cy="70" r="7" fill="#0A92F2" stroke="#fff" stroke-width="3"/></svg></div></div>
