@@ -2534,6 +2534,7 @@ function leadPanel(id){ const l=D.leads.find(x=>x.id===id); if(!l) return panelM
 function pageOverdue(q){
   const b=q.b||''; const rows=D.overdue.filter(o=>!b||(b==='1'?o.days<=7:b==='2'?o.days>7&&o.days<=14:o.days>14)).map(o=>({...o,_id:o.no}));
   return {title:'Overdue',html:`
+  <div style="margin-bottom:16px">${filterCard({chips:{key:'b',val:b,label:'Lama keterlambatan',items:[['','Semua',D.overdue.length],['1','1–7 hari',D.overdue.filter(o=>o.days<=7).length],['2','8–14 hari',D.overdue.filter(o=>o.days>7&&o.days<=14).length],['3','Lebih dari 14 hari',D.overdue.filter(o=>o.days>14).length]]},clear:b?"setQ({b:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> nasabah.`})}</div>
   <div class="stats">${[['','Total tertunggak',jt(D.overdue.reduce((a,o)=>a+o.ang,0)),D.overdue.length+' nasabah'],['1','1–7 hari',D.overdue.filter(o=>o.days<=7).length,'Reminder telepon / WA'],['2','8–14 hari',D.overdue.filter(o=>o.days>7&&o.days<=14).length,'Reminder ulang'],['3','Lebih dari 14 hari',D.overdue.filter(o=>o.days>14).length,'Penagihan ke lokasi']].map(([k,l,v,s])=>`<button class="stat ${b===k&&k?'on':''}" onclick="setQ({b:'${b===k?'':k}'})"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${s}</span></button>`).join('')}</div>
   ${card('Lewat jatuh tempo',dataTable('ovd',{rows,rowClick:r=>`toast('${esc(r.name)}','${r.no} · ${r.addr}')`,cols:[
     {label:'Nasabah',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="mono muted" style="display:block">${r.no}</span>`,prim:true},{label:'Jatuh tempo',k:'due'},{label:'Angsuran',render:r=>rp(r.ang),align:'r'},
@@ -3420,7 +3421,7 @@ const PEN_SATU=['r3','r11'];
 const penBatas=(uid,n)=>{ const u=live('user').find(x=>x.id===uid); return u&&PEN_SATU.includes(u.role)&&n>1?u.name+' berperan sebagai '+roleName(u.role)+'. Role ini hanya boleh ditempatkan di satu toko.':''; };
 const penSales=()=>live('user').filter(u=>PEN_ROLES.includes(u.role)&&u.status==='Aktif');
 const penTipe=n=>n>1?tag('Bergerak','info'):n===1?tag('Diam','neutral'):tag('Belum ditugaskan','accent');
-function penTab(t){ setQ({tab:t,q:'',cat:''}); }
+function penTab(t){ setQ({tab:t,q:'',cat:'',f:'',sg:''}); }
 function pagePenugasan(q){
   const v=q.v==='toko'?'toko':'sales', psg=q.sg||'', pq=(q.q||'').toLowerCase();
   let body='';
@@ -3503,9 +3504,10 @@ const KLAIM_JENIS=[['Bensin',50000],['Parkir',20000],['Tol',40000],['Makan',3500
 const KLAIM=[['kl1','budi','26 Okt','Bensin',45000,'Toko Sinar Jaya Elektronik','Menunggu'],['kl2','budi','26 Okt','Parkir',10000,'Toko Makmur Abadi','Menunggu'],['kl3','dimas','25 Okt','Tol',38000,'CV Sumber Rejeki Elektronik','Menunggu'],['kl4','kevin','25 Okt','Bensin',62000,'Toko Jaya Abadi Kembangan','Menunggu'],['kl5','rina','24 Okt','Makan',35000,'Electronic City Kemang','Disetujui'],['kl6','dimas','24 Okt','Bensin',50000,'Toko Mega Elektronik','Ditolak']].map(([id,u,tgl,jenis,n,toko,st])=>({id,u,tgl,jenis,n,toko,st}));
 const klaimLimit=j=>(KLAIM_JENIS.find(x=>x[0]===j)||[0,0])[1];
 function pageKlaim(q){
-  const f=q.f||'Menunggu', rows=KLAIM.filter(k=>!f||k.st===f).map(k=>({...k,_id:k.id})), c=s=>KLAIM.filter(k=>k.st===s);
+  const fr=q.f||'Menunggu', f=fr==='semua'?'':fr, rows=KLAIM.filter(k=>!f||k.st===f).map(k=>({...k,_id:k.id})), c=s=>KLAIM.filter(k=>k.st===s);
   return {title:'Klaim biaya',html:`
-  <div class="stats">${[['Menunggu','Menunggu approval'],['Disetujui','Disetujui'],['Ditolak','Ditolak'],['','Semua']].map(([k,l])=>{ const L=k?c(k):KLAIM; return `<button class="stat ${f===k?'on':''} ${k==='Menunggu'&&L.length?'tn-warning':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${L.length}</b><span class="xs muted">${jt(L.reduce((s,x)=>s+x.n,0))}</span></button>`; }).join('')}</div>
+  <div style="margin-bottom:16px">${filterCard({chips:{key:'f',val:fr,label:'Status',items:[['Menunggu','Menunggu approval',c('Menunggu').length],['Disetujui','Disetujui',c('Disetujui').length],['Ditolak','Ditolak',c('Ditolak').length],['semua','Semua',KLAIM.length]]},summary:`Menampilkan <b class="fg">${rows.length}</b> klaim${f?' berstatus '+f.toLowerCase():''}.`})}</div>
+  <div class="stats">${[['Menunggu','Menunggu approval'],['Disetujui','Disetujui'],['Ditolak','Ditolak'],['semua','Semua']].map(([k,l])=>{ const L=k!=='semua'?c(k):KLAIM; return `<button class="stat ${fr===k?'on':''} ${k==='Menunggu'&&L.length?'tn-warning':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${L.length}</b><span class="xs muted">${jt(L.reduce((s,x)=>s+x.n,0))}</span></button>`; }).join('')}</div>
   ${card('Klaim dari lapangan',dataTable('klm',{rows,rowClick:r=>`klaimPanel('${r.id}')`,empty:'Tidak ada klaim.',cols:[
     {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(byU(r.u).name)}</span><span class="xs muted" style="display:block">${r.tgl} · ${esc(r.toko)}</span>`,prim:true},{label:'Jenis',render:r=>tag(r.jenis,'accent')},
     {label:'Nominal',render:r=>`<b class="tabular fg">${rp(r.n)}</b>${r.n>klaimLimit(r.jenis)?' '+tag('Lewat limit','warning'):''}`,align:'r'},{label:'Status',render:r=>spill(r.st,r.st==='Disetujui'?'success':r.st==='Ditolak'?'danger':'warning'),hide:true}]}))}
