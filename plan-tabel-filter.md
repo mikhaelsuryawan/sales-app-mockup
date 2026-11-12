@@ -90,3 +90,11 @@ Risiko:
 
 1. Kartu Filter pada tabel kecil (di bawah 12 baris tanpa status): tidak dibuat (rekomendasi) atau tetap dibuat di semua halaman agar seragam mutlak.
 2. Chip status: tetap chip (rekomendasi, seperti sekarang) atau pil seperti pemilih periode di Laporan penjualan.
+
+## 6. Status
+
+Semua fase selesai dan diverifikasi:
+- Fase 0 sampai 4: kode di `dashboard/index.html` (komponen `filterCard`, `searchBox`, kelas `.fcard` dan `.fstack`; `crudList` mengembalikan kartu Filter dan kartu tabel).
+- Fase 5: 53 rute plus Quiz dan Survey diperiksa tanpa error konsol, tanpa overflow horizontal, tanpa kotak cari atau chip di dalam kartu tabel, di lebar 375, 768, dan 1440. Tema terang dan gelap sudah dicoba (375 dan 768 gelap, 1440 terang).
+- Pengecualian yang disengaja: Matrix approval (matriks konfigurasi tetap) dan tabel kecil tanpa status (Live tracking, Sinkron, POSM, SKU display, Market share, Kepatuhan kunjungan, Canvassing, Task pending, Insentif, Target) tetap hanya kartu tabel.
+- Perbaikan sampingan: chip Semua di Klaim biaya sebelumnya kembali ke Menunggu; sekarang menampilkan semua klaim.
