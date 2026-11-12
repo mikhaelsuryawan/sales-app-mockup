@@ -366,7 +366,7 @@ a.stat:hover,button.stat:hover{background:var(--raised)}
 .seg button[aria-checked=true].t-success{background:var(--success);color:#fff} .seg button[aria-checked=true].t-warning{background:var(--warning);color:#fff} .seg button[aria-checked=true].t-danger{background:var(--danger);color:#fff}
 .seg.sm button{height:32px;font-size:12px} .seg.touch{display:flex;width:100%} .seg.touch button{height:48px}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
-.fcard .frow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.fcard .frow+.frow{margin-top:12px}.fcard .fsum{margin-top:12px}
+.fcard .frow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.fcard .frow+.frow{margin-top:12px}.fcard .fsum{margin-top:12px}.fstack{display:grid;gap:16px;min-width:0}
 .chips.nowrap{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;max-width:100%}
 .chips.nowrap::-webkit-scrollbar{display:none}
 .fchip{flex:none;height:40px;padding:0 16px;border-radius:99px;background:var(--card);box-shadow:var(--shadow-card);font-size:14px;font-weight:600;color:var(--body);display:inline-flex;align-items:center;gap:8px;white-space:nowrap;transition:background-color .15s,color .15s}
@@ -2801,7 +2801,7 @@ const simcoLabel=u=>u.allSimco?'Semua company':userSimcos(u).map(id=>MD.simco.fi
 const clientLabel=u=>u.allClients?'Semua client':(u.clients||[]).map(clientName).join(', ')||'–';
 const simcoName=id=>MD.simco.find(c=>c.id===id)?.name||'–';
 const simcoOpts=()=>live('simco').filter(c=>c.status==='Aktif').map(c=>[c.id,c.name]);
-const simcoFilter=(sg,key='sg')=>`<label class="sel" style="display:flex;min-width:190px;margin-bottom:12px"><span class="sr-only">Company</span><select aria-label="Filter Company" style="width:100%" onchange="setQ({${key}:this.value})"><option value="">Semua company</option>${live('simco').map(c=>`<option value="${c.id}" ${c.id===sg?'selected':''}>${esc(c.name)}</option>`).join('')}</select>${I('chev',16)}</label>`;
+const simcoFilter=(sg,key='sg')=>`<label class="sel" style="display:flex;min-width:190px"><span class="sr-only">Company</span><select aria-label="Filter Company" style="width:100%" onchange="setQ({${key}:this.value})"><option value="">Semua company</option>${live('simco').map(c=>`<option value="${c.id}" ${c.id===sg?'selected':''}>${esc(c.name)}</option>`).join('')}</select>${I('chev',16)}</label>`;
 const clientName=id=>MD.client.find(c=>c.id===id)?.name||'–';
 const userName=id=>MD.user.find(u=>u.id===id)?.name||'–';
 const roleName=id=>MD.role.find(r=>r.id===id)?.name||'–';
@@ -2969,15 +2969,20 @@ const lc=E=>E.lower||E.label.toLowerCase();
 function cbT(b){ const on=!b.classList.contains('on'); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.innerHTML=on?I('check',12,3):''; }
 
 /* generic list */
-function crudList(ent,q,{acts='',prefill=''}={}){
+function crudList(ent,q,{acts='',prefill='',sels='',top='',ban=''}={}){
   const E=ENT[ent], f=q.st||'', qq=(q.q||'').toLowerCase(), all=live(E.src||ent).filter(r=>E.filter?E.filter(r,q):true);
   const rows=all.filter(r=>!f||r.status===f).filter(r=>!qq||E.search(r).toLowerCase().includes(qq)).map(r=>({...r,_id:r.id}));
   const addAct=ent==='user'?'simImport()':`openForm('${ent}'${prefill?`,null,${prefill}`:''})`;
-  return card(E.plural,`${can('master.edit')?'':banner({tone:'neutral',body:'Anda hanya dapat melihat data ini. Perubahan dilakukan oleh Admin SIM.',cls:'mb'})}<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
-      <form style="flex:1;min-width:220px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari ${lc(E)}"></label></form>
-      <div class="chips">${((E.stChips?E.stChips(q):['Aktif','Nonaktif']).length?[['','Semua'],...(E.stChips?E.stChips(q):['Aktif','Nonaktif']).map(x=>[x,x])]:[]).map(([k,l])=>`<button class="fchip ${f===k?'on':''}" onclick="setQ({st:'${k}'})">${l} <span class="n">${k?all.filter(r=>r.status===k).length:all.length}</span></button>`).join('')}</div></div>
-    ${dataTable('md_'+ent,{rows,rowClick:r=>`openForm('${ent}','${r.id}')`,acts:can('master.edit')?(r=>rowActs(`openForm('${ent}','${r.id}')`,`delAsk('${ent}','${r.id}')`,{block:E.inUse?.(r)||''})):null,cols:E.hideCols?E.cols.filter(c=>!E.hideCols(q).includes(c.label)):E.cols,empty:qq||f||q.br||q.lv||q.ms||q.sk||q.tk?`Tidak ada ${lc(E)} yang cocok. <button style="color:var(--accent-text);font-weight:600" onclick="setQ({q:'',st:'',sg:'',br:'',lv:'',ms:'',sk:'',tk:''})">Hapus filter</button>`:`Belum ada ${lc(E)}.`})}`,
-    {acts:`${acts}${btn(ent==='user'?'Tambah dari SIM':'Tambah '+lc(E),{v:'accent',size:'sm',icon:'plus',on:addAct,perm:'master.edit'})}`});
+  const stc=(E.stChips?E.stChips(q):['Aktif','Nonaktif']);
+  const dirty=qq||f||q.br||q.lv||q.ms||q.sk||q.tk||q.sg;
+  const fc=filterCard({top,search:searchBox(q.q,{ph:'Cari '+lc(E),label:'Cari '+lc(E)}),
+    chips:stc.length?{key:'st',val:f,label:'Status',items:[['','Semua',all.length],...stc.map(x=>[x,x,all.filter(r=>r.status===x).length])]}:null,
+    selects:sels,clear:dirty?"setQ({q:'',st:'',sg:'',br:'',lv:'',ms:'',sk:'',tk:''})":'',
+    summary:dirty?`Menampilkan <b class="fg">${rows.length}</b> dari ${all.length} ${lc(E)}.`:''});
+  const tc=card(E.plural,`${can('master.edit')?'':banner({tone:'neutral',body:'Anda hanya dapat melihat data ini. Perubahan dilakukan oleh Admin SIM.',cls:'mb'})}${ban}
+    ${dataTable('md_'+ent,{rows,rowClick:r=>`openForm('${ent}','${r.id}')`,acts:can('master.edit')?(r=>rowActs(`openForm('${ent}','${r.id}')`,`delAsk('${ent}','${r.id}')`,{block:E.inUse?.(r)||''})):null,cols:E.hideCols?E.cols.filter(c=>!E.hideCols(q).includes(c.label)):E.cols,empty:qq||f||q.br||q.lv||q.ms||q.sk||q.tk?`Tidak ada ${lc(E)} yang cocok. Ubah atau hapus filter di kartu Filter.`:`Belum ada ${lc(E)}.`})}`,
+    {acts:`${acts}${btn(ent==='user'?'Tambah dari SIM':'Tambah '+lc(E),{v:'accent',size:'sm',icon:'plus',on:addAct,perm:'master.edit'})}`},);
+  return `<div class="fstack">${fc}${tc}</div>`;
 }
 
 /* form */
@@ -3068,7 +3073,7 @@ function simImport(){
 }
 
 /* ---------- pages ---------- */
-function pageClient(q){ return {title:'Client',html:`${simcoFilter(q.sg||'')}${crudList('client',q)}<div style="margin-top:12px">${callout('<b>MOM 9 Nov.</b> Modul Sales retail dan Sales automation tidak lagi diatur di sini, tapi per role di <a href="#/iam" style="color:var(--accent-text);font-weight:600">IAM</a>. Cabang client diatur di menu <a href="#/cabang-client" style="color:var(--accent-text);font-weight:600">Cabang client</a>.')}</div>`}; }
+function pageClient(q){ return {title:'Client',html:`${crudList('client',q,{sels:simcoFilter(q.sg||'')})}<div style="margin-top:12px">${callout('<b>MOM 9 Nov.</b> Modul Sales retail dan Sales automation tidak lagi diatur di sini, tapi per role di <a href="#/iam" style="color:var(--accent-text);font-weight:600">IAM</a>. Cabang client diatur di menu <a href="#/cabang-client" style="color:var(--accent-text);font-weight:600">Cabang client</a>.')}</div>`}; }
 function pageCabang(q){ return {title:'Cabang client',html:`${crudList('cabang',q)}`}; }
 const pageKompetitor=q=>({title:'Kompetitor',html:`${crudList('kompetitor',q)}<div style="margin-top:12px">${callout('Kompetitor adalah master data terpisah, tidak digabung dengan Brand (MOM 9 Nov bagian 1). Dipakai sebagai pembanding di market share.')}</div>`});
 /* ---------- Mapping outlet ke client (MOM 9 Nov bagian 3) ---------- */
@@ -3094,9 +3099,9 @@ function mapOutletToggle(tid,cl){ const t=TOKO.find(x=>x.id===tid), cur=tokoClie
   audit((on?'Melepas ':'Memetakan ')+t.name+(on?' dari ':' ke ')+cName(cl)); render(false); toast(on?'Toko dilepas dari client':'Toko dipetakan ke client',t.name+' · '+cName(cl)); }
 function pageKategori(q){ return {title:'Kategori toko',html:`${crudList('kat',q,{acts:btn('Upload',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Kategori toko')"})})}`}; }
 function pageToko(q){
-  const srcChips=`<div class="chips" style="margin:12px 0 4px" role="group" aria-label="Sumber toko">${[['','Semua sumber'],['Dari client','Toko Client'],['Input sales','Toko Sementara']].map(([k,l])=>`<button class="fchip ${(q.src||'')===k?'on':''}" aria-pressed="${(q.src||'')===k}" onclick="setQ({src:'${k}'})">${l} <span class="n">${live('toko').filter(t=>!k||(t.sumber||'Dari client')===k).length}</span></button>`).join('')}</div>`;
+  const srcChips=`<div class="chips" role="group" aria-label="Sumber toko">${[['','Semua sumber'],['Dari client','Toko Client'],['Input sales','Toko Sementara']].map(([k,l])=>`<button class="fchip ${(q.src||'')===k?'on':''}" aria-pressed="${(q.src||'')===k}" onclick="setQ({src:'${k}'})">${l} <span class="n">${live('toko').filter(t=>!k||(t.sumber||'Dari client')===k).length}</span></button>`).join('')}</div>`;
   return {title:'Toko',html:`
-  ${srcChips+((q.src||'')==='Input sales'?`<div style="margin:4px 0 12px">${callout('<b>Toko Sementara</b> adalah toko hasil input sales di lapangan dan berstatus Takeout. Admin bisa melengkapi datanya, lalu menyimpannya ke Toko Client lewat detail toko.')}</div>`:'')+crudList('toko',q,{acts:`${btn('Template',{v:'outline',size:'sm',icon:'down',on:"toast('Template diunduh','template_toko.xlsx')"})}${btn('Upload',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Toko')"})}`})+`<div style="margin-top:12px">${callout('Sales yang ditugaskan tidak diatur di halaman ini, tapi di menu <a href="#/penugasan" style="color:var(--accent-text);font-weight:600">Penugasan &amp; jadwal</a>. Client lain yang dilayani toko diatur di <a href="#/mapping-outlet" style="color:var(--accent-text);font-weight:600">Mapping outlet</a>.')}</div>`}`};
+  ${crudList('toko',q,{sels:srcChips,ban:(q.src||'')==='Input sales'?`<div style="margin-bottom:12px">${callout('<b>Toko Sementara</b> adalah toko hasil input sales di lapangan dan berstatus Takeout. Admin bisa melengkapi datanya, lalu menyimpannya ke Toko Client lewat detail toko.')}</div>`:'',acts:`${btn('Template',{v:'outline',size:'sm',icon:'down',on:"toast('Template diunduh','template_toko.xlsx')"})}${btn('Upload',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Toko')"})}`})}<div style="margin-top:12px">${callout('Sales yang ditugaskan tidak diatur di halaman ini, tapi di menu <a href="#/penugasan" style="color:var(--accent-text);font-weight:600">Penugasan &amp; jadwal</a>. Client lain yang dilayani toko diatur di <a href="#/mapping-outlet" style="color:var(--accent-text);font-weight:600">Mapping outlet</a>.')}</div>`};
 }
 function tkTab(t){ setQ({tab:t,q:'',st:'',src:''}); }
 function usulanPanel(id){ const u=D.usulan.find(x=>x.id===id); if(!u) return panelMissing('Usulan toko'); const done=u.status!=='Menunggu verifikasi';
@@ -3127,17 +3132,15 @@ function klaimAsk(id,st){
   if(st==='Disetujui') return confirmAsk({title:`Setujui klaim ${esc(k.jenis)} ${esc(nm)}?`,desc:`Nominal ${rp(k.n)} masuk ke rekap biaya sales.`,confirmLabel:'Setujui klaim',on:`klaimSet('${id}','Disetujui')`});
   confirmAsk({title:`Tolak klaim ${esc(k.jenis)} ${esc(nm)}?`,desc:'Sales menerima alasan penolakan di aplikasi.',confirmLabel:'Tolak klaim',destructive:true,needs:'#kr',body:'<label class="field"><span><label for="kr">Alasan penolakan</label><b class="req" aria-hidden="true">*</b></span><textarea class="ta short" id="kr" aria-required="true"></textarea></label>',on:`klaimSet('${id}','Ditolak')`});
 }
-const srcChips=(ent,q)=>{ const all=live('user').filter(r=>ENT[ent].filter(r,{})); return `<div class="chips" style="margin-bottom:12px" role="group" aria-label="Sumber data">${[['','Semua sumber'],['Integrasi SIM','Integrasi SIM'],['Input manual','Input manual']].map(([k,l])=>`<button class="fchip ${(q.src||'')===k?'on':''}" aria-pressed="${(q.src||'')===k}" onclick="setQ({src:'${k}'})">${l} <span class="n">${all.filter(r=>!k||(r.sumber||'Integrasi SIM')===k).length}</span></button>`).join('')}</div>`; };
+const srcChips=(ent,q)=>{ const all=live('user').filter(r=>ENT[ent].filter(r,{})); return `<div class="chips" role="group" aria-label="Sumber data">${[['','Semua sumber'],['Integrasi SIM','Integrasi SIM'],['Input manual','Input manual']].map(([k,l])=>`<button class="fchip ${(q.src||'')===k?'on':''}" aria-pressed="${(q.src||'')===k}" onclick="setQ({src:'${k}'})">${l} <span class="n">${all.filter(r=>!k||(r.sumber||'Integrasi SIM')===k).length}</span></button>`).join('')}</div>`; };
 function pageSimco(q){ return {title:'Company',html:`${crudList('simco',q)}<div style="margin-top:12px">${callout('Company adalah perusahaan internal SIM Group. <a href="#/user-admin" style="color:var(--accent-text);font-weight:600">User management</a> dan <a href="#/user-sales" style="color:var(--accent-text);font-weight:600">Sales management</a> berada di company ini.')}</div>`}; }
 function pagePengguna(q){ return {title:'Sales management',html:`
   ${banner({tone:'neutral',body:'Data pegawai dimiliki SIM (BPR1). Dashboard hanya membaca dan menambahkan jejak aktivitas lapangan.',cls:'mb'})}
-  <div style="display:flex;gap:10px;flex-wrap:wrap">${simcoFilter(q.sg||'')}${srcChips('user',q)}</div>
-  ${crudList('user',q,{acts:`${btn('Input manual',{v:'outline',size:'sm',icon:'plus',on:"openForm('user',null,{sumber:'Input manual',nip:'',name:'',email:'',jabatan:'',simco:'sg1',clients:['cl1'],cabang:'Jakarta Selatan',toko:[],role:'r14',ap1:'sari',ap2:'',akses:'Mobile',face:'Belum',off:'–',npo:'–',status:'Aktif'})"})}${btn('Sinkron dari SIM',{v:'outline',size:'sm',icon:'refresh',on:"audit('Sinkron data pegawai dari SIM (BPR1)');toast('Data pegawai tersinkron','Profil dari SIM diperbarui, 0 perubahan.')"})}`})}
+  ${crudList('user',q,{sels:simcoFilter(q.sg||'')+srcChips('user',q),acts:`${btn('Input manual',{v:'outline',size:'sm',icon:'plus',on:"openForm('user',null,{sumber:'Input manual',nip:'',name:'',email:'',jabatan:'',simco:'sg1',clients:['cl1'],cabang:'Jakarta Selatan',toko:[],role:'r14',ap1:'sari',ap2:'',akses:'Mobile',face:'Belum',off:'–',npo:'–',status:'Aktif'})"})}${btn('Sinkron dari SIM',{v:'outline',size:'sm',icon:'refresh',on:"audit('Sinkron data pegawai dari SIM (BPR1)');toast('Data pegawai tersinkron','Profil dari SIM diperbarui, 0 perubahan.')"})}`})}
   <div style="margin-top:12px">${callout('Sales management berisi tim lapangan: Promotor, Canvassing, Taking Order, Team Leader, dan sejenisnya. Direktur, HR, Manager, dan admin ada di <a href="#/user-admin" style="color:var(--accent-text);font-weight:600">User management</a> (MOM 9 Nov bagian 5).')}</div>`}; }
 function pageAdmin(q){ const all=live('user').filter(r=>ADMIN_ROLES.includes(r.role));
   return {title:'User management',html:`
-  <div style="display:flex;gap:10px;flex-wrap:wrap">${simcoFilter(q.sg||'')}${srcChips('admin',q)}<div class="chips" style="margin-bottom:12px" role="group" aria-label="Jenis">${[['','User & people',all.length],['user','User (akses app)',all.filter(r=>!isPeople(r)).length],['people','People (hanya didata)',all.filter(isPeople).length]].map(([k,l,n])=>`<button class="fchip ${(q.ak||'')===k?'on':''}" aria-pressed="${(q.ak||'')===k}" onclick="setQ({ak:'${k}'})">${l} <span class="n">${n}</span></button>`).join('')}</div></div>
-  ${crudList('admin',q)}
+  ${crudList('admin',q,{sels:`${simcoFilter(q.sg||'')}${srcChips('admin',q)}<div class="chips" role="group" aria-label="Jenis">${[['','User & people',all.length],['user','User (akses app)',all.filter(r=>!isPeople(r)).length],['people','People (hanya didata)',all.filter(isPeople).length]].map(([k,l,n])=>`<button class="fchip ${(q.ak||'')===k?'on':''}" aria-pressed="${(q.ak||'')===k}" onclick="setQ({ak:'${k}'})">${l} <span class="n">${n}</span></button>`).join('')}</div>`})}
   <div style="margin-top:12px">${callout('<b>User</b> adalah orang yang memakai aplikasi. <b>People</b> adalah karyawan yang perlu didata tapi tidak perlu akses aplikasi, misalnya manager yang hanya menerima laporan.')}</div>`}; }
 function pageIAM(q){
   shSet('roleJadwal',Object.fromEntries(MD.role.map(r=>[r.id,r.jadwal])));
@@ -3650,14 +3653,14 @@ function brandTab(k){ setQ({tab:k==='client'?'':k,q:'',st:''}); }
 const pageBrand=q=>q.tab==='kompetitor'?pageKompetitor(q):({title:'Brand',html:`${crudList('brand',q)}<div style="margin-top:12px">${callout('Brand milik client. Brand kompetitor ada di menu <a href="#/kompetitor" style="color:var(--accent-text);font-weight:600">Kompetitor</a>.')}</div>`});
 const kpTab=t=>setQ({tab:t,q:'',st:'',cl:'',br:'',lv:'',ms:''});
 const kpFilters=(tab,q,cl)=>{ const scope=live('katprod').filter(k=>tab==='client'?k.cakupan==='Client'&&brandClient(k.brand)===cl:k.cakupan==='General'), maxLv=Math.max(1,...scope.map(katLevel)), brs=tab==='client'?live('brand').filter(b=>b.client===cl).map(b=>[b.name,b.name]):[];
-  const f=(lbl,opts,val,key)=>`<label class="kpf"><span class="xs muted">${lbl}</span>${sel(opts,val||'',`setQ({${key}:this.value})`,{label:lbl})}</label>`;
-  return `<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin:0 0 12px">${tab==='client'?f('Brand',[['','Semua brand'],...brs],q.br,'br'):''}${f('Level',[['','Semua level'],...Array.from({length:maxLv},(_,i)=>[String(i+1),'Level '+(i+1)])],q.lv,'lv')}${f('Market share',[['','Semua'],['Ya','Ya'],['Tidak','Tidak']],q.ms,'ms')}${q.br||q.lv||q.ms?btn('Reset filter',{v:'outline',size:'sm',on:"setQ({br:'',lv:'',ms:''})"}):''}</div>`; };
+  const f=(lbl,opts,val,key)=>sel(opts,val||'',`setQ({${key}:this.value})`,{label:lbl,cls:'sm'});
+  return `${tab==='client'?f('Brand',[['','Semua brand'],...brs],q.br,'br'):''}${f('Level',[['','Semua level'],...Array.from({length:maxLv},(_,i)=>[String(i+1),'Level '+(i+1)])],q.lv,'lv')}${f('Market share',[['','Semua'],['Ya','Ya'],['Tidak','Tidak']],q.ms,'ms')}`; };
 const pageKatProd=q=>{ const tab=q.tab==='client'?'client':'general', cls=clientOpts(), cl=q.cl||(cls[0]||[''])[0], gen=live('katprod').filter(k=>k.cakupan==='General').length, cli=live('katprod').filter(k=>k.cakupan==='Client').length;
   const tabs=`<div style="margin-bottom:4px">${utabs([['general','General',gen],['client','Client',cli]],tab,'kpTab')}</div>`;
   const first=katcBrandOpts(cl)[0], fb=Array.isArray(first)?'':first;
   const body=tab==='client'
-    ?`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0"><span class="sm muted">Client</span>${sel(cls,cl,"setQ({cl:this.value,q:'',st:'',br:'',lv:'',ms:''})",{label:'Pilih client'})}</div>${kpFilters('client',q,cl)}${crudList('katc',{...q,cl},{prefill:`{client:'${cl}',brand:'${esc(fb)}'}`})}<div style="margin-top:12px">${callout('Kategori Client milik satu client lewat brand. Pilih client dulu, lalu brand di form. Boleh bertingkat tanpa batas level.')}</div>`
-    :`<div style="margin-top:12px">${kpFilters('general',q,cl)}${crudList('katg',q)}</div><div style="margin-top:12px">${callout('<b>MOM 9 Nov.</b> Kategori General berlaku untuk semua client. Boleh bertingkat tanpa batas level, mengikuti pola Si Gesit.')}</div>`;
+    ?`${crudList('katc',{...q,cl},{sels:sel(cls,cl,"setQ({cl:this.value,q:'',st:'',br:'',lv:'',ms:''})",{label:'Pilih client',cls:'sm'})+kpFilters('client',q,cl),prefill:`{client:'${cl}',brand:'${esc(fb)}'}`})}<div style="margin-top:12px">${callout('Kategori Client milik satu client lewat brand. Pilih client dulu, lalu brand di form. Boleh bertingkat tanpa batas level.')}</div>`
+    :`<div style="margin-top:12px">${crudList('katg',q,{sels:kpFilters('general',q,cl)})}</div><div style="margin-top:12px">${callout('<b>MOM 9 Nov.</b> Kategori General berlaku untuk semua client. Boleh bertingkat tanpa batas level, mengikuti pola Si Gesit.')}</div>`;
   return {title:'Kategori produk',html:tabs+body}; };
 const pageEvent=q=>(shSet('events',MD.event),{title:'Event',html:`${crudList('event',q)}<div style="margin-top:12px">${callout('<b>Rekomendasi.</b> Rincian penjualan di event menunggu konfirmasi klien.')}</div>`});
 const pageSektor=q=>({title:'Sektor',html:`${crudList('sektor',q)}<div style="margin-top:12px">${callout('Sektor dipakai di <a href="#/client" style="color:var(--accent-text);font-weight:600">Client</a> dan <a href="#/produk" style="color:var(--accent-text);font-weight:600">Master produk</a>. Mengubah nama sektor ikut memperbarui keduanya.')}</div>`});
@@ -3674,8 +3677,8 @@ const kvUsed=r=>(r.dipakai||0)+(satUse()['k:'+r.produk+':'+r.satuan]||0);
 const satLocked=r=>!!r.dasar||satUsed(r)>0;
 function pageKonversi(q){
   const sat=q.sat||'', sats=live('satuan').filter(x=>!x.dasar), all=live('konversi');
-  const chips=`<div class="chips" style="margin-bottom:12px">${[['','Semua satuan'],...sats.map(x=>[x.id,x.name])].map(([k,l])=>`<button class="fchip ${sat===k?'on':''}" onclick="setQ({sat:'${k}'})">${esc(l)} <span class="n">${k?kvCount(k):all.length}</span></button>`).join('')}</div>`;
-  return {title:'Konversi',html:`${chips}${crudList('konversi',q,{acts:btn('Buka satuan',{v:'outline',size:'sm',on:"go('/satuan')"})})}`};
+  const chips=`<div class="chips">${[['','Semua satuan'],...sats.map(x=>[x.id,x.name])].map(([k,l])=>`<button class="fchip ${sat===k?'on':''}" onclick="setQ({sat:'${k}'})">${esc(l)} <span class="n">${k?kvCount(k):all.length}</span></button>`).join('')}</div>`;
+  return {title:'Konversi',html:`${crudList('konversi',q,{sels:chips,acts:btn('Buka satuan',{v:'outline',size:'sm',on:"go('/satuan')"})})}`};
 }
 const MITRAQ_DEFAULT=[{id:'mq1',q:'Bagaimana kondisi usaha atau kegiatan mitra bulan ini?',status:'Aktif'},{id:'mq2',q:'Kendala apa yang dihadapi mitra dalam mencari nasabah?',status:'Aktif'},{id:'mq3',q:'Dukungan apa yang dibutuhkan mitra dari tim bulan depan?',status:'Aktif'}];
 const mitraQAll=()=>shRead('mitraQ',MITRAQ_DEFAULT).filter(x=>!x.del);
