@@ -2119,13 +2119,13 @@ function pageDataJual(q){
   const rows=all.filter(t=>f==='dash'?isDash(t):f==='app'?!isDash(t):true).filter(t=>!qq||(byU(t.u).name+t.toko+t.id+trxProd(t).name).toLowerCase().includes(qq)).map(t=>({...t,_id:t.id}));
   const dash=all.filter(isDash);
   return {title:'Data penjualan',html:`
+  <div style="margin-bottom:16px">${filterCard({search:searchBox(q.q,{ph:'Cari sales, toko, produk, atau nomor',label:'Cari transaksi'}),selects:sel(LD_MONTHS.map(x=>[x,LD_FULL[x]+' 2026']),m,"setQ({p:this.value})",{label:'Periode',cls:'sm'}),chips:{key:'f',val:f,label:'Sumber',items:[['','Semua',all.length],['app','Dari aplikasi',all.length-dash.length],['dash','Input dashboard',dash.length]]},clear:(f||q.q)?"setQ({f:'',q:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> transaksi di ${LD_FULL[m]} 2026.`})}</div>
   <div class="stats">${[['','Semua transaksi',all.length,jt(sumVal(all))],['app','Dari aplikasi',all.length-dash.length,'Input sales di lapangan'],['dash','Input dashboard',dash.length,dash.length?jt(sumVal(dash)):'Belum ada']].map(([k,l,v,sub])=>`<button class="stat ${f===k?'on':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></button>`).join('')}</div>
-  ${card('Transaksi penjualan',`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px"><form style="flex:1;min-width:220px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari transaksi</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari sales, toko, produk, atau nomor"></label></form></div>
-    ${dataTable('dj',{rows,rowClick:r=>`trxPanel('${r.id}')`,acts:r=>isDash(r)?rowActs(`trxPanel('${r.id}')`,`djDelAsk('${r.id}')`):'',empty:'Belum ada transaksi yang cocok.',cols:[
+  ${card('Transaksi penjualan',`${dataTable('dj',{rows,rowClick:r=>`trxPanel('${r.id}')`,acts:r=>isDash(r)?rowActs(`trxPanel('${r.id}')`,`djDelAsk('${r.id}')`):'',empty:'Belum ada transaksi yang cocok.',cols:[
       {label:'No. transaksi',render:r=>`<span class="mono">${r.id}</span><span class="xs muted" style="display:block">${r.date}</span>`,prim:true},{label:'Sales',render:r=>esc(byU(r.u).name)},
       {label:'Toko',render:r=>esc(r.toko)+(r.tokoFree?' '+tag('Teks bebas','neutral'):''),hide:true},{label:'Produk',render:r=>esc(trxProd(r).name)+(r.q>1?' ×'+r.q:'')+(r.prodFree||(!r.p&&r.pname)?' '+tag('Di luar master','neutral'):''),hide:true},
       {label:'Total',render:r=>`<b class="fg tabular">${rp(trxVal(r))}</b>`,align:'r'},{label:'Sumber',render:r=>isDash(r)?tag('Input dashboard','accent'):tag('Aplikasi','info')}]})}`,
-    {acts:`${sel(LD_MONTHS.map(x=>[x,LD_FULL[x]+' 2026']),m,"setQ({p:this.value})",{label:'Periode',cls:'sm'})}${btn('Tambah penjualan',{v:'accent',size:'sm',icon:'plus',on:'djForm()'})}`})}
+    {acts:`${btn('Tambah penjualan',{v:'accent',size:'sm',icon:'plus',on:'djForm()'})}`})}
   <div style="margin-top:12px">${callout('Admin bisa menambahkan penjualan dari dashboard bila input dari aplikasi gagal. Transaksi ini masuk ke ledger yang sama, jadi ikut dihitung di Laporan penjualan, target, dan insentif. Penjualan tidak terikat ke toko: toko boleh dipilih dari master atau diisi teks bebas.')}</div>`};
 }
 function djTokoMode(v){ document.getElementById('dj_tk_m').style.display=v==='free'?'none':''; document.getElementById('dj_tk_f').style.display=v==='free'?'':'none'; }
@@ -2178,10 +2178,11 @@ function pagePemesanan(q){
   const m=+q.p||10, f=q.f||'', all=MD.order.filter(o=>!o.del&&o.m===m), rows=all.filter(o=>!f||o.st===f).map(o=>({...o,_id:o.id,total:ordTotal(o)}));
   const live_=all.filter(o=>o.st!=='Dibatalkan'), c=k=>all.filter(o=>o.st===k).length;
   return {title:'Pemesanan',html:`
+  <div style="margin-bottom:16px">${filterCard({selects:sel(LD_MONTHS.map(x=>[x,LD_FULL[x]+' 2026']),m,"ordFilter('p',this.value)",{label:'Periode',cls:'sm'}),chips:{key:'f',val:f,label:'Status',items:[['','Semua',all.length],['Dibuat','Dibuat',c('Dibuat')],['Dikirim','Dikirim',c('Dikirim')],['Menunggu batal','Menunggu batal',c('Menunggu batal')]]},clear:f?"setQ({f:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> pesanan di ${LD_FULL[m]} 2026.`})}</div>
   <div class="stats">${[['','Semua pesanan',all.length,jt(live_.reduce((a,o)=>a+ordTotal(o),0))+' aktif'],['Dibuat','Dibuat',c('Dibuat'),'Belum dikirim'],['Dikirim','Dikirim',c('Dikirim'),'Menunggu pelunasan'],['Menunggu batal','Menunggu batal',c('Menunggu batal'),'Perlu approval']].map(([k,l,v,sub])=>`<button class="stat ${f===k?'on':''}" onclick="ordFilter('f','${k}')"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></button>`).join('')}</div>
   ${card('Daftar pesanan',dataTable('ord',{rows,rowClick:r=>`ordPanel('${r.id}')`,empty:'Belum ada pesanan di periode ini.',cols:[
     {label:'No. PO',render:r=>`<span class="mono">${r.id}</span>`,prim:true},{label:'Tanggal',k:'date'},{label:'Sales',render:r=>esc(byU(r.u).name),hide:true},{label:'Toko',render:r=>esc(tokoName(r.toko))},{label:'Produk',render:r=>esc(ordText(r)),hide:true},{label:'Kirim',k:'ship',hide:true},{label:'Total',render:r=>`<b class="fg tabular">${rp(r.total)}</b>`,align:'r'},{label:'Status',render:r=>spill(r.st,ORD_TONE[r.st]||'neutral')}]}),
-    {acts:`${sel(LD_MONTHS.map(x=>[x,LD_FULL[x]+' 2026']),m,"ordFilter('p',this.value)",{label:'Periode',cls:'sm'})}${btn('Buat pesanan',{v:'accent',size:'sm',icon:'plus',on:'ordForm()'})}`})}`};
+    {acts:`${btn('Buat pesanan',{v:'accent',size:'sm',icon:'plus',on:'ordForm()'})}`})}`};
 }
 
 /* ---------- Absensi ---------- */
@@ -2191,9 +2192,9 @@ function pageAbsensi(q){
   const comp={H:0,T:0,C:0,S:0,O:0,B:0,P:0}; Object.values(ATT).forEach(a=>a.forEach(c=>comp[c]++));
   return {title:'Absensi',html:`
   
+  <div style="margin-bottom:16px">${filterCard({search:searchBox(q.q,{ph:'Cari nama sales',label:'Cari sales'}),chips:{key:'st',val:q.st||'',items:[['','Semua',TODAY.length],...['Hadir','Terlambat','Cuti','Belum absen'].map(k=>[k,k,cnt(k)])]},clear:(q.q||q.st)?"setQ({q:'',st:''})":'',summary:(q.q||q.st)?`Menampilkan <b class="fg">${rows.length}</b> dari ${TODAY.length} sales.`:''})}</div>
   <div class="stats">${[['Hadir','success',cnt('Hadir')],['Terlambat','warning',cnt('Terlambat')],['Cuti','accent',cnt('Cuti')],['Belum absen','danger',cnt('Belum absen')]].map(([k,tn,v],i)=>`<button class="stat ${q.st===k?'on':''}" onclick="setQ({st:'${q.st===k?'':k}'})"><small>${k}</small><b class="tabular">${v}</b><span class="xs muted">${q.st===k?'Filter aktif · klik untuk hapus':'Klik untuk filter tabel'}</span></button>`).join('')}</div>
-  ${card('Absensi hari ini',`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px"><form style="flex:1;min-width:220px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari sales</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari nama sales"></label></form>${q.q||q.st?btn('Hapus filter',{v:'ghost',size:'sm',on:"setQ({q:'',st:''})"}):''}</div>
-    ${dataTable('att',{rows,rowClick:r=>`attPanel('${r.u}')`,empty:'Tidak ada sales dengan filter ini.',cols:[
+  ${card('Absensi hari ini',`${dataTable('att',{rows,rowClick:r=>`attPanel('${r.u}')`,empty:'Tidak ada sales dengan filter ini.',cols:[
       {label:'Sales',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(byU(r.u).name)}<span><span class="fg" style="font-weight:500">${byU(r.u).name}</span><span class="xs muted" style="display:block">${byU(r.u).job}</span></span></span>`,prim:true},
       {label:'Masuk',render:r=>`<span class="tabular">${r.in||'–'}</span>`},{label:'Pulang',render:r=>`<span class="tabular">${r.out||'–'}</span>`,hide:true},{label:'Mode',render:r=>r.mode==='–'?'–':tag(r.mode,r.mode==='WFO'?'accent':'info')},
       {label:'Jarak',k:'dist',hide:true},{label:'Face match',render:r=>r.face?`<span class="tabular">${r.face}%</span>`:'–',hide:true},{label:'Status',render:r=>spill(r.st,STTONE[r.st])}]})}`,
@@ -2220,10 +2221,10 @@ const fmTaskSt=(v,k)=>(v.tk||{})[k]||'Belum Selesai';
 const fmDone=v=>FM_TASK_KEYS.filter(([k])=>fmTaskSt(v,k)==='Selesai').length;
 function fmVisitSync(){ shSet('fmVisits',D.visits.filter(v=>isFm(v.u)&&!v.del).map(v=>({id:v.id,u:v.u,place:v.place,time:v.plan,by:v.by||'tl'}))); }
 function pageKunjungan(q){
-  const f=q.f||'', fu=q.u||'', fc=q.cat||'', all=visList().map(visLive).filter(v=>(!fu||v.u===fu)&&(!fc||tokoCat(v.place)===fc)), rows=all.filter(v=>!f||v.status===f).map(v=>({...v,_id:v.id}));
+  const f=q.f||'', fu=q.u||'', fc=q.cat||'', all=visList().map(visLive).filter(v=>(!fu||v.u===fu)&&(!fc||tokoCat(v.place)===fc)), qv=(q.q||'').toLowerCase(), rows=all.filter(v=>!f||v.status===f).filter(v=>!qv||(byU(v.u).name+' '+v.place).toLowerCase().includes(qv)).map(v=>({...v,_id:v.id}));
   const c=k=>all.filter(v=>v.status===k).length;
   return {title:'Kunjungan',html:`
-  ${(fu||fc)?`<div class="chips" style="margin-bottom:12px">${fu?`<button class="fchip on" aria-pressed="true" onclick="setQ({u:''})">Sales: ${esc((byU(fu)||{}).name||fu)} ×</button>`:''}${fc?`<button class="fchip on" aria-pressed="true" onclick="setQ({cat:''})">Kategori: ${esc(fc)} ×</button>`:''}</div>`:''}
+  <div style="margin-bottom:16px">${filterCard({search:searchBox(q.q,{ph:'Cari sales atau tujuan',label:'Cari kunjungan'}),chips:{key:'f',val:f,items:[['','Semua',all.length],['Selesai','Selesai',c('Selesai')],['Berjalan','Berjalan',c('Berjalan')],['Belum','Belum dimulai',c('Belum')],['Terlewat','Terlewat',c('Terlewat')]]},selects:(fu||fc)?`<div class="chips">${fu?`<button class="fchip on" aria-pressed="true" onclick="setQ({u:''})">Sales: ${esc((byU(fu)||{}).name||fu)} ×</button>`:''}${fc?`<button class="fchip on" aria-pressed="true" onclick="setQ({cat:''})">Kategori: ${esc(fc)} ×</button>`:''}</div>`:'',clear:(fu||fc||f||q.q)?"setQ({u:'',cat:'',f:'',q:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> dari ${all.length} kunjungan.`})}</div>
   <div class="stats">${[['','Semua',all.length],['Selesai','Selesai',c('Selesai')],['Berjalan','Berjalan',c('Berjalan')],['Belum','Belum dimulai',c('Belum')],['Terlewat','Terlewat',c('Terlewat')]].map(([k,l,v])=>`<button class="stat ${f===k?'on':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${v}</b></button>`).join('')}</div>
   ${card('Kunjungan hari ini',dataTable('vis',{rows,rowClick:r=>`visPanel('${r.id}')`,acts:r=>rowActs(`visForm('${r.id}')`,`visDelAsk('${r.id}')`),cols:[
     {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${byU(r.u).name}</span><span class="xs muted" style="display:block">${byU(r.u).job}</span>`,prim:true},{label:'Tujuan',render:r=>esc(r.place)+(r.by==='sales'?' '+tag('Dibuat '+esc(byU(r.u).job),'accent'):''),prim:false},{label:'Jadwal',render:r=>`${r.plan}${r.period&&r.period!=='Sekali'?` <span class="xs muted">· ${perLabel(r)}</span>`:''}`,hide:true},{label:'Check-in',render:r=>r.cin||'–'},{label:'Tugas',render:r=>isFm(r.u)?`<span class="tabular">${fmDone(r)}/${FM_TASK_KEYS.length}</span> selesai`:'<span class="muted">–</span>',hide:true},{label:'Foto',render:r=>r.photos,align:'r',hide:true},{label:'Status',render:r=>spill(r.status,r.status==='Selesai'?'success':r.status==='Berjalan'?'accent':r.status==='Terlewat'?'danger':'neutral')+(r.left&&!r.cout?' '+spill('Keluar radius','warning'):'')+(r.remote?' '+spill('Check-out luar radius','neutral'):'')}]}),
@@ -2278,8 +2279,8 @@ function pageApproval(q){
   const types=[...new Set(D.approvals.map(a=>a.type))]; const t=q.type||''; const rows=D.approvals.filter(a=>!t||a.type===t).map(a=>({...a,_id:a.id}));
   const S=ST.sel.apr||(ST.sel.apr=new Set()); [...S].forEach(id=>{ if(!D.approvals.find(a=>a.id===id)) S.delete(id); });
   return {title:'Approval',html:`
-  <div class="chips" style="margin-bottom:16px"><button class="fchip ${!t?'on':''}" onclick="setQ({type:''})">Semua <span class="n">${D.approvals.length}</span></button>${types.map(x=>`<button class="fchip ${t===x?'on':''}" onclick="setQ({type:'${x}'})">${x} <span class="n">${D.approvals.filter(a=>a.type===x).length}</span></button>`).join('')}</div>
-  ${card('',`${S.size?`<div class="bulk"><span style="flex:1">${S.size} dipilih</span>${btn('Tolak',{perm:'approval.decide',v:'onpop',size:'sm',on:`rejectModal([${[...S].map(i=>`'${i}'`).join(',')}])`})}${btn('Setujui',{perm:'approval.decide',v:'accent',size:'sm',on:`approveAsk([${[...S].map(i=>`'${i}'`).join(',')}])`})}</div>`:''}
+  <div style="margin-bottom:16px">${filterCard({chips:{key:'type',val:t,label:'Jenis',items:[['','Semua',D.approvals.length],...types.map(x=>[x,x,D.approvals.filter(a=>a.type===x).length])]},clear:t?"setQ({type:''})":'',summary:t?`Menampilkan <b class="fg">${rows.length}</b> pengajuan jenis ${esc(t)}.`:''})}</div>
+  ${card('Daftar pengajuan',`${S.size?`<div class="bulk"><span style="flex:1">${S.size} dipilih</span>${btn('Tolak',{perm:'approval.decide',v:'onpop',size:'sm',on:`rejectModal([${[...S].map(i=>`'${i}'`).join(',')}])`})}${btn('Setujui',{perm:'approval.decide',v:'accent',size:'sm',on:`approveAsk([${[...S].map(i=>`'${i}'`).join(',')}])`})}</div>`:''}
     ${dataTable('apr',{rows,select:true,rowClick:r=>`aprPanel('${r.id}')`,empty:'Semua pengajuan sudah diproses.',cols:[
       {label:'Pengaju',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(r.u?byU(r.u).name:r.by)}<span><span class="fg" style="font-weight:500">${r.u?byU(r.u).name:r.by}</span><span class="xs muted" style="display:block">${r.when}</span></span></span>`,prim:true},
       {label:'Jenis',render:r=>tag(r.type,r.type==='Promo baru'?'info':'accent')},{label:'Detail',k:'detail'},{label:'Alasan',render:r=>`<span class="muted">“${esc(r.reason)}”</span>`,hide:true},
@@ -2363,7 +2364,7 @@ function uploadModal(what){ openModal(`<h2 class="pt">Upload ${what.toLowerCase(
 function pagePromo(q){
   const f=q.f||''; const rows=D.promos.filter(p=>!f||p.status===f).map(p=>({...p,_id:p.id}));
   return {title:'Promo',html:`
-  <div class="chips" style="margin-bottom:16px">${[['','Semua'],['Aktif','Aktif'],['Menunggu approval','Menunggu approval'],['Draft','Draft']].map(([k,l])=>`<button class="fchip ${f===k?'on':''}" onclick="setQ({f:'${k}'})">${l} <span class="n">${k?D.promos.filter(p=>p.status===k).length:D.promos.length}</span></button>`).join('')}</div>
+  <div style="margin-bottom:16px">${filterCard({chips:{key:'f',val:f,items:[['','Semua',D.promos.length],...['Aktif','Menunggu approval','Draft'].map(k=>[k,k,D.promos.filter(p=>p.status===k).length])]},clear:f?"setQ({f:''})":'',summary:f?`Menampilkan <b class="fg">${rows.length}</b> promo berstatus ${f}.`:''})}</div>
   ${card('Daftar promo',dataTable('prm',{rows,rowClick:r=>`promoPanel('${r.id}')`,acts:r=>rowActs(`promoPanel('${r.id}')`,`promoDelAsk('${r.id}')`),cols:[
     {label:'Promo',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="xs muted" style="display:block">${r.id}</span>`,prim:true},{label:'Jenis',render:r=>tag(r.type,'info')},{label:'Produk',k:'prod',hide:true},{label:'Periode',k:'period',hide:true},
     {label:'Gabung',render:r=>r.combine?tag('Bisa','success'):tag('Tidak','warning')},{label:'Dipakai',render:r=>r.used+'×',align:'r',hide:true},{label:'Status',render:r=>spill(r.status,r.status==='Aktif'?'success':r.status==='Draft'?'neutral':'warning')}]}),
@@ -2463,9 +2464,7 @@ function pageLeads(q){
       <div class="legend" style="margin-top:8px"><span><i class="dotc" style="background:var(--fg)"></i>Pengajuan</span><span><i class="dotc" style="background:var(--info)"></i>Dihubungi</span><span><i class="dotc" style="background:var(--accent-strong)"></i>Deal</span></div>`,{acts:pills([['okt','Oktober'],['q4','Q4']],'okt','leadPer')})}
     ${card('Status Oktober',donut('lds',[{label:'Deal',value:10,slot:4},{label:'Prospect',value:14,slot:1},{label:'Belum Tertarik',value:9,slot:2},{label:'Belum dihubungi',value:15,slot:0}],{total:'48',caption:'total pengajuan',link:it=>`setQ({f:'${it.label==='Belum dihubungi'?'Baru':it.label}'})`}))}
   </div>
-  ${card('Daftar leads',`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px"><form style="flex:1;min-width:220px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari nasabah</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari nama nasabah"></label></form>
-      <div class="chips">${[['','Semua'],['Baru','Baru'],['Prospect','Prospect'],['Deal','Deal'],['Belum Tertarik','Belum Tertarik']].map(([k,l])=>`<button class="fchip ${f===k?'on':''}" onclick="setQ({f:'${k}'})">${l}</button>`).join('')}</div></div>
-    ${S.size?`<div class="bulk"><span style="flex:1">${S.size} leads dipilih</span>${btn('Assign '+S.size+' leads',{perm:'leads.assign',v:'accent',size:'sm',icon:'users',on:"assignModal('',[...ST.sel.lds])"})}</div>`:''}
+  ${card('Daftar leads',`${S.size?`<div class="bulk"><span style="flex:1">${S.size} leads dipilih</span>${btn('Assign '+S.size+' leads',{perm:'leads.assign',v:'accent',size:'sm',icon:'users',on:"assignModal('',[...ST.sel.lds])"})}</div>`:''}
     ${dataTable('lds',{rows,select:true,rowClick:r=>`leadPanel('${r.id}')`,empty:'Tidak ada leads dengan filter ini.',cols:[
       {label:'Nasabah',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="mono muted" style="display:block">${r.id}</span>`,prim:true,sort:r=>r.name},{label:'Produk',k:'prod',hide:true},
       {label:'Cabang',render:r=>leadCab(r),hide:true},{label:'Pengajuan',render:r=>rp(r.amount),align:'r',sort:r=>r.amount},{label:'Goal',render:r=>r.goal?`<b class="fg tabular">${rp(r.goal)}</b>`:'–',align:'r',hide:true},
@@ -2488,7 +2487,8 @@ function ldFilters(q,base){
   const owners=[...new Set(D.leads.filter(l=>leadDimOk(l,{...q,u:''})).map(l=>l.owner).filter(Boolean))];
   const dirty=q.cl||q.cb||q.pk||q.u||q.from||q.to||(q.per&&q.per!=='m');
   const goal=base.filter(l=>l.status==='Deal').reduce((a,b)=>a+(b.goal||0),0);
-  return filterCard({top:`${pills(REP_PRESETS.map(x=>[x[0],x[1]]),r.preset,'ldPer')}
+  const lf=q.f||'', lq=(q.q||'');
+  return filterCard({search:searchBox(lq,{ph:'Cari nama nasabah',label:'Cari nasabah'}),chips:{key:'f',val:lf==='unassigned'?'__':lf,label:'Status',items:[['','Semua',base.length],...['Baru','Prospect','Deal','Belum Tertarik'].map(k=>[k,k,base.filter(l=>l.status===k).length])]},top:`${pills(REP_PRESETS.map(x=>[x[0],x[1]]),r.preset,'ldPer')}
       <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal mulai</span><input id="ld_from" type="date" min="${LD_START}" max="${LD_END}" value="${r.from}" onchange="ldDate()" style="width:140px"></label>
       <span class="muted xs">sampai</span>
       <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal akhir</span><input id="ld_to" type="date" min="${LD_START}" max="${LD_END}" value="${r.to}" onchange="ldDate()" style="width:140px"></label>`,
@@ -2496,7 +2496,7 @@ function ldFilters(q,base){
       ${sel([['','Semua cabang'],...cabs],q.cb||'',"setQ({cb:this.value,u:''})",{label:'Filter cabang',cls:'sm'})}
       ${sel([['','Semua produk'],...prods],q.pk||'',"setQ({pk:this.value})",{label:'Filter produk',cls:'sm'})}
       ${sel([['','Semua ditangani'],['__none','Belum di-assign'],...owners.map(u=>[u,leadOwnerName(u)])],q.u||'',"setQ({u:this.value})",{label:'Filter ditangani',cls:'sm'})}`,
-    clear:dirty?"setQ({cl:'',cb:'',pk:'',u:'',from:'',to:'',per:''})":'',
+    clear:(dirty||lf||lq)?"setQ({cl:'',cb:'',pk:'',u:'',from:'',to:'',per:'',f:'',q:''})":'',
     summary:`Menampilkan <b class="fg">${repLabel(q)}</b>: ${base.length} leads, pengajuan ${jt(base.reduce((a,b)=>a+b.amount,0))}, goal ${jt(goal)}. Filter berlaku untuk kartu status dan daftar leads; grafik di bawah masih data contoh.`});
 }
 /* Assign leads mengikuti mobile: pilih user REA atau CBD dulu, lalu pilih satu leads atau lebih di cabang user itu (MOM 12.5).
@@ -3082,10 +3082,8 @@ function pageMapOutlet(q){
   const all=live('toko').filter(t=>t.status==='Aktif'), on=t=>tokoClients(t).includes(cl.id);
   const rows=all.filter(t=>!qq||(t.name+t.addr).toLowerCase().includes(qq)).filter(t=>q.f==='on'?on(t):q.f==='off'?!on(t):true).sort((a,b)=>on(b)-on(a)||a.name.localeCompare(b.name)).map(t=>({...t,_id:t.id}));
   return {title:'Mapping outlet',html:`
-  ${card('Outlet per client',`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">${sel(cls.map(c=>[c.id,c.name]),cl.id,"setQ({cl:this.value})",{label:'Pilih client'})}
-    <form style="flex:1;min-width:200px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari toko</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari toko"></label></form>
-    <div class="chips">${[['','Semua',all.length],['on','Dipetakan',all.filter(on).length],['off','Belum',all.filter(t=>!on(t)).length]].map(([k,l,n])=>`<button class="fchip ${(q.f||'')===k?'on':''}" onclick="setQ({f:'${k}'})">${l} <span class="n">${n}</span></button>`).join('')}</div></div>
-    ${dataTable('mapo',{rows,rowClick:r=>`mapOutletToggle('${r.id}','${cl.id}')`,empty:'Tidak ada toko yang cocok.',cols:[
+  <div style="margin-bottom:16px">${filterCard({search:searchBox(q.q,{ph:'Cari toko',label:'Cari toko'}),selects:sel(cls.map(c=>[c.id,c.name]),cl.id,"setQ({cl:this.value})",{label:'Pilih client',cls:'sm'}),chips:{key:'f',val:q.f||'',label:'Pemetaan',items:[['','Semua',all.length],['on','Dipetakan',all.filter(on).length],['off','Belum',all.filter(t=>!on(t)).length]]},clear:(q.q||q.f)?"setQ({q:'',f:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> toko untuk ${esc(cl.name)}.`})}</div>
+  ${card('Outlet per client',`${dataTable('mapo',{rows,rowClick:r=>`mapOutletToggle('${r.id}','${cl.id}')`,empty:'Tidak ada toko yang cocok.',cols:[
       {label:'Toko',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${esc(r.addr)} · ${esc(r.cabang)}</span>`,prim:true},
       {label:'Pemilik data',render:r=>esc(cName(r.client)),hide:true},{label:'Sumber',render:r=>tag(r.sumber||'Dari client',(r.sumber||'Dari client')==='Dari client'?'neutral':'info'),hide:true},
       {label:'Client lain',render:r=>{ const o=tokoClients(r).filter(c=>c!==cl.id); return o.length?esc(o.map(cName).join(', ')):'<span class="muted">–</span>'; },hide:true},
@@ -3424,30 +3422,30 @@ const penSales=()=>live('user').filter(u=>PEN_ROLES.includes(u.role)&&u.status==
 const penTipe=n=>n>1?tag('Bergerak','info'):n===1?tag('Diam','neutral'):tag('Belum ditugaskan','accent');
 function penTab(t){ setQ({tab:t,q:'',cat:''}); }
 function pagePenugasan(q){
-  const v=q.v==='toko'?'toko':'sales', psg=q.sg||'';
+  const v=q.v==='toko'?'toko':'sales', psg=q.sg||'', pq=(q.q||'').toLowerCase();
   let body='';
   {
-    const pills=`<div class="chips" style="margin-bottom:12px" role="group" aria-label="Tampilan">${[['sales','Per sales'],['toko','Per toko']].map(([k,l])=>`<button class="fchip ${v===k?'on':''}" aria-pressed="${v===k}" onclick="setQ({v:'${k}'})">${l}</button>`).join('')}</div>`;
     const table=v==='sales'
-      ?dataTable('pens',{rows:penSales().filter(u=>!psg||userSimcos(u).includes(psg)).map(u=>({...u,_id:u.id})),rowClick:r=>`penSalesModal('${r.id}')`,empty:'Belum ada sales aktif.',cols:[
+      ?dataTable('pens',{rows:penSales().filter(u=>!psg||userSimcos(u).includes(psg)).filter(u=>!pq||u.name.toLowerCase().includes(pq)).map(u=>({...u,_id:u.id})),rowClick:r=>`penSalesModal('${r.id}')`,empty:'Belum ada sales aktif.',cols:[
           {label:'Sales',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(r.name)}<span><span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${esc(roleName(r.role))}</span></span></span>`,prim:true},
           {label:'Company',render:r=>esc(simcoName(r.simco)),hide:true},{label:'Cabang',k:'cabang',hide:true},
           {label:'Toko',render:r=>{ const a=tokoOfU(r.id); return a.length?`<span class="tabular fg">${a.length} toko</span><span class="xs muted" style="display:block">${esc(a.slice(0,2).map(t=>t.name).join(', '))}${a.length>2?' +'+(a.length-2):''}</span>`:'<span class="muted">–</span>'; }},
           {label:'Tipe',render:r=>penTipe(tokoOfU(r.id).length)}],
         acts:r=>btn('Ubah',{v:'outline',size:'sm',icon:'edit',on:`penSalesModal('${r.id}')`})})
-      :dataTable('pent',{rows:live('toko').filter(t=>t.status==='Aktif').map(t=>({...t,_id:t.id})),rowClick:r=>`penTokoModal('${r.id}')`,empty:'Belum ada toko aktif.',cols:[
+      :dataTable('pent',{rows:live('toko').filter(t=>t.status==='Aktif').filter(t=>!pq||t.name.toLowerCase().includes(pq)).map(t=>({...t,_id:t.id})),rowClick:r=>`penTokoModal('${r.id}')`,empty:'Belum ada toko aktif.',cols:[
           {label:'Toko',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${esc(r.addr)}</span>`,prim:true},
           {label:'Cabang',k:'cabang',hide:true},{label:'Kategori',render:r=>tag(r.cat,r.cat==='Modern Retail'?'accent':'neutral'),hide:true},
           {label:'Sales ditugaskan',render:r=>r.sales.length?`<span class="fg">${esc(r.sales.map(userName).join(', '))}</span>`:tag('Belum ada sales','accent')}],
         acts:r=>btn('Ubah',{v:'outline',size:'sm',icon:'edit',on:`penTokoModal('${r.id}')`})});
-    body=card('Penempatan toko',`${callout('<b>Usulan.</b> Promotor FMCG dan promotor elektronik hanya satu toko. MD dan canvasser boleh lebih dari satu toko. Satu toko berarti sales Diam, lebih dari satu berarti Bergerak. Canvasser, taking order, dan mobile promotor tidak bisa ditempatkan di toko Modern Retail. Hanya toko yang dipetakan ke client sales (menu Mapping outlet) yang bisa dipasangkan.')}<div style="height:12px"></div>${pills}${v==='sales'?simcoFilter(psg):''}${table}`);
+    body=card('Penempatan toko',`${callout('<b>Usulan.</b> Promotor FMCG dan promotor elektronik hanya satu toko. MD dan canvasser boleh lebih dari satu toko. Satu toko berarti sales Diam, lebih dari satu berarti Bergerak. Canvasser, taking order, dan mobile promotor tidak bisa ditempatkan di toko Modern Retail. Hanya toko yang dipetakan ke client sales (menu Mapping outlet) yang bisa dipasangkan.')}<div style="height:12px"></div>${table}`);
+    body=`<div class="fstack">${filterCard({search:searchBox(q.q,{ph:v==='sales'?'Cari nama sales':'Cari nama toko',label:'Cari penempatan'}),chips:{key:'v',val:v,label:'Tampilan',items:[['sales','Per sales'],['toko','Per toko']]},selects:v==='sales'?simcoFilter(psg):'',clear:(q.q||psg)?"setQ({q:'',sg:''})":''})}${body}</div>`;
   }
   const tab=['jadwal','jp','frek'].includes(q.tab)?q.tab:'tempat';
-  if(tab==='jadwal'){ const vs=visList().map(visLive);
-    body=card('Jadwal kunjungan',dataTable('penj',{rows:vs.map(v=>({...v,_id:v.id})),rowClick:r=>`visPanel('${r.id}')`,acts:r=>rowActs(`visForm('${r.id}')`,`visDelAsk('${r.id}')`),empty:'Belum ada jadwal.',cols:[
+  if(tab==='jadwal'){ const allv=visList().map(visLive), jf=q.f||'', jq=(q.q||'').toLowerCase(), vs=allv.filter(v=>!jf||v.status===jf).filter(v=>!jq||(byU(v.u).name+' '+v.place).toLowerCase().includes(jq)), jc=k=>allv.filter(v=>v.status===k).length;
+    body=`<div class="fstack">${filterCard({search:searchBox(q.q,{ph:'Cari sales atau toko',label:'Cari jadwal'}),chips:{key:'f',val:jf,label:'Status',items:[['','Semua',allv.length],...['Selesai','Berjalan','Belum','Terlewat'].map(k=>[k,k==='Belum'?'Belum dimulai':k,jc(k)])]},clear:(jf||q.q)?"setQ({f:'',q:''})":'',summary:(jf||q.q)?`Menampilkan <b class="fg">${vs.length}</b> dari ${allv.length} jadwal.`:''})}`+card('Jadwal kunjungan',dataTable('penj',{rows:vs.map(v=>({...v,_id:v.id})),rowClick:r=>`visPanel('${r.id}')`,acts:r=>rowActs(`visForm('${r.id}')`,`visDelAsk('${r.id}')`),empty:'Belum ada jadwal.',cols:[
       {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(byU(r.u).name)}</span><span class="xs muted" style="display:block">${esc(byU(r.u).job)}</span>`,prim:true},{label:'Toko',render:r=>esc(r.place)+(r.by==='sales'?' '+tag('Dibuat '+esc(byU(r.u).job),'accent'):'')},
       {label:'Periode',render:r=>`${esc(perLabel(r))}<span class="xs muted" style="display:block">${r.plan}</span>`},{label:'Status',render:r=>spill(r.status,r.status==='Selesai'?'success':r.status==='Berjalan'?'accent':r.status==='Terlewat'?'danger':'neutral'),hide:true}]}),
-      {acts:btn('Buat jadwal',{v:'accent',size:'sm',icon:'plus',on:'visForm()'})})+`<div style="margin-top:12px">${callout('Penugasan mencakup penjadwalan (MOM 9 Nov bagian 4). Periode mingguan dan 2 mingguan wajib memilih hari, boleh hari apa saja. Jadwal yang sama tampil di menu Kunjungan beserta hasil check-in.')}</div>`; }
+      {acts:btn('Buat jadwal',{v:'accent',size:'sm',icon:'plus',on:'visForm()'})})+`</div><div style="margin-top:12px">${callout('Penugasan mencakup penjadwalan (MOM 9 Nov bagian 4). Periode mingguan dan 2 mingguan wajib memilih hari, boleh hari apa saja. Jadwal yang sama tampil di menu Kunjungan beserta hasil check-in.')}</div>`; }
   if(tab==='jp') body=jpBody();
   if(tab==='frek') body=frekBody();
   return {title:'Penugasan & jadwal',html:`<div style="margin-bottom:4px">${utabs([['tempat','Penempatan toko'],['jadwal','Jadwal kunjungan',visList().length],['jp','Journey plan'],['frek','Frekuensi']],tab,'penTab')}</div>${body}`};
@@ -3484,9 +3482,9 @@ function pagePenagihan(q){
   const f=q.f==null?'':q.f, open=AR.filter(a=>arSisa(a)>0), rows=AR.filter(a=>f==='lunas'?arSisa(a)<=0:f===''?true:arSisa(a)>0&&arUmur(a)===+f).map(a=>({...a,_id:a.id}));
   const sum=l=>l.reduce((s,a)=>s+arSisa(a),0);
   return {title:'Penagihan & piutang',html:`
+  <div style="margin-bottom:16px">${filterCard({chips:{key:'f',val:f,label:'Umur tagihan',items:[['','Semua'],...UMUR.map(([l],i)=>[String(i),l]),['lunas','Lunas']]},clear:f!==''?"setQ({f:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> dari ${AR.length} tagihan.`})}</div>
   <div class="stats">${[['','Total piutang',jt(sum(open)),open.length+' tagihan terbuka'],...UMUR.map(([l],i)=>[String(i),l,jt(sum(open.filter(a=>arUmur(a)===i))),open.filter(a=>arUmur(a)===i).length+' tagihan'])].slice(0,4).map(([k,l,v,sub])=>`<button class="stat ${f===k?'on':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></button>`).join('')}</div>
-  ${card('Tagihan per toko',`<div class="chips" style="margin-bottom:12px">${[['','Semua'],...UMUR.map(([l],i)=>[String(i),l]),['lunas','Lunas']].map(([k,l])=>`<button class="fchip ${f===k?'on':''}" onclick="setQ({f:'${k}'})">${l}</button>`).join('')}</div>
-    ${dataTable('ar',{rows,rowClick:r=>`arPanel('${r.id}')`,rowCls:r=>arSisa(r)>0&&arUmur(r)>=2?'aging':'',empty:'Tidak ada tagihan.',cols:[
+  ${card('Tagihan per toko',`${dataTable('ar',{rows,rowClick:r=>`arPanel('${r.id}')`,rowCls:r=>arSisa(r)>0&&arUmur(r)>=2?'aging':'',empty:'Tidak ada tagihan.',cols:[
       {label:'Toko',render:r=>`<span class="fg" style="font-weight:500">${esc(tokoName(r.toko))}</span><span class="xs muted mono" style="display:block">${r.no}</span>`,prim:true},{label:'Sales',render:r=>esc(byU(r.u).name),hide:true},
       {label:'Jatuh tempo',render:r=>`${r.due>0?r.due+' Okt':(30+r.due)+' Sep'}`,hide:true},{label:'Sisa',render:r=>`<b class="fg tabular">${rp(arSisa(r))}</b><span class="xs muted" style="display:block">dari ${rp(r.total)}</span>`,align:'r'},
       {label:'Umur',render:r=>arSisa(r)<=0?spill('Lunas','success'):spill(UMUR[arUmur(r)][0],UMUR[arUmur(r)][1])}]})}`,{acts:btn('Unduh',{v:'outline',size:'sm',icon:'down',on:"toast('Daftar piutang diunduh','piutang_26okt.xlsx')"})})}
