@@ -1855,10 +1855,12 @@ function fxAnimate(root,full){
 function syncUserBawa(){ try{ const m={}; MD.user.forEach(u=>{ if(JP_ROLES.includes(u.role)||u.role==='r4') m[u.id]=bawaOf(u.id); }); if(JSON.stringify(shRead('userBawa',{}))!==JSON.stringify(m)) shSet('userBawa',m); }catch(e){} }
 /* Jadwal yang dibuat promotor FMCG dan MD sendiri di mobile masuk ke daftar kunjungan dan ditandai by:'sales'. */
 function syncOwnVisits(){ try{ shRead('fmOwnVisits',[]).forEach(o=>{ if(D.visits.some(v=>v.id===o.id)) return; D.visits.push({id:o.id,u:o.u,place:o.place,plan:o.time,period:'Sekali',days:[],tasks:FM_TASKS_LABEL,cin:'',cout:'',dur:'',photos:0,status:'Belum',by:'sales'}); }); }catch(e){} }
+/* Daftar toko yang ditugaskan per sales ditulis ke data bersama. Mobile memakainya untuk aturan menambah jadwal: lebih dari satu toko boleh, satu toko tidak. */
+function syncPenugasanToko(){ try{ const m=Object.fromEntries(MD.user.map(u=>[u.id,tokoOfU(u.id).map(t=>t.name)])); if(JSON.stringify(shRead('penugasanToko',{}))!==JSON.stringify(m)) shSet('penugasanToko',m); }catch(e){} }
 function syncUserOff(){ try{ const m={}; MD.user.forEach(u=>{ if(u.off) m[u.id]=u.off; }); if(JSON.stringify(shRead('userOff',{}))!==JSON.stringify(m)) shSet('userOff',m); }catch(e){} }
 function syncTokoBaru(){ shRead('tokoBaruSales',[]).forEach(n=>{ if(TOKO.some(t=>t.id===n.id)) return; TOKO.push({id:n.id,name:n.name,cat:n.cat,cabang:'Jakarta Selatan',dealer:'–',sales:[n.u],addr:n.addr,client:'cl1',mapClients:['cl1'],sumber:'Input sales',status:'Takeout',radius:100,coord:'-6.2900, 106.8000'}); const us=MD.user.find(x=>x.id===n.u); if(us&&!(us.toko||[]).includes(n.id)) us.toko=[...(us.toko||[]),n.id]; }); }
 function render(scrollTop=true){
-  syncProducts(); refreshDerived(); syncApp(); syncTokoBaru(); syncUserOff(); syncUserBawa(); syncOwnVisits();
+  syncProducts(); refreshDerived(); syncApp(); syncTokoBaru(); syncUserOff(); syncUserBawa(); syncPenugasanToko(); syncOwnVisits();
   const {path,q}=parse(); const app=$('#app');
   if(path==='/login'){ app.innerHTML=pageLogin(); lastPath=path; return; }
   if(!AUTHED){ ST.from=location.hash.slice(1)||'/'; location.replace('#/login'); return; }
@@ -2613,6 +2615,8 @@ const MD={
 D.visits.forEach((v,i)=>{ v.id='kv'+(i+1); v.period=v.period||'Sekali'; });
 fmVisitSync();
 const ROLE_OF={'SPG / Promotor':'r3','Canvasing FMCG':'r4','Canvasing Elektronik':'r21','Taking Order':'r5'};
+/* Usulan (12 Nov 2026): data contoh penempatan mengikuti aturan menambah jadwal di mobile. Kevin dua toko, Rangga (MD) dua toko, Tari (FMCG) satu toko. */
+[['c5','kevin'],['t1','rangga'],['t2','rangga'],['t1','tari']].forEach(([t,u])=>{ const x=TOKO.find(k=>k.id===t); if(x&&!x.sales.includes(u)) x.sales.push(u); });
 MD.user=[
   ...SALES.map(s=>({id:s.u,nip:s.nip,name:s.name,email:s.u+'@sim.co.id',jabatan:s.job,role:ROLE_OF[s.job],clients:['cl1'],cabang:s.cabang==='BPR Fatmawati'?'Jakarta Selatan':s.cabang,toko:TOKO.filter(t=>t.sales.includes(s.u)).map(t=>t.id),ap1:'sari',ap2:'',akses:'Mobile',face:s.u==='kevin'?'Minta rekam ulang':'Terekam',status:'Aktif'})),
   {id:'sari',nip:'CLT-TL-0208',name:'Sari Wulandari',email:'sari.w@arunika.example',jabatan:'Team Leader (user client)',role:'r2',clients:['cl1','cl2'],cabang:'Jakarta Selatan',toko:[],ap1:'dewi',ap2:'',akses:'Mobile & Web',face:'Terekam',status:'Aktif'},
@@ -4330,7 +4334,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
 /* ---------- Penyimpanan data dashboard (D6) ----------
    Perubahan di dashboard disimpan sebagai snapshot berversi. Data bersama dengan mobile tetap di salesapp.shared.v1.
    Naikkan DASH_VER bila bentuk data contoh berubah, supaya snapshot lama dibuang dan data contoh baru dipakai. */
-const DASH_VER=4;
+const DASH_VER=5;
 const PARAM={};
 const dashData=()=>({D,MD,TOKO,TRX,INFO,POSM,AR,KLAIM,ATT,REK_ADJ,PARAM});
 function restoreInto(t,src){

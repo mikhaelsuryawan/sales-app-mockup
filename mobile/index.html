@@ -440,6 +440,7 @@ const PROMOS = [
 ];
 const TOKO = {
   spg:[{id:'t1',name:'Electronic City Kemang',addr:'Jl. Kemang Raya No. 8',cat:'Modern Retail'},{id:'t2',name:'Best Denki Senayan City',addr:'Senayan City Lt. 5',cat:'Modern Retail'}],
+  canvasE:[{id:'e1',name:'Toko Jaya Abadi Kembangan',addr:'Kembangan, Jakarta Barat',cat:'Retail'},{id:'e2',name:'Toko Cahaya Baru',addr:'Cilandak',cat:'Retail'}],
   canvas:[{id:'c1',name:'Toko Sinar Jaya Elektronik',addr:'Pasar Minggu',cat:'Grosir'},{id:'c2',name:'Toko Makmur Abadi',addr:'Jagakarsa',cat:'Retail'},{id:'c3',name:'Toko Berkah Elektronik',addr:'Lenteng Agung',cat:'Semi grosir'},{id:'c4',name:'Toko Cahaya Baru',addr:'Cilandak',cat:'Retail'}],
   order:[{id:'o1',name:'Toko Mega Elektronik',addr:'Jl. RS Fatmawati No. 22',cat:'Grosir'},{id:'o2',name:'CV Sumber Rejeki Elektronik',addr:'Ciputat',cat:'Semi grosir'},{id:'o3',name:'Toko Abadi Jaya',addr:'Bintaro Sektor 3',cat:'Retail'}]
 };
@@ -476,6 +477,7 @@ function freshState(){
       {id:'TRX-2210-0070',toko:'Best Denki Senayan City',items:[{id:'mc85',q:1}],total:2199000,time:'13:10',cust:'',status:'Terkirim',d:4},
       {id:'TRX-1510-0042',toko:'Electronic City Kemang',items:[{id:'tv50',q:1}],total:6499000,time:'12:30',cust:'Rahmat',status:'Terkirim',d:11}
     ],
+    canvasESales:[],
     canvasSales:[
       {id:'CVS-2610-0033',toko:'Toko Sinar Jaya Elektronik',items:[{id:'rc18',q:2},{id:'st3',q:3}],total:1455000,time:'09:20',cust:'',status:'Terkirim',d:0},
       {id:'CVS-2510-0031',toko:'Toko Makmur Abadi',items:[{id:'kp16',q:2}],total:598000,time:'14:10',cust:'',status:'Terkirim',d:1},
@@ -579,7 +581,7 @@ const PFOTO_DEFAULT=['tv50','tv43','kl2p','mc85'];
 const PFOTO=()=>shRead('pfoto',PFOTO_DEFAULT);
 const PLAN_DEFAULT={'Minggu 1':[['Rak utama',4],['End gondola',2]],'Minggu 2':[['Rak utama',5],['End gondola',3]],'Minggu 3':[['Rak utama',5],['End gondola',4]],'Minggu 4':[['Rak utama',6],['End gondola',4]]};
 const isMobilePromo = () => U()?.roleLabel==='Mobile Promotor';
-const allToko = () => [...TOKO.spg,...TOKO.canvas,...TOKO.order,...getExtraToko(),...S.newToko];
+const allToko = () => [...TOKO.spg,...TOKO.canvas,...TOKO.canvasE,...TOKO.order,...getExtraToko(),...S.newToko];
 const tokoById = id => allToko().find(t=>t.id===id);
 const tokoByName = n => allToko().find(t=>t.name===n);
 const priceAt = (p,tokoName) => shRead('hargaToko',{})[tokoName]?.[p.id] ?? Math.round(p.price*(CATF[tokoByName(tokoName)?.cat]||1)/1000)*1000;
@@ -793,7 +795,7 @@ function fieldDash(){
     <div class="card"><div class="small muted">Nilai pesanan Oktober</div><div class="big-num num">${rpShort(tot+68e6)}</div><div class="bar" style="margin:10px 0 6px"><i style="width:${(tot+68e6)/150e6*100}%"></i></div><div class="small muted">Target Rp150 jt · ${S.orders.filter(o=>o.status!=='Lunas').length} pesanan perlu follow up</div></div>
     ${todayVisits()}`;
   }
-  const list = (r==='canvas'?S.canvasSales:S.sales).filter(x=>!x.d);
+  const list = salesList().filter(x=>!x.d);
   const today=list.reduce((s,x)=>s+x.total,0);
   if(isSpg()&&aktCfg().dasar==='qty'){ const q=list.reduce((s,x)=>s+x.items.reduce((a,i)=>a+i.q,0),0), o=visitOpen(), td=tgtDaily().total||1, need=aktCfg().checkin==='Ya';
     return `${o||!need?'':`<button class="banner amber" style="margin-top:12px;width:100%;text-align:left;font:inherit" onclick="go('spg-akt')">${I('pin',18)}<span>Belum check-in${byPenempatan()?' di '+esc(spgToko().name):''}. Buka <b>Aktivitas saya</b> untuk check-in.</span></button>`}
@@ -807,7 +809,7 @@ function fieldDash(){
   <div class="card"><div class="row between"><div><div class="small muted">Terjual</div><div class="big-num num">${rpShort(today)}</div></div><div style="text-align:right"><div class="small muted">Target hari ini</div><b class="num">${rpShort(target)}</b></div></div>
   <div class="bar" style="margin:12px 0 6px"><i style="width:${Math.min(100,today/target*100)}%"></i></div>
   <div class="stat3" style="margin:6px 0"><div><small>Target hari ini</small><b>${rpShort(target)}</b></div><div><small>Sudah terjual</small><b style="color:var(--green)">${rpShort(today)}</b></div><div><small>Objektif</small><b>${list.reduce((s,x)=>s+x.items.reduce((a,i)=>a+i.q,0),0)}<span class="muted small">/${r==='canvas'?12:3} unit</span></b></div></div>
-  <div class="small muted">${Math.round(today/target*100)}% tercapai · ${list.length} transaksi${r==='canvas'?` · Stok layak jual ${Object.values(S.stock).reduce((s,x)=>s+x.good,0)} unit`:''}</div></div>
+  <div class="small muted">${Math.round(today/target*100)}% tercapai · ${list.length} transaksi${r==='canvas'&&membawaBarang()?` · Stok layak jual ${Object.values(S.stock).reduce((s,x)=>s+x.good,0)} unit`:''}</div></div>
   ${todayVisits()}`;
 }
 function todayVisits(){
@@ -971,7 +973,7 @@ SCR.izin = p => {
 function daySummary(){
   const r=role(), v=S.visits[vk()]||[], done=v.filter(x=>x.status==='Selesai').length;
   let rows=`<div class="kv"><span>Kunjungan selesai</span><span>${done} dari ${v.length}</span></div>`;
-  if(r==='spg'||r==='canvas'){ const l=(r==='canvas'?S.canvasSales:S.sales).filter(x=>!x.d); rows+=`<div class="kv"><span>Penjualan</span><span class="num">${rp(l.reduce((s,x)=>s+x.total,0))} · ${l.length} trx</span></div>`; }
+  if(r==='spg'||r==='canvas'){ const l=salesList().filter(x=>!x.d); rows+=`<div class="kv"><span>Penjualan</span><span class="num">${rp(l.reduce((s,x)=>s+x.total,0))} · ${l.length} trx</span></div>`; }
   if(r==='order') rows+=`<div class="kv"><span>Pesanan dibuat hari ini</span><span>${S.orders.filter(o=>o.date==='26 Okt 2026').length}</span></div>`;
   if(r==='leads'){ const m=S.leads.filter(l=>l.owner===S.user); rows+=`<div class="kv"><span>Leads dihubungi</span><span>${m.filter(l=>l.status!=='Baru'||l.calls).length} dari ${m.length}</span></div>`; }
   if(r==='spv') rows+=`<div class="kv"><span>Approval diproses</span><span>${4-S.approvals.length} dari 4</span></div>`;
@@ -992,7 +994,18 @@ function assignToggle(id){ const p=S.assignPick; S.assignPick=p.includes(id)?p.f
 function assignSave(){ S.canvasArea[S.assignUser]=S.assignPick; closeSheet(); render(false,true); toast(S.assignPick.length+' toko di-assign'); }
 const RID={'spg.rina':'r3','sales.budi':'r4','sales.dimas':'r5','spv.sari':'r2','ffor.yoga':'r7','arco.maya':'r8','cbd.tono':'r9','rea.nina':'r10','fmcg.tari':'r11','md.rangga':'r12','mobile.fikri':'r13','bantuan.eko':'r14','reliever.gita':'r15'};
 const JADWAL_DEFAULT={r1:'Ya',r2:'Ya',r7:'Ya',r11:'Ya',r12:'Ya'};
-const canSchedule = () => shRead('roleJadwal',JADWAL_DEFAULT)[RID[S.user]]==='Ya';
+/* Usulan (12 Nov 2026): sales hanya bisa menambah jadwal kunjungan bila ditugaskan di lebih dari satu toko. Satu toko: jadwal mengikuti Team Leader.
+   Daftar toko dari dashboard (Penugasan > Penempatan toko) lewat penugasanToko; tanpa itu dipakai data contoh. */
+const tokoDefault=()=>{ const r=role(), u=uid();
+  if(U()?.vkey==='canvasE') return TOKO.canvasE.map(t=>t.name);
+  if(r==='canvas') return TOKO.canvas.map(t=>t.name);
+  if(r==='order') return TOKO.order.map(t=>t.name);
+  if(u==='rangga') return ['Best Denki Senayan City','Electronic City Kemang'];
+  if(isMobilePromo()) return TOKO.spg.map(t=>t.name);
+  return U()?.place?[U().place]:[]; };
+const tokoDitugaskan=()=>{ const m=shRead('penugasanToko',null); return (m&&m[uid()])?m[uid()]:tokoDefault(); };
+const spvJadwal=()=>shRead('roleJadwal',JADWAL_DEFAULT)[RID[S.user]]==='Ya';
+const canSchedule = () => role()==='spv'?spvJadwal():(role()==='leads'?spvJadwal():tokoDitugaskan().length>1);
 const apprChain = u => { const r=RID[u]; if(['r6','r8','r10'].includes(r)) return 'Arco → Team Leader'; if(['r3','r4','r5','r13'].includes(r)) return 'Team Leader → FFOR'; return 'Team Leader'; };
 SCR.kunjungan = p => {
   const seg=p.seg||'hari', r=role();
@@ -1007,7 +1020,7 @@ SCR.kunjungan = p => {
     ${seg==='hari'?`<div class="card" style="margin-bottom:14px"><div class="row between"><b>Progres hari ini</b><span class="num small muted">${v.filter(x=>x.status==='Selesai').length} dari ${v.length} selesai</span></div><div class="bar" style="margin-top:10px"><i style="width:${Math.max(3,v.filter(x=>x.status==='Selesai').length/(v.length||1)*100)}%"></i></div></div><div class="list">${v.map(visitRow).join('')}</div>${teamV}`:
     `<div class="list">${S.plans.map(x=>`<div class="li"><div class="ico-tile tan">${I('calendar',20)}</div><div class="grow"><div class="t">${x.place}</div><div class="s">${x.date}</div></div>${chip(x.status,x.status==='Disetujui'?'green':'amber')}</div>`).join('')}
     <div class="li"><div class="ico-tile">${I('refresh',20)}</div><div class="grow"><div class="t">Kunjungan rutin mingguan</div><div class="s">Setiap Senin & Kamis · Okt – Des 2026</div></div>${chip('Berkala','blue')}</div></div>`}
-    ${canSchedule(r)?`<button class="btn sec" style="margin-top:16px" onclick="act(()=>go('kunjungan-form',{spv:${r==='spv'?1:0}}))">${I('plus',20)} ${r==='spv'?'Tugaskan ke tim':'Tambah kunjungan'}${isLocked()?' '+I('lock',16):''}</button>`:`${(r==='canvas'||r==='order')?`<button class="btn sec" style="margin-top:16px" onclick="act(()=>unplSheet())">${I('plus',20)} Kunjungan di luar rencana</button>`:''}<p class="hint" style="margin-top:14px">Jadwal kunjungan dibuat oleh Team Leader. Kamu cukup mengikuti jadwal ini.</p>`}
+    ${canSchedule(r)?`<button class="btn sec" style="margin-top:16px" onclick="act(()=>go('kunjungan-form',{spv:${r==='spv'?1:0}}))">${I('plus',20)} ${r==='spv'?'Tugaskan ke tim':'Tambah kunjungan'}${isLocked()?' '+I('lock',16):''}</button>`:''}${(r==='canvas'||r==='order')?`<button class="btn sec" style="margin-top:12px" onclick="act(()=>unplSheet())">${I('plus',20)} Kunjungan di luar rencana</button>`:''}${canSchedule(r)?'':`<p class="hint" style="margin-top:14px">${r==='spv'?'':'Kamu ditugaskan di satu toko saja, jadi jadwal kunjungan mengikuti Team Leader.'}</p>`}
   </main>`};
 };
 SCR['kunjungan-detail'] = p => {
@@ -1021,7 +1034,7 @@ SCR['kunjungan-detail'] = p => {
   else if(!x.cin) foot=`<button class="btn ghost" style="width:auto" onclick="toast('Membuka Google Maps…','route')">${I('route',18)} Rute</button><button class="btn ${lk?'locked':''}" onclick="act(()=>startCheckin('${x.id}'))">${I(lk?'lock':'pin',18)} Check-in di lokasi</button>`;
   else foot=`<button class="btn ${lk?'locked':''}" onclick="act(()=>${role()==='fmcg'?`fmOut('${x.id}')`:`go('kunjungan-foto',{id:'${x.id}',mode:'out'})`})">${I(lk?'lock':'check',18,2.2)} Check-out & selesai</button>`;
   return {note:'Check-in dan check-out wajib 1 foto ber-watermark, catatan opsional (MOM 5.2). Untuk Promotor FMCG dan MD, tugas selalu semua aktivitas toko kecuali support task, dan check-out baru bisa setelah semua tugas hijau. Check-in dan check-out harus di lokasi yang sama, dan Promotor FMCG boleh berulang kali dalam sehari. Lupa check-out ditutup otomatis saat check-in di toko berikutnya atau saat absen pulang. Sales Canvasing dan Taking Order wajib check-in dan check-out di tiap toko, hanya di dalam radius toko. Jika keluar radius tanpa check-out, muncul notifikasi belum check-out. Saat check-in di toko berikutnya, sales boleh check-out toko sebelumnya tanpa harus berada di radius toko itu (revisi Nov 2026).',
-  html:`${appbar('Detail kunjungan',{right:(canResched(x)?`<button class="ib" onclick="act(()=>reschedSheet('${x.id}'))" aria-label="Jadwal ulang">${I('calendar',22)}</button>`:'')+(!x.cin&&x.status!=='Selesai'&&(role()!=='fmcg'||x.own)&&canSchedule(role())?`<button class="ib" onclick="act(()=>delVisitSheet('${x.id}'))" aria-label="Hapus kunjungan">${I('trash',20)}</button>`:'')})}<main class="content">
+  html:`${appbar('Detail kunjungan',{right:(canResched(x)?`<button class="ib" onclick="act(()=>reschedSheet('${x.id}'))" aria-label="Jadwal ulang">${I('calendar',22)}</button>`:'')+(!x.cin&&x.status!=='Selesai'&&(role()==='spv'||x.own)&&canSchedule(role())?`<button class="ib" onclick="act(()=>delVisitSheet('${x.id}'))" aria-label="Hapus kunjungan">${I('trash',20)}</button>`:'')})}<main class="content">
     <div class="card"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t" style="font-weight:800;font-size:16px">${x.place}${x.unplanned?' '+chip('Unplanned','amber'):''}</div><div class="small muted">Sen, 26 Okt 2026 · ${x.time}</div></div>${chip(x.status,x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':x.status==='Dijadwal ulang'?'amber':'')}</div>
       ${x.cin?`<div class="kv" style="margin-top:8px"><span>Check-in</span><span class="num">${x.cin} · 24 m dari titik toko</span></div>${x.cout?`<div class="kv"><span>Check-out</span><span class="num">${x.cout} · durasi ${x.dur}${x.remoteOut?' · dari luar radius':''}</span></div>`:''}`
       :noCheckin()?`<div class="banner blue" style="margin-top:12px">${I('alert',18)}<span>Multi Finance, REA, dan CBD tidak memakai check-in dan check-out ke nasabah. Isi hasil kunjungan lalu tandai selesai.</span></div>`:`<div class="banner blue" style="margin-top:12px">${I('pin',18)}<span>Check-in saat sudah sampai. Lokasi kamu dicocokkan dengan titik toko (radius 100 m).</span></div>`}</div>
@@ -1219,7 +1232,7 @@ function missedSave(){ S.ms.note=val('msn'); if(!S.ms.alasan){ $('#mserr').inner
   closeSheet(); render(false); toast('Alasan tersimpan'); }
 /* Usulan (11 Nov 2026): kunjungan di luar rencana untuk canvassing dan taking order. Alasan wajib, ditandai Unplanned, tidak menambah kepatuhan. */
 const UP_ALASAN=['Toko minta dikunjungi','Peluang order mendadak','Searah dengan rute hari ini','Pengganti kunjungan yang gagal','Lainnya'];
-const unplToko=()=>{ const r=role(), have=(S.visits[vk()]||[]).map(v=>v.place); return [...TOKO[r],...S.newToko.filter(t=>t.role===r&&t.status==='Aktif')].filter(t=>!have.includes(t.name)); };
+const unplToko=()=>{ const r=role(), have=(S.visits[vk()]||[]).map(v=>v.place); return [...(TOKO[vk()]||TOKO[r]),...S.newToko.filter(t=>t.role===r&&t.status==='Aktif')].filter(t=>!have.includes(t.name)); };
 function unplSheet(){ S.up={toko:'',alasan:'',note:''}; unplRender(); }
 function unplRender(){ const L=unplToko(), u=S.up;
   sheet(`<h3 style="font-size:18px;font-weight:800">Kunjungan di luar rencana</h3><p class="muted small" style="margin:6px 0 14px;line-height:1.5">Toko ini tidak ada di daftar hari ini. Dicatat sebagai Unplanned dan tidak menambah angka kepatuhan. Alasan wajib diisi.</p>
@@ -1241,13 +1254,13 @@ function delVisitSheet(id){
 SCR['kunjungan-form'] = p => {
   const spv=!!p.spv, kind=p.kind||'adhoc', tasks=p.tasks||[];
   const r=role();
-  const places = spv?['Electronic City Kemang','Best Denki Senayan City','Toko Makmur Abadi','Ahmad Fauzi (nasabah)']:r==='leads'?S.leads.filter(l=>l.owner===S.user).map(l=>l.name+' (nasabah)'):(TOKO[r]||TOKO.spg).map(t=>t.name);
+  const places = spv?['Electronic City Kemang','Best Denki Senayan City','Toko Makmur Abadi','Ahmad Fauzi (nasabah)']:r==='leads'?S.leads.filter(l=>l.owner===S.user).map(l=>l.name+' (nasabah)'):tokoDitugaskan();
   const taskOpts = r==='fmcg'?['Cek stok','Price promo','Facing display','Support task','Quiz','Survey']:r==='leads'?['Survey usaha','Verifikasi dokumen','Tanda tangan akad','Penagihan']:['Penjualan','Cek SKU display','Survey toko','Ambil pesanan','Penagihan'];
-  return {note:spv?'Team Leader menjadwalkan kunjungan anggota tim: sekali atau berkala dengan periode harian, mingguan, 2 mingguan, atau bulanan (MOM 5.1).':'Promotor FMCG dan MD membuat jadwal sendiri, 1 hari 1 toko, dengan periode harian, mingguan, 2 mingguan, atau bulanan (MOM 5.1, 10.1).',
+  return {note:spv?'Team Leader menjadwalkan kunjungan anggota tim: sekali atau berkala dengan periode harian, mingguan, 2 mingguan, atau bulanan (MOM 5.1).':'Sales yang ditugaskan di lebih dari satu toko boleh menambah jadwal sendiri, dengan periode harian, mingguan, 2 mingguan, atau bulanan. Sales di satu toko mengikuti jadwal Team Leader (Usulan, 12 Nov 2026).',
   html:`${appbar(spv?'Tugaskan ke tim':'Tambah kunjungan')}<main class="content">
     ${spv?`<label class="field"><span>Anggota tim</span><select class="input"><option>Rina Marlina – SPG</option><option>Budi Santoso – Canvasing</option><option>Dimas Prasetyo – Taking Order</option><option>Nina Safitri – REA</option></select></label>`:''}
     <div class="field"><span>Jenis kunjungan</span><div class="opts">${(spv?[['adhoc','Sekali'],['berkala','Berkala']]:[['adhoc','Hari ini'],['berkala','Berkala']]).map(o=>`<button class="opt ${kind===o[0]?'on':''}" onclick="setP({kind:'${o[0]}'})">${o[1]}</button>`).join('')}</div>
-      ${spv?'':`<div class="hint">Dalam satu hari kamu hanya menuju satu toko.</div>`}</div>
+      ${spv?'':`<div class="hint">Pilih dari toko yang ditugaskan kepadamu.</div>`}</div>
     <label class="field"><span>${r==='leads'&&!spv?'Nasabah':'Toko / tujuan'}</span><select class="input" id="kp">${places.map(x=>`<option>${x}</option>`).join('')}</select></label>
     ${kind==='berkala'?`<div class="field"><span>Periode</span><div class="opts">${['Harian','Mingguan','2 mingguan','Bulanan'].map((d,i)=>`<button class="opt ${(p.per||'Mingguan')===d?'on':''}" onclick="setP({per:'${d}'})">${d}</button>`).join('')}</div></div>
       <div class="field"><span>Ulangi setiap</span><div class="opts">${['Sen','Sel','Rab','Kam','Jum','Sab'].map((d,i)=>`<button class="opt ${i===0||i===3?'on':''}" onclick="this.classList.toggle('on')">${d}</button>`).join('')}</div></div>
@@ -1262,8 +1275,8 @@ function saveVisit(){
   if(p.spv){ back(); toast('Penugasan terkirim, anggota tim dapat notifikasi'); return; }
   const list=S.visits[vk()];
   if(p.kind==='berkala'){ back(); toast('Jadwal berkala '+(p.per||'Mingguan').toLowerCase()+' tersimpan'); return; }
-  if(list.length){ toast('Hari ini sudah ada jadwal ke '+list[0].place,'alert'); return; } const nid=role()==='fmcg'?'fo'+Date.now()%100000:'v'+(list.length+1)+Date.now()%1000;
-  list.push({id:nid,place,time:'13:00',tasks,status:'Belum',photos:{},own:role()==='fmcg'});
+  if(list.some(v=>v.place===place)){ toast('Hari ini sudah ada jadwal ke '+place,'alert'); return; } const nid=role()==='fmcg'?'fo'+Date.now()%100000:'v'+(list.length+1)+Date.now()%1000;
+  list.push({id:nid,place,time:'13:00',tasks,status:'Belum',photos:{},own:true});
   if(role()==='fmcg') shSet('fmOwnVisits',[...shRead('fmOwnVisits',[]),{id:nid,u:fmUk(),place,time:'13:00'}]); /* Usulan: ditandai Dibuat promotor di dashboard, tanpa persetujuan Team Leader */
   back(); toast('Kunjungan ditambahkan ke jadwal hari ini');
 }
@@ -1271,23 +1284,23 @@ function saveVisit(){
 /* ---------- Penjualan (SPG & Canvasing) ---------- */
 function startSale(){ if(aktCfg()?.akt.includes('jual')){ spgGate(()=>go('spg-jual')); return; } S.cart={toko:null,items:{},cust:{}}; go('jual-toko'); }
 SCR.penjualan = p => {
-  const r=role(), f=p.f||'0', all=r==='canvas'?S.canvasSales:S.sales;
+  const r=role(), f=p.f||'0', all=salesList();
   const tabs=[['0','Hari ini'],['1','Kemarin'],['7','7 hari'],['30','Bulan ini']];
   const list=all.filter(x=>{const d=x.d||0; return f==='0'?d===0:f==='1'?d===1:f==='7'?d<=6:true;});
   const tot=list.reduce((s,x)=>s+x.total,0);
   const groups=[...new Set(list.map(x=>x.d||0))].sort((a,b)=>a-b);
   const row=x=>`<button class="li" onclick="go('jual-detail',{id:'${x.id}'})"><div class="grow"><div class="t">${esc(x.items.map(i=>(i.name||prodById(i.id).name)+(i.q>1?' ×'+i.q:'')).join(', '))}</div><div class="s">${esc(x.toko)} · ${x.time}</div></div><div class="r"><b class="num">${rpShort(x.total)}</b><div style="margin-top:4px">${chip(x.status,x.status==='Terkirim'?'green':'amber')}${x.inv?.flag?' '+chip(x.inv.none?'Tanpa invoice':'Selisih besar','amber'):''}</div></div></button>`;
-  return {tab:'penjualan', note:(r==='canvas'?'Penjualan canvasing mengurangi stok bawaan secara otomatis (BRD 2.16.10).':'Riwayat penjualan SPG/promotor, terkirim ke sistem klien lewat API.')+' Riwayat penjualan sendiri bisa difilter per tanggal (BRD 2.14.8, 2.16.11). Hapus transaksi butuh approval supervisor (BRD 2.14.4–2.14.5).',
+  return {tab:'penjualan', note:(r==='canvas'&&membawaBarang()?'Penjualan canvasing mengurangi stok bawaan secara otomatis (BRD 2.16.10).':'Riwayat penjualan SPG/promotor, terkirim ke sistem klien lewat API.')+' Riwayat penjualan sendiri bisa difilter per tanggal (BRD 2.14.8, 2.16.11). Hapus transaksi butuh approval supervisor (BRD 2.14.4–2.14.5).',
   html:`${appbar('Penjualan',{backBtn:false})}<main class="content">
     <div class="segtabs">${tabs.map(t=>`<button class="${f===t[0]?'on':''}" onclick="setP({f:'${t[0]}'})">${t[1]}</button>`).join('')}</div>
     <div class="card"><div class="row between"><div><div class="small muted">${tabs.find(t=>t[0]===f)[1]} · ${list.length} transaksi</div><div class="big-num num">${rp(tot)}</div></div><div class="ico-tile">${I('bag',22)}</div></div>
-    ${r==='canvas'?`<button class="li" style="padding:12px 0 0;margin-top:12px;border-top:1px solid var(--sep)" onclick="go('stok')"><div class="ico-tile tan">${I('box',20)}</div><div class="grow"><div class="t">Stok bawaan</div><div class="s">${Object.values(S.stock).reduce((s,x)=>s+x.good,0)} layak jual · ${Object.values(S.stock).reduce((s,x)=>s+x.bad,0)} retur</div></div>${I('right',20)}</button>`:''}</div>
+    ${r==='canvas'&&membawaBarang()?`<button class="li" style="padding:12px 0 0;margin-top:12px;border-top:1px solid var(--sep)" onclick="go('stok')"><div class="ico-tile tan">${I('box',20)}</div><div class="grow"><div class="t">Stok bawaan</div><div class="s">${Object.values(S.stock).reduce((s,x)=>s+x.good,0)} layak jual · ${Object.values(S.stock).reduce((s,x)=>s+x.bad,0)} retur</div></div>${I('right',20)}</button>`:''}</div>
     ${list.length?groups.map(g=>`<div class="sec-title">${dayLabel(g)}<span class="small muted num">${rpShort(list.filter(x=>(x.d||0)===g).reduce((s,x)=>s+x.total,0))}</span></div><div class="list">${list.filter(x=>(x.d||0)===g).map(row).join('')}</div>`).join('')
       :`<div class="card" style="margin-top:14px"><div class="empty" style="padding:20px">Belum ada penjualan di periode ini.</div></div>`}
   </main><footer class="actions"><button class="btn ${isLocked()?'locked':''}" onclick="act(()=>startSale())">${I(isLocked()?'lock':'plus',20)} ${r==='canvas'?'Jual dari stok bawaan':'Catat penjualan'}</button></footer>`};
 };
 SCR['jual-detail'] = p => {
-  const list=role()==='canvas'?S.canvasSales:S.sales, x=list.find(s=>s.id===p.id);
+  const list=salesList(), x=list.find(s=>s.id===p.id);
   return {note:'Detail transaksi. Kalau salah input, sales mengajukan penghapusan yang perlu disetujui supervisor.',
   html:`${appbar(x.id)}<main class="content">
     <div class="card"><div class="kv"><span>Toko</span><span>${x.toko}</span></div><div class="kv"><span>Waktu</span><span>${dayLabel(x.d)}, ${x.time}</span></div><div class="kv"><span>Pelanggan</span><span>${esc(x.cust||'–')}</span></div>${(x.vals||[]).map(([l,v])=>`<div class="kv"><span>${esc(l)}</span><span>${esc(v)}</span></div>`).join('')}<div class="kv"><span>Status</span><span>${x.status==='Terkirim'?'Terkirim ke sistem ARUNIKA':x.status}</span></div></div>
@@ -1298,10 +1311,10 @@ SCR['jual-detail'] = p => {
 function delSaleSheet(id){
   sheet(`<h3 style="font-size:18px;font-weight:800">Ajukan hapus transaksi?</h3><p class="muted small" style="margin:6px 0 14px;line-height:1.5">Transaksi baru terhapus setelah disetujui supervisor. Data tetap tersimpan di sistem (soft delete).</p>
   <label class="field"><span>Alasan</span><textarea class="input" id="dr" placeholder="contoh: Salah pilih produk"></textarea></label>
-  <button class="btn danger" onclick="const l=role()==='canvas'?S.canvasSales:S.sales;l.find(s=>s.id==='${id}').status='Menunggu hapus';closeSheet();render(false);toast('Pengajuan hapus dikirim ke supervisor')">Kirim pengajuan</button>`);
+  <button class="btn danger" onclick="const l=salesList();l.find(s=>s.id==='${id}').status='Menunggu hapus';closeSheet();render(false);toast('Pengajuan hapus dikirim ke supervisor')">Kirim pengajuan</button>`);
 }
 function tokoPicker(r,pickFn){
-  const active=[...TOKO[r],...(r==='spg'&&isMobilePromo()?getExtraToko():[]),...S.newToko.filter(t=>t.role===r&&t.status==='Aktif')];
+  const active=[...(TOKO[vk()]||TOKO[r]),...(r==='spg'&&isMobilePromo()?getExtraToko():[]),...S.newToko.filter(t=>t.role===r&&t.status==='Aktif')];
   const pend=S.newToko.filter(t=>t.role===r&&t.status!=='Aktif');
   return `<div class="list">${active.map(t=>`<button class="li" onclick="${pickFn}('${t.id}')"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t">${esc(t.name)}${t.isNew?' '+chip('Baru','green'):''}</div><div class="s">${esc(t.addr)} · ${t.cat}</div></div>${I('right',20)}</button>`).join('')}</div>
   ${pend.length?`<div class="sec-title">Menunggu verifikasi</div><div class="list">${pend.map(t=>`<button class="li" onclick="pendingTokoSheet('${t.id}')"><div class="ico-tile amber">${I('clock',20)}</div><div class="grow"><div class="t">${esc(t.name)}</div><div class="s">${esc(t.addr)}</div></div>${chip('Diverifikasi admin','amber')}</button>`).join('')}</div>`:''}
@@ -1456,14 +1469,14 @@ function cartCalc(){
   return {sub,disc,total:sub-disc,promos,count:Object.values(S.cart.items).reduce((s,q)=>s+q,0),needCust:promos.some(p=>p.needCustomer)};
 }
 function pickPromo(pid,id){ S.cart.pick=S.cart.pick||{}; S.cart.pick[pid]=id; render(false,true); }
-function setQty(id,d){ const r=role(); const q=(S.cart.items[id]||0)+d; const max=r==='canvas'?S.stock[id].good:99; S.cart.items[id]=Math.max(0,Math.min(max,q)); render(false,true); }
+function setQty(id,d){ const r=role(); const q=(S.cart.items[id]||0)+d; const max=r==='canvas'&&membawaBarang()?S.stock[id].good:99; S.cart.items[id]=Math.max(0,Math.min(max,q)); render(false,true); }
 SCR['jual-produk'] = p => {
-  const r=role(), list=r==='canvas'?CANVAS_PRODUCTS:PRODUCTS, c=cartCalc(), q=(p.q||'').toLowerCase();
+  const r=role(), list=r==='canvas'&&membawaBarang()?CANVAS_PRODUCTS:PRODUCTS, c=cartCalc(), q=(p.q||'').toLowerCase();
   return {note:(r==='canvas'?'Langkah 2: jumlah dibatasi stok layak jual yang dibawa. Harga mengikuti toko dan cabang (MOM 6.2).':'Langkah 2: pilih produk dan jumlah. Harga mengikuti toko dan cabang (MOM 6.2). Promo dihitung otomatis; kalau ada promo yang <b>tidak bisa digabung</b>, sales memilih salah satu sesuai pilihan pelanggan (BRD 7.1.8–7.1.9). Coba tambah VISTARA 50".')+'',
   html:`${appbar('Pilih produk')}<main class="content">
     <p class="small muted" style="margin:0 2px 10px">Langkah 2 dari 3 · ${esc(S.cart.toko)} · harga toko ini</p>
     <div class="row" style="gap:8px;margin-bottom:12px"><div style="position:relative;flex:1"><span style="position:absolute;left:14px;top:14px;color:var(--muted)">${I('search',20)}</span><input class="input" style="padding-left:44px" placeholder="Cari produk atau SKU" value="${esc(p.q||'')}" oninput="cur().p.q=this.value;clearTimeout(window._qs);window._qs=setTimeout(()=>{render(false,true);const i=document.querySelector('.content input');i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)"></div></div>
-    <div class="list">${list.filter(x=>!q||(x.name+x.sku).toLowerCase().includes(q)).map(x=>{const n=S.cart.items[x.id]||0; const pr=r==='spg'?PROMOS.filter(pp=>pp.products.includes(x.id)):[]; const st=r==='canvas'?S.stock[x.id].good:null; const solo=pr.length>1&&pr.some(z=>z.solo); const pick=S.cart.pick?.[x.id]||pr[0]?.id;
+    <div class="list">${list.filter(x=>!q||(x.name+x.sku).toLowerCase().includes(q)).map(x=>{const n=S.cart.items[x.id]||0; const pr=r==='spg'?PROMOS.filter(pp=>pp.products.includes(x.id)):[]; const st=r==='canvas'&&membawaBarang()?S.stock[x.id].good:null; const solo=pr.length>1&&pr.some(z=>z.solo); const pick=S.cart.pick?.[x.id]||pr[0]?.id;
       const promoHtml = solo&&n
         ? `<div class="small muted" style="margin-top:6px">Promo tidak bisa digabung, pilih sesuai pilihan pelanggan:</div><div class="opts" style="margin-top:6px">${pr.map(pp=>`<button class="opt ${pick===pp.id?'on':''}" style="padding:5px 10px;font-size:12px" onclick="pickPromo('${x.id}','${pp.id}')">${pp.name}</button>`).join('')}</div>`
         : pr.map(pp=>`<span class="chip tan" style="margin-top:6px">${I(pp.type==='gift'?'gift':'tag',13,2)} ${pp.name}</span>`).join(' ')+(solo?' <span class="small muted">pilih salah satu</span>':'');
@@ -1504,12 +1517,12 @@ SCR['jual-konfirmasi'] = () => {
   </main><footer class="actions"><button class="btn" onclick="saveSale()">Simpan penjualan</button></footer>`};
 };
 function saveSale(){
-  const c=cartCalc(), r=role(), list=r==='canvas'?S.canvasSales:S.sales;
+  const c=cartCalc(), r=role(), list=salesList();
   const items=Object.entries(S.cart.items).filter(e=>e[1]).map(([id,q])=>({id,q,price:c.inv?S.cart.inv.lines.find(l=>l.id===id).price:priceAt(prodById(id),S.cart.toko)}));
   const id=(r==='canvas'?'CVS':'TRX')+'-2610-0'+(100+list.length);
   const d=Math.max(0,BACKDATE.indexOf(S.cart.date||BACKDATE[0]));
   list.unshift({id,toko:S.cart.toko,items,total:c.total,time:'13:05',cust:S.cart.cust.name||'',status:S.demo.offline?'Menunggu sinkron':'Terkirim',d,inv:c.inv?invMeta():S.cart.noInv?{none:true,reason:S.cart.noInv,flag:true}:null});
-  if(r==='canvas'){ items.forEach(i=>S.stock[i.id].good-=i.q); S.mutasi.unshift({t:'Penjualan',d:items.map(i=>prodById(i.id).name+' ×'+i.q).join(', '),time:'13:05',sign:'-'}); }
+  if(r==='canvas'&&membawaBarang()){ items.forEach(i=>S.stock[i.id].good-=i.q); S.mutasi.unshift({t:'Penjualan',d:items.map(i=>prodById(i.id).name+' ×'+i.q).join(', '),time:'13:05',sign:'-'}); }
   S.stack=S.stack.filter(e=>!e.name.startsWith('jual-'));
   go('jual-sukses',{id,total:c.total,off:S.demo.offline});
 }
@@ -1533,6 +1546,7 @@ const CV_SISA_M=[{id:'sb1',u:'budi',item:'Blender 1 L ×2',jam:30,co:'Senin 17:0
 const cvSisaMine=()=>{ if(role()!=='canvas'||!membawaBarang()) return []; const batas=shRead('canvasSisaJam',24), ok=shRead('cvSisaOk',[]);
   return CV_SISA_M.filter(x=>x.u===fmUk()).map(x=>{ const sisa=batas-x.jam, done=ok.includes(x.id); return {...x,done,sisa,batas}; }); };
 /* Usulan: atribut Membawa barang pada role (IAM, Role di dashboard). Canvassing Elektronik tidak membawa barang, jadi tanpa stok, retur, dan sisa barang. */
+const salesList=()=>role()==='canvas'?(membawaBarang()?S.canvasSales:S.canvasESales):S.sales;
 const membawaBarang=()=>role()!=='canvas'||shRead('userBawa',{budi:true,kevin:false})[fmUk()]!==false;
 function cvSisaCard(){ const L=cvSisaMine(); if(!L.length) return '';
   const late=L.filter(x=>!x.done&&x.sisa<0).length;
@@ -2086,7 +2100,9 @@ function aktGate(fn){ act(()=>{ if(!visitOpen()){ sheet(`<h3 style="font-size:18
 function aktTasks(v){
   const r=role(), has=!!v, done=k=>v&&(v.done||{})[k];
   if(r==='canvas'&&!membawaBarang()) return [
-    {ic:'plus',t:'Usulkan toko',sub:'Toko baru langsung aktif',go:"go('toko-baru')"}];
+    {ic:'bag',t:'Catat penjualan',sub:'Penjualan di toko, tanpa stok bawaan',go:'startSale()',lock:1,st:has?(S.canvasESales.some(x=>!x.d&&x.toko===v.place)?'Selesai':'Belum Selesai'):''},
+    {ic:'plus',t:'Usulkan toko',sub:'Toko baru langsung aktif',go:"go('toko-baru')"},
+    {ic:'file',t:'Riwayat penjualan',sub:'Penjualan yang sudah dicatat',go:"tab('penjualan')"}];
   if(r==='canvas') return [
     {ic:'bag',t:'Jual dari stok',sub:'Catat penjualan dari stok bawaan',go:'startSale()',lock:1,st:has?(S.canvasSales.some(x=>!x.d&&x.toko===v.place)?'Selesai':'Belum Selesai'):''},
     {ic:'box',t:'Stok bawaan',sub:'Stok awal, terjual, dan sisa',go:"go('stok')"},
@@ -2585,10 +2601,10 @@ function render(scrollTop=true, keepScroll=false){
    ========================================================= */
 function togglePanel(open){ $('#panel').classList.toggle('open',open); }
 function setNote(n){ const el=$('#pnote'); if(el) el.innerHTML=n; }
-function pendingCount(){ return [...S.sales,...S.canvasSales].filter(x=>x.status==='Menunggu sinkron').length + S.orders.filter(o=>o.status==='Menunggu sinkron').length + S.leads.filter(l=>l.pending).length; }
+function pendingCount(){ return [...S.sales,...S.canvasSales,...S.canvasESales].filter(x=>x.status==='Menunggu sinkron').length + S.orders.filter(o=>o.status==='Menunggu sinkron').length + S.leads.filter(l=>l.pending).length; }
 function flushQueue(){
   const n=pendingCount();
-  [...S.sales,...S.canvasSales].forEach(x=>{ if(x.status==='Menunggu sinkron') x.status='Terkirim'; });
+  [...S.sales,...S.canvasSales,...S.canvasESales].forEach(x=>{ if(x.status==='Menunggu sinkron') x.status='Terkirim'; });
   S.orders.forEach(o=>{ if(o.status==='Menunggu sinkron'){ o.status='Menunggu konfirmasi'; o.tone='amber'; } });
   S.leads.forEach(l=>{ if(l.pending){ l.pending=false; l.log[0].s=l.log[0].s.replace('Menunggu sinkron ke SIM','Terkirim ke SIM'); } });
   if(n) setTimeout(()=>toast(n+' data tersinkron ke server','refresh'),60);
