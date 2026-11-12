@@ -403,7 +403,8 @@ const LOGO = 'data:image/webp;base64,UklGRpgMAABXRUJQVlA4IIwMAADQNgCdASosAU8APpE
    ========================================================= */
 const USERS = {
   'spg.rina':  {name:'Rina Marlina', init:'RM', role:'spg', roleLabel:'SPG / Sales Promotor', nip:'SIM-24-01187', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
-  'sales.budi':{name:'Budi Santoso', init:'BS', role:'canvas', roleLabel:'Sales Canvasing', nip:'SIM-23-00912', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Rute Pasar Minggu – Cilandak', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
+  'sales.budi':{name:'Budi Santoso', init:'BS', role:'canvas', roleLabel:'Sales Canvasing FMCG', nip:'SIM-23-00912', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Rute Pasar Minggu – Cilandak', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
+  'sales.kevin':{name:'Kevin Halim', init:'KH', role:'canvas', vkey:'canvasE', roleLabel:'Sales Canvasing Elektronik', nip:'SIM-23-00988', client:'PT Nusantara Home Appliances', unit:'Cabang Jakarta Barat', place:'Rute Kembangan – Puri', sched:'WFA', main:{key:'kunjungan',label:'Kunjungan',icon:'route'}},
   'sales.dimas':{name:'Dimas Prasetyo', init:'DP', role:'order', roleLabel:'Sales Taking Order', nip:'SIM-24-00455', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Area Fatmawati – Bintaro', sched:'WFA', main:{key:'pesanan',label:'Pesanan',icon:'order'}},
   'spv.sari':  {name:'Sari Wulandari', init:'SW', role:'spv', roleLabel:'Team Leader (SPV 1)', nip:'CLT-TL-0208', client:'Arunika Elektronik & BPR Mitra Usaha', unit:'Cabang Jakarta Selatan', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
   'ffor.yoga': {name:'Yoga Permana', init:'YP', role:'spv', roleLabel:'FFOR (SPV 2)', nip:'SIM-18-00144', client:'Arunika Elektronik', unit:'Region Jakarta', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
@@ -522,6 +523,7 @@ function freshState(){
       spg:[{id:'v1',place:'Electronic City Kemang',time:'08:00 – 17:00',tasks:['Aktivitas saya'],status:'Belum',photos:{}}],
       mobile:[{id:'v1',place:'Electronic City Kemang',time:'08:00 – 13:00',tasks:['Cek SKU display','Penjualan'],status:'Berjalan',photos:{},cin:'08:03'},{id:'v2',place:'Best Denki Senayan City',time:'14:00 – 17:00',tasks:['Survey toko','Cek SKU display','Quiz'],status:'Belum',photos:{}}],
       canvas:[{id:'v1',place:'Toko Sinar Jaya Elektronik',time:'09:00',tasks:['Penjualan','Ambil retur'],status:'Selesai',photos:{0:1,1:1},cin:'09:02',cout:'09:31',dur:'29 mnt'},{id:'v2',place:'Toko Makmur Abadi',time:'10:30',tasks:['Penjualan'],status:'Belum',photos:{}},{id:'v3',place:'Toko Berkah Elektronik',time:'13:00',tasks:['Penjualan','Cek display'],status:'Belum',photos:{}},{id:'v4',place:'Toko Cahaya Baru',time:'15:00',tasks:['Penjualan'],status:'Belum',photos:{}}],
+      canvasE:[{id:'v1',place:'Toko Jaya Abadi Kembangan',time:'09:30',tasks:['Kunjungan'],status:'Belum',photos:{}},{id:'v2',place:'Toko Cahaya Baru',time:'13:00',tasks:['Kunjungan'],status:'Belum',photos:{}}],
       order:[{id:'v1',place:'Toko Mega Elektronik',time:'10:00',tasks:['Ambil pesanan'],status:'Selesai',photos:{0:1},cin:'10:04',cout:'10:30',dur:'26 mnt'},{id:'v2',place:'CV Sumber Rejeki Elektronik',time:'13:30',tasks:['Ambil pesanan','Penagihan'],status:'Belum',photos:{}},{id:'v3',place:'Toko Abadi Jaya',time:'15:30',tasks:['Ambil pesanan'],status:'Belum',photos:{}}],
       leads:[{id:'v1',place:'Ahmad Fauzi (nasabah)',time:'10:00',tasks:['Survey usaha'],status:'Belum',photos:{}},{id:'v2',place:'Yuliana Putri (nasabah)',time:'14:00',tasks:['Verifikasi dokumen'],status:'Belum',photos:{}}],
       fmcg:[{id:'v1',place:'Electronic City Kemang',time:'09:00',tasks:['Semua aktivitas toko'],status:'Belum',photos:{}},{id:'v2',place:'Best Denki Senayan City',time:'13:00',tasks:['Semua aktivitas toko'],status:'Belum',photos:{}}],
@@ -549,7 +551,7 @@ const rpShort = n => n>=1e6 ? 'Rp'+(n/1e6).toLocaleString('id-ID',{maximumFracti
 const U = () => USERS[S.user];
 const role = () => U()?.role;
 // Kunci data kunjungan: Mobile Promotor punya jadwal sendiri, terpisah dari SPG yang diam di satu lokasi
-const vk = () => U()?.menu==='mobile'?'mobile':role();
+const vk = () => U()?.vkey||(U()?.menu==='mobile'?'mobile':role());
 const att = () => S.att[S.user] || (S.att[S.user] = {in:null,out:null});
 const isLocked = () => !att().in || !!att().out;
 const mode = () => S.demo.mode || U()?.sched || 'WFO';
@@ -1039,7 +1041,7 @@ const VISIT_FORM={
 };
 function vfSet(id,k,v){ S.vform[id]=S.vform[id]||{}; S.vform[id][k]=v; render(false,true); }
 function visitFormHTML(x){
-  const fs=VISIT_FORM[role()]||[]; if(!fs.length) return '';
+  const fs=(VISIT_FORM[role()]||[]).filter(f=>membawaBarang()||f[0]!=='Retur diambil'); if(!fs.length) return '';
   const vals=S.vform[x.id]||{};
   return `<div class="sec-title">Form kunjungan</div><div class="card">${fs.map(f=>f[1]==='opt'?`<div class="field"><span>${f[0]}</span><div class="opts">${f[2].map(o=>`<button class="opt ${vals[f[0]]===o?'on':''}" onclick="vfSet('${x.id}','${f[0]}','${o}')">${o}</button>`).join('')}</div></div>`:`<label class="field"><span>${f[0]}</span><input class="input" value="${esc(vals[f[0]]||'')}" onchange="S.vform['${x.id}']=S.vform['${x.id}']||{};S.vform['${x.id}']['${f[0]}']=this.value"></label>`).join('')}</div>`;
 }
@@ -1095,7 +1097,7 @@ function fmSyncVisits(){
   if(role()!=='fmcg') return;
   S.fmv=S.fmv||{}; const L=S.fmv[S.user]||(S.fmv[S.user]=[]); S.visits.fmcg=L;
   const sh=shRead('fmVisits',FM_VISITS_DEFAULT).filter(v=>v.u===fmUk());
-  sh.forEach(v=>{ const c=L.find(x=>x.id===v.id); if(c){ if(!c.cin){ c.place=v.place; c.time=v.time; } } else L.push({id:v.id,place:v.place,time:v.time,tasks:['Semua aktivitas toko'],status:'Belum',photos:{}}); });
+  sh.forEach(v=>{ const c=L.find(x=>x.id===v.id); if(c){ if(!c.cin){ c.place=v.place; c.time=v.time; } } else L.push({id:v.id,place:v.place,time:v.time,tasks:['Semua aktivitas toko'],status:'Belum',photos:{},own:v.by==='sales'}); });
   for(let i=L.length-1;i>=0;i--){ const x=L[i]; if(!x.own&&!x.cin&&!sh.some(v=>v.id===x.id)) L.splice(i,1); }
 }
 /* Usulan (11 Nov 2026): Hari ini canvassing dan taking order membaca journey plan dari dashboard (jpPlan, minggu 1 hari Senin).
@@ -1105,7 +1107,7 @@ function jpSyncVisits(){
   const r=role(); if(r!=='canvas'&&r!=='order') return;
   const plan=shRead('jpPlan',JP_PLAN_DEFAULT).filter(x=>x.u===fmUk()&&x.w===1&&x.d===0&&x.n).sort((a,b)=>a.o-b.o);
   if(!plan.length) return;
-  const L=S.visits[r], names=plan.map(p=>p.n);
+  const L=S.visits[vk()], names=plan.map(p=>p.n);
   for(let i=L.length-1;i>=0;i--){ const x=L[i]; if(!x.own&&!x.cin&&!names.includes(x.place)) L.splice(i,1); }
   names.forEach(n=>{ if(!L.some(x=>x.place===n)) L.push({id:'jp-'+n.replace(/\W+/g,'').toLowerCase(),place:n,time:'16:00',tasks:r==='canvas'?['Penjualan']:['Ambil pesanan'],status:'Belum',photos:{}}); });
   const pos=x=>{ const i=names.indexOf(x.place); return i<0?99:i; };
@@ -1260,7 +1262,9 @@ function saveVisit(){
   if(p.spv){ back(); toast('Penugasan terkirim, anggota tim dapat notifikasi'); return; }
   const list=S.visits[vk()];
   if(p.kind==='berkala'){ back(); toast('Jadwal berkala '+(p.per||'Mingguan').toLowerCase()+' tersimpan'); return; }
-  if(list.length){ toast('Hari ini sudah ada jadwal ke '+list[0].place,'alert'); return; } list.push({id:'v'+(list.length+1)+Date.now()%1000,place,time:'13:00',tasks,status:'Belum',photos:{},own:role()==='fmcg'});
+  if(list.length){ toast('Hari ini sudah ada jadwal ke '+list[0].place,'alert'); return; } const nid=role()==='fmcg'?'fo'+Date.now()%100000:'v'+(list.length+1)+Date.now()%1000;
+  list.push({id:nid,place,time:'13:00',tasks,status:'Belum',photos:{},own:role()==='fmcg'});
+  if(role()==='fmcg') shSet('fmOwnVisits',[...shRead('fmOwnVisits',[]),{id:nid,u:fmUk(),place,time:'13:00'}]); /* Usulan: ditandai Dibuat promotor di dashboard, tanpa persetujuan Team Leader */
   back(); toast('Kunjungan ditambahkan ke jadwal hari ini');
 }
 
@@ -1433,7 +1437,7 @@ function submitToko(){
   S.newToko.push(t);
   if(direct){ /* Usulan: canvasser tidak perlu persetujuan admin. Toko masuk Toko Sementara di dashboard. */
     shSet('tokoBaruSales',[...shRead('tokoBaruSales',[]),{id:t.id,name,addr:t.addr,cat:t.cat,u:fmUk()}]);
-    S.visits.canvas.push({id:'nv'+Date.now(),place:name,time:'Sekarang',tasks:['Penjualan'],status:'Belum',photos:{},own:true,unplanned:true});
+    S.visits[vk()].push({id:'nv'+Date.now(),place:name,time:'Sekarang',tasks:['Penjualan'],status:'Belum',photos:{},own:true,unplanned:true});
     shSet('visitExc',[...shRead('visitExc',[]),{id:'ex'+Date.now(),u:fmUk(),place:name,type:'Unplanned',untuk:'',alasan:'Toko baru dari canvasser',tgl:'26 Okt'}]); }
   replace('toko-terkirim',{name,direct});
 }
@@ -1526,8 +1530,10 @@ SCR.scan = p => ({dark:true, note:'Scan QR atau barcode produk di rak. Nama prod
 /* Usulan (11 Nov 2026): sisa barang canvassing wajib kembali ke gudang dalam batas jam sejak check-out (bawaan 24 jam, diatur di dashboard).
    Check-out tidak diblokir. Dashboard menandai sisa yang sudah dikembalikan (cvSisaOk). Data contoh sama dengan kartu Sisa barang di dashboard. */
 const CV_SISA_M=[{id:'sb1',u:'budi',item:'Blender 1 L ×2',jam:30,co:'Senin 17:04'},{id:'sb2',u:'budi',item:'Rice Cooker 1,8 L ×1',jam:6,co:'Selasa 17:10'},{id:'sb3',u:'kevin',item:'Kipas Angin 16 inci ×3',jam:28,co:'Senin 16:48'}];
-const cvSisaMine=()=>{ if(role()!=='canvas') return []; const batas=shRead('canvasSisaJam',24), ok=shRead('cvSisaOk',[]);
+const cvSisaMine=()=>{ if(role()!=='canvas'||!membawaBarang()) return []; const batas=shRead('canvasSisaJam',24), ok=shRead('cvSisaOk',[]);
   return CV_SISA_M.filter(x=>x.u===fmUk()).map(x=>{ const sisa=batas-x.jam, done=ok.includes(x.id); return {...x,done,sisa,batas}; }); };
+/* Usulan: atribut Membawa barang pada role (IAM, Role di dashboard). Canvassing Elektronik tidak membawa barang, jadi tanpa stok, retur, dan sisa barang. */
+const membawaBarang=()=>role()!=='canvas'||shRead('userBawa',{budi:true,kevin:false})[fmUk()]!==false;
 function cvSisaCard(){ const L=cvSisaMine(); if(!L.length) return '';
   const late=L.filter(x=>!x.done&&x.sisa<0).length;
   return `<div class="sec-title">Sisa barang dari check-out</div>
@@ -2079,11 +2085,13 @@ function aktGate(fn){ act(()=>{ if(!visitOpen()){ sheet(`<h3 style="font-size:18
     <button class="btn" onclick="closeSheet();visitEntry()">Pilih toko</button><button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Nanti</button>`); return; } fn(); }); }
 function aktTasks(v){
   const r=role(), has=!!v, done=k=>v&&(v.done||{})[k];
+  if(r==='canvas'&&!membawaBarang()) return [
+    {ic:'plus',t:'Usulkan toko',sub:'Toko baru langsung aktif',go:"go('toko-baru')"}];
   if(r==='canvas') return [
     {ic:'bag',t:'Jual dari stok',sub:'Catat penjualan dari stok bawaan',go:'startSale()',lock:1,st:has?(S.canvasSales.some(x=>!x.d&&x.toko===v.place)?'Selesai':'Belum Selesai'):''},
     {ic:'box',t:'Stok bawaan',sub:'Stok awal, terjual, dan sisa',go:"go('stok')"},
     {ic:'retur',t:'Catat retur',sub:'Retur layak dan tidak layak',go:"go('stok-form',{kind:'retur'})",lock:1,st:has?(done('retur')?'Selesai':'Belum Selesai'):''},
-    {ic:'plus',t:'Usulkan toko',sub:'Toko baru untuk diverifikasi',go:"go('toko-baru')"},
+    {ic:'plus',t:'Usulkan toko',sub:'Toko baru langsung aktif',go:"go('toko-baru')"},
     {ic:'file',t:'Riwayat penjualan',sub:'Penjualan yang sudah dicatat',go:"tab('penjualan')"}];
   if(r==='order') return [
     {ic:'order',t:'Buat pesanan',sub:'Pesanan dari toko yang dikunjungi',go:'startOrder()',lock:1,st:has?(S.orders.some(o=>o.toko===v.place&&o.date==='26 Okt 2026')?'Selesai':'Belum Selesai'):''},
