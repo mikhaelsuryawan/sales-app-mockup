@@ -1029,7 +1029,7 @@ SCR['kunjungan-detail'] = p => {
   const lk=isLocked();
   let foot;
   if(x.status==='Dijadwal ulang') foot=`<button class="btn" disabled>Dijadwal ulang ke ${x.resched?x.resched.hari+' '+x.resched.tgl:''}</button>`;
-  else if(noCheckin()) foot=x.status==='Selesai'?`<button class="btn" disabled>Kunjungan selesai</button>`:`<button class="btn" onclick="act(()=>{visitById('${x.id}').status='Selesai';render(false,true);toast('Kunjungan ke nasabah selesai')})">${I('check',18,2.2)} Tandai selesai</button>`;
+  else if(noCheckin()) foot=x.status==='Selesai'?`<button class="btn" disabled>Kunjungan selesai</button>`:`<button class="btn" onclick="act(()=>{leadDone('${x.id}')})">${I('check',18,2.2)} Tandai selesai</button>`;
   else if(x.status==='Selesai') foot=role()==='fmcg'?`<button class="btn ${lk?'locked':''}" onclick="act(()=>repeatVisit('${x.id}'))">${I(lk?'lock':'pin',18)} Check-in lagi di lokasi ini</button>`:`<button class="btn" disabled>Kunjungan selesai</button>`;
   else if(!x.cin) foot=`<button class="btn ghost" style="width:auto" onclick="toast('Membuka Google Maps…','route')">${I('route',18)} Rute</button><button class="btn ${lk?'locked':''}" onclick="act(()=>startCheckin('${x.id}'))">${I(lk?'lock':'pin',18)} Check-in di lokasi</button>`;
   else foot=`<button class="btn ${lk?'locked':''}" onclick="act(()=>${role()==='fmcg'?`fmOut('${x.id}')`:`go('kunjungan-foto',{id:'${x.id}',mode:'out'})`})">${I(lk?'lock':'check',18,2.2)} Check-out & selesai</button>`;
@@ -1247,6 +1247,8 @@ function unplSave(){ const u=S.up; u.note=val('upn');
   S.visits[vk()].push({id:'up'+Date.now(),place:t.name,time:'Sekarang',tasks:role()==='canvas'?['Penjualan']:['Ambil pesanan'],status:'Belum',photos:{},own:true,unplanned:true});
   shSet('visitExc',[...shRead('visitExc',[]),{id:'ex'+Date.now(),u:fmUk(),place:t.name,type:'Unplanned',untuk:'',alasan:u.alasan+(u.note?': '+u.note:''),tgl:'26 Okt'}]);
   closeSheet(); render(false); toast('Dicatat sebagai Unplanned'); }
+/* R11: REA dan CBD tanpa check-in. Hasil yang disubmit dikirim ke dashboard (leadVisitDone) untuk kepatuhan. */
+function leadDone(id){ const v=visitById(id); if(!v) return; v.status='Selesai'; shSet('leadVisitDone',[...shRead('leadVisitDone',[]).filter(d=>!(d.u===fmUk()&&d.place===v.place)),{u:fmUk(),place:v.place,tgl:'26 Okt'}]); render(false,true); toast('Kunjungan ke nasabah selesai'); }
 function delVisitSheet(id){
   sheet(`<h3 style="font-size:18px;font-weight:800">Hapus kunjungan ini?</h3><p class="muted small" style="margin:6px 0 16px;line-height:1.5">Kunjungan yang belum dimulai bisa dihapus selama belum lewat hari.</p>
   <button class="btn danger" onclick="S.visits[vk()]=S.visits[vk()].filter(v=>v.id!=='${id}');closeSheet();back();toast('Kunjungan dihapus')">Hapus kunjungan</button>`);
