@@ -31,7 +31,7 @@ Dikonfirmasi pengguna pada 11 Nov 2026: semua rekomendasi dipakai.
 |---|---|---|---|
 | D1 | Skill melarang gradient. Kolom grafik terpilih memakai gradient biru dari mobile. | Ganti dengan biru solid di dashboard; gradient tetap milik mobile. | V-33, C-03 |
 | D2 | Skill membatasi grafik ke ink, warna kedua, aksen, dan abu. Sekarang ada oranye, navy, teal, ungu. | Urutan baru: ink, tan, biru, warning, success, abu. Kategori lebih dari enam digabung ke "Lainnya". | V-31, C-09 |
-| D3 | Skill hanya mengizinkan transisi warna, fade, slide, dan pulse. Sekarang ada hitung naik angka, batang tumbuh, dan stagger. | Pertahankan skeleton dan fade. Hapus hitung naik, batang tumbuh, lift saat hover. | V-83, F-10 |
+| D3 | Skill hanya mengizinkan transisi warna, fade, slide, dan pulse. Sekarang ada hitung naik angka, batang tumbuh, dan stagger. | Pertahankan skeleton dan fade. Hapus hitung naik, batang tumbuh, lift saat hover. Pengecualian 12 Nov 2026: hitung naik angka dipasang kembali atas permintaan pemilik produk, hanya saat pindah halaman; batang tumbuh, stagger berlebih, dan lift tetap dihapus. | V-83, F-10 |
 | D4 | Penjaga izin per role (`can()`) dengan pengalih role demo. | Terapkan dengan dua role demo (Admin SIM, Supervisor) dan label "Usulan". Penjaga UI hanya kenyamanan; backend tetap yang memutuskan. | U-07, S-14 |
 | D5 | Menu "Buat" global di rail dan header. | Terapkan, berisi alur buat yang sudah ada saja. | L-09, L-21, S-37 |
 | D6 | Simpan perubahan data dashboard (bukan hanya data bersama) ke localStorage. | Terapkan dengan envelope berversi dan banner bila penyimpanan gagal. | S-17, U-14 |
