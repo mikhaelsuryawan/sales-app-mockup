@@ -2829,6 +2829,33 @@ function act(type,{perm='',guard=null,blockedTitle='Tidak bisa diproses',run,aud
 const stPill=s=>spill(s,s==='Aktif'?'success':s==='Takeout'?'warning':'neutral');
 
 /* entity definitions */
+/* Form kategori produk berbasis level: pilih level dulu, induk hanya menampilkan kategori satu level di atasnya, dan jalur hasilnya dipratinjau. */
+const katRows=()=>{ const cl=FORM&&FORM.ent==='katc', br=cl?(document.getElementById('f_brand')?.value||katcState().br):''; return live('katprod').filter(k=>cl?(k.cakupan==='Client'&&k.brand===br):k.cakupan==='General').filter(k=>!(FORM&&FORM.id)||!katChain(k).some(x=>x.id===FORM.id)); };
+const katLvlOpts=own=>{ const mx=Math.max(own||1,1+Math.max(0,...katRows().map(katLevel))); return Array.from({length:mx},(_,i)=>[String(i+1),'Level '+(i+1)+(i===0?' (paling atas)':'')]); };
+const katParentChoices=n=>{ const rows=katRows().filter(k=>katLevel(k)===n-1).map(k=>[k.name,katLevel(k)>1?k.name+' · di bawah '+katChain(k).slice(0,-1).map(x=>x.name).join(' › '):k.name]); return rows.length?rows:[['','Belum ada kategori level '+(n-1)]]; };
+const KAT_LVL={k:'lvl',label:'Level kategori',type:'select',val:r=>FORM&&FORM.id?String(katLevel(r)):'1',opts:()=>{ const own=FORM&&FORM.id?katLevel(MD.katprod.find(x=>x.id===FORM.id)):1; return katLvlOpts(own); },onchange:'katLvlSync()',hint:'Level 1 adalah kategori paling atas. Level 2 dan seterusnya berada di dalam kategori induk.'};
+const KAT_PARENT={k:'parent',label:'Kategori induk',type:'select',req:r=>{ const el=document.getElementById('f_lvl'); return el?+el.value>1:!!(FORM&&FORM.id&&r&&katLevel(r)>1); },opts:()=>{ const own=FORM&&FORM.id?katLevel(MD.katprod.find(x=>x.id===FORM.id)):1; return katParentChoices(Math.max(own,2)); },hint:'Pilih kategori di level sebelumnya yang menaungi kategori ini.',validate:v=>katCycle(v,(document.getElementById('f_name')?.value||'').trim())?'Induk tidak boleh dirinya sendiri atau turunannya':''};
+const katPrevBox=()=>`<div class="tile" id="kat_prev" style="margin-top:2px" aria-live="polite"></div>`;
+function katLvlSync(init){
+  const lv=document.getElementById('f_lvl'), pa=document.getElementById('f_parent'); if(!lv||!pa) return;
+  const optHTML=(a,sel)=>a.map(([v,l])=>`<option value="${esc(v)}" ${String(v)===String(sel)?'selected':''}>${esc(l)}</option>`).join('');
+  const rec=FORM&&FORM.id?MD.katprod.find(x=>x.id===FORM.id):null, own=rec?katLevel(rec):1;
+  if(!init){ const opts=katLvlOpts(own), keep=opts.some(o=>o[0]===lv.value)?lv.value:'1'; lv.innerHTML=optHTML(opts,keep); }
+  const n=+lv.value||1, fld=pa.closest('.field');
+  if(!init){ const ch=katParentChoices(n>1?n:2); pa.innerHTML=optHTML(ch,n>1?ch[0][0]:''); }
+  if(n===1) pa.value='';
+  if(fld){ fld.style.display=n===1?'none':''; const star=fld.querySelector('span'); if(star&&!star.querySelector('.req')&&n>1) star.insertAdjacentHTML('beforeend',' <b class="req" aria-hidden="true">*</b>'); if(star&&n===1) star.querySelector('.req')?.remove(); const h=fld.querySelector('p.xs'); if(h) h.textContent='Pilih kategori level '+(n-1)+' yang menaungi kategori ini.'; }
+  katPrev();
+}
+function katPrev(){
+  const box=document.getElementById('kat_prev'), lv=document.getElementById('f_lvl'), pa=document.getElementById('f_parent'); if(!box||!lv) return;
+  const n=+lv.value||1, nm=(document.getElementById('f_name')?.value||'').trim()||'(nama kategori)';
+  const par=n>1&&pa&&pa.value?katRows().find(k=>k.name===pa.value):null, path=[...(par?katChain(par).map(x=>x.name):[]),nm];
+  box.innerHTML=`<div class="xs muted">Posisi di pohon kategori</div><b class="fg">${path.map(esc).join(' › ')}</b><div class="xs muted" style="margin-top:4px">Level ${par?katLevel(par)+1:1}${n>1&&!par?' · pilih kategori induk dulu':''}</div>`;
+}
+document.addEventListener('input',e=>{ if(e.target.id==='f_name'&&document.getElementById('kat_prev')) katPrev(); });
+document.addEventListener('change',e=>{ if(e.target.id==='f_parent'&&document.getElementById('kat_prev')) katPrev(); });
+
 const ENT={
   simco:{label:'Company',lower:'company',plural:'Daftar Company',prefix:'sg',store:()=>MD.simco,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code,unique:'code',afterCreate:rec=>{ MD.user.forEach(u=>{ if(u.allSimco) u.simcos=[...(u.simcos||[]),rec.id]; }); },
     fields:[{k:'code',label:'Kode company',req:true,ph:'contoh: SIM',hint:'Huruf kapital, singkat'},{k:'name',label:'Nama company',req:true,ph:'contoh: SIM'}],
@@ -2924,15 +2951,15 @@ Object.assign(ENT,{
     cols:[nameCol(),{label:'Client',render:r=>cName(r.client),hide:true},{label:'Dipakai di market share',render:r=>SHARE_REP.filter(x=>x.brand===r.name).length+' toko',align:'r',hide:true},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>{ const n=SHARE_REP.filter(x=>x.brand===r.name).length; return n?`Kompetitor ini dipakai di market share ${n} toko. Nonaktifkan kompetitor jika tidak dibandingkan lagi.`:''; }},
   katg:{src:'katprod',label:'Kategori produk',lower:'kategori produk',plural:'Kategori produk General',prefix:'kp',store:()=>MD.katprod,title:r=>r.name,search:r=>r.name+(r.parent||''),filter:(r,q)=>r.cakupan==='General'&&katPass(r,q),blank:()=>({cakupan:'General',brand:'',share:'Ya'}),
-    fields:[{k:'parent',label:'Kategori induk',type:'select',opts:()=>[['','–'],...live('katprod').filter(k=>k.cakupan==='General'&&k.id!==(FORM&&FORM.id)).map(k=>k.name)],hint:'Kosongkan untuk kategori level 1. Level dihitung otomatis dari kedalaman induk, tanpa batas.',validate:v=>katCycle(v,(document.getElementById('f_name')?.value||'').trim())?'Induk tidak boleh dirinya sendiri atau turunannya':''},
-      {k:'share',label:'Dipakai untuk market share',type:'select',opts:['Ya','Tidak'],hint:'Client bisa membuat kategori sendiri untuk market share (MOM 8)'},{k:'name',label:'Nama',req:true,hint:'Kategori General berlaku untuk semua client'}],
+    fields:[KAT_LVL,KAT_PARENT,{k:'name',label:'Nama',req:true,hint:'Kategori General berlaku untuk semua client'},{k:'share',label:'Dipakai untuk market share',type:'select',opts:['Ya','Tidak'],hint:'Client bisa membuat kategori sendiri untuk market share (MOM 8)'}],
+    extra:()=>katPrevBox(),afterOpen:()=>katLvlSync(true),afterSave:r=>{ delete r.lvl; },afterCreate:r=>{ delete r.lvl; },
     cols:[nameCol(r=>r.parent?'Di bawah '+r.parent:''),{label:'Level',render:r=>tag('Level '+katLevel(r),katLevel(r)===1?'accent':'neutral')},{label:'Market share',render:r=>r.share==='Tidak'?'<span class="muted">Tidak</span>':tag('Ya','success'),hide:true},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>katInUse(r)},
   katc:{src:'katprod',label:'Kategori produk',lower:'kategori produk',plural:'Kategori produk Client',prefix:'kp',store:()=>MD.katprod,title:r=>r.name,search:r=>r.name+r.brand+(r.parent||''),filter:(r,q)=>r.cakupan==='Client'&&(!q.cl||brandClient(r.brand)===q.cl)&&katPass(r,q),blank:()=>({cakupan:'Client',share:'Ya'}),
     fields:[{k:'client',label:'Client',type:'ro',fmt:(v,r)=>clientName(v||brandClient(r.brand)),hint:'Mengikuti client yang dipilih di filter'},
       {k:'brand',label:'Brand',type:'select',req:true,opts:()=>katcBrandOpts(katcState().cl),onchange:"katcSync('brand')",hint:'Brand milik client yang dipilih'},
-      {k:'parent',label:'Kategori induk',type:'select',opts:()=>katcParentOpts(katcState().br),hint:'Kosongkan untuk kategori level 1. Level dihitung otomatis dari kedalaman induk, tanpa batas.',validate:v=>katCycle(v,(document.getElementById('f_name')?.value||'').trim())?'Induk tidak boleh dirinya sendiri atau turunannya':''},
-      {k:'share',label:'Dipakai untuk market share',type:'select',opts:['Ya','Tidak'],hint:'Client bisa membuat kategori sendiri untuk market share (MOM 8)'},{k:'name',label:'Nama',req:true}],
+      KAT_LVL,KAT_PARENT,{k:'name',label:'Nama',req:true},{k:'share',label:'Dipakai untuk market share',type:'select',opts:['Ya','Tidak'],hint:'Client bisa membuat kategori sendiri untuk market share (MOM 8)'}],
+    extra:()=>katPrevBox(),afterOpen:()=>katLvlSync(true),afterSave:r=>{ delete r.lvl; },afterCreate:r=>{ delete r.lvl; },
     cols:[nameCol(r=>r.parent?'Di bawah '+r.parent:''),{label:'Brand',k:'brand'},{label:'Level',render:r=>tag('Level '+katLevel(r),katLevel(r)===1?'accent':'neutral'),hide:true},{label:'Market share',render:r=>r.share==='Tidak'?'<span class="muted">Tidak</span>':tag('Ya','success'),hide:true},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>katInUse(r)},
   statprod:{label:'Status produk',plural:'Daftar status produk',prefix:'sp',store:()=>MD.statprod,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code,unique:'code',blank:()=>({}),
@@ -2992,7 +3019,7 @@ let FORM=null;
 function multiTog(b,all){ b.classList.toggle('on'); const on=b.classList.contains('on'); b.setAttribute('aria-pressed',on); if(all&&on) b.parentElement.querySelectorAll('.fchip').forEach(x=>{ if(x!==b&&(b.dataset.v===all||x.dataset.v===all)){ x.classList.remove('on'); x.setAttribute('aria-pressed','false'); } }); }
 const fromSales=()=>!!(FORM&&FORM.prefill&&FORM.prefill._tmp);
 function fieldHTML(fd,r){
-  const v=r[fd.k], t=((fd.lock&&r.id&&fd.lock(r))||(fd.roIf&&fd.roIf(r)))?'ro':(fd.type||'text'), id='f_'+fd.k;
+  const v=fd.val?fd.val(r):r[fd.k], t=((fd.lock&&r.id&&fd.lock(r))||(fd.roIf&&fd.roIf(r)))?'ro':(fd.type||'text'), id='f_'+fd.k;
   const lab=`<span>${fd.label}${(typeof fd.req==='function'?fd.req(r):fd.req)?' <b class="req" aria-hidden="true">*</b>':''}</span>`, hint=(ht=>ht?`<p class="xs muted" style="margin-top:6px">${ht}</p>`:'')(typeof fd.hint==='function'?fd.hint(r):fd.hint), err=`<p class="ferr" id="e_${fd.k}"></p>`;
   const opts=()=>(typeof fd.opts==='function'?fd.opts():fd.opts).map(o=>Array.isArray(o)?o:[o,o]);
   let h;
@@ -3011,6 +3038,7 @@ function openForm(ent,id,prefill){
     :`${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn(ent==='user'?'Daftarkan user':'Tambah '+lc(E),{v:'accent',on:'saveForm()'})}`;
   const ro=!can('master.edit');
   openPanel(id?E.title(r):(ent==='user'?'Daftarkan user':'Tambah '+lc(E)),body,foot,{sub:id?`${E.label}${E.code?' · '+E.code(r):''} · ${r.status}`:E.label+' baru'});
+  E.afterOpen?.(r);
   if(ro){ document.querySelectorAll('#mdform input,#mdform select,#mdform textarea,#mdform .fchip').forEach(e=>{ e.disabled=true; e.style.pointerEvents='none'; }); const f=document.querySelector('#layer .panel-f'); if(f) f.innerHTML=btn('Tutup',{v:'outline',on:'closeLayer()'}); }
 }
 function saveForm(mode){
@@ -3952,7 +3980,7 @@ const katcState=()=>{ const rec=FORM&&FORM.id?MD.katprod.find(k=>k.id===FORM.id)
 const katcBrandOpts=cl=>{ const b=live('brand').filter(x=>x.status==='Aktif'&&x.client===cl).map(x=>x.name); return b.length?b:[['','Belum ada brand']]; };
 const katcParentOpts=br=>[['','–'],...live('katprod').filter(k=>k.cakupan==='Client'&&k.brand===br&&k.id!==(FORM&&FORM.id)).map(k=>k.name)];
 MD.katprod.forEach(k=>{ if(k.cakupan==='Client') k.client=brandClient(k.brand); });
-function katcSync(src){ const optHTML=a=>a.map(o=>Array.isArray(o)?o:[o,o]).map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join(''); const b=document.getElementById('f_brand'), pa=document.getElementById('f_parent'); if(src==='client') b.innerHTML=optHTML(katcBrandOpts(document.getElementById('f_client').value)); pa.innerHTML=optHTML(katcParentOpts(b.value)); }
+function katcSync(src){ const optHTML=a=>a.map(o=>Array.isArray(o)?o:[o,o]).map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join(''); const b=document.getElementById('f_brand'), pa=document.getElementById('f_parent'); if(src==='client') b.innerHTML=optHTML(katcBrandOpts(document.getElementById('f_client').value)); katLvlSync(); }
 const katPass=(r,q)=>(!q.br||r.brand===q.br)&&(!q.lv||katLevel(r)===+q.lv)&&(!q.ms||(r.share||'Ya')===q.ms);
 const katParentOf=k=>k.parent?(MD.katprod.find(x=>!x.del&&x.name===k.parent&&x.brand===k.brand)||MD.katprod.find(x=>!x.del&&x.name===k.parent)):null;
 const katLevel=k=>{ let n=1,c=k,g=0; while(c.parent&&g++<30){ c=katParentOf(c); if(!c) break; n++; } return n; };
