@@ -415,7 +415,7 @@ const USERS = {
   'md.rangga': {name:'Rangga Saputra', init:'RS', role:'fmcg', roleLabel:'Merchandising (MD)', nip:'SIM-23-01102', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
   'mobile.fikri':{name:'Fikri Ramadhan', init:'FR', role:'spg', menu:'mobile', roleLabel:'Mobile Promotor', nip:'SIM-24-01377', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Beberapa toko dan event', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
   'bantuan.eko':{name:'Eko Prabowo', init:'EP', role:'spg', menu:'bantuan', roleLabel:'Promotor Bantuan', nip:'BTN-0007', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
-  'reliever.gita':{name:'Gita Puspita', init:'GP', role:'spg', menu:'bantuan', roleLabel:'Reliever', nip:'RLV-0031', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}}
+  'bantuan.gita':{name:'Gita Puspita', init:'GP', role:'spg', menu:'bantuan', roleLabel:'Promotor Bantuan', nip:'BTN-0031', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}}
 };
 const PRODUCTS = [
   {id:'tv50',name:'VISTARA 4K Google TV 50"',sku:'AR-TV50G',cat:'TV',price:6499000},
@@ -992,7 +992,7 @@ function assignSheetRender(){ const u=S.assignUser, pick=S.assignPick;
   <button class="btn" style="margin-top:14px" ${pick.length?'':'disabled'} onclick="assignSave()">Simpan ${pick.length?pick.length+' toko':''}</button>`); }
 function assignToggle(id){ const p=S.assignPick; S.assignPick=p.includes(id)?p.filter(x=>x!==id):[...p,id]; assignSheetRender(); }
 function assignSave(){ S.canvasArea[S.assignUser]=S.assignPick; closeSheet(); render(false,true); toast(S.assignPick.length+' toko di-assign'); }
-const RID={'spg.rina':'r3','sales.budi':'r4','sales.dimas':'r5','spv.sari':'r2','ffor.yoga':'r7','arco.maya':'r8','cbd.tono':'r9','rea.nina':'r10','fmcg.tari':'r11','md.rangga':'r12','mobile.fikri':'r13','bantuan.eko':'r14','reliever.gita':'r15'};
+const RID={'spg.rina':'r3','sales.budi':'r4','sales.dimas':'r5','spv.sari':'r2','ffor.yoga':'r7','arco.maya':'r8','cbd.tono':'r9','rea.nina':'r10','fmcg.tari':'r11','md.rangga':'r12','mobile.fikri':'r13','bantuan.eko':'r14','bantuan.gita':'r14'};
 const JADWAL_DEFAULT={r1:'Ya',r2:'Ya',r7:'Ya',r11:'Ya',r12:'Ya'};
 /* Usulan (12 Nov 2026): sales hanya bisa menambah jadwal kunjungan bila ditugaskan di lebih dari satu toko. Satu toko: jadwal mengikuti Team Leader.
    Daftar toko dari dashboard (Penugasan > Penempatan toko) lewat penugasanToko; tanpa itu dipakai data contoh. */
@@ -1687,7 +1687,7 @@ const leadLabel = l => l.sub?l.status+' · '+l.sub:l.status;
 const leadCab = l => l.cabang||'Fatmawati';
 function cabangSheet(){ sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Pindah cabang</h3><div class="list">${['Fatmawati','Cilandak'].map(c=>`<button class="li" onclick="pindahCabang('${c}')"><div class="grow"><div class="t">${c}</div><div class="s">${S.leads.filter(l=>leadCab(l)===c).length} leads</div></div>${S.cabang===c?chip('Sekarang','green'):''}</button>`).join('')}</div>`); }
 function pindahCabang(c){ S.cabang=c; closeSheet(); render(false,true); toast('Sekarang di cabang '+c+', '+S.leads.filter(l=>leadCab(l)===c).length+' leads diterima'); }
-function acctType(){ const u=S.user; if(u==='spv.sari') return 'User client (SPV 1 / CRH)'; if(u==='arco.maya') return 'User client, di luar BPR'; if(['reliever.gita','bantuan.eko'].includes(u)) return 'Di luar BPR, non SIM dan non client'; return 'Pegawai SIM (BPR)'; }
+function acctType(){ const u=S.user; if(u==='spv.sari') return 'User client (SPV 1 / CRH)'; if(u==='arco.maya') return 'User client, di luar BPR'; if(['bantuan.gita','bantuan.eko'].includes(u)) return 'Di luar BPR, non SIM dan non client'; return 'Pegawai SIM (BPR)'; }
 function moveType(){ const u=U(), rl=u.roleLabel; if(/Canvas|Taking|CBD|Mobile/.test(rl)||u.role==='canvas'||u.role==='order') return 'Bergerak (lebih dari 1 toko)'; if(u.role==='spg') return TOKO.spg.length>1?'Bergerak (lebih dari 1 toko)':'Diam (1 toko)'; if(u.role==='fmcg'||/REA/.test(rl)) return 'Diam (1 lokasi)'; return '–'; }
 function leadRow(l,showOwner){
   return `<button class="li" onclick="go('lead-detail',{id:'${l.id}'})"><div class="av ${l.status==='Baru'?'blue':''}">${l.name.split(' ').map(s=>s[0]).join('').slice(0,2)}</div><div class="grow"><div class="t">${l.name}</div><div class="s">${l.prod} · ${rpShort(l.amount)}${showOwner?' · '+(l.owner?USERS[l.owner].name.split(' ')[0]:'Belum di-assign'):''}${l.status==='Baru'&&l.age?' · '+l.age:''}${l.status==='Prospect'&&l.fu?' · follow up '+l.fu:''}${l.pending?' · menunggu sinkron':''}</div></div>${chip(l.status==='Deal'?'Deal '+rpShort(l.goal):l.status,LTONE[l.status])}</button>`;
