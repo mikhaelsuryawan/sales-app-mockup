@@ -3006,11 +3006,11 @@ Object.assign(ENT,{
     cols:[{label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${esc(prodNm(r.produk))}</span><span class="xs muted" style="display:block">${esc((kvProds().find(p=>p.id===r.produk)||{}).sku||'–')}</span>`,prim:true},{label:'Satuan',render:r=>esc(satName(r.satuan))},{label:'Jumlah',render:r=>r.isi,align:'r'},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>kvUsed(r)>0?`Konversi ini sudah dipakai ${kvUsed(r)} catatan stock opname. Data riwayat harus tetap bisa dilacak, jadi nonaktifkan saja.`:'',
     lockStatus:r=>r.status==='Nonaktif'&&MD.konversi.some(x=>!x.del&&x.status==='Aktif'&&x.id!==r.id&&x.cakupan===r.cakupan&&x.produk===r.produk&&x.satuan===r.satuan)?'Sudah ada konversi aktif untuk produk dan satuan ini. Nonaktifkan yang lama dulu.':''},
-  konvg:{src:'konversi',label:'Konversi',lower:'konversi',plural:'Daftar konversi',prefix:'kv',store:()=>MD.konversi,title:r=>'Semua produk · '+satName(r.satuan),search:r=>satName(r.satuan),filter:r=>r.cakupan==='General',blank:()=>({cakupan:'General',satuan:'sa2',isi:12,dipakai:0}),
+  konvg:{src:'konversi',label:'Konversi',lower:'konversi',plural:'Daftar konversi',prefix:'kv',store:()=>MD.konversi,title:r=>'Semua produk · '+satName(r.satuan),search:r=>satName(r.satuan),filter:(r,q)=>r.cakupan==='General'&&(!q.sat||r.satuan===q.sat),blank:()=>({cakupan:'General',satuan:'sa2',isi:12,dipakai:0}),
     extraTop:r=>kvUsed(r)>0?callout('<b>Dikunci.</b> Konversi ini sudah dipakai '+kvUsed(r)+' catatan stock opname, jadi satuan dan jumlahnya tidak bisa diubah. Untuk mengganti jumlah, nonaktifkan konversi ini lalu buat konversi baru.'):'',
     fields:[{k:'satuan',label:'Satuan',type:'select',req:true,lock:r=>kvUsed(r)>0,fmt:v=>satName(v),opts:()=>kvSatOpts(),hint:'Pcs tidak ada di daftar karena menjadi satuan dasar',validate:(v,vals)=>MD.konversi.some(x=>!x.del&&x.status==='Aktif'&&x.id!==(FORM&&FORM.id)&&x.cakupan==='General'&&x.satuan===v)?'Konversi General aktif untuk satuan ini sudah ada':''},
       {k:'isi',label:'Jumlah',type:'number',req:true,lock:r=>kvUsed(r)>0,hint:'Jumlah pcs dalam 1 satuan untuk semua produk, bilangan bulat. Contoh: 1 Dus berisi 12 pcs, jumlah 12',validate:v=>v<1?'Minimal 1':!Number.isInteger(v)?'Jumlah harus bilangan bulat':''}],
-    cols:[{label:'Cakupan',render:r=>tag('Semua produk','accent'),prim:true},{label:'Satuan',render:r=>esc(satName(r.satuan))},{label:'Jumlah',render:r=>r.isi,align:'r'},{label:'Status',render:r=>stPill(r.status)}],
+    cols:[{label:'Satuan',render:r=>`<span class="fg" style="font-weight:500">${esc(satName(r.satuan))}</span>`,prim:true},{label:'Jumlah',render:r=>r.isi,align:'r'},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>kvUsed(r)>0?`Konversi ini sudah dipakai ${kvUsed(r)} catatan stock opname. Data riwayat harus tetap bisa dilacak, jadi nonaktifkan saja.`:'',
     lockStatus:r=>r.status==='Nonaktif'&&MD.konversi.some(x=>!x.del&&x.status==='Aktif'&&x.id!==r.id&&x.cakupan==='General'&&x.satuan===r.satuan)?'Sudah ada konversi General aktif untuk satuan ini. Nonaktifkan yang lama dulu.':''},
   event:{label:'Event',plural:'Daftar event',prefix:'ev',store:()=>MD.event,title:r=>r.name,search:r=>r.name+r.lokasi+r.cabang,unique:'name',blank:()=>({client:'cl1',cabang:'Jakarta Selatan',start:'2026-11-01',end:'2026-11-03'}),
@@ -3752,11 +3752,11 @@ function pageKonversi(q){
   const tab=q.tab==='produk'?'produk':'general', sat=q.sat||'', sats=live('satuan').filter(x=>!x.dasar), all=live('konversi').filter(r=>r.cakupan==='Produk');
   const gen=live('konversi').filter(r=>r.cakupan==='General').length;
   const tabs=`<div style="margin-bottom:4px">${utabs([['general','General',gen],['produk','Produk',all.length]],tab,'kvTab')}</div>`;
-  const chips=`<div class="chips">${[['','Semua satuan'],...sats.map(x=>[x.id,x.name])].map(([k,l])=>`<button class="fchip ${sat===k?'on':''}" onclick="setQ({sat:'${k}'})">${esc(l)} <span class="n">${k?all.filter(r=>r.satuan===k).length:all.length}</span></button>`).join('')}</div>`;
+  const chips=sel([['','Semua satuan'],...sats.map(x=>[x.id,x.name])],sat,"setQ({sat:this.value})",{label:'Satuan',cls:'sm'});
   const acts=btn('Buka satuan',{v:'outline',size:'sm',on:"go('/satuan')"});
   const body=tab==='produk'
     ?`${crudList('konversi',q,{sels:chips,acts})}<div style="margin-top:12px">${callout('<b>Konversi Produk</b> berlaku untuk satu produk dan menimpa konversi General untuk satuan yang sama.')}</div>`
-    :`<div style="margin-top:12px">${crudList('konvg',q,{acts})}</div><div style="margin-top:12px">${callout('<b>Konversi General</b> berlaku untuk semua produk. Produk yang punya konversi sendiri di tab Produk memakai angkanya sendiri.')}</div>`;
+    :`<div style="margin-top:12px">${crudList('konvg',q,{sels:chips,acts})}</div><div style="margin-top:12px">${callout('<b>Konversi General</b> berlaku untuk semua produk. Produk yang punya konversi sendiri di tab Produk memakai angkanya sendiri.')}</div>`;
   return {title:'Konversi',html:tabs+body};
 }
 const MITRAQ_DEFAULT=[{id:'mq1',q:'Bagaimana kondisi usaha atau kegiatan mitra bulan ini?',status:'Aktif'},{id:'mq2',q:'Kendala apa yang dihadapi mitra dalam mencari nasabah?',status:'Aktif'},{id:'mq3',q:'Dukungan apa yang dibutuhkan mitra dari tim bulan depan?',status:'Aktif'}];
