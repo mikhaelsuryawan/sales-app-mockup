@@ -146,6 +146,7 @@ a.stat:active,button.stat:active,.fchip:active,.pills button:active,.dd-opt:acti
 .nl.on{background:var(--accent-strong);color:#fff;box-shadow:var(--shadow-glow)}
 .nl.open{color:#fff}
 .nl.sub{height:36px;padding:0 12px 0 44px;font-size:13px}
+.sb-chv{display:grid;margin-left:auto;border:0;background:none;color:inherit;cursor:pointer;padding:0 0 0 8px}
 .nl.sub.grp{width:100%;border:0;background:none;font:inherit;font-size:13px;font-weight:500;cursor:pointer;text-align:left}
 .nl .lbl{overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
 .nl svg{flex:none}
@@ -1724,7 +1725,7 @@ function sidebarHTML(collapsed){
     const single=items.length===1, isCur=si===cur.si, n=secCount(items), first=items[0][0], lab=single?items[0][1]:sec, open=isCur&&!single&&!collapsed;
     if(collapsed) return `<a href="#${first}" class="nl ${isCur?'on':''}" ${isCur?'aria-current="page"':''} aria-label="${esc(lab)}${n?', '+n+' menunggu':''}" data-tip="${esc(lab)}" data-tip-side="right">${I(SEC_ICON[sec],20)}${n?`<span class="cnt w">${n>99?'99+':n}</span>`:''}</a>`;
     const head=`<a href="#${first}" class="nl ${isCur&&single?'on':''} ${open?'open':''}" ${isCur?'aria-current="page"':''} ${single?'':`aria-expanded="${open}"`}>${I(SEC_ICON[sec],20)}<span class="lbl">${esc(lab)}</span>${!open&&n?`<span class="cnt w">${n>99?'99+':n}</span>`:''}${single?'':`<span class="chv ${open?'up':''}">${I('chev',16)}</span>`}</a>`;
-    const subs=open?`<div class="subs">${byTop?sbSubsHTML(tops[si],0,cur.it[0]):items.map(([p,l,ic,ck])=>{ const on=cur.it[0]===p, c=ck?counts()[ck]:0; return `<a href="#${p}" class="nl sub ${on?'on':''}" ${on?'aria-current="page"':''}><span class="lbl">${esc(l)}</span>${c?`<span class="cnt w">${c>99?'99+':c}</span>`:''}</a>`; }).join('')}</div>`:'';
+    const subs=open?`<div class="subs">${byTop?(tops[si].path?`<a href="#${tops[si].path}" class="nl sub ${cur.it[0]===tops[si].path?'on':''}" ${cur.it[0]===tops[si].path?'aria-current="page"':''}><span class="lbl">${esc(tops[si].label)}</span></a>`:'')+sbSubsHTML(tops[si],0,cur.it[0]):items.map(([p,l,ic,ck])=>{ const on=cur.it[0]===p, c=ck?counts()[ck]:0; return `<a href="#${p}" class="nl sub ${on?'on':''}" ${on?'aria-current="page"':''}><span class="lbl">${esc(l)}</span>${c?`<span class="cnt w">${c>99?'99+':c}</span>`:''}</a>`; }).join('')}</div>`:'';
     return head+subs; }).join('');
   return `<aside class="sidebar ${collapsed?'collapsed':''}" aria-label="Navigasi utama">
     <a href="#/" class="sb-brand" aria-label="Sales Console, ke Overview"><span class="sb-mark">S</span><span class="sb-name"><b>Sales Console</b><small>SIMGROUP</small></span></a>
@@ -3714,7 +3715,7 @@ function posmDel(id){
 /* ---------- Sidebar Menu: konfigurasi menu sidebar, hanya Super Admin ---------- */
 const SB_ROLES=[['super','Super Admin'],['admin','Admin SIM'],['spv','Supervisor']];
 const SB_BADGE=[['','Tanpa hitungan'],['approval','Approval menunggu'],['leads','Leads belum di-assign'],['overdue','Leads overdue'],['usulan','Usulan toko baru']];
-/* Satu simpul: {id,parent,label,path,icon,badge,roles,bawaan,sistem,status}. Simpul tanpa path adalah grup yang boleh berisi submenu di level berapa pun. Urutan saudara mengikuti urutan array. */
+/* Satu simpul: {id,parent,label,path,icon,badge,roles,bawaan,sistem,status}. Simpul tanpa path adalah grup; simpul dengan path juga boleh berisi submenu di level berapa pun. Urutan saudara mengikuti urutan array. */
 function sbSeed(){ const out=[];
   NAV_DEFAULT.forEach(([sec,items],si)=>{ const gid='sm_g'+si; out.push({id:gid,parent:'',label:sec,path:'',icon:SEC_ICON[sec]||'grid',badge:'',roles:[],bawaan:true,status:'Aktif'});
     items.forEach(([pt,l,ic,bd],j)=>out.push({id:'sm_'+si+'_'+j,parent:gid,label:l,path:pt,icon:ic||'grid',badge:bd||'',roles:[],bawaan:true,status:'Aktif'})); });
@@ -3723,20 +3724,23 @@ function sbSeed(){ const out=[];
   return out; }
 const sbKids=pid=>MD.sidebar.filter(n=>!n.del&&(n.parent||'')===pid);
 const sbSees=(n,key=ME.key)=>n.status==='Aktif'&&(key==='super'||!(n.roles||[]).length||n.roles.includes(key));
-function sbLeaves(n,key=ME.key){ if(!sbSees(n,key)) return []; if(n.path) return [n]; return sbKids(n.id).flatMap(c=>sbLeaves(c,key)); }
+function sbLeaves(n,key=ME.key){ if(!sbSees(n,key)) return []; return [...(n.path?[n]:[]),...sbKids(n.id).flatMap(c=>sbLeaves(c,key))]; }
 function navBuild(key=ME.key){ const out=[]; sbKids('').forEach(n=>{ const lv=sbLeaves(n,key); if(!lv.length) return; SEC_ICON[n.label]=n.icon||'grid'; out.push([n.label,lv.map(l=>[l.path,l.label,l.icon||'grid',l.badge||undefined])]); }); return out.length?out:NAV_DEFAULT; }
 function navRebuild(){ NAV.splice(0,NAV.length,...navBuild()); }
 const sbHas=(n,pt)=>sbLeaves(n).some(l=>l.path===pt);
 const sbIsOpen=(n,pt)=>ST.sbOpen&&n.id in ST.sbOpen?ST.sbOpen[n.id]:sbHas(n,pt);
 function sbToggle(id){ ST.sbOpen=ST.sbOpen||{}; const n=MD.sidebar.find(x=>x.id===id); ST.sbOpen[id]=!sbIsOpen(n,leafOf(parse().path).it[0]); render(false); }
-function sbSubsHTML(n,depth,cur){ return sbKids(n.id).filter(c=>sbLeaves(c).length).map(c=>{ const pad=44+depth*14;
-  if(c.path){ const on=cur===c.path, cnt=c.badge?counts()[c.badge]:0; return `<a href="#${c.path}" class="nl sub ${on?'on':''}" ${on?'aria-current="page"':''} style="padding-left:${pad}px"><span class="lbl">${esc(c.label)}</span>${cnt?`<span class="cnt w">${cnt>99?'99+':cnt}</span>`:''}</a>`; }
-  const open=sbIsOpen(c,cur);
-  return `<button type="button" class="nl sub grp ${open?'open':''}" aria-expanded="${open}" onclick="sbToggle('${c.id}')" style="padding-left:${pad}px"><span class="lbl">${esc(c.label)}</span><span class="chv ${open?'up':''}">${I('chev',16)}</span></button>${open?`<div class="subs">${sbSubsHTML(c,depth+1,cur)}</div>`:''}`; }).join(''); }
+function sbSubsHTML(n,depth,cur){ return sbKids(n.id).filter(c=>sbLeaves(c).length).map(c=>{ const pad=44+depth*14, kids=sbKids(c.id).filter(k=>sbLeaves(k).length), cnt=c.path&&c.badge?counts()[c.badge]:0;
+  const cntH=cnt?`<span class="cnt w">${cnt>99?'99+':cnt}</span>`:'';
+  if(!kids.length){ const on=cur===c.path; return `<a href="#${c.path}" class="nl sub ${on?'on':''}" ${on?'aria-current="page"':''} style="padding-left:${pad}px"><span class="lbl">${esc(c.label)}</span>${cntH}</a>`; }
+  const open=sbIsOpen(c,cur), on=!!c.path&&cur===c.path, chv=`<span class="chv ${open?'up':''}">${I('chev',16)}</span>`;
+  const head=c.path?`<div class="nl sub ${on?'on':''} ${open?'open':''}" style="padding-left:${pad}px"><a href="#${c.path}" class="lbl" ${on?'aria-current="page"':''} style="color:inherit">${esc(c.label)}</a>${cntH}<button type="button" class="sb-chv" aria-label="${open?'Ciutkan':'Buka'} ${esc(c.label)}" aria-expanded="${open}" onclick="sbToggle('${c.id}')">${chv}</button></div>`
+    :`<button type="button" class="nl sub grp ${open?'open':''}" aria-expanded="${open}" onclick="sbToggle('${c.id}')" style="padding-left:${pad}px"><span class="lbl">${esc(c.label)}</span>${chv}</button>`;
+  return head+(open?`<div class="subs">${sbSubsHTML(c,depth+1,cur)}</div>`:''); }).join(''); }
 function sbFlat(pid='',depth=0,out=[]){ sbKids(pid).forEach(n=>{ out.push({...n,_depth:depth}); sbFlat(n.id,depth+1,out); }); return out; }
 const sbDesc=(id,out=new Set())=>{ sbKids(id).forEach(c=>{ out.add(c.id); sbDesc(c.id,out); }); return out; };
 const sbTrail=n=>{ const a=[]; let c=n; while(c){ a.unshift(c.label); c=c.parent?MD.sidebar.find(x=>x.id===c.parent):null; } return a.join(' › '); };
-const sbParentOpts=()=>{ const id=FORM&&FORM.id, bad=id?sbDesc(id):new Set(); return [['','Level 1 (menu utama)'],...sbFlat().filter(n=>!n.path&&n.id!==id&&!bad.has(n.id)).map(n=>[n.id,'Level '+(n._depth+1)+' · '+sbTrail(n)])]; };
+const sbParentOpts=()=>{ const id=FORM&&FORM.id, bad=id?sbDesc(id):new Set(); return [['','Level 1 (menu utama)'],...sbFlat().filter(n=>n.id!==id&&!bad.has(n.id)).map(n=>[n.id,'Level '+(n._depth+1)+' · '+sbTrail(n)])]; };
 const sbPathLabel=pt=>(NAV_DEFAULT.flatMap(x=>x[1]).find(x=>x[0]===pt)||[])[1]||pt;
 const sbPathOpts=()=>[['','Grup (tanpa halaman, berisi submenu)'],...Object.keys(ROUTES).filter(pt=>pt!=='/login').sort((a,b)=>sbPathLabel(a).localeCompare(sbPathLabel(b))).map(pt=>[pt,sbPathLabel(pt)+' · '+pt])];
 const sbRoleNames=n=>!(n.roles||[]).length?'Semua role':n.roles.map(k=>(SB_ROLES.find(r=>r[0]===k)||[,k])[1]).join(', ');
@@ -3744,12 +3748,11 @@ ENT.sbmenu={label:'Menu sidebar',lower:'menu sidebar',plural:'Struktur menu',pre
   extraTop:r=>r.sistem?callout('<b>Menu sistem.</b> Menu ini hanya untuk Super Admin dan tidak bisa dipindah, dinonaktifkan, atau dihapus supaya akses ke pengaturan ini tidak hilang. Nama, ikon, dan urutan tetap bisa diubah.'):'',
   fields:[
     {k:'label',label:'Nama menu',req:true,ph:'Contoh: Laporan harian'},
-    {k:'parent',label:'Induk menu',type:'select',opts:sbParentOpts,roIf:r=>r.sistem,fmt:v=>v?sbTrail(MD.sidebar.find(x=>x.id===v)||{label:v}):'Level 1 (menu utama)',hint:'Pilih induk untuk membuat submenu. Level submenu tidak dibatasi, selama induknya berupa grup.'},
-    {k:'path',label:'Halaman tujuan',type:'select',opts:sbPathOpts,roIf:r=>r.sistem,hint:'Pilih halaman yang dibuka. Biarkan Grup agar menu ini menjadi folder yang bisa berisi submenu.',validate:v=>MD.sidebar.some(x=>!x.del&&x.status==='Aktif'&&x.id!==(FORM&&FORM.id)&&x.path===v)?'Halaman ini sudah dipakai menu lain':''},
+    {k:'parent',label:'Induk menu',type:'select',opts:sbParentOpts,roIf:r=>r.sistem,fmt:v=>v?sbTrail(MD.sidebar.find(x=>x.id===v)||{label:v}):'Level 1 (menu utama)',hint:'Pilih induk untuk membuat submenu. Induknya boleh grup atau menu yang punya halaman. Level tidak dibatasi.'},
+    {k:'path',label:'Halaman tujuan',type:'select',opts:sbPathOpts,roIf:r=>r.sistem,hint:'Pilih halaman yang dibuka. Biarkan Grup kalau menu ini hanya folder. Menu yang punya halaman tetap bisa berisi submenu.',validate:v=>MD.sidebar.some(x=>!x.del&&x.status==='Aktif'&&x.id!==(FORM&&FORM.id)&&x.path===v)?'Halaman ini sudah dipakai menu lain':''},
     {k:'icon',label:'Ikon',type:'select',opts:()=>Object.keys(P).sort().map(k=>[k,k]),hint:'Ikon tampil di sidebar untuk menu level 1.'},
     {k:'badge',label:'Hitungan di samping menu',type:'select',opts:SB_BADGE,hint:'Angka tugas yang menunggu, hanya untuk menu yang punya halaman.'},
     {k:'roles',label:'Role yang melihat',type:'multi',opts:SB_ROLES.slice(1),roIf:r=>r.sistem,hint:'Kosong berarti semua role. Super Admin selalu melihat semua menu aktif.'}],
-  validateExtra:v=>{ const id=FORM&&FORM.id; if(v.path&&id&&sbKids(id).length) return 'Menu ini punya submenu, jadi harus berupa Grup. Pindahkan submenunya dulu.'; return ''; },
   inUse:r=>r.sistem?'Menu sistem ini tidak bisa dihapus supaya Super Admin tetap bisa mengatur sidebar.':r.bawaan?'Menu bawaan tidak bisa dihapus. Nonaktifkan saja untuk menyembunyikannya dari sidebar.':sbKids(r.id).length?'Hapus atau pindahkan submenu di dalamnya dulu.':'',
   lockStatus:r=>r.sistem?'Menu sistem tidak bisa dinonaktifkan.':'',
   delNote:'Menu disembunyikan dari sidebar dan tetap tersimpan untuk audit (soft delete).'};
@@ -3758,7 +3761,7 @@ function sbMove(id,dir){ const n=MD.sidebar.find(x=>x.id===id), sib=sbKids(n.par
   act('sbmenu/move',{perm:'master.edit',run:()=>{ const a=MD.sidebar.indexOf(n), b=MD.sidebar.indexOf(o); [MD.sidebar[a],MD.sidebar[b]]=[MD.sidebar[b],MD.sidebar[a]]; },audit:'Memindah urutan menu '+n.label,toast:['Urutan menu diubah',n.label+' '+(dir<0?'naik':'turun')]}); }
 function sbReset(){ act('sbmenu/reset',{perm:'master.edit',run:()=>{ MD.sidebar.splice(0,MD.sidebar.length,...sbSeed()); ST.sbOpen={}; },audit:'Mengembalikan menu sidebar ke bawaan',toast:['Menu dikembalikan ke bawaan','Menu buatan sendiri dihapus.']}); }
 function sbResetAsk(){ confirmAsk({title:'Kembalikan menu ke bawaan?',desc:'Susunan, nama, level, dan akses semua menu kembali seperti awal. Menu yang kamu buat sendiri dihapus. Tindakan ini tercatat di audit.',confirmLabel:'Kembalikan',destructive:true,on:'sbReset()'}); }
-function sbPreview(pid,key,depth){ return sbKids(pid).filter(n=>sbLeaves(n,key).length).map(n=>`<div class="sm" style="display:flex;align-items:center;gap:8px;padding:5px 0 5px ${depth*16}px">${depth===0?I(n.icon||'grid',15):'<span class="muted" aria-hidden="true">└</span>'}<span class="${n.path?'':'fg'}" style="${n.path?'':'font-weight:600'}">${esc(n.label)}</span></div>${n.path?'':sbPreview(n.id,key,depth+1)}`).join(''); }
+function sbPreview(pid,key,depth){ return sbKids(pid).filter(n=>sbLeaves(n,key).length).map(n=>`<div class="sm" style="display:flex;align-items:center;gap:8px;padding:5px 0 5px ${depth*16}px">${depth===0?I(n.icon||'grid',15):'<span class="muted" aria-hidden="true">└</span>'}<span class="${n.path?'':'fg'}" style="${n.path?'':'font-weight:600'}">${esc(n.label)}</span></div>${sbPreview(n.id,key,depth+1)}`).join(''); }
 function pageSidebarMenu(q){
   if(ME.key!=='super') return {title:'Sidebar Menu',html:card('',emptyState({icon:'lock',title:'Hanya untuk Super Admin',desc:'Pengaturan menu sidebar hanya bisa dibuka oleh akun dengan role Super Admin.',action:btn('Kembali ke Overview',{v:'outline',on:"go('/')"})}))};
   const all=sbFlat(), qq=(q.q||'').toLowerCase(), st=q.st||'', as=SB_ROLES.some(r=>r[0]===q.as)?q.as:'super';
@@ -3773,10 +3776,10 @@ function pageSidebarMenu(q){
     {label:'Halaman',render:r=>r.path?`<span class="mono xs">${esc(r.path)}</span>`:'<span class="muted">–</span>',hide:true},
     {label:'Role',render:r=>`<span class="xs">${esc(sbRoleNames(r))}</span>`,hide:true},
     {label:'Status',render:r=>stPill(r.status)}],
-    acts:r=>`${ibtn('arrowup','Naik',`sbMove('${r.id}',-1)`,{size:'icon-sm'})}${ibtn('arrowdown','Turun',`sbMove('${r.id}',1)`,{size:'icon-sm'})}${r.path?'':ibtn('plus','Tambah submenu',`openForm('sbmenu',null,{parent:'${r.id}'})`,{size:'icon-sm'})}${rowActs(`openForm('sbmenu','${r.id}')`,`delAsk('sbmenu','${r.id}')`,{block:ENT.sbmenu.inUse(r)})}`});
+    acts:r=>`${ibtn('arrowup','Naik',`sbMove('${r.id}',-1)`,{size:'icon-sm'})}${ibtn('arrowdown','Turun',`sbMove('${r.id}',1)`,{size:'icon-sm'})}${ibtn('plus','Tambah submenu',`openForm('sbmenu',null,{parent:'${r.id}'})`,{size:'icon-sm'})}${rowActs(`openForm('sbmenu','${r.id}')`,`delAsk('sbmenu','${r.id}')`,{block:ENT.sbmenu.inUse(r)})}`});
   const struct=card('Struktur menu',`${tbl}`,{acts:`${btn('Kembalikan ke bawaan',{v:'outline',size:'sm',on:'sbResetAsk()'})}${btn('Tambah menu level 1',{v:'accent',size:'sm',icon:'plus',on:"openForm('sbmenu')"})}`});
   const prev=card('Pratinjau sidebar',`<label class="field" style="margin-bottom:12px"><span class="sr-only">Lihat sebagai</span>${sel(SB_ROLES,as,"setQ({as:this.value})",{label:'Lihat sebagai',cls:'sm'})}</label><div class="rows" style="max-height:34rem;overflow:auto">${sbPreview('',as,0)||'<p class="sm muted">Tidak ada menu yang terlihat untuk role ini.</p>'}</div>`);
-  return {title:'Sidebar Menu',html:`<div class="fstack">${fc}<div class="grid g-side">${struct}${prev}</div>${callout('<b>Cara pakai.</b> Klik baris untuk mengubah. Tombol panah mengatur urutan di level yang sama, tombol + menambah submenu di bawah grup, dan Induk menu di form memindahkan menu ke level lain. Level tidak dibatasi. Perubahan langsung dipakai sidebar semua akun sesuai role.')}</div>`};
+  return {title:'Sidebar Menu',html:`<div class="fstack">${fc}<div class="grid g-side">${struct}${prev}</div>${callout('<b>Cara pakai.</b> Klik baris untuk mengubah. Tombol panah mengatur urutan di level yang sama, tombol + menambah submenu di bawah menu mana pun, dan Induk menu di form memindahkan menu ke level lain. Level tidak dibatasi. Perubahan langsung dipakai sidebar semua akun sesuai role.')}</div>`};
 }
 /* ---------- Master tambahan ---------- */
 const pageRegion=q=>({title:'Region',html:`${crudList('region',q)}`});
