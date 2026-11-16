@@ -307,6 +307,44 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .laser{position:absolute;left:14px;right:14px;height:2px;border-radius:2px;background:#FF5A5F;box-shadow:0 0 12px 2px rgba(255,90,95,.8);animation:laser 1.1s ease-in-out infinite alternate}
 @keyframes laser{from{top:18px}to{top:calc(100% - 20px)}}
 .offpill{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:6px;background:#E0393F;color:#fff}
+/* MOM 12 Nov 2026: grafik capaian, daftar toko, webview SIM SIAP, form quiz/survey */
+.cap3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.cap3 button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 2px;border-radius:14px;text-align:center;min-width:0}
+.cap3 button:hover{background:rgba(255,255,255,.5)}
+.cap3 .dn{position:relative;width:68px;height:68px}
+.cap3 .dn b{position:absolute;inset:0;display:grid;place-items:center;font-size:14px;font-weight:800}
+.cap3 .lb{font-size:12px;font-weight:700;line-height:1.25}
+.cap3 .nm{font-size:11.5px;color:var(--muted);line-height:1.3}
+.vrow{flex-wrap:wrap}
+.vrow .acts{flex-basis:100%;display:flex;gap:8px;padding-left:54px;flex-wrap:wrap}
+.vrow .acts .btn{flex:1 1 auto;min-width:0;padding:0 10px}
+.vrow .no{font-size:11px;font-weight:800;color:var(--muted);margin-right:4px}
+.wv{display:flex;flex-direction:column;flex:1;min-height:0;background:#F4F6F9}
+.wv-bar{flex:none;padding:calc(var(--sb) + 4px) 8px 8px;background:#fff;border-bottom:1px solid #E3E8EF;display:flex;align-items:center;gap:6px}
+.wv-bar .ib{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:#33475B}
+.wv-url{flex:1;min-width:0;height:34px;border-radius:10px;background:#EEF1F5;display:flex;align-items:center;gap:6px;padding:0 10px;font-size:12.5px;color:#33475B}
+.wv-url span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wv-load{height:3px;background:#3466FF;transform-origin:left;animation:wvload .7s ease-out forwards}
+@keyframes wvload{from{transform:scaleX(.1);opacity:1}80%{transform:scaleX(1);opacity:1}to{transform:scaleX(1);opacity:0}}
+.wv-page{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:0 0 24px;color:#1F2D3D}
+.wv-head{background:#0B3C7A;color:#fff;padding:16px}
+.wv-head small{opacity:.75;font-size:12px}
+.wv-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:16px}
+.wv-tiles button{background:#fff;border:1px solid #E3E8EF;border-radius:10px;padding:14px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:#1F2D3D}
+.wv-tiles button svg{color:#0B3C7A}
+.wv-box{background:#fff;border:1px solid #E3E8EF;border-radius:10px;margin:0 16px 12px;padding:14px;font-size:13.5px}
+.wv-box .kv{font-size:13px;padding:6px 0}
+.wv-btn{display:block;width:100%;height:40px;border-radius:8px;background:#0B3C7A;color:#fff;font-weight:700;font-size:13.5px;margin-top:10px}
+.qcard{margin-bottom:12px}
+.qcard .qt{font-size:14.5px;font-weight:700;line-height:1.4}
+.qcard .qt i{color:var(--red);font-style:normal}
+.qcard .qbody{margin-top:12px}
+.qcard.bad{box-shadow:inset 0 0 0 1.5px rgba(229,72,77,.55),var(--shadow)}
+.qopt .k.box{border-radius:6px}
+.qgrid-row{padding:8px 0;border-top:1px solid var(--sep)}
+.qgrid-row:first-child{border-top:0}
+.qgrid-row .opts{margin-top:6px}
+.qfile{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 1px var(--sep);font-size:13.5px}
 
 /* ---------- small screens: real phone ---------- */
 @media (max-width:520px){
@@ -401,7 +439,9 @@ const P = {
   fingerprint:'M12 11v3a8 8 0 0 0 1 4M8 13a4 4 0 0 1 8 0v1M5 15V12a7 7 0 0 1 13-3.5M16 18a12 12 0 0 0 1-3',
   upload:'M12 16V4M7 9l5-5 5 5M4 16v4h16v-4',
   edit:'M4 20h4L19 9l-4-4L4 16zM14 6l4 4',
-  barcode:'M3 7V4h3M18 4h3v3M21 17v3h-3M6 20H3v-3M7 8v8M10 8v8M13 8v8M16 8v8'
+  barcode:'M3 7V4h3M18 4h3v3M21 17v3h-3M6 20H3v-3M7 8v8M10 8v8M13 8v8M16 8v8',
+  globe:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18',
+  store:'M4 9l1.5-5h13L20 9M4 9h16v2a2.7 2.7 0 0 1-5.3 0 2.7 2.7 0 0 1-5.4 0A2.7 2.7 0 0 1 4 11zM5 13v8h14v-8M10 21v-5h4v5'
 };
 function I(n,s=22,w=1.8){return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${P[n]}"/></svg>`}
 const LOGO = 'data:image/webp;base64,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';
@@ -777,10 +817,12 @@ SCR.home = () => {
   else if(hasAkt()) menus=[[aktLabel(),'grid',"act(()=>tab('akt'))",1],...menus];
   // Konfigurasi Aktivitas per role: modul yang masuk Aktivitas saya disembunyikan dari beranda, menu terpisah bisa ikut dikunci check-in
   else if(cfg) menus=[['Aktivitas saya','grid',"go('spg-akt')"],...menus.filter(m=>!cfg.akt.includes(m[4])).map(m=>cfg.checkin==='Ya'&&(cfg.gated||[]).includes(m[4])?[m[0],m[1],`spgGate(()=>${m[2]})`,m[3],m[4]]:m)];
+  // MOM 12 Nov 2026: menu webview SIM SIAP untuk semua role
+  menus=[...menus,['SIM SIAP','globe',"go('sim-siap')"]];
   let extra='';
   if(r==='spv') extra = spvDash();
-  else extra = fieldDash();
-  return {dark:true, tab:'home', note: locked&&!att().out ? '<b>Beranda sebelum absen.</b> Semua menu bisa dibuka untuk dilihat, tapi menu bergembok (catat/ubah data) baru bisa dipakai setelah absen masuk.' : 'Beranda. Ringkasan absen, menu sesuai role, dan pencapaian hari ini.',
+  else extra = capChart() + fieldDash();
+  return {dark:true, tab:'home', note: (locked&&!att().out ? '<b>Beranda sebelum absen.</b> Semua menu bisa dibuka untuk dilihat, tapi menu bergembok (catat/ubah data) baru bisa dipakai setelah absen masuk.' : 'Beranda. Ringkasan absen, menu sesuai role, dan pencapaian hari ini.')+(r==='spv'?'':' <b>MOM 12 Nov:</b> grafik Capaian hari ini menunjukkan pekerjaan (kunjungan dan tugas aktivitas, atau leads untuk REA dan CBD) dan task dari Team Leader. Angkanya mengikuti data yang kamu kerjakan di aplikasi.')+' Menu <b>SIM SIAP</b> membuka portal SIM SIAP di dalam aplikasi (MOM 12 Nov).',
   html:`<main class="content flush">
     <section class="hero">${rings()}
       <div class="top"><div class="av">${u.init}</div><div class="grow"><div class="hello">Selamat pagi,</div><div class="name">${u.name}</div></div>
@@ -842,9 +884,10 @@ const TOKO_COORD_M={'Toko Sinar Jaya Elektronik':[-6.284,106.844],'Toko Makmur A
 const POS_DEMO=[-6.27,106.81];
 function jarakKm(a,b){ const R=6371, rd=x=>x*Math.PI/180, dl=rd(b[0]-a[0]), dg=rd(b[1]-a[1]), h=Math.sin(dl/2)**2+Math.cos(rd(a[0]))*Math.cos(rd(b[0]))*Math.sin(dg/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
 function jarakText(place){ if(noCheckin()) return ''; const m=shRead('tokoCoord',null), c=(m&&m[place])||TOKO_COORD_M[place]; if(!c) return ''; const km=jarakKm(POS_DEMO,c); return km<1?(Math.round(km*100)*10)+' m':km.toFixed(1).replace('.',',')+' km'; }
+const visitTone = st => st==='Selesai'?'green':st==='Berjalan'?'blue':st==='Dijadwal ulang'?'amber':st==='Terlewat'?'red':st==='Toko tutup'?'tan':'';
 function visitRow(x){
-  const tone=x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':x.status==='Dijadwal ulang'?'amber':x.status==='Terlewat'?'red':'';
-  return `<button class="li" onclick="go('kunjungan-detail',{id:'${x.id}'})"><div class="ico-tile ${x.status==='Selesai'?'green':''}">${I('pin',20)}</div><div class="grow"><div class="t">${x.place}${x.unplanned?' '+chip('Unplanned','amber'):''}</div><div class="s">${x.time} · ${x.tasks.join(', ')}${jarakText(x.place)?' · '+jarakText(x.place):''}</div></div>${chip(x.status,tone)}</button>`;
+  const tone=visitTone(x.status), tt=x.status==='Toko tutup';
+  return `<button class="li" onclick="go('kunjungan-detail',{id:'${x.id}'})"><div class="ico-tile ${x.status==='Selesai'?'green':tt?'tan':''}">${I(tt?'lock':'pin',20)}</div><div class="grow"><div class="t">${x.place}${x.unplanned?' '+chip('Unplanned','amber'):''}</div><div class="s">${x.time} · ${x.tasks.join(', ')}${jarakText(x.place)?' · '+jarakText(x.place):''}</div></div>${chip(x.status,tone)}</button>`;
 }
 function spvDash(){
   const L=S.leads, c=k=>L.filter(l=>l.status===k).length;
@@ -1037,14 +1080,15 @@ const apprChain = u => { const r=RID[u]; if(['r6','r8','r10'].includes(r)) retur
 SCR.kunjungan = p => {
   const seg=p.seg||'hari', r=role();
   const v=S.visits[vk()]||[];
-  const teamV = r==='spv' ? `<div class="sec-title">Kunjungan tim hari ini</div><div class="list">${[['Rina Marlina','Electronic City Kemang','Berjalan','blue'],['Budi Santoso','4 toko · 1 selesai','Berjalan','blue'],['Nina Safitri','2 nasabah','Belum','']].map(x=>`<div class="li"><div class="av blue">${x[0].split(' ').map(s=>s[0]).join('')}</div><div class="grow"><div class="t">${x[0]}</div><div class="s">${x[1]}</div></div>${chip(x[2],x[3])}</div>`).join('')}</div>`:'';
-  return {tab:'kunjungan', note:'Penugasan/kunjungan (MOM 5.1). Check-in dan check-out lewat satu tombol untuk semua role: jika ada lebih dari satu toko di jadwal, pilih toko dulu; jika hanya satu, langsung diproses. Jadwal dibuat Team Leader/Supervisor, sales cukup mengikutinya. Hak membuat jadwal diatur per role di dashboard (IAM); bawaannya hanya Promotor FMCG dan MD yang boleh membuat sendiri.',
+  const ml=multiList(), nTT=v.filter(x=>x.status==='Toko tutup').length;
+  const teamV = r==='spv' ?`<div class="sec-title">Kunjungan tim hari ini</div><div class="list">${[['Rina Marlina','Electronic City Kemang','Berjalan','blue'],['Budi Santoso','4 toko · 1 selesai','Berjalan','blue'],['Nina Safitri','2 nasabah','Belum','']].map(x=>`<div class="li"><div class="av blue">${x[0].split(' ').map(s=>s[0]).join('')}</div><div class="grow"><div class="t">${x[0]}</div><div class="s">${x[1]}</div></div>${chip(x[2],x[3])}</div>`).join('')}</div>`:'';
+  return {tab:'kunjungan', note:'Penugasan/kunjungan (MOM 5.1). Check-in dan check-out lewat satu tombol untuk semua role: jika ada lebih dari satu toko di jadwal, pilih toko dulu; jika hanya satu, langsung diproses. Jadwal dibuat Team Leader/Supervisor, sales cukup mengikutinya. Hak membuat jadwal diatur per role di dashboard (IAM); bawaannya hanya Promotor FMCG dan MD yang boleh membuat sendiri.'+(ml?' <b>MOM 12 Nov:</b> sales bergerak (canvassing, taking order, mobile promotor, Promotor FMCG dan MD) tidak lagi memilih toko lewat popup. Daftar toko hari ini tampil langsung sesuai urutan rute, masing-masing dengan tombol Check-in, Check-out, Toko tutup, atau Lihat.':'')+(canTutup()?' Toko yang tutup ditandai dengan 1 foto (status Toko tutup, tidak dihitung terlewat).':''),
   html:`${appbar('Kunjungan',{backBtn:false,right:canSchedule(r)?`<button class="ib" onclick="act(()=>go('kunjungan-form',{spv:${r==='spv'?1:0}}))" aria-label="${r==='spv'?'Tugaskan ke tim':'Tambah kunjungan'}">${I('plus',24,2)}</button>`:''})}<main class="content">
     <div class="segtabs">${[['hari','Hari ini'],['rencana','Rencana']].map(s=>`<button class="${seg===s[0]?'on':''}" onclick="setP({seg:'${s[0]}'})">${s[1]}</button>`).join('')}</div>
     ${seg==='hari'?missedOpen().map(m=>`<button class="banner amber" style="width:100%;text-align:left;margin-bottom:14px" onclick="act(()=>missedSheet('${m.id}'))">${I('alert',18)}<span>Kunjungan ke ${esc(m.place)} (${m.tgl}) terlewat. Isi alasannya.</span></button>`).join(''):''}
     ${seg==='hari'&&S.leftOpen&&visitById(S.leftOpen)&&!visitById(S.leftOpen).cout?`<div class="banner amber" style="margin-bottom:14px">${I('alert',18)}<span>Kamu keluar dari radius ${visitById(S.leftOpen).place} dan belum check-out. Check-out sekarang atau saat check-in di toko berikutnya.</span></div>`:''}
-    ${seg==='hari'&&v.length&&!noCheckin()?`<button class="btn ${isLocked()?'locked':''}" style="margin-bottom:14px" onclick="visitEntry()">${I(isLocked()?'lock':'pin',18)} Check-in / Check-out</button>`:''}
-    ${seg==='hari'?`<div class="card" style="margin-bottom:14px"><div class="row between"><b>Progres hari ini</b><span class="num small muted">${v.filter(x=>x.status==='Selesai').length} dari ${v.length} selesai</span></div><div class="bar" style="margin-top:10px"><i style="width:${Math.max(3,v.filter(x=>x.status==='Selesai').length/(v.length||1)*100)}%"></i></div></div><div class="list">${v.map(visitRow).join('')}</div>${teamV}`:
+    ${seg==='hari'&&v.length&&!noCheckin()&&!ml?`<button class="btn ${isLocked()?'locked':''}" style="margin-bottom:14px" onclick="visitEntry()">${I(isLocked()?'lock':'pin',18)} Check-in / Check-out</button>`:''}
+    ${seg==='hari'?`<div class="card" style="margin-bottom:14px"><div class="row between"><b>Progres hari ini</b><span class="num small muted">${v.filter(x=>x.status==='Selesai').length} dari ${v.length} selesai${nTT?' · '+nTT+' tutup':''}</span></div><div class="bar" style="margin-top:10px"><i style="width:${Math.max(3,v.filter(x=>x.status==='Selesai').length/(v.length||1)*100)}%"></i></div></div>${ml?visitList(v,false):`<div class="list">${v.map(visitRow).join('')}</div>`}${teamV}`:
     `<div class="list">${S.plans.map(x=>`<div class="li"><div class="ico-tile tan">${I('calendar',20)}</div><div class="grow"><div class="t">${x.place}</div><div class="s">${x.date}</div></div>${chip(x.status,x.status==='Disetujui'?'green':'amber')}</div>`).join('')}
     <div class="li"><div class="ico-tile">${I('refresh',20)}</div><div class="grow"><div class="t">Kunjungan rutin mingguan</div><div class="s">Setiap Senin & Kamis · Okt – Des 2026</div></div>${chip('Berkala','blue')}</div></div>`}
     ${canSchedule(r)?`<button class="btn sec" style="margin-top:16px" onclick="act(()=>go('kunjungan-form',{spv:${r==='spv'?1:0}}))">${I('plus',20)} ${r==='spv'?'Tugaskan ke tim':'Tambah kunjungan'}${isLocked()?' '+I('lock',16):''}</button>`:''}${(r!=='spv'&&r!=='leads'&&bisaTambah())?`<button class="btn sec" style="margin-top:12px" onclick="act(()=>unplSheet())">${I('plus',20)} Kunjungan di luar rencana</button>`:''}${canSchedule(r)?'':`<p class="hint" style="margin-top:14px">${r==='spv'?'':(bisaTambah()?'Kamu ditugaskan di satu toko saja, jadi jadwal kunjungan mengikuti Team Leader.':'Role kamu tidak menambah kunjungan sendiri. Jadwal kunjungan mengikuti Team Leader.')}</p>`}
@@ -1055,17 +1099,19 @@ SCR['kunjungan-detail'] = p => {
   if(!x) return SCR.kunjungan({});
   const lk=isLocked();
   let foot;
-  if(x.status==='Terlewat') foot=`<button class="btn" disabled>Terlewat. Check-in hanya di hari yang sama</button>`;
+  if(x.status==='Toko tutup') foot=`<button class="btn" disabled>${I('lock',18)} Toko tutup. Check-in tidak tersedia hari ini</button>`;
+  else if(x.status==='Terlewat') foot=`<button class="btn" disabled>Terlewat. Check-in hanya di hari yang sama</button>`;
   else if(x.status==='Dijadwal ulang') foot=`<button class="btn" disabled>Dijadwal ulang ke ${x.resched?x.resched.hari+' '+x.resched.tgl:''}</button>`;
   else if(vk()==='cbd'&&x.mid) foot=x.status==='Selesai'?`<button class="btn" disabled>Monitoring selesai</button>`:`<button class="btn" onclick="go('mitra-detail',{id:'${x.mid}'})">Isi monitoring mitra</button>`;
   else if(noCheckin()) foot=x.status==='Selesai'?`<button class="btn" disabled>Kunjungan selesai</button>`:`<button class="btn" onclick="act(()=>{leadDone('${x.id}')})">${I('check',18,2.2)} Tandai selesai</button>`;
   else if(x.status==='Selesai') foot=role()==='fmcg'?`<button class="btn ${lk?'locked':''}" onclick="act(()=>repeatVisit('${x.id}'))">${I(lk?'lock':'pin',18)} Check-in lagi di lokasi ini</button>`:`<button class="btn" disabled>Kunjungan selesai</button>`;
-  else if(!x.cin) foot=`<button class="btn ghost" style="width:auto" onclick="toast('Membuka Google Maps…','route')">${I('route',18)} Rute</button><button class="btn ${lk?'locked':''}" onclick="act(()=>startCheckin('${x.id}'))">${I(lk?'lock':'pin',18)} Check-in di lokasi</button>`;
+  else if(!x.cin) foot=`<button class="btn ghost" style="width:auto;padding:0 14px" onclick="toast('Membuka Google Maps…','route')" aria-label="Rute">${I('route',18)}${canTutup()?'':' Rute'}</button>${canTutup()?`<button class="btn ghost" style="width:auto;padding:0 14px" onclick="startTutup('${x.id}')">${I('lock',18)} Toko tutup</button>`:''}<button class="btn ${lk?'locked':''}" onclick="act(()=>startCheckin('${x.id}'))">${I(lk?'lock':'pin',18)} Check-in di lokasi</button>`;
   else foot=`<button class="btn ${lk?'locked':''}" onclick="act(()=>${role()==='fmcg'?`fmOut('${x.id}')`:`go('kunjungan-foto',{id:'${x.id}',mode:'out'})`})">${I(lk?'lock':'check',18,2.2)} Check-out & selesai</button>`;
-  return {note:'Check-in dan check-out wajib 1 foto ber-watermark, catatan opsional (MOM 5.2). Untuk Promotor FMCG dan MD, tugas selalu semua aktivitas toko kecuali support task, dan check-out baru bisa setelah semua tugas hijau. Check-in dan check-out harus di lokasi yang sama, dan Promotor FMCG boleh berulang kali dalam sehari. Lupa check-out ditutup otomatis saat check-in di toko berikutnya atau saat absen pulang. Sales Canvasing dan Taking Order wajib check-in dan check-out di tiap toko, hanya di dalam radius toko. Jika keluar radius tanpa check-out, muncul notifikasi belum check-out. Saat check-in di toko berikutnya, sales boleh check-out toko sebelumnya tanpa harus berada di radius toko itu (revisi Nov 2026).',
+  return {note:(canTutup()?'<b>MOM 12 Nov:</b> jika toko tutup, tekan Toko tutup sebagai ganti check-in. Wajib 1 foto, catatan opsional, GPS tercatat. Status Toko tutup tidak dihitung terlewat dan toko tidak bisa di-check-in lagi hari itu. ':'')+'Check-in dan check-out wajib 1 foto ber-watermark, catatan opsional (MOM 5.2). Untuk Promotor FMCG dan MD, tugas selalu semua aktivitas toko kecuali support task, dan check-out baru bisa setelah semua tugas hijau. Check-in dan check-out harus di lokasi yang sama, dan Promotor FMCG boleh berulang kali dalam sehari. Lupa check-out ditutup otomatis saat check-in di toko berikutnya atau saat absen pulang. Sales Canvasing dan Taking Order wajib check-in dan check-out di tiap toko, hanya di dalam radius toko. Jika keluar radius tanpa check-out, muncul notifikasi belum check-out. Saat check-in di toko berikutnya, sales boleh check-out toko sebelumnya tanpa harus berada di radius toko itu (revisi Nov 2026).',
   html:`${appbar('Detail kunjungan',{right:(canResched(x)?`<button class="ib" onclick="act(()=>reschedSheet('${x.id}'))" aria-label="Jadwal ulang">${I('calendar',22)}</button>`:'')+(!x.cin&&x.status!=='Selesai'&&(role()==='spv'||x.own)&&canSchedule(role())?`<button class="ib" onclick="act(()=>delVisitSheet('${x.id}'))" aria-label="Hapus kunjungan">${I('trash',20)}</button>`:'')})}<main class="content">
-    <div class="card"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t" style="font-weight:800;font-size:16px">${x.place}${x.unplanned?' '+chip('Unplanned','amber'):''}</div><div class="small muted">Sen, 26 Okt 2026 · ${x.time}</div></div>${chip(x.status,x.status==='Selesai'?'green':x.status==='Berjalan'?'blue':x.status==='Dijadwal ulang'?'amber':x.status==='Terlewat'?'red':'')}</div>
-      ${x.cin?`<div class="kv" style="margin-top:8px"><span>Check-in</span><span class="num">${x.cin} · 24 m dari titik toko</span></div>${x.cout?`<div class="kv"><span>Check-out</span><span class="num">${x.cout} · durasi ${x.dur}${x.remoteOut?' · dari luar radius':''}</span></div>`:''}`
+    <div class="card"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t" style="font-weight:800;font-size:16px">${x.place}${x.unplanned?' '+chip('Unplanned','amber'):''}</div><div class="small muted">Sen, 26 Okt 2026 · ${x.time}</div></div>${chip(x.status,visitTone(x.status))}</div>
+      ${x.status==='Toko tutup'&&x.tutup?`<div class="kv" style="margin-top:8px"><span>Ditandai tutup</span><span class="num">${x.tutup.jam} · -6.2615, 106.8106</span></div>${x.tutup.catatan?`<div class="kv"><span>Catatan</span><span>${esc(x.tutup.catatan)}</span></div>`:''}<div class="thumbs">${wmPhoto(x.place,x.tutup.jam)}</div>`
+      :x.cin?`<div class="kv" style="margin-top:8px"><span>Check-in</span><span class="num">${x.cin} · 24 m dari titik toko</span></div>${x.cout?`<div class="kv"><span>Check-out</span><span class="num">${x.cout} · durasi ${x.dur}${x.remoteOut?' · dari luar radius':''}</span></div>`:''}`
       :noCheckin()?`<div class="banner blue" style="margin-top:12px">${I('alert',18)}<span>Multi Finance, REA, dan CBD tidak memakai check-in dan check-out ke nasabah. Isi hasil kunjungan lalu tandai selesai.</span></div>`:`<div class="banner blue" style="margin-top:12px">${I('pin',18)}<span>Check-in saat sudah sampai. Lokasi kamu dicocokkan dengan titik toko (radius 100 m). Check-in kunjungan bisa kapan saja sampai pukul 23.59.</span></div>`}</div>
     <div class="sec-title">Tugas${x.sesi>1?' · sesi ke-'+x.sesi:''}</div>
     ${role()==='fmcg'?fmTaskSummary(x):`<div class="list">${x.tasks.map(t=>/^(Quiz|Survey)$/.test(t)?`<button class="li" onclick="go('${t.toLowerCase()}')"><div class="ico-tile tan">${I(t==='Quiz'?'quiz':'survey',18,2)}</div><div class="grow"><div class="t">${t}</div><div class="s">Dikerjakan di dalam kunjungan</div></div>${I('right',18)}</button>`:`<div class="li"><div class="ico-tile">${I('check',18,2.2)}</div><div class="grow"><div class="t">${t}</div></div></div>`).join('')}</div>`}
@@ -1089,6 +1135,7 @@ function visitFormHTML(x){
 }
 function visitAction(id){
   const v=visitById(id);
+  if(v.status==='Toko tutup'){ toast(v.place+' ditandai tutup hari ini. Check-in tidak tersedia','alert'); return; }
   if(v.status==='Terlewat'){ toast('Kunjungan ke '+v.place+' terlewat. Isi alasan di tab Kunjungan','alert'); return; }
   if(v.status==='Dijadwal ulang'){ toast('Kunjungan ini dijadwal ulang ke '+(v.resched?v.resched.hari+' '+v.resched.tgl:'hari lain'),'alert'); return; }
   if(v.status==='Selesai'){ if(role()==='fmcg') repeatVisit(id); else toast('Kunjungan ke '+v.place+' sudah selesai'); return; }
@@ -1100,8 +1147,10 @@ function visitEntry(){ act(()=>{
   const L=S.visits[vk()]||[];
   if(!L.length){ toast('Belum ada kunjungan terjadwal','alert'); return; }
   if(L.length===1){ visitAction(L[0].id); return; }
+  // MOM 12 Nov 2026: sales bergerak memilih toko dari daftar di halaman, tanpa popup
+  if(multiRole()){ const t=role()==='fmcg'?'aktivitas':hasAkt()?'akt':'kunjungan'; if(cur()?.name!==t) tab(t); toast('Pilih toko dari daftar hari ini','pin'); return; }
   sheet(`<h3 style="font-size:18px;font-weight:800">Pilih toko</h3><p class="muted small" style="margin:6px 0 12px;line-height:1.5">Pilih toko yang mau di-check-in atau di-check-out.</p>
-  <div class="list">${L.map(v=>{ const open=v.cin&&!v.cout, done=(v.status==='Selesai'&&role()!=='fmcg')||v.status==='Dijadwal ulang'||v.status==='Terlewat';
+  <div class="list">${L.map(v=>{ const open=v.cin&&!v.cout, done=(v.status==='Selesai'&&role()!=='fmcg')||v.status==='Dijadwal ulang'||v.status==='Terlewat'||v.status==='Toko tutup';
     return `<button class="li" ${done?'disabled':''} onclick="closeSheet();visitAction('${v.id}')"><div class="ico-tile ${v.status==='Selesai'?'green':''}">${I('pin',20)}</div><div class="grow"><div class="t">${v.place}</div><div class="s">${v.time}</div></div>${chip(open?'Check-out':v.status==='Selesai'?(role()==='fmcg'?'Check-in lagi':'Selesai'):'Check-in',open?'blue':v.status==='Selesai'?'green':'')}</button>`; }).join('')}</div>`);
 }); }
 function repeatVisit(id){ const v=visitById(id); v.sesi=(v.sesi||1)+1; v.cin=null; v.cout=null; v.dur=null; v.status='Belum'; render(false,true); toast('Sesi ke-'+v.sesi+' siap, check-in di lokasi yang sama','pin'); }
@@ -2040,17 +2089,42 @@ function fmTaskSave(draft){
 /* ---------- POSM & planogram ---------- */
 const POSM=[{id:'pm3',name:'Campaign: penempatan barang promo akhir tahun',kind:'Campaign',acuan:'Barang promo di end gondola'},{id:'pm1',name:'Planogram rak utama',kind:'Planogram',acuan:'Urutan brand dan jumlah facing'},{id:'pm2',name:'POSM wobbler promo akhir tahun',kind:'POSM',acuan:'Posisi wobbler di depan rak'}];
 SCR.posm = () => ({note:'POSM dan planogram (MOM 13). User memotret lokasi, lalu foto dicocokkan dengan foto brief yang di-assign. AI memberi nilai berdasarkan acuan (simulasi).',
-  html:`${appbar('Campaign, POSM & planogram')}<main class="content"><div class="list">${POSM.map(x=>`<button class="li" onclick="go('posm-detail',{id:'${x.id}'})"><div class="ico-tile">${I('image',20)}</div><div class="grow"><div class="t">${x.name}</div><div class="s">${x.kind}</div></div>${S.posm[x.id]?chip('Nilai '+S.posm[x.id],'green'):stChip('Belum Selesai')}</button>`).join('')}</div></main><footer class="actions"><button class="btn ghost" onclick="fmDraftSave('posm')">Simpan sementara</button></footer>`});
+  html:`${appbar('Campaign, POSM & planogram')}<main class="content"><div class="list">${POSM.map(x=>`<button class="li" onclick="go('posm-detail',{id:'${x.id}'})"><div class="ico-tile">${I('image',20)}</div><div class="grow"><div class="t">${x.name}</div><div class="s">${x.kind}</div></div>${S.posm[x.id]?(()=>{ const f=posmFinal(x.id); return chip('Nilai '+f,f>=80?'green':f>=70?'amber':'red'); })():stChip('Belum Selesai')}</button>`).join('')}</div></main><footer class="actions"><button class="btn ghost" onclick="fmDraftSave('posm')">Simpan sementara</button></footer>`});
 SCR['posm-detail'] = p => {
   const x=POSM.find(a=>a.id===p.id), n=S.posm[x.id];
-  return {note:'Nilai AI di sini simulasi. Rekomendasi ambang: 80 atau lebih lulus, 70 sampai 79 ditinjau Team Leader, di bawah 70 foto ulang. Acuan final menunggu klien.',
+  const a=(S.posmAdj||{})[x.id]||{adj:0,alasan:''}, f=posmFinal(x.id);
+  return {note:'Nilai AI di sini simulasi. Rekomendasi ambang: 80 atau lebih lulus, 70 sampai 79 ditinjau Team Leader, di bawah 70 foto ulang. Acuan final menunggu klien. <b>MOM 12 Nov:</b> setelah nilai AI keluar, isi nilai adjustment (−20 sampai +20). Alasan wajib jika adjustment bukan 0. Nilai akhir = nilai AI + adjustment (0–100) dan menentukan status. Nilai tersimpan ke dashboard lewat posmNilai.',
   html:`${appbar(x.kind)}<main class="content">
     <div class="card"><b>${x.name}</b><div class="small muted" style="margin-top:2px">Acuan: ${x.acuan}</div></div>
     <div class="sec-title">Foto brief</div><div class="wm-photo">${I('image',26)}</div>
-    <div class="sec-title">Foto kamu</div>${n?`<div class="wm-photo">${I('image',26)}</div><div class="card" style="margin-top:12px"><div class="row between"><div class="small muted">Nilai AI</div>${n>=80?chip('Lulus','green'):n>=70?chip('Ditinjau Team Leader','amber'):chip('Foto ulang','red')}</div><div class="big-num num">${n}</div><p class="hint">Dicocokkan dengan foto brief.</p></div>`:`<button class="wm-photo add" onclick="act(()=>posmShoot('${x.id}'))" aria-label="Ambil foto">${I('camera',26)}<span class="small">Ambil foto</span></button>`}
-  </main>`};
+    <div class="sec-title">Foto kamu</div>${n?`<div class="wm-photo">${I('image',26)}</div><div class="card" style="margin-top:12px"><div class="row between"><div class="small muted">Nilai AI</div>${posmChip(n)}</div><div class="big-num num">${n}</div><p class="hint">Dicocokkan dengan foto brief.</p></div>
+    <div class="sec-title">Nilai adjustment</div>
+    <div class="card">
+      <label class="field"><span>Adjustment (−20 sampai +20)</span><input class="input num" id="pa_adj" type="number" inputmode="numeric" min="-20" max="20" step="1" value="${a.adj}" oninput="posmAdjPreview(${n})"></label>
+      <label class="field" style="margin-bottom:6px"><span>Alasan adjustment <span id="pa_req" class="small muted">${a.adj?'(wajib)':'(wajib jika bukan 0)'}</span></span><textarea class="input" id="pa_al" placeholder="Misalnya: posisi wobbler sudah benar, foto tertutup pengunjung">${esc(a.alasan)}</textarea></label>
+      <div id="pa_err"></div>
+      <div class="kv" style="margin-top:6px"><span>Nilai AI</span><span class="num">${n}</span></div>
+      <div class="kv"><span>Adjustment</span><span class="num" id="pa_v">${a.adj>0?'+':''}${a.adj}</span></div>
+      <div class="kv" style="align-items:center"><span>Nilai akhir</span><span class="row" style="gap:8px"><b class="num" id="pa_f" style="font-size:18px">${f}</b><span id="pa_c">${posmChip(f)}</span></span></div>
+      ${a.saved?`<p class="hint" style="margin:4px 0 0">Tersimpan. Team Leader melihat nilai ini di dashboard.</p>`:''}
+    </div>`:`<button class="wm-photo add" onclick="act(()=>posmShoot('${x.id}'))" aria-label="Ambil foto">${I('camera',26)}<span class="small">Ambil foto</span></button>`}
+  </main>${n?`<footer class="actions"><button class="btn" onclick="act(()=>posmAdjSave('${x.id}'))">Simpan nilai</button></footer>`:''}`};
 };
-function posmShoot(id){ S.posm[id]=86; if(POSM.every(a=>S.posm[a.id])) fmMark('posm'); render(false,true); toast('Foto dinilai AI: 86','camera'); }
+const posmChip = v => v>=80?chip('Lulus','green'):v>=70?chip('Ditinjau Team Leader','amber'):chip('Foto ulang','red');
+const posmClamp = v => Math.max(0,Math.min(100,v));
+const posmFinal = id => posmClamp((S.posm[id]||0)+(((S.posmAdj||{})[id]||{}).adj||0));
+function posmAdjPreview(ai){ const raw=parseInt(($('#pa_adj')||{}).value,10), adj=isNaN(raw)?0:Math.max(-20,Math.min(20,raw)), f=posmClamp(ai+adj);
+  $('#pa_v').textContent=(adj>0?'+':'')+adj; $('#pa_f').textContent=f; $('#pa_c').innerHTML=posmChip(f); $('#pa_req').textContent=adj?'(wajib)':'(wajib jika bukan 0)'; $('#pa_err').innerHTML=''; }
+/* MOM 12 Nov 2026: nilai AI, adjustment, dan nilai akhir dikirim ke dashboard lewat posmNilai (satu entri per user dan brief). */
+function posmPush(id){ const x=POSM.find(a=>a.id===id), ai=S.posm[id], a=(S.posmAdj||{})[id]||{adj:0,alasan:''};
+  const e={u:uid(),brief:x.name,ai,adj:a.adj,final:posmClamp(ai+a.adj),alasan:a.alasan,tgl:'26 Okt'};
+  shSet('posmNilai',[...shRead('posmNilai',[]).filter(r=>!(r.u===e.u&&r.brief===e.brief)),e]); return e; }
+function posmAdjSave(id){ const raw=val('pa_adj'), adj=raw===''?0:Number(raw), alasan=val('pa_al');
+  if(!Number.isInteger(adj)||adj<-20||adj>20){ $('#pa_err').innerHTML='<div class="err">Adjustment harus bilangan bulat dari −20 sampai +20.</div>'; return; }
+  if(adj!==0&&!alasan){ $('#pa_err').innerHTML='<div class="err">Isi alasan adjustment.</div>'; return; }
+  S.posmAdj=S.posmAdj||{}; S.posmAdj[id]={adj,alasan:adj?alasan:'',saved:true};
+  const e=posmPush(id); render(false,true); toast('Nilai akhir '+e.final+' tersimpan'); }
+function posmShoot(id){ S.posm[id]=86; S.posmAdj=S.posmAdj||{}; delete S.posmAdj[id]; posmPush(id); if(POSM.every(a=>S.posm[a.id])) fmMark('posm'); render(false,true); toast('Foto dinilai AI: 86','camera'); }
 
 /* ---------- Task Pending (Team Leader) ---------- */
 const TASK_FLOW=['Menunggu assign','Sedang diperbaiki','Sudah selesai diperbaiki','Closed'];
@@ -2182,16 +2256,17 @@ function aktPekerjaan(o){
 }
 SCR.akt = () => {
   const L=aktStores(), o=visitOpen(), multi=L.length>1, nas=role()==='leads';
-  const storeRow=v=>{ const open=v.cin&&!v.cout, fin=v.status==='Selesai', lab=open?'Check-out':fin?'Selesai':'Check-in';
-    return `<div class="li"><div class="ico-tile ${fin?'green':''}">${I(fin?'check':'pin',20,fin?2.2:2)}</div><div class="grow"><div class="t">${esc(v.place)}</div><div class="s">${v.time}${v.cin?' · check-in '+v.cin:''}${v.cout?' · check-out '+v.cout:''}</div></div><button class="btn sm ${open?'sec':''}" style="width:auto" ${fin?'disabled':''} onclick="act(()=>visitAction('${v.id}'))">${lab}</button></div>`; };
+  const storeRow=v=>{ const open=v.cin&&!v.cout, tt=v.status==='Toko tutup', fin=v.status==='Selesai'||tt, lab=open?'Check-out':tt?'Toko tutup':fin?'Selesai':'Check-in';
+    return `<div class="li"><div class="ico-tile ${tt?'tan':fin?'green':''}">${I(tt?'lock':fin?'check':'pin',20,fin?2.2:2)}</div><div class="grow"><div class="t">${esc(v.place)}</div><div class="s">${v.time}${v.cin?' · check-in '+v.cin:''}${v.cout?' · check-out '+v.cout:''}</div></div><button class="btn sm ${open?'sec':''}" style="width:auto" ${fin?'disabled':''} onclick="act(()=>visitAction('${v.id}'))">${lab}</button></div>`; };
   const head = o
     ? `<div class="card" style="margin-bottom:14px"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="small muted">Sedang di ${nas?'lokasi':'toko'}</div><div class="t" style="font-weight:800">${esc(o.place)}</div><div class="small muted">Check-in ${o.cin}</div></div>${chip('Berjalan','blue')}</div>
       <button class="btn sm" style="margin-top:12px" onclick="act(()=>visitAction('${o.id}'))">${I('check',18,2.2)} Check-out & selesai</button></div>`
     : !L.length ? `<div class="empty">Belum ada jadwal kunjungan. Team Leader membuat jadwalnya.</div>`
-    : multi ? `<div class="card" style="margin-bottom:14px"><b>Kamu punya ${L.length} ${nas?'tujuan':'toko'} hari ini</b><p class="small muted" style="margin:6px 0 12px;line-height:1.5">Pilih satu, check-in, kerjakan tugas, lalu check-out.</p><button class="btn sm" onclick="act(()=>visitEntry())">${I('pin',18)} Pilih ${nas?'tujuan':'toko'}</button></div>`
+    : multi ? ''
     : `<div class="list" style="margin-bottom:14px">${storeRow(L[0])}</div><p class="hint" style="margin:-6px 0 14px">Kamu punya 1 tujuan hari ini. Check-in, kerjakan tugas, lalu check-out.</p>`;
-  const others = o&&multi ? `<button class="btn sm ghost" style="margin-bottom:14px" onclick="act(()=>visitEntry())">${I('pin',18)} Pilih ${nas?'tujuan':'toko'} lain</button>` : '';
-  return {tab:'akt', note:'Halaman Aktivitas untuk pilih toko, check-in, dan check-out, mengikuti pola Promotor FMCG. Menu pekerjaan ada di halaman ini, tidak di Beranda: pilih toko jika lebih dari satu, check-in, kerjakan pekerjaan, lalu check-out. Judul: Aktivitas Saya untuk 1 toko, Aktivitas Toko untuk lebih dari 1 toko. Pekerjaan yang terikat lokasi terkunci sampai check-in. Check-out tidak mewajibkan semua tugas selesai (aturan itu hanya untuk Promotor FMCG dan MD).',
+  // MOM 12 Nov 2026: daftar toko langsung di halaman, menggantikan popup Pilih toko
+  const others = multi ? visitList(L,true) : '';
+  return {tab:'akt', note:'<b>MOM 12 Nov:</b> daftar toko hari ini tampil langsung di halaman sesuai urutan journey plan, tanpa popup Pilih toko. Tiap baris punya tombol sendiri: Check-in, Check-out, Toko tutup, atau Lihat. Halaman Aktivitas untuk pilih toko, check-in, dan check-out, mengikuti pola Promotor FMCG. Menu pekerjaan ada di halaman ini, tidak di Beranda: pilih toko jika lebih dari satu, check-in, kerjakan pekerjaan, lalu check-out. Judul: Aktivitas Saya untuk 1 toko, Aktivitas Toko untuk lebih dari 1 toko. Pekerjaan yang terikat lokasi terkunci sampai check-in. Check-out tidak mewajibkan semua tugas selesai (aturan itu hanya untuk Promotor FMCG dan MD).',
   html:`${appbar(aktLabel(),{backBtn:false})}<main class="content">
     ${head}
     ${others}${aktPekerjaan(o)}</main>`};
@@ -2205,16 +2280,17 @@ function mdTasks(o){
 const fmAktLabel = () => fmStores().length>1?'Aktivitas Toko':'Aktivitas Saya';
 SCR.aktivitas = () => {
   const L=fmStores(), o=visitOpen(), multi=L.length>1;
-  const storeRow=v=>{ const open=v.cin&&!v.cout, fin=v.status==='Selesai', lab=open?'Check-out':fin?'Check-in lagi':'Check-in';
-    return `<div class="li"><div class="ico-tile ${fin?'green':''}">${I(fin?'check':'pin',20,fin?2.2:2)}</div><div class="grow"><div class="t">${esc(v.place)}</div><div class="s">${v.time}${v.cin?' · check-in '+v.cin:''}${v.cout?' · check-out '+v.cout:''}</div></div><button class="btn sm ${open?'sec':''}" style="width:auto" onclick="act(()=>visitAction('${v.id}'))">${lab}</button></div>`; };
+  const storeRow=v=>{ const open=v.cin&&!v.cout, tt=v.status==='Toko tutup', fin=v.status==='Selesai', lab=open?'Check-out':tt?'Toko tutup':fin?'Check-in lagi':'Check-in';
+    return `<div class="li"><div class="ico-tile ${tt?'tan':fin?'green':''}">${I(tt?'lock':fin?'check':'pin',20,fin?2.2:2)}</div><div class="grow"><div class="t">${esc(v.place)}</div><div class="s">${v.time}${v.cin?' · check-in '+v.cin:''}${v.cout?' · check-out '+v.cout:''}</div></div><button class="btn sm ${open?'sec':''}" style="width:auto" ${tt?'disabled':''} onclick="act(()=>visitAction('${v.id}'))">${lab}</button></div>`; };
   const head = o
     ? `<div class="card" style="margin-bottom:14px"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="small muted">Sedang di toko</div><div class="t" style="font-weight:800">${esc(o.place)}</div><div class="small muted">Check-in ${o.cin}</div></div>${chip('Berjalan','blue')}</div>
       <button class="btn sm" style="margin-top:12px" onclick="act(()=>fmOut('${o.id}'))">${I('check',18,2.2)} Check-out & selesai</button></div>`
     : !L.length ? `<div class="empty">Belum ada jadwal kunjungan. Admin atau Team Leader membuat jadwalnya.</div>`
-    : multi ? `<div class="card" style="margin-bottom:14px"><b>Kamu ditugaskan di ${L.length} toko</b><p class="small muted" style="margin:6px 0 12px;line-height:1.5">Pilih toko, check-in, kerjakan aktivitas, lalu check-out.</p><button class="btn sm" onclick="act(()=>visitEntry())">${I('pin',18)} Pilih toko</button></div>`
-    : `<div class="list" style="margin-bottom:14px">${storeRow(L[0])}</div><p class="hint" style="margin:-6px 0 14px">Kamu ditugaskan di 1 toko. Check-in, kerjakan aktivitas, lalu check-out.</p>`;
-  const others = o&&multi ? `<button class="btn sm ghost" style="margin-bottom:14px" onclick="act(()=>visitEntry())">${I('pin',18)} Pilih toko lain</button>` : '';
-  return {tab:'aktivitas', note:'Halaman Aktivitas Promotor FMCG dan MD untuk pilih toko, check-in, dan check-out. Menu tugas ada di Beranda: pilih toko (jika ditugaskan di lebih dari satu), check-in, kerjakan tugas, lalu check-out. Judul halaman: Aktivitas Saya jika hanya 1 toko, Aktivitas Toko jika lebih dari 1 toko. Menu pekerjaan (Cek stok, Price promo, Facing display, Market share, Support task) ada di halaman ini untuk Promotor FMCG dan MD, bukan di Beranda. Lupa check-out: muncul informasi saat check-in di toko berikutnya, lalu toko sebelumnya ditutup otomatis.',
+    : multi ? ''
+    : `<div class="list" style="margin-bottom:14px">${storeRow(L[0])}</div><p class="hint" style="margin:-6px 0 14px">Kamu ditugaskan di 1 toko. Check-in, kerjakan aktivitas, lalu check-out.</p>${L[0].status==='Belum'&&!L[0].cin?`<button class="btn sm ghost" style="margin:-4px 0 14px" onclick="act(()=>startTutup('${L[0].id}'))">${I('lock',16)} Toko tutup</button>`:''}`;
+  // MOM 12 Nov 2026: daftar toko langsung di halaman, menggantikan popup Pilih toko
+  const others = multi ? visitList(L,true) : '';
+  return {tab:'aktivitas', note:'<b>MOM 12 Nov:</b> jika ditugaskan di lebih dari satu toko, daftar toko tampil langsung di halaman tanpa popup, masing-masing dengan Check-in, Check-out, Toko tutup, atau Lihat. Toko tutup wajib 1 foto dan tidak dihitung terlewat. Halaman Aktivitas Promotor FMCG dan MD untuk pilih toko, check-in, dan check-out. Menu tugas ada di Beranda: pilih toko (jika ditugaskan di lebih dari satu), check-in, kerjakan tugas, lalu check-out. Judul halaman: Aktivitas Saya jika hanya 1 toko, Aktivitas Toko jika lebih dari 1 toko. Menu pekerjaan (Cek stok, Price promo, Facing display, Market share, Support task) ada di halaman ini untuk Promotor FMCG dan MD, bukan di Beranda. Lupa check-out: muncul informasi saat check-in di toko berikutnya, lalu toko sebelumnya ditutup otomatis.',
   html:`${appbar(fmAktLabel(),{backBtn:false})}<main class="content">
     ${head}
     ${others}${mdTasks(o)}</main>`};
@@ -2578,42 +2654,210 @@ const QUIZ=[
   {q:'VISTARA AR-TV50G menggunakan sistem operasi…',o:['Tizen','Google TV','webOS','VIDAA'],a:1},
   {q:'Promo cashback e-wallet wajib disertai…',o:['Foto toko','Nota manual','Data pelanggan','Tanda tangan SPV'],a:2}
 ];
-SCR.quiz = () => ({note:'Quiz dibuat admin di Web, sales mengerjakannya di mobile. Skor langsung tampil, lalu ada feedback dan leaderboard top 10 (BRD III.2.8).',
+/* MOM 12 Nov 2026: quiz dan survey dikonfigurasi di dashboard (kontenQ) dengan tipe pertanyaan seperti Google Form.
+   Tanpa kontenQ (atau tanpa formulir untuk tipe itu) dipakai data bawaan di bawah. */
+const Q_DEF=[
+  {id:'QZ-DEF',type:'Quiz',name:'Product knowledge VISTARA & Puraklin',desc:'5 menit · berlaku s.d. 31 Okt',questions:QUIZ.map(x=>({q:x.q,type:'pg',opts:x.o,key:x.a,req:true}))},
+  {id:'SV-DEF',type:'Survey',name:'Kondisi toko Oktober 2026',desc:'Berlaku s.d. 31 Okt',questions:[{q:'Seberapa ramai pengunjung toko minggu ini?',type:'skala',min:1,max:5,minLabel:'Sepi',maxLabel:'Sangat ramai',req:true},{q:'Ada promo kompetitor yang sedang berjalan?',type:'bs',opts:['Ya','Tidak'],req:true},{q:'Produk apa yang paling sering ditanyakan?',type:'singkat'}]}
+];
+const Q_TIPE={singkat:'Jawaban singkat',essay:'Paragraf',pg:'Pilihan ganda',cb:'Kotak centang',dd:'Drop-down',bs:'Benar/salah',skala:'Skala linier',tgl:'Tanggal',jam:'Waktu',file:'Upload file',grid:'Kisi pilihan ganda'};
+function qForms(type){ const k=shRead('kontenQ',null), sh=Array.isArray(k)?k.filter(f=>f&&!f.del&&(!f.status||f.status==='Aktif')&&Array.isArray(f.questions)):[];
+  const of=t=>{ const a=sh.filter(f=>f.type===t); return a.length?a:Q_DEF.filter(f=>f.type===t); };
+  return type?of(type):[...of('Quiz'),...of('Survey')]; }
+const qFormById = id => qForms().find(f=>String(f.id)===String(id));
+const qDone = id => (S.qDone||{})[id];
+const qOpts = q => q.type==='bs'&&!(q.opts||[]).length?['Benar','Salah']:(q.opts||[]);
+const qEmpty = (q,a) => { if(q.type==='cb') return !(a||[]).length; if(q.type==='grid') return (q.rows||[]).some((r,ri)=>!a||a[ri]===undefined); return a===undefined||a===null||a===''; };
+const qScorable = q => (['pg','bs','dd'].includes(q.type)&&typeof q.key==='number')||(q.type==='cb'&&Array.isArray(q.key));
+const qCorrect = (q,a) => q.type==='cb'?(()=>{ const x=[...(a||[])].sort().join(','), k=[...q.key].map(Number).sort().join(','); return x===k; })():a===q.key;
+function qAns(i,v){ cur().p.ans[i]=v; }
+function qPick(i,v){ cur().p.ans[i]=v; cur().p.err=(cur().p.err||[]).filter(e=>e!==i); render(false,true); }
+function qToggle(i,j){ const a=cur().p.ans, s=new Set(a[i]||[]); s.has(j)?s.delete(j):s.add(j); a[i]=[...s].sort((x,y)=>x-y); render(false,true); }
+function qGrid(i,r,c){ const a=cur().p.ans; a[i]={...(a[i]||{}),[r]:c}; render(false,true); }
+function qFile(i,on){ cur().p.ans[i]=on?{name:'Lampiran_'+(i+1)+'_26Okt.jpg',size:'1,2 MB'}:undefined; render(false,true); if(on) toast('File terlampir','upload'); }
+/* Satu pertanyaan: dirender sesuai tipe. Teks disimpan saat diketik tanpa render ulang agar fokus tidak hilang. */
+function qField(q,i,a,quiz){
+  const t=q.type||'pg';
+  if(t==='singkat') return `<input class="input" value="${esc(a??'')}" placeholder="Jawaban singkat" oninput="qAns(${i},this.value)">`;
+  if(t==='essay') return `<textarea class="input" rows="4" placeholder="Tulis jawaban" oninput="qAns(${i},this.value)">${esc(a??'')}</textarea>`;
+  if(t==='pg'||t==='bs') return qOpts(q).map((o,j)=>`<button class="qopt ${a===j?'on':''}" onclick="qPick(${i},${j})"><span class="k" style="${quiz?'':'border-radius:50%'}">${quiz?'ABCDEFGHIJ'[j]||j+1:(a===j?I('check',14,2.6):'')}</span>${esc(o)}</button>`).join('');
+  if(t==='cb') return `${qOpts(q).map((o,j)=>{ const on=(a||[]).includes(j); return `<button class="qopt ${on?'on':''}" role="checkbox" aria-checked="${on}" onclick="qToggle(${i},${j})"><span class="k box">${on?I('check',14,2.6):''}</span>${esc(o)}</button>`; }).join('')}<p class="hint" style="margin-top:8px">Pilih satu atau lebih.</p>`;
+  if(t==='dd') return `<select class="input" onchange="qPick(${i},this.value===''?'':+this.value)"><option value="">Pilih jawaban</option>${qOpts(q).map((o,j)=>`<option value="${j}" ${a===j?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+  if(t==='skala'){ const mn=Number.isFinite(+q.min)&&q.min!==''&&q.min!==undefined?+q.min:1, mx=Number.isFinite(+q.max)&&q.max!==''&&q.max!==undefined?+q.max:5, L=[]; for(let v=mn;v<=mx&&L.length<11;v++) L.push(v);
+    return `<div class="opts">${L.map(v=>`<button class="opt ${a===v?'on':''}" style="min-width:42px;text-align:center" onclick="qPick(${i},${v})">${v}</button>`).join('')}</div>${q.minLabel||q.maxLabel?`<div class="row between small muted" style="margin-top:6px"><span>${esc(q.minLabel||'')}</span><span>${esc(q.maxLabel||'')}</span></div>`:''}`; }
+  if(t==='tgl') return `<input class="input" type="date" value="${esc(a??'')}" onchange="qAns(${i},this.value)">`;
+  if(t==='jam') return `<input class="input" type="time" value="${esc(a??'')}" onchange="qAns(${i},this.value)">`;
+  if(t==='file') return a?`<div class="qfile">${I('file',20)}<div class="grow"><b>${esc(a.name)}</b><div class="small muted">${a.size}</div></div><button class="ib" style="color:var(--red)" onclick="qFile(${i},false)" aria-label="Hapus lampiran">${I('x',18,2.2)}</button></div>`
+    :`<button class="btn sec sm" style="width:100%" onclick="qFile(${i},true)">${I('upload',18)} Lampirkan file</button><p class="hint" style="margin-top:6px">Foto atau dokumen, maksimal 10 MB (simulasi).</p>`;
+  if(t==='grid') return (q.rows||[]).map((r,ri)=>`<div class="qgrid-row"><div class="small" style="font-weight:700">${esc(r)}</div><div class="opts">${(q.cols||[]).map((c,ci)=>`<button class="opt ${a&&a[ri]===ci?'on':''}" onclick="qGrid(${i},${ri},${ci})">${esc(c)}</button>`).join('')}</div></div>`).join('');
+  return `<p class="hint">Tipe pertanyaan ${esc(t)} belum didukung.</p>`;
+}
+function qCard(q,i,a,bad,quiz,num){
+  return `<div class="card qcard ${bad?'bad':''}"><div class="qt">${num?(i+1)+'. ':''}${esc(q.q)}${q.req?' <i>*</i>':''}</div><div class="small muted" style="margin-top:2px">${Q_TIPE[q.type||'pg']||''}</div><div class="qbody">${qField(q,i,a,quiz)}</div>${bad?`<div class="err">Pertanyaan ini wajib diisi.</div>`:''}</div>`;
+}
+SCR.quiz = () => { const L=qForms('Quiz');
+  return {note:'Quiz dibuat admin di Web, sales mengerjakannya di mobile. Skor langsung tampil, lalu ada feedback dan leaderboard top 10 (BRD III.2.8). <b>MOM 12 Nov:</b> daftar quiz dibaca dari Konten quiz dan survey di dashboard (kontenQ). Tipe pertanyaan seperti Google Form; skor hanya dari pilihan ganda, benar/salah, drop-down, dan kotak centang.',
   html:`${appbar('Quiz')}<main class="content">
-    <div class="card"><div class="row"><div class="ico-tile tan">${I('quiz',22)}</div><div class="grow"><b>Product knowledge VISTARA & Puraklin</b><div class="small muted">3 soal · 5 menit · berlaku s.d. 31 Okt</div></div></div>
-      ${S.quizDone?`<div class="kv" style="margin-top:10px"><span>Skor kamu</span><span class="num">${S.quizScore}/100</span></div>`:`<button class="btn" style="margin-top:14px" onclick="go('quiz-main',{i:0,ans:[]})">Mulai quiz</button>`}</div>
-    <div class="list" style="margin-top:14px"><div class="li"><div class="ico-tile green">${I('check',20)}</div><div class="grow"><div class="t">SOP pencatatan penjualan</div><div class="s">Selesai 12 Okt</div></div><b class="num">90</b></div></div>
+    ${L.map(f=>{ const d=qDone(f.id), n=f.questions.length, sc=f.questions.filter(qScorable).length; return `<div class="card" style="margin-bottom:12px"><div class="row"><div class="ico-tile tan">${I('quiz',22)}</div><div class="grow"><b>${esc(f.name)}</b><div class="small muted">${n} soal${sc&&sc<n?' · '+sc+' dinilai':''}${f.desc?' · '+esc(f.desc):''}</div></div></div>
+      ${d?`<div class="kv" style="margin-top:10px"><span>Skor kamu</span><span class="num">${d.score===null?'Terkirim':d.score+'/100'}</span></div>`:`<button class="btn" style="margin-top:14px" onclick="go('quiz-main',{id:'${esc(f.id)}',i:0,ans:{}})">Mulai quiz</button>`}</div>`; }).join('')||'<div class="empty">Belum ada quiz aktif.</div>'}
+    <div class="list" style="margin-top:2px"><div class="li"><div class="ico-tile green">${I('check',20)}</div><div class="grow"><div class="t">SOP pencatatan penjualan</div><div class="s">Selesai 12 Okt</div></div><b class="num">90</b></div></div>
     <button class="btn sec" style="margin-top:14px" onclick="go('leaderboard')">${I('trophy',20)} Lihat leaderboard</button>
-  </main>`});
+  </main>`}; };
 SCR['quiz-main'] = p => {
-  const q=QUIZ[p.i], a=p.ans[p.i];
-  return {note:'Mengerjakan quiz pilihan ganda.',
-  html:`${appbar('Soal '+(p.i+1)+' dari '+QUIZ.length,{right:`<span class="chip amber" style="margin-right:8px">${I('clock',13,2.2)} 04:${String(32-p.i*11).padStart(2,'0')}</span>`})}
-  <div class="bar" style="border-radius:0;height:4px"><i style="width:${(p.i+1)/QUIZ.length*100}%;border-radius:0"></i></div>
-  <main class="content"><h2 style="font-size:19px;font-weight:800;line-height:1.35;margin:8px 2px 20px">${q.q}</h2>
-  ${q.o.map((o,i)=>`<button class="qopt ${a===i?'on':''}" onclick="cur().p.ans[${p.i}]=${i};render(false)"><span class="k">${'ABCD'[i]}</span>${o}</button>`).join('')}
-  </main><footer class="actions"><button class="btn" ${a===undefined?'disabled':''} onclick="${p.i<QUIZ.length-1?`go('quiz-main',{i:${p.i+1},ans:cur().p.ans})`:`finishQuiz(cur().p.ans)`}">${p.i<QUIZ.length-1?'Soal berikutnya':'Kirim jawaban'}</button></footer>`};
+  const f=qFormById(p.id)||qForms('Quiz')[0], Q=f.questions, q=Q[p.i], a=p.ans[p.i], last=p.i>=Q.length-1, bad=(p.err||[]).includes(p.i);
+  return {note:'Mengerjakan quiz, satu soal per halaman. <b>MOM 12 Nov:</b> tipe soal mengikuti konfigurasi dashboard (jawaban singkat, paragraf, pilihan ganda, kotak centang, drop-down, benar/salah, skala linier, tanggal, waktu, upload file, kisi pilihan ganda). Soal bertanda * wajib dijawab sebelum lanjut.',
+  html:`${appbar('Soal '+(p.i+1)+' dari '+Q.length,{right:`<span class="chip amber" style="margin-right:8px">${I('clock',13,2.2)} 04:${String(Math.max(0,32-p.i*11)).padStart(2,'0')}</span>`})}
+  <div class="bar" style="border-radius:0;height:4px"><i style="width:${(p.i+1)/Q.length*100}%;border-radius:0"></i></div>
+  <main class="content"><h2 style="font-size:19px;font-weight:800;line-height:1.35;margin:8px 2px 4px">${esc(q.q)}${q.req?' <span style="color:var(--red)">*</span>':''}</h2><div class="small muted" style="margin:0 2px 16px">${Q_TIPE[q.type||'pg']||''}${qScorable(q)?'':' · tidak dinilai'}</div>
+  ${qField(q,p.i,a,true)}${bad?`<div class="err" style="margin-top:10px">Soal ini wajib dijawab.</div>`:''}
+  </main><footer class="actions"><button class="btn" onclick="quizNext()">${last?'Kirim jawaban':'Soal berikutnya'}</button></footer>`};
 };
-function finishQuiz(ans){ const ok=ans.filter((a,i)=>a===QUIZ[i].a).length; S.quizDone=true; S.quizScore=Math.round(ok/QUIZ.length*100); S.stack=S.stack.filter(e=>e.name!=='quiz-main'); go('quiz-hasil',{ok}); }
-SCR['quiz-hasil'] = p => ({note:'Skor langsung tampil setelah submit, lalu user bisa memberi feedback.',
-  html:`${appbar('Hasil quiz')}<main class="content"><div class="result" style="padding:10px 10px 0">${bigRing(S.quizScore>=60?'#12875F':'#D49E77','trophy')}<h2 class="num">${S.quizScore}/100</h2><p>Kamu menjawab benar ${p.ok} dari ${QUIZ.length} soal.</p></div>
+function quizNext(){ const p=cur().p, f=qFormById(p.id)||qForms('Quiz')[0], q=f.questions[p.i];
+  if(q.req&&qEmpty(q,p.ans[p.i])){ p.err=[p.i]; render(false,true); return; }
+  if(p.i<f.questions.length-1) go('quiz-main',{id:p.id,i:p.i+1,ans:p.ans}); else finishQuiz(p.id,p.ans); }
+function finishQuiz(id,ans){ const f=qFormById(id)||qForms('Quiz')[0], sc=f.questions.map((q,i)=>[q,i]).filter(([q])=>qScorable(q)), ok=sc.filter(([q,i])=>qCorrect(q,ans[i])).length;
+  const score=sc.length?Math.round(ok/sc.length*100):null;
+  S.qDone=S.qDone||{}; S.qDone[f.id]={score,ok,tot:sc.length};
+  if(f.id==='QZ-DEF'){ S.quizDone=true; S.quizScore=score; }
+  S.stack=S.stack.filter(e=>e.name!=='quiz-main'); go('quiz-hasil',{id:f.id}); toast('Jawaban quiz terkirim'); }
+SCR['quiz-hasil'] = p => { const d=qDone(p.id)||{score:S.quizScore,ok:0,tot:QUIZ.length}, sc=d.score;
+  return {note:'Skor langsung tampil setelah submit, lalu user bisa memberi feedback. Skor dihitung dari soal pilihan ganda, benar/salah, drop-down, dan kotak centang (harus sama persis). Tipe lain tidak dinilai (MOM 12 Nov).',
+  html:`${appbar('Hasil quiz')}<main class="content"><div class="result" style="padding:10px 10px 0">${bigRing(sc===null||sc>=60?'#12875F':'#D49E77','trophy')}<h2 class="num">${sc===null?'Terkirim':sc+'/100'}</h2><p>${d.tot?`Kamu menjawab benar ${d.ok} dari ${d.tot} soal yang dinilai.`:'Quiz ini tidak memiliki soal yang dinilai.'}</p></div>
   <div class="card" style="margin-top:20px;text-align:center"><b>Seberapa membantu quiz ini?</b><div class="stars" style="margin:12px 0">${[1,2,3,4,5].map(i=>`<button class="${(p.star||0)>=i?'on':''}" onclick="setP({star:${i}})" aria-label="${i} bintang">${I('star',30,1.6).replace('fill="none"',(p.star||0)>=i?'fill="currentColor"':'fill="none"')}</button>`).join('')}</div>
   <textarea class="input" placeholder="Masukan untuk tim trainer (opsional)"></textarea></div>
-  </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="replace('leaderboard')">Leaderboard</button><button class="btn" onclick="back();toast('Terima kasih atas feedback-nya')">Kirim feedback</button></footer>`});
+  </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="replace('leaderboard')">Leaderboard</button><button class="btn" onclick="back();toast('Terima kasih atas feedback-nya')">Kirim feedback</button></footer>`}; };
 SCR.leaderboard = () => {
   const me=U().name, base=[['Putri Ayuningtyas',100],['Fajar Nugroho',100],['Rina Marlina',95],['Kevin Halim',90],['Sinta Dewi',90],['Budi Santoso',85],['Rizky Maulana',80],['Dimas Prasetyo',80],['Ayu Lestari',75],['Andi Wijaya',70]];
   return {note:'Leaderboard 10 besar skor quiz (BRD 6.1.14).',
   html:`${appbar('Leaderboard')}<main class="content"><p class="small muted" style="margin:0 2px 12px">Product knowledge VISTARA & Puraklin · seluruh cabang</p>
   <div class="list">${base.map((b,i)=>`<div class="li" style="${b[0]===me?'background:var(--blue-50)':''}"><span class="rank ${i<3?'top':''}">${i+1}</span><div class="av ${b[0]===me?'blue':''}" style="width:34px;height:34px;font-size:12px">${b[0].split(' ').map(s=>s[0]).join('')}</div><div class="grow"><div class="t">${b[0]}${b[0]===me?' (kamu)':''}</div></div><b class="num">${b[1]}</b></div>`).join('')}</div></main>`};
 };
-SCR.survey = p => ({note:'Survey dari admin (scala, true/false, isian singkat) diisi di mobile (BRD 0.12, fitur 31).',
+SCR.survey = () => { const L=qForms('Survey');
+  return {note:'Survey dari admin diisi di mobile (BRD 0.12, fitur 31). <b>MOM 12 Nov:</b> daftar survey dibaca dari Konten quiz dan survey di dashboard (kontenQ), dengan tipe pertanyaan seperti Google Form. Tanpa data dashboard, survey bawaan yang dipakai.',
   html:`${appbar('Survey')}<main class="content">
-  ${S.surveyDone?`<div class="empty"><div class="ico-tile green">${I('check',24)}</div>Survey “Kondisi toko Oktober” sudah kamu kirim. Terima kasih!</div>`:
-  `<div class="card"><b>Kondisi toko Oktober 2026</b><div class="small muted" style="margin-top:2px">3 pertanyaan · berlaku s.d. 31 Okt</div></div>
-  <div class="card"><b style="font-size:14.5px">1. Seberapa ramai pengunjung toko minggu ini?</b><div class="opts" style="margin-top:12px">${[1,2,3,4,5].map(i=>`<button class="opt ${p.s1===i?'on':''}" style="width:46px;text-align:center" onclick="setP({s1:${i}})">${i}</button>`).join('')}</div><div class="row between small muted" style="margin-top:6px"><span>Sepi</span><span>Sangat ramai</span></div></div>
-  <div class="card"><b style="font-size:14.5px">2. Ada promo kompetitor yang sedang berjalan?</b><div class="opts" style="margin-top:12px">${['Ya','Tidak'].map(x=>`<button class="opt ${p.s2===x?'on':''}" onclick="setP({s2:'${x}'})">${x}</button>`).join('')}</div></div>
-  <div class="card"><b style="font-size:14.5px">3. Produk apa yang paling sering ditanyakan?</b><input class="input" style="margin-top:12px" placeholder="Jawaban singkat"></div>`}
-  </main>${S.surveyDone?'':`<footer class="actions"><button class="btn" onclick="S.surveyDone=true;back();toast('Survey terkirim')">Kirim survey</button></footer>`}`});
+  ${L.length?`<div class="list">${L.map(f=>{ const d=qDone(f.id)||(f.id==='SV-DEF'&&S.surveyDone?{}:null); return `<button class="li" onclick="${d?`toast('Survey ini sudah kamu kirim')`:`go('survey-isi',{id:'${esc(f.id)}',ans:{}})`}"><div class="ico-tile ${d?'green':'tan'}">${I(d?'check':'survey',20)}</div><div class="grow"><div class="t">${esc(f.name)}</div><div class="s">${f.questions.length} pertanyaan${f.desc?' · '+esc(f.desc):''}</div></div>${d?chip('Terkirim','green'):chip('Isi survey','blue')}</button>`; }).join('')}</div>`:'<div class="empty">Belum ada survey aktif.</div>'}
+  </main>`}; };
+SCR['survey-isi'] = p => { const f=qFormById(p.id)||qForms('Survey')[0], err=p.err||[];
+  return {note:'Mengisi survey. Semua pertanyaan tampil di satu halaman. Pertanyaan bertanda * wajib; jika kosong saat dikirim, muncul pesan di bawah pertanyaan itu (MOM 12 Nov).',
+  html:`${appbar('Survey')}<main class="content">
+  <div class="card qcard"><b>${esc(f.name)}</b><div class="small muted" style="margin-top:2px">${f.questions.length} pertanyaan${f.desc?' · '+esc(f.desc):''}</div>${f.questions.some(q=>q.req)?`<div class="small" style="margin-top:6px;color:var(--red)">* wajib diisi</div>`:''}</div>
+  ${f.questions.map((q,i)=>qCard(q,i,p.ans[i],err.includes(i),false,true)).join('')}
+  ${err.length?`<div class="err" style="margin:0 2px">${err.length} pertanyaan wajib belum diisi.</div>`:''}
+  </main><footer class="actions"><button class="btn" onclick="surveySend()">Kirim survey</button></footer>`};
+};
+function surveySend(){ const p=cur().p, f=qFormById(p.id)||qForms('Survey')[0];
+  const err=f.questions.map((q,i)=>q.req&&qEmpty(q,p.ans[i])?i:-1).filter(i=>i>=0);
+  if(err.length){ p.err=err; render(false,true); const el=document.querySelector('.qcard.bad'), c=$('#view .content'); if(el&&c) c.scrollTop=Math.max(0,el.offsetTop-c.offsetTop-80); return; }
+  S.qDone=S.qDone||{}; S.qDone[f.id]={score:null,sent:true}; if(f.id==='SV-DEF') S.surveyDone=true;
+  back(); toast('Survey terkirim'); }
+
+/* =========================================================
+   MOM 12 Nov 2026
+   ========================================================= */
+/* Sales bergerak: role yang mengunjungi beberapa toko (canvassing FMCG dan elektronik, taking order, mobile promotor, Promotor FMCG dan MD). */
+const multiRole = () => ['canvas','order','fmcg'].includes(role()) || isMobilePromo();
+const multiList = () => multiRole() && !noCheckin() && (S.visits[vk()]||[]).length>1;
+const canTutup = () => multiRole() && !noCheckin();
+const tokoCat = name => (tokoByName(name)||{}).cat || (/^Event /.test(name||'')?'Event':'');
+
+/* Daftar toko hari ini langsung di halaman, urutan mengikuti journey plan (S.visits sudah diurutkan jpSyncVisits). Menggantikan popup Pilih toko. */
+function visitListRow(v,i){
+  const open=v.cin&&!v.cout, fin=v.status==='Selesai', tt=v.status==='Toko tutup', blocked=v.status==='Terlewat'||v.status==='Dijadwal ulang', fm=role()==='fmcg';
+  const cat=tokoCat(v.place), jr=jarakText(v.place), lk=isLocked(), lock=lk?' '+I('lock',14):'';
+  let b='';
+  if(open) b=`<button class="btn sm sec ${lk?'locked':''}" onclick="act(()=>visitAction('${v.id}'))">${I('check',16,2.2)} Check-out${lock}</button>`;
+  else if(fin&&fm) b=`<button class="btn sm ghost" onclick="act(()=>visitAction('${v.id}'))">Check-in lagi${lock}</button>`;
+  else if(!fin&&!tt&&!blocked&&!v.cin) b=`<button class="btn sm ${lk?'locked':''}" onclick="act(()=>visitAction('${v.id}'))">${I('pin',16)} Check-in${lock}</button>${canTutup()?`<button class="btn sm ghost" onclick="act(()=>startTutup('${v.id}'))">Toko tutup${lock}</button>`:''}`;
+  b+=`<button class="btn sm ghost" onclick="go('kunjungan-detail',{id:'${v.id}'})">Lihat</button>`;
+  const meta=[v.time, cat, jr, v.cin?'check-in '+v.cin:'', v.cout?'check-out '+v.cout:'', tt&&v.tutup?'tutup '+v.tutup.jam:''].filter(Boolean).join(' · ');
+  return `<div class="li vrow"><div class="ico-tile ${fin?'green':tt?'tan':open?'':''}">${I(fin?'check':tt?'lock':'store',20,fin?2.2:1.8)}</div><div class="grow"><div class="t"><span class="no">${i+1}</span>${esc(v.place)}${v.unplanned?' '+chip('Unplanned','amber'):''}</div><div class="s">${meta}</div></div>${chip(open?'Berjalan':v.status,visitTone(open?'Berjalan':v.status))}<div class="acts">${b}</div></div>`;
+}
+function visitList(L,title){
+  return `${title?`<div class="sec-title">Toko hari ini <span class="small muted num">${L.filter(x=>x.status==='Selesai').length}/${L.length} selesai</span></div>`:''}<div class="list" style="margin-bottom:14px">${L.map((v,i)=>visitListRow(v,i)).join('')}</div>`;
+}
+
+/* Status toko tutup: pengganti check-in. Disimpan ke tokoTutup (dibaca dashboard). */
+const TT_NOW='10:15';
+function tutupSync(){ if(!canTutup()) return; const L=S.visits[vk()]; if(!L) return; const tt=shRead('tokoTutup',[]);
+  L.forEach(v=>{ if(!v.cin&&v.status==='Belum'){ const e=tt.find(t=>t.u===uid()&&t.toko===v.place&&t.tgl==='26 Okt'); if(e){ v.status='Toko tutup'; v.tutup=e; } } }); }
+function startTutup(id){ act(()=>{ const v=visitById(id); if(!v) return;
+  if(v.cin){ toast('Kamu sudah check-in di '+v.place,'alert'); return; }
+  if(v.status!=='Belum'){ toast('Kunjungan ini berstatus '+v.status,'alert'); return; }
+  go('toko-tutup',{id}); }); }
+SCR['toko-tutup'] = p => {
+  const x=visitById(p.id); if(!x) return SCR.kunjungan({});
+  const n=p.n||0;
+  return {note:'<b>MOM 12 Nov.</b> Status toko tutup untuk sales bergerak (canvassing, taking order, mobile promotor, Promotor FMCG dan MD). Dipakai sebagai ganti check-in: wajib 1 foto toko ber-watermark, catatan opsional, dan lokasi GPS tercatat otomatis (simulasi). Kunjungan berstatus Toko tutup, tidak dihitung Terlewat, dan tidak bisa di-check-in lagi hari itu. Data dikirim ke dashboard lewat tokoTutup.',
+  html:`${appbar('Toko tutup')}<main class="content">
+    <div class="card"><div class="row"><div class="ico-tile tan">${I('store',20)}</div><div class="grow"><div class="t" style="font-weight:800">${esc(x.place)}</div><div class="small muted">${tokoCat(x.place)?tokoCat(x.place)+' · ':''}Sen, 26 Okt 2026 · ${x.time}</div></div></div></div>
+    <div class="banner blue" style="margin:14px 0">${I('camera',18)}<span>Ambil 1 foto bagian depan toko yang tutup. Watermark dan lokasi GPS terpasang otomatis.</span></div>
+    <div class="thumbs" style="margin-top:0">${n?wmPhoto(x.place,TT_NOW):`<button class="wm-photo add" onclick="setP({n:1,note:val('ttn')})" aria-label="Ambil foto">${I('camera',26)}<span class="small">Ambil foto</span></button>`}</div>
+    <p class="hint" style="margin-top:10px">${n?'Foto siap dikirim.':'Masih perlu 1 foto.'}</p>
+    <div class="card" style="margin-top:12px;padding:6px 16px"><div class="kv"><span>Lokasi GPS</span><span class="num">-6.2615, 106.8106</span></div><div class="kv"><span>Jam</span><span class="num">${TT_NOW}</span></div></div>
+    <label class="field" style="margin-top:14px"><span>Catatan (opsional)</span><textarea class="input" id="ttn" placeholder="Misalnya: toko tutup karena acara keluarga">${esc(p.note||'')}</textarea></label>
+    <p class="hint">Setelah disimpan, toko ini tidak bisa di-check-in lagi hari ini dan tidak dihitung terlewat.</p>
+  </main><footer class="actions"><button class="btn" ${n?'':'disabled'} onclick="tutupSave()">Simpan toko tutup</button></footer>`};
+};
+function tutupSave(){ const p=cur().p, v=visitById(p.id); if(!v||v.cin||v.status!=='Belum') return;
+  const e={id:'tt'+Date.now(),u:uid(),toko:v.place,tgl:'26 Okt',jam:TT_NOW,catatan:val('ttn'),foto:1};
+  shSet('tokoTutup',[...shRead('tokoTutup',[]).filter(t=>!(t.u===e.u&&t.toko===e.toko&&t.tgl===e.tgl)),e]);
+  v.status='Toko tutup'; v.tutup=e; back(); toast(v.place+' tercatat tutup','check'); }
+
+/* Grafik capaian di Beranda: pekerjaan dan task, dihitung dari state aplikasi. */
+function capItems(){
+  const r=role(), v=S.visits[vk()]||[], out=[];
+  const qf=qForms(), qd=qf.filter(f=>qDone(f.id)||(f.id==='QZ-DEF'&&S.quizDone)||(f.id==='SV-DEF'&&S.surveyDone)).length;
+  const qItem={c:'task',label:'Quiz & survey',done:qd,total:qf.length,sub:'tugas Team Leader',go:"go('quiz')"};
+  if(r==='leads'){
+    const mine=S.leads.filter(l=>l.owner===S.user);
+    if(vk()==='cbd'){ out.push({c:'visit',label:'Monitoring mitra',done:v.filter(x=>x.status==='Selesai').length,total:v.length,sub:'mitra dikunjungi',go:"act(()=>go('mitra'))"}); }
+    out.push({c:'job',label:'Leads dihubungi',done:mine.filter(l=>l.status!=='Baru').length,total:mine.length,sub:'leads kamu',go:"tab('leads')"});
+    if(vk()==='cbd'){ const t=cbdTasks(); out.push({c:'task',label:'Task Team Leader',done:t.filter(x=>x.st==='Terjawab').length,total:t.length,sub:'pertanyaan TL',go:"act(()=>go('cbd-task'))"}); }
+    else out.push(qItem);
+    return out;
+  }
+  const vGo=r==='fmcg'?"tab('aktivitas')":hasAkt()?"tab('akt')":"tab('kunjungan')";
+  if(v.length){ const tt=v.filter(x=>x.status==='Toko tutup').length; out.push({c:'visit',label:'Kunjungan',done:v.filter(x=>x.status==='Selesai').length,total:v.length,sub:tt?tt+' toko tutup':'toko selesai',go:vGo}); }
+  const actv=v.filter(x=>x.status!=='Toko tutup');
+  if(r==='fmcg') out.push({c:'job',label:'Tugas aktivitas',done:actv.reduce((s,x)=>s+FM_TASKS.filter(t=>(x.done||{})[t[0]]).length,0),total:actv.length*FM_TASKS.length,sub:'stok, promo, facing, share',go:"tab('aktivitas')"});
+  else if(r==='canvas'||r==='order'){ const T=actv.flatMap(x=>aktTasks(x).filter(t=>t.st)); out.push({c:'job',label:'Pekerjaan toko',done:T.filter(t=>t.st==='Selesai').length,total:T.length,sub:r==='order'?'pesanan per toko':'penjualan dan retur',go:"tab('akt')"}); }
+  else if(isSpg()){ const c=aktCfg(), st={jual:spgTrx().length>0,sku:S.dispDone,share:S.shareState==='kirim',stok:S.fm.stokDone,posm:POSM.every(a=>S.posm[a.id])}, m=(c.akt||[]).filter(k=>k in st); out.push({c:'job',label:'Aktivitas saya',done:m.filter(k=>st[k]).length,total:m.length,sub:'modul hari ini',go:"go('spg-akt')"}); }
+  else if(isMobilePromo()) out.push({c:'job',label:'Campaign & POSM',done:POSM.filter(a=>S.posm[a.id]).length,total:POSM.length,sub:'brief dinilai',go:"go('posm')"});
+  else if(r==='spg'){ const n=salesList().filter(x=>!x.d).length; out.push({c:'job',label:'Transaksi',done:Math.min(n,3),total:3,sub:'target 3 per hari',go:"tab('penjualan')"}); }
+  if(r==='fmcg') out.push({c:'task',label:'Support task',done:S.fm.tasks.filter(t=>t.done).length,total:S.fm.tasks.length,sub:'dari Team Leader',go:"fmGate(()=>go('fm-task'))"});
+  else out.push(qItem);
+  return out;
+}
+const CAP_COL={visit:['#3BE3A6','#0C9E62'],job:['#21CFF7','#3466FF'],task:['#FFC79E','#F09A66']};
+function capDonut(d){ const pct=d.total?Math.round(d.done/d.total*100):0, R=28, C=2*Math.PI*R, id='cg'+(++_gid), g=CAP_COL[d.c]||CAP_COL.job;
+  return `<span class="dn"><svg viewBox="0 0 68 68" width="68" height="68" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${g[0]}"/><stop offset="1" stop-color="${g[1]}"/></linearGradient></defs><circle cx="34" cy="34" r="${R}" fill="none" stroke="rgba(12,46,89,.08)" stroke-width="8"/>${pct?`<circle cx="34" cy="34" r="${R}" fill="none" stroke="url(#${id})" stroke-width="8" stroke-linecap="round" stroke-dasharray="${(C*pct/100).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 34 34)"/>`:''}</svg><b class="num">${pct}%</b></span>`; }
+function capChart(){
+  const L=capItems().filter(d=>d.total>0); if(!L.length) return '';
+  const dn=L.reduce((s,d)=>s+d.done,0), tot=L.reduce((s,d)=>s+d.total,0);
+  return `<div class="sec-title">Capaian hari ini <span class="small muted num">${dn} dari ${tot} selesai</span></div>
+  <div class="card" style="padding:12px 10px"><div class="cap3" style="grid-template-columns:repeat(${L.length},minmax(0,1fr))">${L.map(d=>`<button onclick="${d.go}" aria-label="${d.label} ${d.done} dari ${d.total}">${capDonut(d)}<span class="lb">${d.label}</span><span class="nm"><b class="num" style="color:var(--ink)">${d.done}/${d.total}</b> · ${d.sub}</span></button>`).join('')}</div></div>`;
+}
+
+/* Webview portal SIM SIAP (simulasi in-app browser). */
+const SIAP_PG={'':'',slip:'/slip-gaji',cuti:'/cuti',profil:'/profil',info:'/pengumuman',absen:'/absensi',dok:'/dokumen'};
+const SIAP_TILE=[['slip','Slip gaji','money'],['cuti','Cuti','calendar'],['profil','Profil','user'],['info','Pengumuman','bell'],['absen','Rekap absen','clock'],['dok','Dokumen','file']];
+function siapPage(pg,p){
+  const u=U(), kv=(a,b)=>`<div class="kv"><span>${a}</span><span class="num">${b}</span></div>`, h=t=>`<div class="wv-head"><small>SIM SIAP</small><div style="font-size:17px;font-weight:800;margin-top:2px">${t}</div></div>`;
+  if(pg==='slip') return `${h('Slip gaji')}<div style="height:12px"></div><div class="wv-box"><b>Periode Oktober 2026</b>${kv('Gaji pokok','Rp5.100.000')}${kv('Tunjangan transport','Rp600.000')}${kv('Tunjangan makan','Rp520.000')}${kv('Insentif penjualan','Rp850.000')}${kv('Potongan BPJS','−Rp204.000')}${kv('PPh 21','−Rp96.000')}<div class="kv" style="border-top:1px solid #E3E8EF;margin-top:4px;padding-top:10px"><span><b>Take home pay</b></span><span class="num"><b>Rp6.770.000</b></span></div><button class="wv-btn" onclick="toast('Slip gaji Oktober 2026 diunduh','upload')">Unduh PDF</button></div><div class="wv-box">${['September 2026','Agustus 2026'].map(m=>`<div class="kv"><span>${m}</span><a class="link" onclick="toast('Slip gaji ${m} dibuka','file')">Lihat</a></div>`).join('')}</div>`;
+  if(pg==='cuti') return `${h('Cuti')}<div style="height:12px"></div><div class="wv-box">${kv('Sisa cuti tahunan','8 dari 12 hari')}${kv('Cuti terpakai 2026','4 hari')}${p.sent?`<p style="margin:8px 0 0;color:#0C7A4E;font-weight:600">Pengajuan cuti 3–4 Nov terkirim ke atasan.</p>`:`<button class="wv-btn" onclick="setP({sent:1});toast('Pengajuan cuti terkirim ke atasan')">Ajukan cuti 3–4 Nov</button>`}</div><div class="wv-box"><b>Riwayat</b>${kv('20 Okt · Sakit','Disetujui')}${kv('14–15 Agu · Cuti tahunan','Disetujui')}</div>`;
+  if(pg==='profil') return `${h('Profil')}<div style="height:12px"></div><div class="wv-box">${kv('Nama',esc(u.name))}${kv('NIP',u.nip)}${kv('Jabatan',esc(u.roleLabel))}${kv('Unit',esc(u.unit))}${kv('Penempatan',esc(u.client.split(' & ')[0]))}${kv('Email',u.name.split(' ')[0].toLowerCase()+'@simgroup.example')}</div>`;
+  if(pg==='info') return `${h('Pengumuman')}<div style="height:12px"></div>${[['Jadwal libur akhir tahun','Kantor tutup 24–26 Des 2026.','2 hari lalu'],['Pembaruan data BPJS','Cek data keluarga sebelum 15 Nov.','5 hari lalu'],['Pelatihan product knowledge','Kelas daring 30 Okt, 10.00.','1 minggu lalu']].map(a=>`<div class="wv-box"><b>${a[0]}</b><div style="margin-top:4px;color:#5B6B7C">${a[1]}</div><div style="margin-top:6px;font-size:12px;color:#8A97A6">${a[2]}</div></div>`).join('')}`;
+  if(pg==='absen') return `${h('Rekap absen')}<div style="height:12px"></div><div class="wv-box"><b>Oktober 2026</b>${kv('Hadir','20 hari')}${kv('Terlambat','2 kali')}${kv('Izin dan sakit','1 hari')}${kv('Off','4 hari')}</div>`;
+  if(pg==='dok') return `${h('Dokumen')}<div style="height:12px"></div><div class="wv-box">${['Kontrak kerja 2026','SK penempatan','Kartu BPJS Ketenagakerjaan'].map(d=>`<div class="kv"><span>${d}</span><a class="link" onclick="toast('${d} dibuka','file')">Buka</a></div>`).join('')}</div>`;
+  return `<div class="wv-head"><small>Portal karyawan SIMGROUP</small><div style="font-size:20px;font-weight:800;margin-top:2px">SIM SIAP</div><div style="margin-top:10px;font-size:13px">Halo, ${esc(u.name)}<br><small>${u.nip} · ${esc(u.unit)}</small></div></div>
+  <div class="wv-tiles">${SIAP_TILE.map(t=>`<button onclick="setP({pg:'${t[0]}'})">${I(t[2],24)}${t[1]}</button>`).join('')}</div>
+  <div class="wv-box"><b>Pengumuman terbaru</b><div style="margin-top:6px;color:#5B6B7C">Jadwal libur akhir tahun: kantor tutup 24–26 Des 2026.</div><a class="link" style="display:inline-block;margin-top:8px" onclick="setP({pg:'info'})">Lihat semua</a></div>`;
+}
+SCR['sim-siap'] = p => { const pg=p.pg||'';
+  return {note:'<b>MOM 12 Nov.</b> Menu SIM SIAP ada di Beranda untuk semua role. Menu ini membuka portal SIM SIAP sebagai webview di dalam aplikasi (in-app browser dengan bilah URL, tombol kembali, dan tutup). Isi portal di mockup hanya simulasi: slip gaji, cuti, profil, pengumuman, rekap absen, dan dokumen. Login portal memakai sesi akun SIM yang sama (perlu dikonfirmasi).',
+  html:`<div class="wv"><div class="wv-bar"><button class="ib" onclick="back()" aria-label="Tutup">${I('x',20,2.2)}</button>${pg?`<button class="ib" onclick="setP({pg:'',sent:0})" aria-label="Kembali">${I('left',20,2.2)}</button>`:''}<div class="wv-url">${I('lock',13,2.4)}<span>siap.simgroup.example${SIAP_PG[pg]||''}</span></div><button class="ib" onclick="render(false);toast('Halaman dimuat ulang','refresh')" aria-label="Muat ulang">${I('refresh',18)}</button></div>
+  <div class="wv-load"></div><div class="wv-page">${siapPage(pg,p)}</div></div>`};
+};
 
 /* ---------- Notifikasi & Akun ---------- */
 SCR.notif = () => {
@@ -2672,7 +2916,7 @@ function render(scrollTop=true, keepScroll=false){
   const c=cur(); if(!c) return;
   if(S.user&&role()==='fmcg'){ fmSyncVisits(); fmPushState(); }
   else if(S.user) jpSyncVisits();
-  if(S.user){ cbdSync(); eodSync(); }
+  if(S.user){ cbdSync(); tutupSync(); eodSync(); }
   const content=$('#view .content'); const st=keepScroll&&content?content.scrollTop:0;
   const def=SCR[c.name](c.p);
   $('#view').innerHTML=def.html;
