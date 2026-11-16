@@ -819,7 +819,6 @@ textarea.ta[aria-invalid=true]{border-color:var(--danger)}
 @media (min-width:1280px){ .user-btn .utx{display:block} }
 @media (max-width:1023px){ .shell{padding:12px;gap:12px} }
 @media (max-width:767px){ .hsearch{display:none} .btn.search-btn{display:inline-flex} }
-@media (max-width:639px){ .create-btn{display:none} }
 @media (max-width:1023px){ .stats{grid-template-columns:repeat(2,minmax(0,1fr))} .g2{grid-template-columns:minmax(0,1fr)} }
 @media (max-width:767px){
   .rail-wrap{display:none}
@@ -1726,7 +1725,6 @@ function sidebarHTML(collapsed){
     return head+subs; }).join('');
   return `<aside class="sidebar ${collapsed?'collapsed':''}" aria-label="Navigasi utama">
     <a href="#/" class="sb-brand" aria-label="Sales Console, ke Overview"><span class="sb-mark">S</span><span class="sb-name"><b>Sales Console</b><small>SIMGROUP</small></span></a>
-    <span class="ra-w" style="position:relative;display:block;margin-top:16px;width:100%"><button type="button" class="ra" onclick="openCreate(this,'rail')" aria-haspopup="menu" aria-expanded="false" ${collapsed?'aria-label="Buat" data-tip="Buat" data-tip-side="right"':''}>${I('plus',20,2.4)}<span class="lbl">Buat</span></button></span>
     <nav class="sb-scroll" aria-label="Halaman">${rows}</nav>
     <div class="sb-foot">
       <span class="ws" style="position:relative;display:block"><button type="button" class="ws-btn" onclick="wsPop(this)" aria-haspopup="menu" aria-expanded="false" ${collapsed?`aria-label="Workspace: ${esc(wsName())}" data-tip="Workspace: ${esc(wsName())}" data-tip-side="right"`:''}><span class="ws-tile">S</span><span class="wtx" style="flex:1;min-width:0"><small>Workspace klien</small><b>${esc(wsName())}</b></span><span class="chev">${I('updown',16)}</span></button></span>
@@ -1736,17 +1734,6 @@ function sidebarHTML(collapsed){
 function toggleSb(){ ST.sidebar=!ST.sidebar; store.set(KEY.rail,ST.sidebar?'1':'0'); render(false); }
 function setTheme(t){ ST.theme=t||(ST.theme==='dark'?'light':'dark'); document.documentElement.dataset.theme=ST.theme==='dark'?'dark':''; if(ST.theme!=='dark') delete document.documentElement.dataset.theme; store.set(KEY.theme,ST.theme); const tc=document.querySelector('meta[name=theme-color]'); if(tc) tc.content=ST.theme==='dark'?'#0D0D0F':'#F1F0F1'; render(false); }
 const popSide=where=>where==='rail'?{right:false,cls:'pop-rt'}:{right:true,cls:''};
-
-/* ---------- Menu Buat: hanya alur buat yang sudah ada ---------- */
-const createItems=()=>[
-  {perm:'order.create',label:'Pesanan baru',desc:'Catat pesanan dealer',icon:'file',on:'ordForm()'},
-  {perm:'sales.input',label:'Input penjualan',desc:'Catat transaksi dari dashboard',icon:'chart',on:'djForm()'},
-  {perm:'visit.create',label:'Jadwal kunjungan',desc:'Atur kunjungan sales ke toko',icon:'cal',on:'visForm()'},
-  {perm:'promo.create',label:'Promo baru',desc:'Ajukan promo untuk approval',icon:'tag',on:'promoForm()'},
-  {perm:'info.create',label:'Pengumuman',desc:'Kirim info ke sales lapangan',icon:'bell',on:'infoForm()'},
-  {perm:'master.edit',label:'Toko baru',desc:'Tambah toko ke master data',icon:'store',on:"openForm('toko')"}
-].filter(i=>can(i.perm));
-function openCreate(el,where){ const items=createItems(); if(!items.length) return; const pos=popSide(where||'header'); openPop(el,menuItems([{header:'Buat'},...items]),{...pos,title:'Buat'}); }
 
 /* ---------- Pencarian global ---------- */
 const GS={hits:[],hi:-1};
@@ -1807,7 +1794,6 @@ function bottomBar(path){
   const c=counts(), moreOn=!!document.querySelector('#layer .drawer'), it=(p,l,ic,n)=>{ const on=p==='/'?path==='/':(path===p||path.startsWith(p+'/')); return `<a href="#${p}" class="bb-i ${on?'on':''}" ${on?'aria-current="page"':''} aria-label="${l}${n?', '+n+' menunggu':''}" data-tip="${l}">${I(ic,20)}${n?`<span class="cnt w">${n>99?'99+':n}</span>`:''}</a>`; };
   const itn=(p,n)=>{ const l=NAV.flatMap(x=>x[1]).find(x=>x[0]===p); return it(p,l[1],l[2],n); };
   return `<nav class="bbar" aria-label="Navigasi cepat">${itn('/')}${itn('/approval',c.approval)}
-    <span style="position:relative;display:inline-flex"><button type="button" class="bb-i bb-act" aria-label="Buat" aria-haspopup="menu" onclick="openCreate(this,'bar')">${I('plus',20,2.4)}</button></span>
     ${itn('/absensi')}${itn('/leads',c.leads)}
     <button type="button" class="bb-i bb-more ${moreOn?'on':''}" aria-label="Semua halaman" aria-haspopup="dialog" onclick="openMore()">${I('grid',20)}</button></nav>`;
 }
@@ -1917,7 +1903,6 @@ function render(scrollTop=true){
       ${gsearch('hsearch')}
       <div class="hdr-r">
         <button type="button" class="btn b-card icon-lg search-btn" aria-label="Cari" aria-expanded="${!!ST.searchOpen}" onclick="toggleSearch()">${I('search',20)}</button>
-        <span class="create-w"><button type="button" class="btn b-accent create-btn" aria-haspopup="menu" aria-expanded="false" onclick="openCreate(this,'header')">${I('plus',16,2.4)}Buat</button></span>
         <span style="position:relative"><button type="button" class="btn b-card icon-lg bell" aria-label="Notifikasi${un?`, ${un} belum dibaca`:''}" aria-haspopup="menu" aria-expanded="false" onclick="bellPop(this)">${I('bell',20)}${un?`<i>${un}</i>`:''}</button></span>
         <span style="position:relative"><button type="button" class="user-btn" aria-haspopup="menu" aria-expanded="false" aria-label="Akun ${ME.name}" onclick="userPop(this)">${av(ME.name)}<span class="utx"><b>${ME.name}</b><small>${ME.role}</small></span></button></span></div>
     </header>
