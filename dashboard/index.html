@@ -2048,7 +2048,31 @@ const appTrx=()=>shRead('trxApp',[]).map(t=>({...t,app:true}));
 const trxInWs=t=>{ if(ST.ws==='all') return true; const k=TOKO.find(x=>x.name===t.toko); return !k||!k.client||k.client===ST.ws; };
 const allTrx=()=>[...appTrx(),...TRX].filter(t=>t.st!=='Dihapus'&&trxInWs(t));
 const trxProdText=t=>{ const L=trxLines(t), l=L[0]; return esc(lineProd(l).name)+(L.length>1?' '+tag('+'+(L.length-1)+' produk','neutral'):l.q>1?' ×'+l.q:''); };
+/* Data contoh: penjualan yang diinput admin dari dashboard (sumber Dashboard). Disimpan sekali ke ledger bersama, jadi bisa dihapus lewat aksi baris. */
+function ensureDashSeed(){
+  try{
+    const L0=shRead('trxApp',[]); if(L0.some(t=>t.seed)) return;
+    const sl=SALES.filter(s=>['SPG / Promotor','Canvasing FMCG','Canvasing Elektronik'].includes(s.job)), pp=PRODUCTS.filter(p=>p.status!=='Nonaktif');
+    const AL=['Aplikasi error saat kirim','Sinyal hilang, data tidak terkirim','HP sales rusak atau hilang','Transaksi lupa diinput sales','Lainnya'];
+    // [bulan, hari, [[indeks produk, jumlah, diskon per unit]], diskon transaksi, no. invoice, indeks alasan, catatan]
+    const spec=[[10,25,[[0,2,0]],0,'INV/EC/2610/05110',0,''],[10,24,[[1,1,200000],[2,2,0]],50000,'INV/BD/2610/00931',1,'Sinyal toko buruk saat sales kirim'],[10,22,[[3,1,0]],0,'',2,'HP sales rusak, data dibawa ke admin'],
+      [10,19,[[4,3,0]],100000,'INV/TM/2610/00417',3,''],[10,15,[[5,1,0],[0,1,0],[2,1,100000]],0,'INV/SJ/2610/01204',0,'Konfirmasi Team Leader'],[10,9,[[6,2,0]],0,'',4,''],
+      [9,28,[[1,1,0]],0,'INV/EC/2609/04877',1,''],[9,17,[[7,4,0]],150000,'INV/BD/2609/00702',0,''],[9,5,[[2,1,0]],0,'INV/TM/2609/00188',3,''],
+      [8,21,[[0,1,0],[3,1,0]],0,'INV/SJ/2608/00951',2,''],[8,11,[[4,2,0]],0,'',1,''],[7,30,[[5,1,0]],0,'INV/EC/2607/04021',0,''],[6,18,[[6,1,0]],0,'INV/BD/2606/00544',3,''],[5,12,[[8,2,0]],0,'INV/TM/2605/00233',4,'']];
+    const rows=spec.map(([m,day,its,dT,invNo,al,note],i)=>{
+      const u=sl[i%sl.length].u, tk=TOKO.find(t=>!t.del&&t.sales.includes(u)), items=its.map(([pi,q,dk])=>{ const p=pp[pi%pp.length], d=dk<p.price?dk:0; return {p:p.id,kat:p.cat,q,list:p.price,disc:d,price:p.price-d,total:(p.price-d)*q}; });
+      const sub=items.reduce((a,x)=>a+x.total,0);
+      return {seed:true,id:'TRX-2610-D'+String(i+1).padStart(3,'0'),m,day,date:day+' '+LD_MN[m],d:ldAgo(m,day),u,toko:tk?tk.name:'Warung Elektronik Bu Siti',tokoFree:!tk,p:items[0].p,kat:items[0].kat,prodFree:false,q:items.reduce((a,x)=>a+x.q,0),total:sub-dT,sub,diskonTrx:dT,items,st:'Terkirim',inv:null,src:'Dashboard',invNo,alasan:AL[al],note,by:'Admin Dashboard'};
+    });
+    // Toko dan produk di luar master (teks bebas)
+    const fp=(id,m,day,u,toko,name,price,q,al,note,invNo)=>({seed:true,id,m,day,date:day+' '+LD_MN[m],d:ldAgo(m,day),u,toko,tokoFree:true,p:null,pname:name,kat:'',prodFree:true,q,total:price*q,sub:price*q,diskonTrx:0,items:[{p:null,pname:name,kat:'',q,list:price,disc:0,price,total:price*q}],st:'Terkirim',inv:null,src:'Dashboard',invNo,alasan:al,note,by:'Admin Dashboard'});
+    rows.push(fp('TRX-2610-D015',10,12,sl[0].u,'Warung Elektronik Bu Siti','Setrika Uap Mini',350000,2,AL[3],'Toko belum terdaftar di master','INV/WB/2610/00012'),fp('TRX-2610-D016',9,9,sl[1%sl.length].u,'Toko Cahaya Baru','Kipas Meja 12 inci',275000,3,AL[0],'','INV/CB/2609/00077'));
+    shSet('trxApp',[...rows,...L0]);
+  }catch(e){}
+}
+const trxClient=t=>t.tokoFree?'':(tokoRef(t.toko,t.u).client||'');
 const trxProd=t=>PRODUCTS.find(p=>p.id===t.p)||{name:t.pname||'–',sku:'–',cat:t.kat||'–'};
+ensureDashSeed();
 function pagePenjualan(q){
   const tab=q.tab||'klien';
   const ser=repSeries(q); ST.penKeys=ser.pts.map(x=>x.key); let si=ST.penKeys.indexOf(ST.penKey); if(si<0) si=ST.penKeys.length-1; const sp=ser.pts[si]||{title:'',r:ser.r};
@@ -2097,7 +2121,7 @@ function trxPanel(id){ const t=allTrx().find(x=>x.id===id); if(!t) return panelM
   openPanel(t.id,`${panelHero({eyebrow:'Transaksi · '+t.date+' 2026',title:trxLines(t).length>1?trxLines(t).length+' produk · '+t.q+' unit':esc(p.name)+(t.q>1?' ×'+t.q:''),sub:esc(s.name)+' · '+esc(t.toko),badge:spill(t.st,t.st==='Terkirim'?'success':'warning'),metrics:[['Total (invoice)',rp(iv?iv.price:t.total)],['Jumlah',t.q+' unit'],['Harga sistem',rp(t.total)]]})}
   ${trxLines(t).length>1?`<div class="xs muted" style="margin-bottom:8px">Produk (${trxLines(t).length})</div><div class="rows" style="margin-bottom:14px">${trxLines(t).map(l=>{ const lp=lineProd(l); return `<div class="rowlink" style="cursor:default"><span class="sm fg" style="flex:1">${esc(lp.name)}<span class="xs muted" style="display:block">${rp(l.price||Math.round(l.total/l.q))} × ${l.q}${l.disc?' · diskon '+rp(l.disc)+'/unit':''}</span></span><b class="tabular fg sm">${rp((l.price||Math.round(l.total/l.q))*l.q)}</b></div>`; }).join('')}</div>`
   :`<div class="tile" style="margin-bottom:14px"><div class="xs muted">Produk</div><b class="fg">${p.name} ×${t.q}</b><div class="xs muted">${p.sku}${t.promo?' · promo '+t.promo:''}</div></div>`}
-  <div class="xs muted" style="margin-bottom:8px">Data dari aplikasi mobile</div><div class="rows" style="margin-bottom:14px">${rowKV('No. transaksi (sistem)',`<span class="mono">${esc(t.id)}</span>`)}${rowKV('No. invoice toko',invNoOf(t)?`<span class="mono">${esc(invNoOf(t))}</span>`:'<span class="muted">Tidak diisi</span>')}${rowKV('Tanggal',esc(t.date)+' 2026'+(t.time?' · '+esc(t.time):''))}${rowKV('Sales',esc(s.name))}${rowKV('Toko',esc(t.toko))}${t.cust?rowKV('Pembeli',esc(t.cust)):''}${t.diskonTrx>0?rowKV('Subtotal produk',rp(t.sub))+rowKV('Diskon transaksi','−'+rp(t.diskonTrx))+rowKV('Total transaksi',`<b class="tabular">${rp(t.inv?t.inv.price:t.total)}</b>`):''}${rowKV('Sumber',t.src==='Dashboard'?'Input dashboard':'Aplikasi mobile')}</div>
+  <div class="xs muted" style="margin-bottom:8px">${t.src==='Dashboard'?'Data transaksi (input dashboard)':'Data dari aplikasi mobile'}</div><div class="rows" style="margin-bottom:14px">${rowKV('No. transaksi (sistem)',`<span class="mono">${esc(t.id)}</span>`)}${rowKV('No. invoice toko',invNoOf(t)?`<span class="mono">${esc(invNoOf(t))}</span>`:'<span class="muted">Tidak diisi</span>')}${rowKV('Tanggal',esc(t.date)+' 2026'+(t.time?' · '+esc(t.time):''))}${rowKV('Sales',esc(s.name))}${rowKV('Toko',esc(t.toko))}${t.cust?rowKV('Pembeli',esc(t.cust)):''}${t.diskonTrx>0?rowKV('Subtotal produk',rp(t.sub))+rowKV('Diskon transaksi','−'+rp(t.diskonTrx))+rowKV('Total transaksi',`<b class="tabular">${rp(t.inv?t.inv.price:t.total)}</b>`):''}${rowKV('Sumber',t.src==='Dashboard'?'Input dashboard':'Aplikasi mobile')}</div>
   ${!iv&&t.invFoto>0?`<div class="xs muted" style="margin-bottom:8px">Foto invoice (${t.invFoto} foto)</div><div style="display:flex;gap:14px;margin-bottom:14px"><div style="width:120px;flex:none;border-radius:12px;overflow:hidden;box-shadow:var(--shadow-card);background:#fff">${invDocSvg(120,156)}</div><div style="flex:1;min-width:0"><div class="mono fg" style="margin-bottom:6px">${esc(invNoOf(t)||'–')}</div><div class="xs muted">Diunggah sales lewat Catat penjualan.</div></div></div>`:''}
   ${iv?`<div class="xs muted" style="margin-bottom:8px">Invoice dari lapangan</div><div style="display:flex;gap:14px;margin-bottom:14px"><div style="width:120px;flex:none;border-radius:12px;overflow:hidden;box-shadow:var(--shadow-card);background:#fff">${invDocSvg(120,156)}</div><div style="flex:1;min-width:0"><div class="mono fg" style="margin-bottom:8px">${esc(invNoOf(t))}</div><div class="rows">
     <div class="rowlink" style="cursor:default;padding:8px 0"><span class="sm muted" style="flex:1">Harga invoice (acuan)</span><b class="tabular fg">${rp(unitInv)}</b></div>
@@ -2151,15 +2175,30 @@ function ordFilter(k,v){ setQ({[k]:v}); }
 /* ---------- Data penjualan (MOM 9 Nov bagian 8): daftar transaksi + input dari dashboard bila input aplikasi gagal ---------- */
 const DJ_ALASAN=['Aplikasi error saat kirim','Sinyal hilang, data tidak terkirim','HP sales rusak atau hilang','Transaksi lupa diinput sales','Lainnya'];
 const isDash=t=>t.src==='Dashboard';
+const DJ_DEF=[isoOf(10,1),LD_END];
+function djRange(q){ const cl=x=>x<LD_START?LD_START:x>LD_END?LD_END:x; let f=cl(q.from||DJ_DEF[0]), t=cl(q.to||DJ_DEF[1]); if(f>t) [f,t]=[t,f]; return {from:f,to:t}; }
+function djDate(){ const f=document.getElementById('djf_from').value, t=document.getElementById('djf_to').value; setQ({from:f,to:t}); }
+const djField=(key,val,ph,label)=>`<form style="flex:1;min-width:200px" onsubmit="event.preventDefault();setQ({${key}:this.v.value.trim()})"><label class="inp h40"><span class="sr-only">${label}</span>${I('search',16)}<input name="v" value="${esc(val||'')}" placeholder="${ph}" autocomplete="off" onchange="setQ({${key}:this.value.trim()})"></label></form>`;
 function pageDataJual(q){
-  const m=+q.p||10, f=q.f||'', qq=(q.q||'').toLowerCase(), all=allTrx().filter(t=>tmo(t)===m);
-  const rows=all.filter(t=>f==='dash'?isDash(t):f==='app'?!isDash(t):true).filter(t=>!qq||(byU(t.u).name+t.toko+t.id+invNoOf(t)+trxLines(t).map(l=>lineProd(l).name).join(' ')).toLowerCase().includes(qq)).map(t=>({...t,_id:t.id}));
-  const dash=all.filter(isDash);
+  const r=djRange(q), f=q.f||'', tr=(q.tr||'').toLowerCase(), iv=(q.iv||'').toLowerCase();
+  const inRange=allTrx().filter(t=>{ const x=trxIso(t); return x>=r.from&&x<=r.to; });
+  const all=inRange.filter(t=>(!tr||t.id.toLowerCase().includes(tr))&&(!iv||invNoOf(t).toLowerCase().includes(iv))&&(!q.u||t.u===q.u)&&(!q.cl||trxClient(t)===q.cl)&&(!q.tk||t.toko===q.tk)&&(!q.pr||trxLines(t).some(l=>lineProd(l).name===q.pr)));
+  const rows=all.filter(t=>f==='dash'?isDash(t):f==='app'?!isDash(t):true).map(t=>({...t,_id:t.id}));
+  const dash=all.filter(isDash), dirty=q.tr||q.iv||q.u||q.cl||q.tk||q.pr||f||q.from||q.to;
+  const everyone=allTrx(), uOpts=[...new Set(everyone.map(t=>t.u))].map(u=>[u,(byU(u)||{}).name||u]).sort((a,b)=>a[1].localeCompare(b[1])),
+    cOpts=live('client').filter(c=>c.status==='Aktif').map(c=>[c.id,c.name]),
+    tOpts=[...new Set([...live('toko').filter(t=>t.status==='Aktif'&&(!q.cl||t.client===q.cl)).map(t=>t.name),...(q.cl?[]:everyone.filter(t=>t.tokoFree).map(t=>t.toko))])].sort(),
+    pOpts=[...new Set([...PRODUCTS.map(p=>p.name),...everyone.filter(t=>t.prodFree).flatMap(t=>trxLines(t).map(l=>lineProd(l).name))])].sort();
+  const dText=r.from===r.to?fmtIso(r.to)+' 2026':fmtIso(r.from)+' sampai '+fmtIso(r.to)+' 2026';
   return {title:'Data penjualan',html:`
-  <div style="margin-bottom:16px">${filterCard({search:searchBox(q.q,{ph:'Cari sales, toko, produk, atau nomor transaksi/invoice',label:'Cari transaksi'}),selects:sel(LD_MONTHS.map(x=>[x,LD_FULL[x]+' 2026']),m,"setQ({p:this.value})",{label:'Periode',cls:'sm'}),chips:{key:'f',val:f,label:'Sumber',items:[['','Semua',all.length],['app','Dari aplikasi',all.length-dash.length],['dash','Input dashboard',dash.length]]},clear:(f||q.q)?"setQ({f:'',q:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> transaksi di ${LD_FULL[m]} 2026.`})}</div>
+  <div style="margin-bottom:16px">${filterCard({top:`<label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal mulai</span><input id="djf_from" type="date" min="${LD_START}" max="${LD_END}" value="${r.from}" onchange="djDate()" style="width:140px"></label><span class="muted xs">sampai</span><label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal akhir</span><input id="djf_to" type="date" min="${LD_START}" max="${LD_END}" value="${r.to}" onchange="djDate()" style="width:140px"></label>`,
+    search:`${djField('tr',q.tr,'No. transaksi','Cari no. transaksi')}${djField('iv',q.iv,'No. invoice toko','Cari no. invoice toko')}`,
+    selects:`${sel([['','Semua sales'],...uOpts],q.u||'',"setQ({u:this.value})",{label:'Filter sales',cls:'sm'})}${sel([['','Semua client'],...cOpts],q.cl||'',"setQ({cl:this.value,tk:''})",{label:'Filter client',cls:'sm'})}${sel([['','Semua toko'],...tOpts],q.tk||'',"setQ({tk:this.value})",{label:'Filter toko',cls:'sm'})}${sel([['','Semua produk'],...pOpts],q.pr||'',"setQ({pr:this.value})",{label:'Filter produk',cls:'sm'})}${sel([['','Semua sumber'],['app','Dari aplikasi'],['dash','Input dashboard']],f,"setQ({f:this.value})",{label:'Filter sumber',cls:'sm'})}`,
+    clear:dirty?"setQ({tr:'',iv:'',u:'',cl:'',tk:'',pr:'',f:'',from:'',to:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> transaksi, ${dText}.`})}</div>
   <div class="stats">${[['','Semua transaksi',all.length,jt(sumVal(all))],['app','Dari aplikasi',all.length-dash.length,'Input sales di lapangan'],['dash','Input dashboard',dash.length,dash.length?jt(sumVal(dash)):'Belum ada']].map(([k,l,v,sub])=>`<button class="stat ${f===k?'on':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></button>`).join('')}</div>
   ${card('Transaksi penjualan',`${dataTable('dj',{rows,rowClick:r=>`trxPanel('${r.id}')`,acts:r=>isDash(r)?rowActs(`trxPanel('${r.id}')`,`djDelAsk('${r.id}')`):'',empty:'Belum ada transaksi yang cocok.',cols:[
       {label:'No. transaksi',render:r=>`<span class="mono">${r.id}</span><span class="xs muted" style="display:block">${r.date}</span>`,prim:true},{label:'No. invoice toko',render:r=>invNoOf(r)?`<span class="mono">${esc(invNoOf(r))}</span>`:'<span class="muted">–</span>'},{label:'Sales',render:r=>esc(byU(r.u).name)},
+      {label:'Client',render:r=>trxClient(r)?esc(clientName(trxClient(r))):'<span class="muted">–</span>',hide:true},
       {label:'Toko',render:r=>esc(r.toko)+(r.tokoFree?' '+tag('Teks bebas','neutral'):''),hide:true},{label:'Produk',render:r=>trxProdText(r)+(r.prodFree||(!r.p&&r.pname)?' '+tag('Di luar master','neutral'):''),hide:true},
       {label:'Total',render:r=>`<b class="fg tabular">${rp(trxVal(r))}</b>`,align:'r'},{label:'Sumber',render:r=>isDash(r)?tag('Input dashboard','accent'):tag('Aplikasi','info')}]})}`,
     {acts:`${btn('Tambah penjualan',{v:'accent',size:'sm',icon:'plus',on:'djForm()'})}`})}
