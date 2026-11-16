@@ -2236,6 +2236,7 @@ addEventListener('resize',rpClose); addEventListener('scroll',e=>{ if(!e.target.
 const DJ_DEF=[isoOf(10,1),LD_END];
 function djRange(q){ const cl=x=>x<LD_START?LD_START:x>LD_END?LD_END:x; let f=cl(q.from||DJ_DEF[0]), t=cl(q.to||DJ_DEF[1]); if(f>t) [f,t]=[t,f]; return {from:f,to:t}; }
 function djDate(f,t){ setQ({from:f,to:t}); }
+function djPer(k){ const p=REP_PRESETS.find(x=>x[0]===k); if(p) setQ(k==='m'?{from:'',to:''}:{from:p[2][0],to:p[2][1]}); }
 const djField=(key,val,ph,label)=>`<form style="flex:1;min-width:200px" onsubmit="event.preventDefault();setQ({${key}:this.v.value.trim()})"><label class="inp h40"><span class="sr-only">${label}</span>${I('search',16)}<input name="v" value="${esc(val||'')}" placeholder="${ph}" autocomplete="off" onchange="setQ({${key}:this.value.trim()})"></label></form>`;
 function pageDataJual(q){
   const r=djRange(q), f=q.f||'', tr=(q.tr||'').toLowerCase();
@@ -2249,7 +2250,7 @@ function pageDataJual(q){
     pOpts=[...new Set([...PRODUCTS.map(p=>p.name),...everyone.filter(t=>t.prodFree).flatMap(t=>trxLines(t).map(l=>lineProd(l).name))])].sort();
   const dText=r.from===r.to?fmtIso(r.to)+' 2026':fmtIso(r.from)+' sampai '+fmtIso(r.to)+' 2026';
   return {title:'Data penjualan',html:`
-  <div style="margin-bottom:16px">${filterCard({top:rangePicker({id:'dj',from:r.from,to:r.to,min:LD_START,max:LD_END,on:'djDate',presets:REP_PRESETS}),
+  <div style="margin-bottom:16px">${filterCard({top:pills(REP_PRESETS.map(x=>[x[0],x[1]]),(REP_PRESETS.find(x=>x[2][0]===r.from&&x[2][1]===r.to)||[''])[0],'djPer')+rangePicker({id:'dj',from:r.from,to:r.to,min:LD_START,max:LD_END,on:'djDate',presets:REP_PRESETS}),
     search:djField('tr',q.tr,'No. transaksi atau No. invoice toko','Cari no. transaksi atau no. invoice toko'),
     selects:`${sel([['','Semua sales'],...uOpts],q.u||'',"setQ({u:this.value})",{label:'Filter sales',cls:'sm'})}${sel([['','Semua client'],...cOpts],q.cl||'',"setQ({cl:this.value,tk:''})",{label:'Filter client',cls:'sm'})}${sel([['','Semua toko'],...tOpts],q.tk||'',"setQ({tk:this.value})",{label:'Filter toko',cls:'sm'})}${sel([['','Semua produk'],...pOpts],q.pr||'',"setQ({pr:this.value})",{label:'Filter produk',cls:'sm'})}${sel([['','Semua sumber'],['app','Dari aplikasi'],['dash','Input dashboard']],f,"setQ({f:this.value})",{label:'Filter sumber',cls:'sm'})}`,
     clear:dirty?"setQ({tr:'',u:'',cl:'',tk:'',pr:'',f:'',from:'',to:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> transaksi, ${dText}.`})}</div>
