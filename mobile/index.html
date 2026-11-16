@@ -2218,6 +2218,7 @@ const MASTER_DEF={
   formjual:[['kategori','Kategori produk','select','katprod','','Produk','Ya','Ya','kategori'],['status','Status produk','select','statprod','','Produk','Ya','Ya',''],['nama','Nama produk','text','produk','','Produk','Ya','Ya','produk'],
     ['harga','Harga','money','','','Produk','Ya','Ya',''],['diskon','Diskon','money','','','Produk','Tidak','Ya',''],['setelah','Harga setelah diskon','calc','','{harga} - {diskon}','Produk','Tidak','Tidak','harga'],
     ['tanggal','Tanggal pembelian','date','','','Produk','Ya','Ya',''],['jumlah','Jumlah produk','number','','','Produk','Ya','Ya','qty'],['foto','Foto produk','photo','','','Produk','Ya','Tidak',''],
+    ['noinv','No. invoice','text','','','Invoice','Ya','Ya','noinv'],['fotoinv','Foto invoice','photo','','','Invoice','Ya','Tidak','fotoinv'],
     ['pembeli','Nama pembeli','text','','','Pembeli','Ya','Tidak','pembeli'],['alamat','Alamat pembeli','text','','','Pembeli','Tidak','Tidak',''],['telepon','Telepon pembeli','tel','','','Pembeli','Ya','Tidak','']
   ].map(([key,label,type,src,rumus,bagian,wajib,ocr,peran])=>({key,label,type,src,rumus,opsi:'',bagian,wajib,ocr,peran,roles:['r3']})),
   tgtqty:[['TV',34,26],['Kulkas',18,12],['Mesin Cuci',14,9],['AC',8,6],['Air Purifier',6,5]].map(([kat,target,act])=>({u:'rina',kat,bulan:'Oktober 2026',target,act}))
@@ -2323,12 +2324,13 @@ SCR['spg-invoice'] = p => {
     html:docCam({title:'Foto invoice',hint:'Masukkan seluruh invoice ke dalam bingkai',phase:ph,onShoot:'spgShoot()',onManual:'spgNew(1)'})};
 };
 // Contoh hasil baca OCR (demo). Dipetakan ke field lewat peran, lalu kunci field.
-function ocrSample(){ const p=mProd()[0]||{}; return {peran:{kategori:p.brand+'/'+prodPath(p),produk:p.name,qty:1},key:{harga:p.price,diskon:Math.round((p.price||0)*.1/1000)*1000,tanggal:TODAY_ISO}}; }
+const OCR_INV_NO='INV/EC/2610/04571';
+function ocrSample(){ const p=mProd()[0]||{}; return {peran:{kategori:p.brand+'/'+prodPath(p),produk:p.name,qty:1,noinv:OCR_INV_NO},key:{harga:p.price,diskon:Math.round((p.price||0)*.1/1000)*1000,tanggal:TODAY_ISO}}; }
 function spgShoot(){
   setP({phase:'scan'});
   setTimeout(()=>{ if(cur().name!=='spg-invoice') return; if(S.demo.ocr==='bad'){ setP({phase:'fail'}); return; }
     const sm=ocrSample(), sf=sfBlank(); formFields().filter(f=>f.ocr==='Ya').forEach(f=>{ const v=sm.peran[f.peran]??sm.key[f.key]??(f.src==='statprod'?STATUS_PRODUK()[0]:undefined); if(v!==undefined) sf.v[f.key]=v; });
-    sf.ocr={no:'INV/EC/2610/04571',conf:96}; S.sf=sf; replace('spg-jual-form'); },1900);
+    sf.ocr={no:OCR_INV_NO,conf:96}; const fi=fPeran('fotoinv'); if(fi) sf.ph[fi.key]=1; S.sf=sf; replace('spg-jual-form'); },1900);
 }
 function fCalcRaw(f,seen=0){ if(seen>10) return 0; const expr=(f.rumus||'').replace(/\{([a-z0-9_]+)\}/g,(_,k)=>{ const g=formFields().find(x=>x.key===k); return g?.type==='calc'?fCalcRaw(g,seen+1):(Number(S.sf.v[k])||0); });
   if(!/^[\d\s+\-*/().]*$/.test(expr)) return 0; try{ const r=Function('return ('+(expr||0)+')')(); return isFinite(r)?r:0; }catch(e){ return 0; } }
@@ -2375,10 +2377,11 @@ function spgSave(){
   if(neg.length){ $('#sferr').innerHTML=`<div class="err">${esc(neg.join(', '))} tidak boleh minus. Periksa isian angkanya.</div>`; return; }
   const fp=fPeran('produk'), fc=fPeran('pembeli'), fk=fPeran('kategori'), name=(fp?S.sf.v[fp.key]:'')||'Produk', q=fQty()||1, unit=fUnit(), pr=mProd().find(p=>p.name===name);
   const id='TRX-2610-0'+(100+S.sales.length), o=visitOpen(), toko=o?o.place:spgToko().name, vals=F.map(f=>[f.label,fDisp(f)]), cust=fc?String(S.sf.v[fc.key]||'').trim():'';
+  const fn=fPeran('noinv'), invNo=((fn?S.sf.v[fn.key]:'')||S.sf.ocr?.no||'').toString().replace(/['"<>`]/g,'').trim().toUpperCase(), ffi=fPeran('fotoinv'), invFoto=ffi?(S.sf.ph[ffi.key]||0):(S.sf.ocr?1:0);
   const inv=S.sf.ocr?{no:S.sf.ocr.no,total:unit*q,sys:(pr?.price||unit)*q,flag:false}:null;
-  S.sales.unshift({id,toko,items:[{id:pr?.id||null,name,q,price:unit}],total:unit*q,time:'10:'+String(15+spgTrx().length*7).padStart(2,'0'),cust,vals,status:S.demo.offline?'Menunggu sinkron':'Terkirim',d:0,ci:true,inv});
+  S.sales.unshift({id,toko,items:[{id:pr?.id||null,name,q,price:unit}],total:unit*q,time:'10:'+String(15+spgTrx().length*7).padStart(2,'0'),cust,vals,invNo,invFoto,status:S.demo.offline?'Menunggu sinkron':'Terkirim',d:0,ci:true,inv});
   // Terkirim ke dashboard (Laporan penjualan › Transaksi)
-  const kat=fk?(S.sf.v[fk.key]||'').split('/')[1]:''; shSet('trxApp',[{id,u:uid(),toko,date:'26 Okt',d:0,p:pr?.id||null,pname:name,kat:kat||pr?.kat||'',q,total:inv?inv.sys:unit*q,st:'Terkirim',inv:inv?{no:inv.no,price:inv.total,sys:inv.sys,pct:inv.sys?inv.total/inv.sys*100-100:0,flag:false,conf:S.sf.ocr.conf}:null,vals},...shRead('trxApp',[])]);
+  const kat=fk?(S.sf.v[fk.key]||'').split('/')[1]:''; shSet('trxApp',[{id,u:uid(),toko,date:'26 Okt',d:0,p:pr?.id||null,pname:name,kat:kat||pr?.kat||'',q,total:inv?inv.sys:unit*q,st:'Terkirim',invNo,invFoto,cust,time:'10:'+String(15+spgTrx().length*7).padStart(2,'0'),inv:inv?{no:inv.no,price:inv.total,sys:inv.sys,pct:inv.sys?inv.total/inv.sys*100-100:0,flag:false,conf:S.sf.ocr.conf}:null,vals},...shRead('trxApp',[])]);
   S.stack=S.stack.filter(e=>!['spg-jual-form','spg-invoice'].includes(e.name)); render(true);
   toast(id+' tersimpan'+(S.demo.offline?', menunggu sinkron':''));
 }
