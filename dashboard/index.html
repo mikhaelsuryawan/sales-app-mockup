@@ -2238,11 +2238,11 @@ function djRange(q){ const cl=x=>x<LD_START?LD_START:x>LD_END?LD_END:x; let f=cl
 function djDate(f,t){ setQ({from:f,to:t}); }
 const djField=(key,val,ph,label)=>`<form style="flex:1;min-width:200px" onsubmit="event.preventDefault();setQ({${key}:this.v.value.trim()})"><label class="inp h40"><span class="sr-only">${label}</span>${I('search',16)}<input name="v" value="${esc(val||'')}" placeholder="${ph}" autocomplete="off" onchange="setQ({${key}:this.value.trim()})"></label></form>`;
 function pageDataJual(q){
-  const r=djRange(q), f=q.f||'', tr=(q.tr||'').toLowerCase(), iv=(q.iv||'').toLowerCase();
+  const r=djRange(q), f=q.f||'', tr=(q.tr||'').toLowerCase();
   const inRange=allTrx().filter(t=>{ const x=trxIso(t); return x>=r.from&&x<=r.to; });
-  const all=inRange.filter(t=>(!tr||t.id.toLowerCase().includes(tr))&&(!iv||invNoOf(t).toLowerCase().includes(iv))&&(!q.u||t.u===q.u)&&(!q.cl||trxClient(t)===q.cl)&&(!q.tk||t.toko===q.tk)&&(!q.pr||trxLines(t).some(l=>lineProd(l).name===q.pr)));
+  const all=inRange.filter(t=>(!tr||t.id.toLowerCase().includes(tr)||invNoOf(t).toLowerCase().includes(tr))&&(!q.u||t.u===q.u)&&(!q.cl||trxClient(t)===q.cl)&&(!q.tk||t.toko===q.tk)&&(!q.pr||trxLines(t).some(l=>lineProd(l).name===q.pr)));
   const rows=all.filter(t=>f==='dash'?isDash(t):f==='app'?!isDash(t):true).map(t=>({...t,_id:t.id}));
-  const dash=all.filter(isDash), dirty=q.tr||q.iv||q.u||q.cl||q.tk||q.pr||f||q.from||q.to;
+  const dash=all.filter(isDash), dirty=q.tr||q.u||q.cl||q.tk||q.pr||f||q.from||q.to;
   const everyone=allTrx(), uOpts=[...new Set(everyone.map(t=>t.u))].map(u=>[u,(byU(u)||{}).name||u]).sort((a,b)=>a[1].localeCompare(b[1])),
     cOpts=live('client').filter(c=>c.status==='Aktif').map(c=>[c.id,c.name]),
     tOpts=[...new Set([...live('toko').filter(t=>t.status==='Aktif'&&(!q.cl||t.client===q.cl)).map(t=>t.name),...(q.cl?[]:everyone.filter(t=>t.tokoFree).map(t=>t.toko))])].sort(),
@@ -2250,9 +2250,9 @@ function pageDataJual(q){
   const dText=r.from===r.to?fmtIso(r.to)+' 2026':fmtIso(r.from)+' sampai '+fmtIso(r.to)+' 2026';
   return {title:'Data penjualan',html:`
   <div style="margin-bottom:16px">${filterCard({top:rangePicker({id:'dj',from:r.from,to:r.to,min:LD_START,max:LD_END,on:'djDate',presets:REP_PRESETS}),
-    search:`${djField('tr',q.tr,'No. transaksi','Cari no. transaksi')}${djField('iv',q.iv,'No. invoice toko','Cari no. invoice toko')}`,
+    search:djField('tr',q.tr,'No. transaksi atau No. invoice toko','Cari no. transaksi atau no. invoice toko'),
     selects:`${sel([['','Semua sales'],...uOpts],q.u||'',"setQ({u:this.value})",{label:'Filter sales',cls:'sm'})}${sel([['','Semua client'],...cOpts],q.cl||'',"setQ({cl:this.value,tk:''})",{label:'Filter client',cls:'sm'})}${sel([['','Semua toko'],...tOpts],q.tk||'',"setQ({tk:this.value})",{label:'Filter toko',cls:'sm'})}${sel([['','Semua produk'],...pOpts],q.pr||'',"setQ({pr:this.value})",{label:'Filter produk',cls:'sm'})}${sel([['','Semua sumber'],['app','Dari aplikasi'],['dash','Input dashboard']],f,"setQ({f:this.value})",{label:'Filter sumber',cls:'sm'})}`,
-    clear:dirty?"setQ({tr:'',iv:'',u:'',cl:'',tk:'',pr:'',f:'',from:'',to:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> transaksi, ${dText}.`})}</div>
+    clear:dirty?"setQ({tr:'',u:'',cl:'',tk:'',pr:'',f:'',from:'',to:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> transaksi, ${dText}.`})}</div>
   <div class="stats">${(()=>{ const T=[['','Semua transaksi',all.length,'Jumlah transaksi sesuai filter'],['app','Dari aplikasi',all.length-dash.length,'Input sales di lapangan'],['dash','Input dashboard',dash.length,dash.length?jt(sumVal(dash)):'Belum ada']].map(([k,l,v,sub])=>`<button class="stat ${f===k?'on':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></button>`); T.splice(1,0,`<div class="stat" style="cursor:default"><small>Total amount transaksi</small><b class="tabular">${jt(sumVal(all))}</b><span class="xs muted">Nilai semua transaksi sesuai filter</span></div>`); return T.join(''); })()}</div>
   ${card('Transaksi penjualan',`${dataTable('dj',{rows,rowClick:r=>`trxPanel('${r.id}')`,acts:r=>isDash(r)?rowActs(`trxPanel('${r.id}')`,`djDelAsk('${r.id}')`):'',empty:'Belum ada transaksi yang cocok.',cols:[
       {label:'No. transaksi',render:r=>`<span class="mono">${r.id}</span><span class="xs muted" style="display:block">${r.date}</span>`,prim:true},{label:'No. invoice toko',render:r=>invNoOf(r)?`<span class="mono">${esc(invNoOf(r))}</span>`:'<span class="muted">–</span>'},{label:'Sales',render:r=>esc(byU(r.u).name)},
