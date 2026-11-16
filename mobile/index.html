@@ -308,6 +308,39 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 @keyframes laser{from{top:18px}to{top:calc(100% - 20px)}}
 .offpill{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:6px;background:#E0393F;color:#fff}
 /* MOM 12 Nov 2026: grafik capaian, daftar toko, webview SIM SIAP, form quiz/survey */
+
+.pc{margin-top:14px;padding:16px;border-radius:24px;background:linear-gradient(160deg,rgba(255,255,255,.82),rgba(255,255,255,.52));border:1px solid rgba(255,255,255,.9);box-shadow:0 14px 34px -18px rgba(20,70,160,.4),inset 0 0 0 1px rgba(12,46,89,.04);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.pc-h{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.pc-h h3{font-size:18px;font-weight:800;letter-spacing:-.01em}.pc-h small{font-size:12.5px;color:var(--muted)}
+.pc-top{display:flex;align-items:center;gap:14px;margin:14px 0 12px}
+.pc-ring{position:relative;width:104px;height:104px;flex:none}
+.pc-ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:1px;font-size:26px;font-weight:800;letter-spacing:-.02em}
+.pc-ring b small{font-size:13px;font-weight:700;color:var(--muted);margin-top:6px}
+.pc-arc{animation:pcarc .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes pcarc{from{stroke-dashoffset:var(--c)}to{stroke-dashoffset:var(--o)}}
+.pc-stats{flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pc-stats>div{padding:10px 8px;border-radius:16px;background:rgba(12,46,89,.05);text-align:center}
+.pc-stats small{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
+.pc-stats b{display:block;font-size:24px;font-weight:800;margin-top:2px}
+.pc-stats .ok{background:rgba(18,135,95,.12)}.pc-stats .ok b{color:#0C7A4E}
+.pc-stats .wa{background:rgba(239,164,119,.2)}.pc-stats .wa b{color:#B45F22}
+.pc-barrow{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:6px}
+.pc-bar{height:12px;border-radius:99px;background:rgba(12,46,89,.08);overflow:hidden}
+.pc-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#21CFF7,#3466FF);transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.pc-scope{display:grid;grid-template-columns:1fr;gap:8px;margin-top:14px;padding:12px;border-radius:16px;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 1px rgba(12,46,89,.05)}
+.pc-scope>div{display:flex;align-items:center;gap:10px;min-width:0}
+.pc-ic{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:var(--blue-100);color:var(--blue-700);flex:none}
+.pc-scope small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.pc-scope b{display:block;font-size:13.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc-more{width:100%;margin-top:12px;display:flex;align-items:center;justify-content:space-between;padding:10px 4px 2px;font-size:13.5px;font-weight:700;color:var(--blue-700)}
+.pc-more svg{transition:transform .2s}.pc.open .pc-more svg{transform:rotate(180deg)}
+.pc-list{display:none;gap:8px;margin-top:8px}.pc.open .pc-list{display:grid}
+.pc-row{text-align:left;padding:12px;border-radius:16px;background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px rgba(12,46,89,.06);transition:transform .12s,background .15s}
+.pc-row:active{transform:scale(.985);background:#fff}
+.pc-rt{display:flex;align-items:center;justify-content:space-between;gap:8px}.pc-rt b{font-size:14px}
+.pc-rb{height:8px;border-radius:99px;background:rgba(12,46,89,.08);overflow:hidden;margin:9px 0 7px}.pc-rb i{display:block;height:100%;border-radius:99px;transition:width .5s}
+.pc-rm{display:flex;justify-content:space-between;gap:8px;font-size:12px}
+@media (prefers-reduced-motion:reduce){.pc-arc,.pc-bar i,.pc-rb i{animation:none;transition:none}}
 .cap3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .cap3 button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 2px;border-radius:14px;text-align:center;min-width:0}
 .cap3 button:hover{background:rgba(255,255,255,.5)}
@@ -406,6 +439,7 @@ const P = {
   x:'M6 6l12 12M18 6 6 18',
   left:'M15 5l-7 7 7 7',
   right:'M9 5l7 7-7 7',
+  down:'M6 9l6 6 6-6',
   plus:'M12 5v14M5 12h14',
   minus:'M5 12h14',
   phone:'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z',
@@ -821,7 +855,7 @@ SCR.home = () => {
   menus=[...menus,['SIM SIAP','globe',"go('sim-siap')"]];
   let extra='';
   if(r==='spv') extra = spvDash();
-  else extra = capChart() + fieldDash();
+  else extra = fieldDash();
   return {dark:true, tab:'home', note: (locked&&!att().out ? '<b>Beranda sebelum absen.</b> Semua menu bisa dibuka untuk dilihat, tapi menu bergembok (catat/ubah data) baru bisa dipakai setelah absen masuk.' : 'Beranda. Ringkasan absen, menu sesuai role, dan pencapaian hari ini.')+(r==='spv'?'':' <b>MOM 12 Nov:</b> grafik Capaian hari ini menunjukkan pekerjaan (kunjungan dan tugas aktivitas, atau leads untuk REA dan CBD) dan task dari Team Leader. Angkanya mengikuti data yang kamu kerjakan di aplikasi.')+' Menu <b>SIM SIAP</b> membuka portal SIM SIAP di dalam aplikasi (MOM 12 Nov).',
   html:`<main class="content flush">
     <section class="hero">${rings()}
@@ -833,6 +867,7 @@ SCR.home = () => {
       ${attCard()}
       ${locked && !att().out ? `<div class="banner" style="margin-top:12px">${I('lock',18,2)}<span>Aktivitas terkunci sampai kamu absen masuk. Kamu tetap bisa melihat semua menu.</span></div>`:''}
       ${S.demo.offline?`<div class="banner red" style="margin-top:12px">${I('refresh',18)}<span><b>Kamu sedang offline.</b> Data yang kamu catat disimpan di HP dan dikirim otomatis saat sinyal kembali${pendingCount()?` (${pendingCount()} menunggu)`:''}.</span></div>`:''}
+      ${pencapaian()}
       <div class="sec-title">Menu</div>
       <div class="grid">${menus.map(m=>`<button onclick="${m[2]}"><span class="ico-tile ${m[3]?'tan':''}">${I(m[1],22)}${m[3]?lockBadge():''}</span>${m[0]}</button>`).join('')}</div>
       ${extra}
@@ -2872,6 +2907,33 @@ function capChart(){
   const dn=L.reduce((s,d)=>s+d.done,0), tot=L.reduce((s,d)=>s+d.total,0);
   return `<div class="sec-title">Capaian hari ini <span class="small muted num">${dn} dari ${tot} selesai</span></div>
   <div class="card" style="padding:12px 10px"><div class="cap3" style="grid-template-columns:repeat(${L.length},minmax(0,1fr))">${L.map(d=>`<button onclick="${d.go}" aria-label="${d.label} ${d.done} dari ${d.total}">${capDonut(d)}<span class="lb">${d.label}</span><span class="nm"><b class="num" style="color:var(--ink)">${d.done}/${d.total}</b> · ${d.sub}</span></button>`).join('')}</div></div>`;
+}
+
+
+/* Pencapaian di Beranda (di atas Menu): pekerjaan hari ini, selesai, belum, dan persen. Sama dengan kolom di Aktivitas Sales dashboard. */
+function pcScope(){
+  const u=U(), v=S.visits[vk()]||[], toko=isSpg()?spgToko().name:v.length>1?v.length+' toko · '+v[0].place:v.length?v[0].place:u.place;
+  return [['Cabang',(u.unit||'').replace(/^Cabang\s+/,'')||'–','pin'],['Client',(u.client||'–').split(' & ')[0],'store'],['Toko',toko||'–','store']];
+}
+function pcToggle(){ S.pcOpen=S.pcOpen===false; const b=document.querySelector('.pc'); if(!b) return; b.classList.toggle('open',S.pcOpen); const t=b.querySelector('.pc-more'); if(t) t.setAttribute('aria-expanded',S.pcOpen); }
+function pencapaian(){
+  if(role()==='spv') return '';
+  const L=capItems().filter(d=>d.total>0); if(!L.length) return '';
+  const tot=L.reduce((s,d)=>s+d.total,0), dn=L.reduce((s,d)=>s+d.done,0), bl=tot-dn, pct=Math.round(dn/tot*100), R=40, C=2*Math.PI*R, id='pg'+(++_gid), open=S.pcOpen!==false;
+  const tone=pct>=100?'green':pct>0?'blue':'amber', lab=pct>=100?'Tuntas':pct>0?'Berjalan':'Belum mulai';
+  return `<section class="pc ${open?'open':''}" aria-label="Pencapaian hari ini">
+    <div class="pc-h"><div><h3>Pencapaian</h3><small>Hari ini · Senin, 26 Okt 2026</small></div>${chip(lab,tone)}</div>
+    <div class="pc-top">
+      <div class="pc-ring" role="img" aria-label="Pencapaian ${pct} persen"><svg viewBox="0 0 100 100" width="104" height="104" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#21CFF7"/><stop offset="1" stop-color="#3466FF"/></linearGradient></defs><circle cx="50" cy="50" r="${R}" fill="none" stroke="rgba(12,46,89,.08)" stroke-width="11"/><circle class="pc-arc" cx="50" cy="50" r="${R}" fill="none" stroke="url(#${id})" stroke-width="11" stroke-linecap="round" transform="rotate(-90 50 50)" style="--c:${C.toFixed(1)};--o:${(C*(1-pct/100)).toFixed(1)}" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-pct/100)).toFixed(1)}"/></svg><b class="num">${pct}<small>%</small></b></div>
+      <div class="pc-stats"><div><small>Pekerjaan</small><b class="num">${tot}</b></div><div class="ok"><small>Selesai</small><b class="num">${dn}</b></div><div class="wa"><small>Belum</small><b class="num">${bl}</b></div></div>
+    </div>
+    <div class="pc-barrow"><span>Pencapaian</span><b class="num">${pct}%</b></div>
+    <div class="pc-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="width:${Math.max(pct?4:0,pct)}%"></i></div>
+    <div class="pc-scope">${pcScope().map(([k,v,ic])=>`<div><span class="pc-ic">${I(ic,15,2)}</span><div><small>${k}</small><b>${esc(v)}</b></div></div>`).join('')}</div>
+    <button class="pc-more" type="button" onclick="pcToggle()" aria-expanded="${open}"><span>Rincian pekerjaan</span>${I('down',16,2.4)}</button>
+    <div class="pc-list">${L.map(d=>{ const p=d.total?Math.round(d.done/d.total*100):0, g=CAP_COL[d.c]||CAP_COL.job, st=p>=100?['Selesai','green']:p>0?['Berjalan','blue']:['Belum','amber'];
+      return `<button type="button" class="pc-row" onclick="${d.go}" aria-label="${d.label}: ${d.done} dari ${d.total} selesai"><div class="pc-rt"><b>${d.label}</b>${chip(st[0],st[1])}</div><div class="pc-rb"><i style="width:${Math.max(p?6:0,p)}%;background:linear-gradient(90deg,${g[0]},${g[1]})"></i></div><div class="pc-rm"><span><b class="num">${d.done}</b> selesai · <b class="num">${d.total-d.done}</b> belum</span><span class="muted">${d.sub}</span></div></button>`; }).join('')}</div>
+  </section>`;
 }
 
 /* Webview portal SIM SIAP (simulasi in-app browser). */
