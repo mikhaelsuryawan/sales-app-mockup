@@ -1515,19 +1515,14 @@ function repBar(q,tab){
 }
 function repSet(p){ ST.drill=[]; ST.penKey=null; setQ(p); }
 function repPer(k){ repSet({per:k,from:'',to:''}); }
-function repDate(){ const f=document.getElementById('rf_from').value, t=document.getElementById('rf_to').value;
-  if(f&&t&&f>t){ toast('Rentang tidak valid','Tanggal mulai harus sebelum atau sama dengan tanggal akhir.','danger'); return; }
-  repSet({from:f,to:t,per:''}); }
+function repDate(f,t){ repSet({from:f,to:t,per:''}); }
 function repFilters(q){
   const r=repRange(q), list=repTrx(q,r), n=list.length, tot=sumVal(list);
   const clients=live('client').filter(c=>clientHasModul(c,'Sales retail')&&c.status==='Aktif');
   const tokoOpts=live('toko').filter(t=>t.status==='Aktif'&&(!q.cl||t.client===q.cl)&&(!q.cb||t.cabang===q.cb));
   const salesIds=[...new Set(allTrx().filter(t=>repDimOk(t,{...q,u:''})).map(t=>t.u))];
   const dirty=q.cl||q.cb||q.tk||q.u||q.from||q.to||(q.per&&q.per!=='m');
-  return filterCard({top:`${pills(REP_PRESETS.map(x=>[x[0],x[1]]),r.preset,'repPer')}
-      <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal mulai</span><input id="rf_from" type="date" min="${LD_START}" max="${LD_END}" value="${r.from}" onchange="repDate()" style="width:140px"></label>
-      <span class="muted xs">sampai</span>
-      <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal akhir</span><input id="rf_to" type="date" min="${LD_START}" max="${LD_END}" value="${r.to}" onchange="repDate()" style="width:140px"></label>`,
+  return filterCard({top:`${pills(REP_PRESETS.map(x=>[x[0],x[1]]),(REP_PRESETS.find(x=>x[2][0]===r.from&&x[2][1]===r.to)||[''])[0],'repPer')}${rangePicker({id:'rf',from:r.from,to:r.to,min:LD_START,max:LD_END,on:'repDate',presets:REP_PRESETS})}`,
     selects:`${sel([['','Semua klien'],...clients.map(c=>[c.id,c.name])],q.cl||'',"repSet({cl:this.value,tk:'',u:''})",{label:'Filter klien',cls:'sm'})}
       ${sel([['','Semua cabang'],...CABANG.slice(1)],q.cb||'',"repSet({cb:this.value,tk:'',u:''})",{label:'Filter cabang',cls:'sm'})}
       ${sel([['','Semua toko'],...tokoOpts.map(t=>[t.id,t.name])],q.tk||'',"repSet({tk:this.value,u:''})",{label:'Filter toko',cls:'sm'})}
@@ -2644,9 +2639,7 @@ const leadDimOk=(l,q)=>(!q.cl||q.cl==='cl2')&&(!q.cb||leadCab(l)===q.cb)&&(!q.pk
 const leadIn=(l,q)=>{ const r=repRange(q), x=labIso(l.date); return x>=r.from&&x<=r.to; };
 const leadOwnerName=u=>u==='sari'?'Sari W. (manager)':((byU(u)||{}).name||u);
 function ldPer(k){ setQ({per:k,from:'',to:''}); }
-function ldDate(){ const f=document.getElementById('ld_from').value, t=document.getElementById('ld_to').value;
-  if(f&&t&&f>t){ toast('Rentang tidak valid','Tanggal mulai harus sebelum atau sama dengan tanggal akhir.','danger'); return; }
-  setQ({from:f,to:t,per:''}); }
+function ldDate(f,t){ setQ({from:f,to:t,per:''}); }
 function ldFilters(q,base){
   const r=repRange(q), clients=live('client').filter(c=>clientHasModul(c,'Sales automation')&&c.status==='Aktif');
   const cabs=[...new Set(D.leads.map(leadCab))], prods=[...new Set(D.leads.map(l=>l.prod))];
@@ -2654,10 +2647,7 @@ function ldFilters(q,base){
   const dirty=q.cl||q.cb||q.pk||q.u||q.from||q.to||(q.per&&q.per!=='m');
   const goal=base.filter(l=>l.status==='Deal').reduce((a,b)=>a+(b.goal||0),0);
   const lf=q.f||'', lq=(q.q||'');
-  return filterCard({search:searchBox(lq,{ph:'Cari nama nasabah',label:'Cari nasabah'}),chips:{key:'f',val:lf==='unassigned'?'__':lf,label:'Status',items:[['','Semua',base.length],...['Baru','Prospect','Deal','Belum Tertarik'].map(k=>[k,k,base.filter(l=>l.status===k).length])]},top:`${pills(REP_PRESETS.map(x=>[x[0],x[1]]),r.preset,'ldPer')}
-      <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal mulai</span><input id="ld_from" type="date" min="${LD_START}" max="${LD_END}" value="${r.from}" onchange="ldDate()" style="width:140px"></label>
-      <span class="muted xs">sampai</span>
-      <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal akhir</span><input id="ld_to" type="date" min="${LD_START}" max="${LD_END}" value="${r.to}" onchange="ldDate()" style="width:140px"></label>`,
+  return filterCard({search:searchBox(lq,{ph:'Cari nama nasabah',label:'Cari nasabah'}),chips:{key:'f',val:lf==='unassigned'?'__':lf,label:'Status',items:[['','Semua',base.length],...['Baru','Prospect','Deal','Belum Tertarik'].map(k=>[k,k,base.filter(l=>l.status===k).length])]},top:`${pills(REP_PRESETS.map(x=>[x[0],x[1]]),(REP_PRESETS.find(x=>x[2][0]===r.from&&x[2][1]===r.to)||[''])[0],'ldPer')}${rangePicker({id:'ld',from:r.from,to:r.to,min:LD_START,max:LD_END,on:'ldDate',presets:REP_PRESETS})}`,
     selects:`${sel([['','Semua klien'],...clients.map(c=>[c.id,c.name])],q.cl||'',"setQ({cl:this.value})",{label:'Filter klien',cls:'sm'})}
       ${sel([['','Semua cabang'],...cabs],q.cb||'',"setQ({cb:this.value,u:''})",{label:'Filter cabang',cls:'sm'})}
       ${sel([['','Semua produk'],...prods],q.pk||'',"setQ({pk:this.value})",{label:'Filter produk',cls:'sm'})}
@@ -4755,9 +4745,7 @@ function hkData(u,r){
   return x;
 }
 function hkPer(k){ setQ({per:k,from:'',to:''}); }
-function hkDate(){ const f=document.getElementById('hk_from').value, t=document.getElementById('hk_to').value;
-  if(f&&t&&f>t){ toast('Rentang tidak valid','Tanggal mulai harus sebelum atau sama dengan tanggal akhir.','danger'); return; }
-  setQ({from:f,to:t,per:''}); }
+function hkDate(f,t){ setQ({from:f,to:t,per:''}); }
 function hkView(q){
   q=hkQ(q); const r=hkRange(q), role=q.r||'', f=q.f||'', qq=(q.q||'').toLowerCase();
   const all=hkUsers().filter(s=>!role||hkKind(s.u)===role).filter(s=>!qq||s.name.toLowerCase().includes(qq)).map(s=>({...hkData(s.u,r),_id:s.u})).filter(x=>(!q.cl||x.sc.cl.includes(q.cl))&&(!q.cb||x.sc.cb.includes(q.cb))&&(!q.tk||x.sc.tk.includes(q.tk)));
@@ -4767,10 +4755,7 @@ function hkView(q){
   const tokoOpts=live('toko').filter(t=>t.status==='Aktif'&&(!q.cl||t.client===q.cl)&&(!q.cb||t.cabang===q.cb));
   const dirty=q.cl||q.cb||q.tk||role||q.q||q.from||q.to||(q.per&&q.per!=='d');
   const stat=(l,v,sub,on,act)=>`<button class="stat ${act?'on':''}" onclick="${on}"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></button>`;
-  const filt=card('Filter',`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">${pills(REP_PRESETS.map(p=>[p[0],p[1]]),r.preset,'hkPer')}
-      <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal mulai</span><input id="hk_from" type="date" min="${LD_START}" max="${LD_END}" value="${r.from}" onchange="hkDate()" style="width:140px"></label>
-      <span class="muted xs">sampai</span>
-      <label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal akhir</span><input id="hk_to" type="date" min="${LD_START}" max="${LD_END}" value="${r.to}" onchange="hkDate()" style="width:140px"></label></div>
+  const filt=card('Filter',`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">${pills(REP_PRESETS.map(p=>[p[0],p[1]]),(REP_PRESETS.find(x=>x[2][0]===r.from&&x[2][1]===r.to)||[''])[0],'hkPer')}${rangePicker({id:'hk',from:r.from,to:r.to,min:LD_START,max:LD_END,on:'hkDate',presets:REP_PRESETS})}</div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
       ${sel(HK_ROLES,role,"setQ({r:this.value})",{label:'Filter peran',cls:'sm'})}
       ${sel([['','Semua klien'],...clients.map(c=>[c.id,c.name])],q.cl||'',"setQ({cl:this.value,tk:''})",{label:'Filter klien',cls:'sm'})}
