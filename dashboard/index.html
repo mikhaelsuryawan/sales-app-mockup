@@ -3142,18 +3142,22 @@ function pageCabang(q){ return {title:'Cabang client',html:`${crudList('cabang',
 const pageKompetitor=q=>({title:'Kompetitor',html:`${crudList('kompetitor',q)}<div style="margin-top:12px">${callout('Kompetitor adalah master data terpisah, tidak digabung dengan Brand (MOM 9 Nov bagian 1). Dipakai sebagai pembanding di market share.')}</div>`});
 /* ---------- Mapping outlet ke client (MOM 9 Nov bagian 3) ---------- */
 function pageMapOutlet(q){
-  const cls=live('client').filter(c=>c.status==='Aktif'), cl=cls.find(c=>c.id===q.cl)||cls[0], qq=(q.q||'').toLowerCase();
-  const all=live('toko').filter(t=>t.status==='Aktif'), on=t=>tokoClients(t).includes(cl.id);
-  const rows=all.filter(t=>!qq||(t.name+t.addr).toLowerCase().includes(qq)).filter(t=>q.f==='on'?on(t):q.f==='off'?!on(t):true).sort((a,b)=>on(b)-on(a)||a.name.localeCompare(b.name)).map(t=>({...t,_id:t.id}));
+  const cls=live('client').filter(c=>c.status==='Aktif'), cl=cls.find(c=>c.id===q.cl), qq=(q.q||'').toLowerCase();
+  const all=live('toko').filter(t=>t.status==='Aktif'), on=t=>!!cl&&tokoClients(t).includes(cl.id);
+  /* Filter client kosong: semua toko. Terisi: hanya toko yang dipetakan ke client itu, atau yang belum lewat chip Belum. */
+  const scope=cl?all.filter(t=>q.f==='off'?!on(t):on(t)):all;
+  const rows=scope.filter(t=>!qq||(t.name+t.addr).toLowerCase().includes(qq)).sort((a,b)=>on(b)-on(a)||a.name.localeCompare(b.name)).map(t=>({...t,_id:t.id}));
+  const clientCol={label:'Client',render:r=>{ const n=tokoClients(r).map(c=>esc(cName(c))); return n.length?`<span class="fg" style="font-weight:500">${n.join(', ')}</span>`:'<span class="muted">–</span>'; }};
+  const chips=cl?{key:'f',val:q.f==='off'?'off':'',label:'Pemetaan',items:[['','Dipetakan',all.filter(on).length],['off','Belum',all.filter(t=>!on(t)).length]]}:null;
   return {title:'Mapping outlet',html:`
-  <div style="margin-bottom:16px">${filterCard({search:searchBox(q.q,{ph:'Cari toko',label:'Cari toko'}),selects:sel(cls.map(c=>[c.id,c.name]),cl.id,"setQ({cl:this.value})",{label:'Pilih client',cls:'sm'}),chips:{key:'f',val:q.f||'',label:'Pemetaan',items:[['','Semua',all.length],['on','Dipetakan',all.filter(on).length],['off','Belum',all.filter(t=>!on(t)).length]]},clear:(q.q||q.f)?"setQ({q:'',f:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> toko untuk ${esc(cl.name)}.`})}</div>
-  ${card('Outlet per client',`${dataTable('mapo',{rows,rowClick:r=>`mapOutletToggle('${r.id}','${cl.id}')`,empty:'Tidak ada toko yang cocok.',cols:[
+  <div style="margin-bottom:16px">${filterCard({search:searchBox(q.q,{ph:'Cari toko',label:'Cari toko'}),selects:sel([['','Semua client'],...cls.map(c=>[c.id,c.name])],cl?cl.id:'',"setQ({cl:this.value,f:''})",{label:'Client',cls:'sm'}),chips,clear:(q.q||q.f||cl)?"setQ({q:'',f:'',cl:''})":'',summary:cl?`Menampilkan <b class="fg">${rows.length}</b> toko ${q.f==='off'?'yang belum dipetakan ke':'untuk'} ${esc(cl.name)}.`:`Menampilkan <b class="fg">${rows.length}</b> toko dari semua client.`})}</div>
+  ${card('Outlet per client',`${dataTable('mapo',{rows,rowClick:r=>cl?`mapOutletToggle('${r.id}','${cl.id}')`:`toast('Pilih client dulu','Pilih satu client di filter untuk memetakan atau melepas toko.')`,empty:'Tidak ada toko yang cocok.',cols:[clientCol,
       {label:'Toko',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${esc(r.addr)} · ${esc(r.cabang)}</span>`,prim:true},
       {label:'Pemilik data',render:r=>esc(cName(r.client)),hide:true},{label:'Sumber',render:r=>tag(r.sumber||'Dari client',(r.sumber||'Dari client')==='Dari client'?'neutral':'info'),hide:true},
-      {label:'Client lain',render:r=>{ const o=tokoClients(r).filter(c=>c!==cl.id); return o.length?esc(o.map(cName).join(', ')):'<span class="muted">–</span>'; },hide:true},
-      {label:'Di client ini',render:r=>on(r)?tag('Dipetakan','success'):tag('Belum','neutral')}]})}`,
+      ...(cl?[{label:'Client lain',render:r=>{ const o=tokoClients(r).filter(c=>c!==cl.id); return o.length?esc(o.map(cName).join(', ')):'<span class="muted">–</span>'; },hide:true},
+      {label:'Di client ini',render:r=>on(r)?tag('Dipetakan','success'):tag('Belum','neutral')}]:[])]})}`,
     {acts:btn('Upload mapping',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Mapping outlet')"})})}
-  <div style="margin-top:12px">${callout('Satu toko bisa melayani lebih dari satu client. Klik baris untuk memetakan atau melepas toko dari client terpilih. Penugasan sales hanya bisa ke toko yang dipetakan ke client sales tersebut. Client pemilik data tidak bisa dilepas.')}</div>`};
+  <div style="margin-top:12px">${callout('Satu toko bisa melayani lebih dari satu client. Pilih client di filter untuk melihat toko miliknya, lalu klik baris untuk memetakan atau melepas toko. Tanpa filter client, daftar menampilkan semua toko. Penugasan sales hanya bisa ke toko yang dipetakan ke client sales tersebut. Client pemilik data tidak bisa dilepas.')}</div>`};
 }
 function mapOutletToggle(tid,cl){ const t=TOKO.find(x=>x.id===tid), cur=tokoClients(t);
   if(t.client===cl){ toast('Tidak bisa dilepas',t.name+' adalah data milik '+cName(cl)+'. Ubah client pemilik di menu Toko.','danger'); return; }
