@@ -59,7 +59,7 @@ Dokumen notes hanya menyebut SFA sebagai referensi tanpa daftar modul SFA Tintin
 | Laporan dan dashboard | Ya | |
 | **Penagihan dan piutang (collection)** | Usulan | Menu Penagihan & piutang: tagihan per toko, umur piutang, catat pembayaran |
 | **Klaim biaya dan reimburse** | Usulan | Menu Klaim biaya: bensin, parkir, tol, makan per kunjungan dengan foto bukti, limit, setujui atau tolak |
-| **Live tracking peta sales** | Usulan | Menu Live tracking: posisi terakhir, status (di toko, perjalanan, offline), baterai |
+| **Live tracking peta sales** | Dihapus dari mockup | Menu Live tracking sudah dihapus (16 Nov 2026) |
 | **Kepatuhan rencana kunjungan** | Usulan | Menu Kepatuhan kunjungan: rencana vs realisasi vs tepat waktu per sales |
 | **Pengumuman (broadcast)** | Usulan | Menu Pengumuman: kirim ke role dan client, jumlah yang sudah membaca |
 | **Status sinkron offline** | Usulan | Menu Status sinkron: antrean data per perangkat, versi aplikasi, pengingat. Absensi tidak masuk antrean |
