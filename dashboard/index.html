@@ -2733,7 +2733,8 @@ Object.assign(MD,{
 MD.katprod.forEach(k=>{ k.share='Ya'; k.cakupan='Client'; });
 /* Konversi punya dua cakupan: General berlaku untuk semua produk, Produk khusus satu produk dan menimpa General. */
 MD.konversi.forEach(k=>{ k.cakupan='Produk'; });
-MD.konversi.push({id:'kv30',cakupan:'General',satuan:'sa2',isi:12,dipakai:0,status:'Aktif'},{id:'kv31',cakupan:'General',satuan:'sa3',isi:6,dipakai:0,status:'Aktif'});
+MD.konversi.push({id:'kv30',cakupan:'General',satuan:'sa2',isi:12,dipakai:0,status:'Aktif'},{id:'kv31',cakupan:'General',satuan:'sa3',isi:6,dipakai:0,status:'Aktif'},
+  {id:'kv32',cakupan:'General',satuan:'sa4',isi:1,dipakai:0,status:'Aktif'},{id:'kv33',cakupan:'General',satuan:'sa3',isi:10,dipakai:0,status:'Nonaktif'},{id:'kv40',cakupan:'Produk',produk:'fm1',satuan:'sa2',isi:24,dipakai:0,status:'Aktif'},{id:'kv41',cakupan:'Produk',produk:'fm2',satuan:'sa2',isi:24,dipakai:0,status:'Aktif'},{id:'kv42',cakupan:'Produk',produk:'fm3',satuan:'sa2',isi:24,dipakai:2,status:'Aktif'},{id:'kv43',cakupan:'Produk',produk:'fm5',satuan:'sa2',isi:40,dipakai:0,status:'Aktif'},{id:'kv44',cakupan:'Produk',produk:'fm5',satuan:'sa3',isi:5,dipakai:0,status:'Aktif'},{id:'kv45',cakupan:'Produk',produk:'fm6',satuan:'sa2',isi:24,dipakai:0,status:'Aktif'},{id:'kv46',cakupan:'Produk',produk:'fm7',satuan:'sa2',isi:100,dipakai:0,status:'Aktif'},{id:'kv47',cakupan:'Produk',produk:'nh1',satuan:'sa4',isi:1,dipakai:0,status:'Aktif'},{id:'kv48',cakupan:'Produk',produk:'nh2',satuan:'sa4',isi:1,dipakai:0,status:'Aktif'},{id:'kv49',cakupan:'Produk',produk:'nh3',satuan:'sa4',isi:1,dipakai:0,status:'Aktif'},{id:'kv50',cakupan:'Produk',produk:'nh4',satuan:'sa4',isi:1,dipakai:0,status:'Aktif'},{id:'kv51',cakupan:'Produk',produk:'mt5',satuan:'sa3',isi:12,dipakai:0,status:'Aktif'});
 /* MOM 9 Nov bagian 6: cakupan kategori dinamis. General berlaku untuk semua, Client spesifik. */
 MD.katprod.push({id:'kp30',name:'Elektronik Rumah Tangga',brand:'',parent:'',cakupan:'General',share:'Tidak',status:'Aktif'},
   {id:'kp40',name:'Audio',brand:'VISTARA',parent:'',cakupan:'Client',share:'Ya',status:'Aktif'},
@@ -3005,7 +3006,7 @@ Object.assign(ENT,{
     cols:[{label:'Produk',render:r=>`<span class="fg" style="font-weight:500">${esc(prodNm(r.produk))}</span><span class="xs muted" style="display:block">${esc((kvProds().find(p=>p.id===r.produk)||{}).sku||'–')}</span>`,prim:true},{label:'Satuan',render:r=>esc(satName(r.satuan))},{label:'Jumlah',render:r=>r.isi,align:'r'},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>kvUsed(r)>0?`Konversi ini sudah dipakai ${kvUsed(r)} catatan stock opname. Data riwayat harus tetap bisa dilacak, jadi nonaktifkan saja.`:'',
     lockStatus:r=>r.status==='Nonaktif'&&MD.konversi.some(x=>!x.del&&x.status==='Aktif'&&x.id!==r.id&&x.cakupan===r.cakupan&&x.produk===r.produk&&x.satuan===r.satuan)?'Sudah ada konversi aktif untuk produk dan satuan ini. Nonaktifkan yang lama dulu.':''},
-  konvg:{src:'konversi',label:'Konversi',lower:'konversi',plural:'Konversi General',prefix:'kv',store:()=>MD.konversi,title:r=>'Semua produk · '+satName(r.satuan),search:r=>satName(r.satuan),filter:r=>r.cakupan==='General',blank:()=>({cakupan:'General',satuan:'sa2',isi:12,dipakai:0}),
+  konvg:{src:'konversi',label:'Konversi',lower:'konversi',plural:'Daftar konversi',prefix:'kv',store:()=>MD.konversi,title:r=>'Semua produk · '+satName(r.satuan),search:r=>satName(r.satuan),filter:r=>r.cakupan==='General',blank:()=>({cakupan:'General',satuan:'sa2',isi:12,dipakai:0}),
     extraTop:r=>kvUsed(r)>0?callout('<b>Dikunci.</b> Konversi ini sudah dipakai '+kvUsed(r)+' catatan stock opname, jadi satuan dan jumlahnya tidak bisa diubah. Untuk mengganti jumlah, nonaktifkan konversi ini lalu buat konversi baru.'):'',
     fields:[{k:'satuan',label:'Satuan',type:'select',req:true,lock:r=>kvUsed(r)>0,fmt:v=>satName(v),opts:()=>kvSatOpts(),hint:'Pcs tidak ada di daftar karena menjadi satuan dasar',validate:(v,vals)=>MD.konversi.some(x=>!x.del&&x.status==='Aktif'&&x.id!==(FORM&&FORM.id)&&x.cakupan==='General'&&x.satuan===v)?'Konversi General aktif untuk satuan ini sudah ada':''},
       {k:'isi',label:'Jumlah',type:'number',req:true,lock:r=>kvUsed(r)>0,hint:'Jumlah pcs dalam 1 satuan untuk semua produk, bilangan bulat. Contoh: 1 Dus berisi 12 pcs, jumlah 12',validate:v=>v<1?'Minimal 1':!Number.isInteger(v)?'Jumlah harus bilangan bulat':''}],
@@ -4498,7 +4499,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
 /* ---------- Penyimpanan data dashboard (D6) ----------
    Perubahan di dashboard disimpan sebagai snapshot berversi. Data bersama dengan mobile tetap di salesapp.shared.v1.
    Naikkan DASH_VER bila bentuk data contoh berubah, supaya snapshot lama dibuang dan data contoh baru dipakai. */
-const DASH_VER=10;
+const DASH_VER=11;
 const PARAM={};
 const dashData=()=>({D,MD,TOKO,TRX,INFO,POSM,AR,KLAIM,ATT,REK_ADJ,PARAM});
 function restoreInto(t,src){
