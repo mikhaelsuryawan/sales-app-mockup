@@ -4772,7 +4772,7 @@ function hkView(q){
     ${stat('Pekerjaan selesai',T?Math.round(D_/T*100)+'%':'–',D_+' dari '+T+' · buka log aktivitas',"setQ({tab:'log'})")}
     ${stat('Perlu tindak lanjut',nflag+' sales',f==='flag'?'Filter aktif · klik untuk hapus':'SKU rusak, retur, draft, usulan',`setQ({f:'${f==='flag'?'':'flag'}'})`,f==='flag')}
   </div>
-  ${card('Hasil kerja per sales',dataTable('hk',{rows,rowClick:x=>`hkPanel('${x.u}')`,empty:'Tidak ada sales dengan filter ini.',cols:[
+  ${card('Aktivitas Sales',dataTable('hk',{rows,rowClick:x=>`hkPanel('${x.u}')`,empty:'Tidak ada sales dengan filter ini.',cols:[
       {label:'Sales',render:x=>`<span style="display:flex;gap:10px;align-items:center">${av(x.me.name)}<span><span class="fg" style="font-weight:500">${esc(x.me.name)}</span><span class="xs muted" style="display:block">${esc(x.me.job)}</span></span></span>`,prim:true},
       {label:'Klien',render:x=>esc(x.sc.cl.map(clientName).join(', ')),hide:true},
       {label:'Cabang',render:x=>esc(x.sc.cb.join(', ')),hide:true},
@@ -4817,7 +4817,7 @@ function hkPanel(u){
 function aktTab(k){ setQ({tab:k==='sales'?'':k,f:'',st:'',q:'',r:'',cl:'',cb:'',tk:'',per:'',from:'',to:''}); }
 function pageAktivitas(q){
   const tab=q.tab==='log'?'log':'sales', v=tab==='log'?aktLog(q):hkView(q);
-  return {title:'Aktivitas lapangan',html:`<div style="margin-bottom:14px">${pills([['sales','Hasil kerja per sales'],['log','Log aktivitas toko']],tab,'aktTab')}</div>`+v.html};
+  return {title:'Aktivitas lapangan',html:`<div style="margin-bottom:14px">${pills([['sales','Aktivitas Sales'],['log','Log aktivitas toko']],tab,'aktTab')}</div>`+v.html};
 }
 
 const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi,'/kunjungan':pageKunjungan,'/approval':pageApproval,'/target':pageTarget,'/promo':pagePromo,'/insentif':pageInsentif,'/grading':pageGrading,'/leads':pageLeads,'/overdue':pageOverdue,'/company-sim':pageSimco,'/sektor':pageSektor,'/client':pageClient,'/kategori-toko':pageKategori,'/toko':pageToko,'/iam':pageIAM,'/produk':pageProduk,'/penugasan':pagePenugasan,'/pemesanan':pagePemesanan,'/sell-in':pageSellin,'/user-sales':pagePengguna,'/job':pageJob,'/user-admin':pageAdmin,'/parameter':pageParameter,'/task-pending':pageTaskPending,'/aktivitas':pageAktivitas,'/canvassing':pageCanvassing,'/posm':pagePosm,'/region':pageRegion,'/brand':pageBrand,'/kategori-produk':pageKatProd,'/kompetitor':pageKompetitor,'/cabang-client':pageCabang,'/mapping-outlet':pageMapOutlet,'/data-penjualan':pageDataJual,'/penagihan':pagePenagihan,'/klaim-biaya':pageKlaim,'/kepatuhan-kunjungan':pageKepatuhan,'/pengumuman':pagePengumuman,'/sinkron':pageSinkron,'/satuan':pageSatuan,'/konversi':pageKonversi,'/sidebar-menu':pageSidebarMenu,'/konfigurasi-aktivitas':pageAktCfg,'/form-penjualan':pageFormJual,'/status-produk':pageStatProd,'/event':pageEvent,'/mitra':pageMitra,'/sku-display':pageSkuDisplay,'/market-share':pageMarketShare,'/quiz':q=>pageKonten(q,'Quiz'),'/survey':q=>pageKonten(q,'Survey'),'/pengaturan':pagePengaturan};
