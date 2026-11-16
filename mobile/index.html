@@ -1001,7 +1001,7 @@ function assignSave(){ S.canvasArea[S.assignUser]=S.assignPick; closeSheet(); re
 const RID={'spg.rina':'r3','sales.budi':'r4','sales.dimas':'r5','spv.sari':'r2','ffor.yoga':'r7','arco.maya':'r8','cbd.tono':'r9','rea.nina':'r10','fmcg.tari':'r11','md.rangga':'r12','mobile.fikri':'r13','bantuan.eko':'r14','bantuan.gita':'r14'};
 const JADWAL_DEFAULT={r1:'Ya',r2:'Ya',r7:'Ya',r11:'Ya',r12:'Ya'};
 /* Usulan (12 Nov 2026): sales hanya bisa menambah jadwal kunjungan bila ditugaskan di lebih dari satu toko. Satu toko: jadwal mengikuti Team Leader.
-   Daftar toko dari dashboard (Penugasan > Penempatan toko) lewat penugasanToko; tanpa itu dipakai data contoh. */
+   Daftar toko dari dashboard (Penugasan > Penugasan toko) lewat penugasanToko; tanpa itu dipakai data contoh. */
 const tokoDefault=()=>{ const r=role(), u=uid();
   if(U()?.vkey==='canvasE') return TOKO.canvasE.map(t=>t.name);
   if(r==='canvas') return TOKO.canvas.map(t=>t.name);

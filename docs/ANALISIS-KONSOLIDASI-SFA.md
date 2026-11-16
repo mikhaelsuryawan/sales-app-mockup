@@ -13,7 +13,7 @@ Sumber: `NOTES-KONSOLIDASI-SFA.docx` (gabungan NOTES 1 dan NOTES 2 meeting klien
 | 3 | Bedakan toko dari client dan toko baru dari sales | Belum | Field **Sumber toko** (Dari client, Input sales) dan filter di daftar toko |
 | 3 | Toko canvassing temporary, free text, bisa jadi master | Sebagian (Usulan dari lapangan) | Tab **Toko canvassing (sementara)** dengan aksi Jadikan master |
 | 3 | Assign sales jangan di halaman Toko | Kolom Sales masih tampil di Toko | Kolom Sales dihapus dari Toko, diarahkan ke Penugasan |
-| 4 | Menu penugasan terpisah, termasuk penjadwalan | Penugasan ada, jadwal di Kunjungan | **Penugasan & jadwal** dengan tab Penempatan toko dan Jadwal kunjungan |
+| 4 | Menu penugasan terpisah, termasuk penjadwalan | Penugasan ada, jadwal di Kunjungan | **Penugasan & jadwal** dengan tab Penugasan toko dan Jadwal kunjungan |
 | 4 | Jadwal mingguan bisa pilih hari | Sudah | Tetap |
 | 4 | Sales retail dan Sales automation keluar dari Client, pindah ke hak akses role | Belum (field Modul di Client) | Field **Modul** pindah ke Role (IAM). Filter laporan membaca modul dari role user client |
 | 5 | Bedakan User dan People | Belum | Akses aplikasi **Tanpa akses** menandai people; filter User atau People |
