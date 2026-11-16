@@ -423,6 +423,13 @@ a.stat:hover,button.stat:hover{background:var(--raised)}
 .field .hint{display:block;font-size:12px;color:var(--muted);margin-top:4px}
 .ferr{font-size:12px;color:var(--danger);font-weight:500;margin-top:4px}
 .ferr:empty{display:none}
+.qty{display:inline-flex;align-items:center;height:44px;border:1px solid var(--line);border-radius:999px;background:var(--card);overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.qty:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px rgb(10 146 242 / .2)}
+.qty .qb{width:44px;height:100%;display:grid;place-items:center;color:var(--accent-text);flex:none}
+.qty .qb:hover{background:var(--accent-soft)}
+.qty .qi{width:56px;height:100%;border:0;background:none;outline:none;text-align:center;font-weight:600;color:var(--fg);min-width:0}
+.djrow{display:grid;gap:12px;padding:14px;border:1px solid var(--line);border-radius:var(--r-panel)}
+.djrow-h{display:flex;align-items:center;justify-content:space-between}
 .inp{position:relative;display:flex;align-items:center;gap:10px;height:44px;border-radius:var(--r-panel);padding:0 16px;border:1px solid var(--line);background:var(--card);transition:border-color .15s,box-shadow .15s}
 .inp:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px rgb(10 146 242 / .2)}
 .inp input{border:0;background:none;outline:none;flex:1;min-width:0;font-size:14px;color:var(--fg)}
@@ -905,7 +912,7 @@ const P={
   cal:'M4 6h16v15H4zM4 10h16M8 3v4M16 3v4',
   down:'M12 4v12M7 11l5 5 5-5M4 20h16', up:'M12 16V4M7 9l5-5 5 5M4 16v4h16v-4',
   x:'M6 6l12 12M18 6 6 18', left:'M15 5l-7 7 7 7', right:'M9 5l7 7-7 7', chev:'M6 9l6 6 6-6',
-  plus:'M12 5v14M5 12h14', ext:'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',
+  plus:'M12 5v14M5 12h14', minus:'M5 12h14', ext:'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',
   spark:'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z',
   logout:'M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10',
   phone:'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z',
@@ -1385,7 +1392,9 @@ const ordTotal=o=>o.items.reduce((a,i)=>a+priceAt(i.p,o.toko)*i.q,0);
 const ordLive=()=>(MD.order||[]).filter(o=>!o.del&&o.st!=='Dibatalkan');
 const ordOf=(u,m)=>ordLive().filter(o=>o.u===u&&o.m===m);
 const actualOf=(u,m)=>sumVal(trxIn(m).filter(t=>t.u===u))+ordOf(u,m).reduce((a,o)=>a+ordTotal(o),0);
-const qtyActOf=(u,kat)=>trxOct().filter(t=>t.u===u&&trxProd(t).cat===kat).reduce((a,t)=>a+t.q,0);
+const trxLines=t=>t.items?.length?t.items:[{p:t.p,pname:t.pname,kat:t.kat,q:t.q,total:t.total,price:t.q?Math.round(t.total/t.q):t.total}];
+const lineProd=l=>PRODUCTS.find(p=>p.id===l.p)||{name:l.pname||'–',sku:'–',cat:l.kat||'–'};
+const qtyActOf=(u,kat)=>trxOct().filter(t=>t.u===u).reduce((a,t)=>a+trxLines(t).filter(l=>lineProd(l).cat===kat).reduce((b,l)=>b+l.q,0),0);
 const qtyActTotal=u=>trxOct().filter(t=>t.u===u).reduce((a,t)=>a+t.q,0);
 const CAT_SLOT={'TV':1,'Kulkas':2,'AC':3,'Mesin Cuci':4,'Small Appliances':5,'Air Purifier':0};
 const catMix=list=>{ const m=new Map(); list.forEach(t=>{ const c=trxProd(t).cat; m.set(c,(m.get(c)||0)+trxVal(t)); }); const tot=[...m.values()].reduce((a,b)=>a+b,0)||1; return {tot:[...m.values()].reduce((a,b)=>a+b,0),items:[...m].sort((a,b)=>b[1]-a[1]).map(([l,v])=>[l,Math.round(v/tot*100),CAT_SLOT[l]??0])}; };
@@ -2038,6 +2047,7 @@ function drillUp(n){ ST.drill=ST.drill.slice(0,n); render(false); }
 const appTrx=()=>shRead('trxApp',[]).map(t=>({...t,app:true}));
 const trxInWs=t=>{ if(ST.ws==='all') return true; const k=TOKO.find(x=>x.name===t.toko); return !k||!k.client||k.client===ST.ws; };
 const allTrx=()=>[...appTrx(),...TRX].filter(t=>t.st!=='Dihapus'&&trxInWs(t));
+const trxProdText=t=>{ const L=trxLines(t), l=L[0]; return esc(lineProd(l).name)+(L.length>1?' '+tag('+'+(L.length-1)+' produk','neutral'):l.q>1?' ×'+l.q:''); };
 const trxProd=t=>PRODUCTS.find(p=>p.id===t.p)||{name:t.pname||'–',sku:'–',cat:t.kat||'–'};
 function pagePenjualan(q){
   const tab=q.tab||'klien';
@@ -2050,7 +2060,7 @@ function pagePenjualan(q){
   let tableHTML='';
   if(tab==='penjualan') tableHTML=dataTable('trx',{rows,rowClick:r=>`trxPanel('${r.id}')`,cols:[
     {label:'No. transaksi',render:r=>`<span class="mono">${r.id}</span>`,prim:true},{label:'Tanggal',k:'date'},{label:'Sales',render:r=>byU(r.u).name},{label:'Toko',k:'toko',hide:true},
-    {label:'Produk',render:r=>esc(trxProd(r).name)+(r.q>1?' ×'+r.q:'')+(r.src==='Dashboard'?' '+tag('Input dashboard','accent'):r.app?' '+tag('Aplikasi','info'):'')},{label:'Promo',render:r=>r.promo?tag(r.promo,'info'):'<span class="muted">–</span>',hide:true},
+    {label:'Produk',render:r=>trxProdText(r)+(r.src==='Dashboard'?' '+tag('Input dashboard','accent'):r.app?' '+tag('Aplikasi','info'):'')},{label:'Promo',render:r=>r.promo?tag(r.promo,'info'):'<span class="muted">–</span>',hide:true},
     {label:'Harga invoice',render:r=>r.inv?`<b class="fg tabular">${rp(r.inv.price)}</b>`:`<b class="fg tabular">${rp(r.total)}</b>`,align:'r'},{label:'Harga sistem',render:r=>`<span class="tabular muted">${rp(r.total)}</span>`,align:'r',hide:true},
     {label:'Selisih',render:r=>!r.inv?tag('Tanpa invoice','warning'):Math.abs(r.inv.pct)<.5?'<span class="muted">Sama</span>':tag((r.inv.pct>0?'+':'−')+Math.abs(r.inv.pct).toFixed(1).replace('.',',')+'%',r.inv.flag?'warning':'info')},{label:'Status',render:r=>spill(r.st,r.st==='Terkirim'?'success':'warning')}]});
   if(tab==='dealer') tableHTML=dataTable('dlr',{rows:dealerRowsQ(q).map(r=>({...r,_id:r.n})),rowClick:r=>`go('/sell-in')`,empty:'Belum ada data sell-in.',cols:[
@@ -2084,8 +2094,9 @@ const invNoOf=t=>t.invNo||t.inv?.no||'';
 const rowKV=(l,v)=>`<div class="rowlink" style="cursor:default;padding:8px 0"><span class="sm muted" style="flex:1">${l}</span><span class="sm fg" style="text-align:right">${v}</span></div>`;
 function trxPanel(id){ const t=allTrx().find(x=>x.id===id); if(!t) return panelMissing('Transaksi'); const p=trxProd(t), s=byU(t.u), iv=t.inv;
   const unitSys=Math.round(t.total/t.q), unitInv=iv?Math.round(iv.price/t.q):unitSys;
-  openPanel(t.id,`${panelHero({eyebrow:'Transaksi · '+t.date+' 2026',title:esc(p.name)+(t.q>1?' ×'+t.q:''),sub:esc(s.name)+' · '+esc(t.toko),badge:spill(t.st,t.st==='Terkirim'?'success':'warning'),metrics:[['Total (invoice)',rp(iv?iv.price:t.total)],['Jumlah',t.q+' unit'],['Harga sistem',rp(t.total)]]})}
-  <div class="tile" style="margin-bottom:14px"><div class="xs muted">Produk</div><b class="fg">${p.name} ×${t.q}</b><div class="xs muted">${p.sku}${t.promo?' · promo '+t.promo:''}</div></div>
+  openPanel(t.id,`${panelHero({eyebrow:'Transaksi · '+t.date+' 2026',title:trxLines(t).length>1?trxLines(t).length+' produk · '+t.q+' unit':esc(p.name)+(t.q>1?' ×'+t.q:''),sub:esc(s.name)+' · '+esc(t.toko),badge:spill(t.st,t.st==='Terkirim'?'success':'warning'),metrics:[['Total (invoice)',rp(iv?iv.price:t.total)],['Jumlah',t.q+' unit'],['Harga sistem',rp(t.total)]]})}
+  ${trxLines(t).length>1?`<div class="xs muted" style="margin-bottom:8px">Produk (${trxLines(t).length})</div><div class="rows" style="margin-bottom:14px">${trxLines(t).map(l=>{ const lp=lineProd(l); return `<div class="rowlink" style="cursor:default"><span class="sm fg" style="flex:1">${esc(lp.name)}<span class="xs muted" style="display:block">${rp(l.price||Math.round(l.total/l.q))} × ${l.q}</span></span><b class="tabular fg sm">${rp((l.price||Math.round(l.total/l.q))*l.q)}</b></div>`; }).join('')}</div>`
+  :`<div class="tile" style="margin-bottom:14px"><div class="xs muted">Produk</div><b class="fg">${p.name} ×${t.q}</b><div class="xs muted">${p.sku}${t.promo?' · promo '+t.promo:''}</div></div>`}
   <div class="xs muted" style="margin-bottom:8px">Data dari aplikasi mobile</div><div class="rows" style="margin-bottom:14px">${rowKV('No. transaksi (sistem)',`<span class="mono">${esc(t.id)}</span>`)}${rowKV('No. invoice toko',invNoOf(t)?`<span class="mono">${esc(invNoOf(t))}</span>`:'<span class="muted">Tidak diisi</span>')}${rowKV('Tanggal',esc(t.date)+' 2026'+(t.time?' · '+esc(t.time):''))}${rowKV('Sales',esc(s.name))}${rowKV('Toko',esc(t.toko))}${t.cust?rowKV('Pembeli',esc(t.cust)):''}${rowKV('Sumber',t.src==='Dashboard'?'Input dashboard':'Aplikasi mobile')}</div>
   ${!iv&&t.invFoto>0?`<div class="xs muted" style="margin-bottom:8px">Foto invoice (${t.invFoto} foto)</div><div style="display:flex;gap:14px;margin-bottom:14px"><div style="width:120px;flex:none;border-radius:12px;overflow:hidden;box-shadow:var(--shadow-card);background:#fff">${invDocSvg(120,156)}</div><div style="flex:1;min-width:0"><div class="mono fg" style="margin-bottom:6px">${esc(invNoOf(t)||'–')}</div><div class="xs muted">Diunggah sales lewat Catat penjualan.</div></div></div>`:''}
   ${iv?`<div class="xs muted" style="margin-bottom:8px">Invoice dari lapangan</div><div style="display:flex;gap:14px;margin-bottom:14px"><div style="width:120px;flex:none;border-radius:12px;overflow:hidden;box-shadow:var(--shadow-card);background:#fff">${invDocSvg(120,156)}</div><div style="flex:1;min-width:0"><div class="mono fg" style="margin-bottom:8px">${esc(invNoOf(t))}</div><div class="rows">
@@ -2096,7 +2107,8 @@ function trxPanel(id){ const t=allTrx().find(x=>x.id===id); if(!t) return panelM
     ${iv.flag?callout(`Selisih lebih dari ${INV_TOL}% dari harga sistem. Cek promo toko di invoice sebelum transaksi dijadikan dasar perhitungan target dan insentif.`):callout('Selisih dalam batas wajar, biasanya karena promo toko. Harga invoice dipakai sebagai harga transaksi.','blue')}`
   :t.src==='Dashboard'?callout(`<b>Input dari dashboard</b> oleh ${esc(t.by||'admin')}. Alasan: ${esc(t.alasan||'–')}.${t.note?' Catatan: '+esc(t.note)+'.':''}${t.tokoFree?' Toko diisi teks bebas.':''}${t.prodFree?' Produk di luar master, tercatat di Produk dari sales (sementara).':''}`)
   :t.app||t.invFoto>0?'':`${callout('<b>Tanpa foto invoice.</b> Sales menginput manual dengan alasan "Toko belum menerbitkan invoice". Harga memakai harga sistem dan perlu ditinjau.')}`}
-  ${t.vals?`<div class="xs muted" style="margin:${iv?14:0}px 0 8px">Isian form penjualan${iv||t.invFoto>0?'':' (input manual)'}</div><div class="rows">${t.vals.map(([l,v])=>`<div class="rowlink" style="cursor:default;padding:8px 0"><span class="sm muted" style="flex:1">${esc(l)}</span><span class="sm fg" style="text-align:right">${esc(v||'–')}</span></div>`).join('')}</div>`:''}
+  ${t.items?.some(l=>l.vals)?t.items.map((l,k)=>`<div class="xs muted" style="margin:14px 0 8px">Isian produk${t.items.length>1?' '+(k+1):''} · ${esc(lineProd(l).name)}</div><div class="rows">${(l.vals||[]).map(([a,b])=>rowKV(esc(a),esc(b||'–'))).join('')}</div>`).join(''):''}
+  ${t.vals?`<div class="xs muted" style="margin:${iv||t.items?.some(l=>l.vals)?14:0}px 0 8px">Isian form penjualan${iv||t.invFoto>0?'':' (input manual)'}</div><div class="rows">${t.vals.map(([l,v])=>`<div class="rowlink" style="cursor:default;padding:8px 0"><span class="sm muted" style="flex:1">${esc(l)}</span><span class="sm fg" style="text-align:right">${esc(v||'–')}</span></div>`).join('')}</div>`:''}
   <a class="rowlink" href="#/absensi?q=${encodeURIComponent(s.name)}" onclick="closeLayer()" style="margin-top:10px">${av(s.name,'md')}<span style="flex:1"><b class="fg sm" style="display:block">${s.name}</b><span class="xs muted">${s.job} · ${t.toko}</span></span>${I('right',16)}</a>
   <div style="margin-top:14px">${callout('Transaksi terkirim real-time ke sistem klien lewat API (BRD 2.18.2). Penghapusan hanya lewat pengajuan sales yang disetujui supervisor, lalu sistem mengirim pembatalan ke klien (BRD 2.18.3).')}</div>`,
   iv?.flag?`${btn('Tutup',{v:'outline',on:'closeLayer()'})}${btn('Tandai sudah ditinjau',{v:'accent',on:`closeLayer();toast('Transaksi ditinjau','Selisih harga invoice dicatat sudah dicek.')`})}`:btn('Tutup',{v:'outline',on:'closeLayer()'}),{sub:'Transaksi penjualan'}); }
@@ -2141,58 +2153,77 @@ const DJ_ALASAN=['Aplikasi error saat kirim','Sinyal hilang, data tidak terkirim
 const isDash=t=>t.src==='Dashboard';
 function pageDataJual(q){
   const m=+q.p||10, f=q.f||'', qq=(q.q||'').toLowerCase(), all=allTrx().filter(t=>tmo(t)===m);
-  const rows=all.filter(t=>f==='dash'?isDash(t):f==='app'?!isDash(t):true).filter(t=>!qq||(byU(t.u).name+t.toko+t.id+invNoOf(t)+trxProd(t).name).toLowerCase().includes(qq)).map(t=>({...t,_id:t.id}));
+  const rows=all.filter(t=>f==='dash'?isDash(t):f==='app'?!isDash(t):true).filter(t=>!qq||(byU(t.u).name+t.toko+t.id+invNoOf(t)+trxLines(t).map(l=>lineProd(l).name).join(' ')).toLowerCase().includes(qq)).map(t=>({...t,_id:t.id}));
   const dash=all.filter(isDash);
   return {title:'Data penjualan',html:`
   <div style="margin-bottom:16px">${filterCard({search:searchBox(q.q,{ph:'Cari sales, toko, produk, atau nomor transaksi/invoice',label:'Cari transaksi'}),selects:sel(LD_MONTHS.map(x=>[x,LD_FULL[x]+' 2026']),m,"setQ({p:this.value})",{label:'Periode',cls:'sm'}),chips:{key:'f',val:f,label:'Sumber',items:[['','Semua',all.length],['app','Dari aplikasi',all.length-dash.length],['dash','Input dashboard',dash.length]]},clear:(f||q.q)?"setQ({f:'',q:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> transaksi di ${LD_FULL[m]} 2026.`})}</div>
   <div class="stats">${[['','Semua transaksi',all.length,jt(sumVal(all))],['app','Dari aplikasi',all.length-dash.length,'Input sales di lapangan'],['dash','Input dashboard',dash.length,dash.length?jt(sumVal(dash)):'Belum ada']].map(([k,l,v,sub])=>`<button class="stat ${f===k?'on':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></button>`).join('')}</div>
   ${card('Transaksi penjualan',`${dataTable('dj',{rows,rowClick:r=>`trxPanel('${r.id}')`,acts:r=>isDash(r)?rowActs(`trxPanel('${r.id}')`,`djDelAsk('${r.id}')`):'',empty:'Belum ada transaksi yang cocok.',cols:[
       {label:'No. transaksi',render:r=>`<span class="mono">${r.id}</span><span class="xs muted" style="display:block">${r.date}</span>`,prim:true},{label:'No. invoice toko',render:r=>invNoOf(r)?`<span class="mono">${esc(invNoOf(r))}</span>`:'<span class="muted">–</span>'},{label:'Sales',render:r=>esc(byU(r.u).name)},
-      {label:'Toko',render:r=>esc(r.toko)+(r.tokoFree?' '+tag('Teks bebas','neutral'):''),hide:true},{label:'Produk',render:r=>esc(trxProd(r).name)+(r.q>1?' ×'+r.q:'')+(r.prodFree||(!r.p&&r.pname)?' '+tag('Di luar master','neutral'):''),hide:true},
+      {label:'Toko',render:r=>esc(r.toko)+(r.tokoFree?' '+tag('Teks bebas','neutral'):''),hide:true},{label:'Produk',render:r=>trxProdText(r)+(r.prodFree||(!r.p&&r.pname)?' '+tag('Di luar master','neutral'):''),hide:true},
       {label:'Total',render:r=>`<b class="fg tabular">${rp(trxVal(r))}</b>`,align:'r'},{label:'Sumber',render:r=>isDash(r)?tag('Input dashboard','accent'):tag('Aplikasi','info')}]})}`,
     {acts:`${btn('Tambah penjualan',{v:'accent',size:'sm',icon:'plus',on:'djForm()'})}`})}
   <div style="margin-top:12px">${callout('Admin bisa menambahkan penjualan dari dashboard bila input dari aplikasi gagal. Transaksi ini masuk ke ledger yang sama, jadi ikut dihitung di Laporan penjualan, target, dan insentif. Penjualan tidak terikat ke toko: toko boleh dipilih dari master atau diisi teks bebas.')}</div>`};
 }
+/* Pemilih jumlah: tombol − dan +, tetapi angkanya juga bisa diketik langsung. */
+const qtyBox=(id,val,{min=1,on='',label='Jumlah'}={})=>`<div class="qty" role="group" aria-label="${label}"><button type="button" class="qb" aria-label="Kurangi ${label.toLowerCase()}" onclick="qtyStep('${id}',-1,${min});${on}">${I('minus',16)}</button><input id="${id}" class="qi tabular" inputmode="numeric" autocomplete="off" value="${val}" aria-label="${label}" oninput="this.value=this.value.replace(/\\D/g,'');${on}" onblur="qtyFix(this,${min});${on}"><button type="button" class="qb" aria-label="Tambah ${label.toLowerCase()}" onclick="qtyStep('${id}',1,${min});${on}">${I('plus',16)}</button></div>`;
+function qtyStep(id,d,min){ const e=document.getElementById(id); e.value=Math.max(min,(parseInt(e.value,10)||0)+d); }
+function qtyFix(e,min){ if(!(parseInt(e.value,10)>=min)) e.value=min; }
+let DJ_I=0;
+const djIdx=()=>[...document.querySelectorAll('[data-djrow]')].map(r=>+r.dataset.djrow);
+function djRow(i){ const g=PRODUCTS.filter(p=>p.status!=='Nonaktif');
+  return `<div class="djrow" data-djrow="${i}"><div class="djrow-h"><b class="sm fg dj-rn">Produk</b>${btn('Hapus',{v:'outline',size:'sm',icon:'trash',on:`djRowDel(${i})`})}</div>
+    <div class="chips" role="radiogroup" aria-label="Sumber produk">${[['master','Dari master'],['free','Di luar master (teks bebas)']].map(([k,l],j)=>`<label class="fchip"><input type="radio" name="dj_pm${i}" value="${k}" ${j?'':'checked'} onchange="djProdMode(${i},this.value)" style="margin-right:6px">${l}</label>`).join('')}</div>
+    <div id="dj_p_m${i}">${sel(g.map(p=>[p.id,p.name]),g[0].id,`djPrice(${i})`,{label:'Produk',id:'dj_p'+i})}</div><div id="dj_p_f${i}" style="display:none"><span class="inp"><input id="dj_pf${i}" placeholder="Nama produk, contoh: Setrika Uap Mini"></span></div>
+    <div class="grid g2" style="gap:10px"><label class="field"><span>Jumlah</span>${qtyBox('dj_q'+i,1,{on:`djNote(${i})`})}</label>
+      <label class="field"><span>Harga satuan (Rp) <b class="req" aria-hidden="true">*</b></span><span class="inp"><input id="dj_h${i}" inputmode="numeric" value="${g[0].price}" oninput="djNote(${i})"><span class="unit">Rp</span></span></label></div>
+    <div id="dj_note${i}" aria-live="polite"></div></div>`; }
+function djRenum(){ const rs=[...document.querySelectorAll('[data-djrow]')]; rs.forEach((r,k)=>{ r.querySelector('.dj-rn').textContent='Produk '+(k+1); r.querySelector('.djrow-h .btn').style.display=rs.length>1?'':'none'; }); djTotal(); }
+function djTotal(){ const t=document.getElementById('dj_tot'); if(!t) return; t.textContent=rp(djIdx().reduce((a,i)=>a+(parseInt(document.getElementById('dj_q'+i).value,10)||0)*(parseInt((document.getElementById('dj_h'+i).value||'').replace(/\D/g,''),10)||0),0)); }
+function djRowAdd(){ const i=++DJ_I; document.getElementById('dj_rows').insertAdjacentHTML('beforeend',djRow(i)); djRenum(); djPrice(i); document.getElementById('dj_p'+i)?.focus?.(); }
+function djRowDel(i){ if(djIdx().length<2) return; document.querySelector(`[data-djrow="${i}"]`).remove(); djRenum(); }
 function djTokoMode(v){ document.getElementById('dj_tk_m').style.display=v==='free'?'none':''; document.getElementById('dj_tk_f').style.display=v==='free'?'':'none'; }
-function djProdMode(v){ document.getElementById('dj_p_m').style.display=v==='free'?'none':''; document.getElementById('dj_p_f').style.display=v==='free'?'':'none'; if(v==='free') document.getElementById('dj_h').value=''; else djPrice(); }
-function djPrice(){ const id=document.getElementById('dj_p').value, tn=document.getElementById('dj_t')?.value, tk=TOKO.find(t=>t.name===tn), m=tk&&MD.mapping.find(x=>!x.del&&x.status==='Aktif'&&x.produk===id&&x.toko===tk.id), p=PRODUCTS.find(x=>x.id===id); if(m) document.getElementById('dj_h').value=effHarga(m); else if(p) document.getElementById('dj_h').value=p.price; }
+function djProdMode(i,v){ document.getElementById('dj_p_m'+i).style.display=v==='free'?'none':''; document.getElementById('dj_p_f'+i).style.display=v==='free'?'':'none'; if(v==='free') document.getElementById('dj_h'+i).value=''; else djPrice(i); djNote(i); }
+function djPrice(i){ const id=document.getElementById('dj_p'+i)?.value, tn=document.getElementById('dj_t')?.value, tk=TOKO.find(t=>t.name===tn), m=tk&&MD.mapping.find(x=>!x.del&&x.status==='Aktif'&&x.produk===id&&x.toko===tk.id), p=PRODUCTS.find(x=>x.id===id); if(m) document.getElementById('dj_h'+i).value=effHarga(m); else if(p) document.getElementById('dj_h'+i).value=p.price; djNote(i); }
+function djPriceAll(){ djIdx().forEach(i=>{ if(document.querySelector(`input[name="dj_pm${i}"]:checked`)?.value!=='free') djPrice(i); }); }
 function djForm(){ if(!can('sales.input')) return noAccess();
-  const sales=SALES.filter(s=>['SPG / Promotor','Canvasing FMCG','Canvasing Elektronik'].includes(s.job)), tk=live('toko').filter(t=>t.status==='Aktif');
+  const sales=SALES.filter(s=>['SPG / Promotor','Canvasing FMCG','Canvasing Elektronik'].includes(s.job)), tk=live('toko').filter(t=>t.status==='Aktif'); DJ_I=0;
   openModal(`<h2 class="pt">Tambah penjualan<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Dipakai bila sales gagal menginput dari aplikasi. Tercatat atas nama sales, dengan jejak admin yang menginput.</p>
   <div class="grid" style="gap:12px">
     <div class="grid g2" style="gap:10px"><label class="field"><span>Sales <b class="req" aria-hidden="true">*</b></span>${sel(sales.map(s=>[s.u,s.name+' – '+s.job]),sales[0].u,'',{label:'Sales',id:'dj_u'})}</label>
     <label class="field"><span>Tanggal (Okt) <b class="req" aria-hidden="true">*</b></span><span class="inp"><input id="dj_d" inputmode="numeric" value="${LD_TODAY}"></span></label></div>
     <div class="field"><span>Toko</span><div class="chips" role="radiogroup" aria-label="Sumber toko" style="margin-bottom:8px">${[['master','Dari master'],['free','Teks bebas']].map(([k,l],i)=>`<label class="fchip"><input type="radio" name="dj_tm" value="${k}" ${i?'':'checked'} onchange="djTokoMode(this.value)" style="margin-right:6px">${l}</label>`).join('')}</div>
-      <div id="dj_tk_m">${sel(tk.map(t=>[t.name,t.name]),tk[0]?.name||'','djPrice()',{label:'Toko',id:'dj_t'})}</div>
+      <div id="dj_tk_m">${sel(tk.map(t=>[t.name,t.name]),tk[0]?.name||'','djPriceAll()',{label:'Toko',id:'dj_t'})}</div>
       <div id="dj_tk_f" style="display:none"><span class="inp"><input id="dj_tf" placeholder="Nama toko, contoh: Warung Elektronik Bu Siti"></span></div></div>
-    <div class="field"><span>Produk <b class="req" aria-hidden="true">*</b></span><div class="chips" role="radiogroup" aria-label="Sumber produk" style="margin-bottom:8px">${[['master','Dari master'],['free','Di luar master (teks bebas)']].map(([k,l],i)=>`<label class="fchip"><input type="radio" name="dj_pm" value="${k}" ${i?'':'checked'} onchange="djProdMode(this.value)" style="margin-right:6px">${l}</label>`).join('')}</div>
-      <div class="grid" style="gap:10px;grid-template-columns:1fr 90px"><div><div id="dj_p_m">${sel(PRODUCTS.filter(p=>p.status!=='Nonaktif').map(p=>[p.id,p.name]),PRODUCTS[0].id,'djPrice()',{label:'Produk',id:'dj_p'})}</div><div id="dj_p_f" style="display:none"><span class="inp"><input id="dj_pf" placeholder="Nama produk, contoh: Setrika Uap Mini"></span></div></div><label class="field"><span class="sr-only">Jumlah</span><span class="inp"><input id="dj_q" inputmode="numeric" value="1" aria-label="Jumlah"></span></label></div>
+    <div class="field"><span>Produk <b class="req" aria-hidden="true">*</b></span><div id="dj_rows" style="display:grid;gap:10px">${djRow(0)}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px">${btn('Tambah produk',{v:'outline',size:'sm',icon:'plus',on:'djRowAdd()'})}<span class="sm muted">Total <b class="fg tabular" id="dj_tot"></b></span></div>
       <p class="xs muted" style="margin-top:6px">Produk di luar master tetap tercatat sebagai penjualan dan masuk daftar Produk dari sales (sementara).</p></div>
-    <label class="field"><span>Harga satuan (Rp) <b class="req" aria-hidden="true">*</b></span><span class="inp"><input id="dj_h" inputmode="numeric" value="${PRODUCTS[0].price}" oninput="djNote()" aria-describedby="dj_note"><span class="unit">Rp</span></span></label><div id="dj_note" aria-live="polite"></div>
     <label class="field"><span>No. invoice toko</span><span class="inp"><input id="dj_inv" placeholder="contoh: INV/EC/2610/04571" autocomplete="off"></span></label>
     <label class="field"><span>Alasan input dari dashboard <b class="req" aria-hidden="true">*</b></span>${sel(DJ_ALASAN,DJ_ALASAN[0],'',{label:'Alasan',id:'dj_a'})}</label>
     <label class="field"><span>Catatan</span><textarea class="ta" id="dj_n" style="min-height:60px" placeholder="contoh: nomor nota toko, konfirmasi Team Leader"></textarea></label>
     <p class="ferr" id="dj_e"></p></div>
-  <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan penjualan',{v:'accent',on:'djSave()'})}</div>`); }
+  <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan penjualan',{v:'accent',on:'djSave()'})}</div>`); djRenum(); djPrice(0); }
 /* Aturan yang akan terpicu oleh isian tampil sebagai banner yang naik tingkat saat mengetik */
-function djNote(){ const box=document.getElementById('dj_note'); if(!box) return; const pf=document.querySelector('input[name="dj_pm"]:checked')?.value==='free'; if(pf){ box.innerHTML=banner({tone:'info',body:'Produk di luar master belum punya harga sistem, jadi harga ini tidak dibandingkan.'}); return; }
-  const h=parseInt((document.getElementById('dj_h').value||'').replace(/\D/g,''),10), tn=document.getElementById('dj_t')?.value, tk=TOKO.find(t=>t.name===tn), pid=document.getElementById('dj_p')?.value, ref=priceAt(pid,tk?.id);
+function djNote(i){ djTotal(); const box=document.getElementById('dj_note'+i); if(!box) return; const pf=document.querySelector(`input[name="dj_pm${i}"]:checked`)?.value==='free'; if(pf){ box.innerHTML=banner({tone:'info',body:'Produk di luar master belum punya harga sistem, jadi harga ini tidak dibandingkan.'}); return; }
+  const h=parseInt((document.getElementById('dj_h'+i).value||'').replace(/\D/g,''),10), tn=document.getElementById('dj_t')?.value, tk=TOKO.find(t=>t.name===tn), pid=document.getElementById('dj_p'+i)?.value, ref=priceAt(pid,tk?.id);
   if(!h||!ref){ box.innerHTML=''; return; } const d=Math.round((h-ref)/ref*1000)/10, ab=Math.abs(d);
   box.innerHTML=ab<.5?'':banner({tone:ab>=INV_TOL?'warning':'info',title:ab>=INV_TOL?'Selisih melewati batas':'Harga berbeda dari harga sistem',body:`Harga ${d>0?'lebih tinggi':'lebih rendah'} ${num(ab,1)}% dari harga sistem ${rp(ref)}.${ab>=INV_TOL?' Transaksi ditandai untuk diperiksa.':''}`}); }
 function djSave(){
   const g=id=>document.getElementById(id), err=g('dj_e'), clean=s=>s.replace(/['"<>`]/g,'').trim();
   const free=document.querySelector('input[name="dj_tm"]:checked')?.value==='free', toko=free?clean(g('dj_tf').value):g('dj_t').value;
-  const day=parseInt(g('dj_d').value,10), qn=parseInt(g('dj_q').value,10), h=parseInt(g('dj_h').value.replace(/\D/g,''),10), p=g('dj_p').value, u=g('dj_u').value;
-  const pfree=document.querySelector('input[name="dj_pm"]:checked')?.value==='free', pname=pfree?clean(g('dj_pf').value):'';
+  const day=parseInt(g('dj_d').value,10), u=g('dj_u').value;
   if(!toko){ err.textContent='Isi nama toko.'; return; }
-  if(pfree&&!pname){ err.textContent='Isi nama produk.'; return; }
   if(!(day>=1&&day<=LD_TODAY)){ err.textContent='Tanggal antara 1 dan '+LD_TODAY+' Okt.'; return; }
-  if(!(qn>0)){ err.textContent='Jumlah minimal 1.'; return; }
-  if(!(h>0)){ err.textContent='Isi harga satuan lebih dari nol.'; return; }
-  const L=shRead('trxApp',[]), n=L.filter(t=>t.src==='Dashboard').length+1;
-  const rec={id:'TRX-2610-D'+String(n).padStart(3,'0'),m:10,day,date:day+' Okt',d:ldAgo(10,day),u,toko,tokoFree:free,p:pfree?null:p,pname:pfree?pname:undefined,prodFree:pfree,q:qn,total:h*qn,st:'Terkirim',inv:null,src:'Dashboard',invNo:clean(g('dj_inv').value).toUpperCase(),alasan:g('dj_a').value,note:clean(g('dj_n').value),by:ME.name};
+  const idx=djIdx(), items=[]; let bad='';
+  idx.forEach((i,k)=>{ const pre=idx.length>1?'Produk '+(k+1)+': ':'', pfree=document.querySelector(`input[name="dj_pm${i}"]:checked`)?.value==='free', pname=pfree?clean(g('dj_pf'+i).value):'', qn=parseInt(g('dj_q'+i).value,10), h=parseInt(g('dj_h'+i).value.replace(/\D/g,''),10);
+    if(bad) return; if(pfree&&!pname){ bad=pre+'isi nama produk.'; return; } if(!(qn>0)){ bad=pre+'jumlah minimal 1.'; return; } if(!(h>0)){ bad=pre+'isi harga satuan lebih dari nol.'; return; }
+    items.push({p:pfree?null:g('dj_p'+i).value,pname:pfree?pname:undefined,prodFree:pfree,q:qn,price:h,total:h*qn}); });
+  if(bad){ err.textContent=bad.charAt(0).toUpperCase()+bad.slice(1); return; }
+  const L=shRead('trxApp',[]), n=L.filter(t=>t.src==='Dashboard').length+1, tot=items.reduce((a,x)=>a+x.total,0), pc=x=>x.p?PRODUCTS.find(y=>y.id===x.p)?.cat:'';
+  items.forEach(x=>{ x.kat=pc(x)||''; });
+  const rec={id:'TRX-2610-D'+String(n).padStart(3,'0'),m:10,day,date:day+' Okt',d:ldAgo(10,day),u,toko,tokoFree:free,p:items[0].p,pname:items[0].pname,kat:items[0].kat,prodFree:items.some(x=>x.prodFree),q:items.reduce((a,x)=>a+x.q,0),total:tot,items,st:'Terkirim',inv:null,src:'Dashboard',invNo:clean(g('dj_inv').value).toUpperCase(),alasan:g('dj_a').value,note:clean(g('dj_n').value),by:ME.name};
   shSet('trxApp',[rec,...L]);
-  if(pfree&&!D.prodTemp.some(x=>!x.master&&x.name.toLowerCase()===pname.toLowerCase())) D.prodTemp.unshift({id:newId('pt'),name:pname,harga:h,note:'Dari input penjualan dashboard '+rec.id,by:u,toko,when:day+' Okt'}); audit('Menambahkan penjualan '+rec.id+' atas nama '+byU(u).name+' ('+rec.alasan+')');
+  items.filter(x=>x.prodFree&&!D.prodTemp.some(y=>!y.master&&y.name.toLowerCase()===x.pname.toLowerCase())).forEach(x=>D.prodTemp.unshift({id:newId('pt'),name:x.pname,harga:x.price,note:'Dari input penjualan dashboard '+rec.id,by:u,toko,when:day+' Okt'})); audit('Menambahkan penjualan '+rec.id+' atas nama '+byU(u).name+' ('+rec.alasan+')');
   closeLayer(); render(false); toast('Penjualan ditambahkan',rec.id+' · '+rp(rec.total)+'. Masuk ke laporan dan target '+byU(u).name+'.'); }
 function djDelAsk(id){ const t=allTrx().find(x=>x.id===id);
   openModal(`<h2 class="pt">Hapus ${esc(id)}?<i>.</i></h2><p class="dlg-d">Penjualan input dashboard ini dikeluarkan dari laporan, target, dan insentif. Data tetap tersimpan untuk audit (soft delete).</p><div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Hapus',{v:'danger-solid',icon:'trash',on:`djDel('${id}')`})}</div>`); }
@@ -4266,7 +4297,7 @@ Object.assign(MD,{
   formjual:[
     ['kategori','Kategori produk','select','katprod','','Produk','Ya','Ya','kategori'],['status','Status produk','select','statprod','','Produk','Ya','Ya',''],['nama','Nama produk','text','produk','','Produk','Ya','Ya','produk'],
     ['harga','Harga','money','','','Produk','Ya','Ya',''],['diskon','Diskon','money','','','Produk','Tidak','Ya',''],['setelah','Harga setelah diskon','calc','','{harga} - {diskon}','Produk','Tidak','Tidak','harga'],
-    ['tanggal','Tanggal pembelian','date','','','Produk','Ya','Ya',''],['jumlah','Jumlah produk','number','','','Produk','Ya','Ya','qty'],['foto','Foto produk','photo','','','Produk','Ya','Tidak',''],
+    ['tanggal','Tanggal pembelian','date','','','Invoice','Ya','Ya',''],['jumlah','Jumlah produk','number','','','Produk','Ya','Ya','qty'],['foto','Foto produk','photo','','','Produk','Ya','Tidak',''],
     ['noinv','No. invoice','text','','','Invoice','Ya','Ya','noinv'],['fotoinv','Foto invoice','photo','','','Invoice','Ya','Tidak','fotoinv'],
     ['pembeli','Nama pembeli','text','','','Pembeli','Ya','Tidak','pembeli'],['alamat','Alamat pembeli','text','','','Pembeli','Tidak','Tidak',''],['telepon','Telepon pembeli','tel','','','Pembeli','Ya','Tidak','']
   ].map(([key,label,type,src,rumus,bagian,wajib,ocr,peran],i)=>({id:'fj'+(i+1),key,label,type,src,rumus,opsi:'',bagian,wajib,ocr,peran,urut:i+1,roles:['r3'],status:'Aktif'})),
@@ -4311,7 +4342,7 @@ Object.assign(ENT,{
       {k:'src',label:'Sumber pilihan',type:'select',opts:FSRC,hint:'Dropdown: daftar pilihan. Teks: saran isian. Master Produk otomatis disaring oleh field Kategori produk'},
       {k:'opsi',label:'Opsi manual (satu per baris)',type:'textarea',only:'select'},
       {k:'rumus',label:'Rumus',only:'calc',ph:'{harga} - {diskon}',hint:'Pakai kunci field dalam kurung kurawal dan operator + − × ÷',validate:(v,vals)=>{ if(vals.type!=='calc') return ''; const keys=[...v.matchAll(/\{([a-z0-9_]+)\}/g)].map(m=>m[1]); const bad=keys.filter(k=>!fjKeys().includes(k)); if(bad.length) return 'Kunci tidak dikenal: '+bad.join(', '); return /^[\s\d+\-*/().{}a-z_]*$/.test(v)?'':'Hanya angka, kunci field, dan operator + - * / ( )'; }},
-      {k:'bagian',label:'Bagian form',req:true,ph:'contoh: Produk',hint:'Field dengan bagian yang sama tampil berkelompok'},
+      {k:'bagian',label:'Bagian form',req:true,ph:'contoh: Produk',hint:'Field dengan bagian yang sama tampil berkelompok. Bagian Produk diulang untuk tiap produk, sales bisa menambah lebih dari satu produk. Bagian lain diisi sekali per transaksi'},
       {k:'wajib',label:'Wajib diisi',type:'select',opts:['Ya','Tidak']},
       {k:'ocr',label:'Terisi dari foto invoice (OCR)',type:'select',opts:['Ya','Tidak']},
       {k:'peran',label:'Peran di transaksi',type:'select',opts:FPERAN,hint:'Menghubungkan field ke perhitungan total, target quantity, dan laporan. Satu peran untuk satu field',validate:(v,vals)=>v&&live('formjual').some(f=>f.peran===v&&f.key!==vals.key&&f.id!==FORM?.id)?'Peran ini sudah dipakai field lain':''},
@@ -4589,7 +4620,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
 /* ---------- Penyimpanan data dashboard (D6) ----------
    Perubahan di dashboard disimpan sebagai snapshot berversi. Data bersama dengan mobile tetap di salesapp.shared.v1.
    Naikkan DASH_VER bila bentuk data contoh berubah, supaya snapshot lama dibuang dan data contoh baru dipakai. */
-const DASH_VER=13;
+const DASH_VER=14;
 const PARAM={};
 const dashData=()=>({D,MD,TOKO,TRX,INFO,POSM,AR,KLAIM,ATT,REK_ADJ,PARAM});
 function restoreInto(t,src){
