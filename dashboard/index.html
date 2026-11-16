@@ -1161,6 +1161,14 @@ try{ matchMedia('(min-width:1280px)').addEventListener('change',()=>{ if(parse()
 const SHARE_KEY='salesapp.shared.v1';
 const shGet=()=>{try{return JSON.parse(localStorage.getItem(SHARE_KEY))||{}}catch(e){return {}}};
 const shRead=(k,def)=>{const o=shGet();return o[k]!==undefined?o[k]:def};
+/* Pemisah ribuan: input dengan data-num diformat 1.234.567 saat diketik. data-num="dec" boleh memakai koma desimal. */
+const numStr=(n,dec)=>n==null||n===''||isNaN(n)?'':Number(n).toLocaleString('id-ID',{maximumFractionDigits:dec?8:0});
+function numFmt(el){ const dec=el.dataset.num==='dec', v=el.value, pos=el.selectionStart==null?v.length:el.selectionStart, keep=dec?/[^\d,]/g:/\D/g;
+  const before=v.slice(0,pos).replace(keep,'').length; let s=v.replace(keep,''); const parts=s.split(','); let i=parts[0].replace(/^0+(?=\d)/,'');
+  const g=i.replace(/\B(?=(\d{3})+(?!\d))/g,'.'), out=dec&&s.includes(',')?g+','+parts.slice(1).join(''):g; if(out===v) return; el.value=out;
+  let n=0,p=0; while(p<out.length&&n<before){ if(/[\d,]/.test(out[p])) n++; p++; } try{ el.setSelectionRange(p,p); }catch(e){} }
+document.addEventListener('input',e=>{ if(e.target.matches&&e.target.matches('input[data-num]')) numFmt(e.target); });
+
 const shSet=(k,v)=>{const o=shGet();o[k]=v;const ok=writeKey(SHARE_KEY,JSON.stringify(o));if(!ok)storageFail();return ok};
 const SKU_TASK_DEFAULT=[{id:'T-11',prod:'kl2p',toko:'Electronic City Kemang',by:'Rina Marlina',st:'Sedang diperbaiki'},{id:'T-12',prod:'ap30',toko:'Best Denki Alam Sutera',by:'Fajar Nugroho',st:'Menunggu assign'},{id:'T-09',prod:'tv43',toko:'Electronic Solution Puri',by:'Putri Ayuningtyas',st:'Closed'}];
 const CBD_DEFAULT=[{id:'CT-3',t:'Alasan leads tidak goal',to:'Tono Hidayat',qs:['Kenapa nasabah menolak?','Produk apa yang lebih diminati?'],st:'Menunggu jawaban'},{id:'CT-2',t:'Minat produk Dana Tunai',to:'Tono Hidayat',qs:['Produk apa yang paling diminati?','Berapa nominal yang dibutuhkan?','Kapan dibutuhkan?'],st:'Terjawab'}];
@@ -2265,8 +2273,8 @@ function djRow(i){ const g=PRODUCTS.filter(p=>p.status!=='Nonaktif');
     <div class="chips" role="radiogroup" aria-label="Sumber produk">${[['master','Dari master'],['free','Di luar master (teks bebas)']].map(([k,l],j)=>`<label class="fchip"><input type="radio" name="dj_pm${i}" value="${k}" ${j?'':'checked'} onchange="djProdMode(${i},this.value)" style="margin-right:6px">${l}</label>`).join('')}</div>
     <div id="dj_p_m${i}">${sel(g.map(p=>[p.id,p.name]),g[0].id,`djPrice(${i})`,{label:'Produk',id:'dj_p'+i})}</div><div id="dj_p_f${i}" style="display:none"><span class="inp"><input id="dj_pf${i}" placeholder="Nama produk, contoh: Setrika Uap Mini"></span></div>
     <div class="grid g2" style="gap:10px"><label class="field"><span>Jumlah</span>${qtyBox('dj_q'+i,1,{on:`djNote(${i})`})}</label>
-      <label class="field"><span>Harga satuan (Rp) <b class="req" aria-hidden="true">*</b></span><span class="inp"><input id="dj_h${i}" inputmode="numeric" value="${g[0].price}" oninput="djNote(${i})"><span class="unit">Rp</span></span></label></div>
-    <label class="field"><span>Diskon produk per unit (Rp) <span class="muted">· opsional</span></span><span class="inp"><input id="dj_dk${i}" inputmode="numeric" placeholder="0" oninput="this.value=this.value.replace(/\D/g,'');djNote(${i})"><span class="unit">Rp</span></span></label>
+      <label class="field"><span>Harga satuan (Rp) <b class="req" aria-hidden="true">*</b></span><span class="inp"><input id="dj_h${i}" inputmode="numeric" data-num="int" value="${numStr(g[0].price)}" oninput="djNote(${i})"><span class="unit">Rp</span></span></label></div>
+    <label class="field"><span>Diskon produk per unit (Rp) <span class="muted">· opsional</span></span><span class="inp"><input id="dj_dk${i}" inputmode="numeric" data-num="int" placeholder="0" oninput="djNote(${i})"><span class="unit">Rp</span></span></label>
     <div class="sm muted" style="text-align:right">Subtotal produk <b class="fg tabular" id="dj_sub${i}"></b></div>
     <div id="dj_note${i}" aria-live="polite"></div></div>`; }
 function djRenum(){ const rs=[...document.querySelectorAll('[data-djrow]')]; rs.forEach((r,k)=>{ r.querySelector('.dj-rn').textContent='Produk '+(k+1); r.querySelector('.djrow-h .btn').style.display=rs.length>1?'':'none'; }); djTotal(); }
@@ -2278,7 +2286,7 @@ function djRowAdd(){ const i=++DJ_I; document.getElementById('dj_rows').insertAd
 function djRowDel(i){ if(djIdx().length<2) return; document.querySelector(`[data-djrow="${i}"]`).remove(); djRenum(); }
 function djTokoMode(v){ document.getElementById('dj_tk_m').style.display=v==='free'?'none':''; document.getElementById('dj_tk_f').style.display=v==='free'?'':'none'; }
 function djProdMode(i,v){ document.getElementById('dj_p_m'+i).style.display=v==='free'?'none':''; document.getElementById('dj_p_f'+i).style.display=v==='free'?'':'none'; if(v==='free') document.getElementById('dj_h'+i).value=''; else djPrice(i); djNote(i); }
-function djPrice(i){ const id=document.getElementById('dj_p'+i)?.value, tn=document.getElementById('dj_t')?.value, tk=TOKO.find(t=>t.name===tn), m=tk&&MD.mapping.find(x=>!x.del&&x.status==='Aktif'&&x.produk===id&&x.toko===tk.id), p=PRODUCTS.find(x=>x.id===id); if(m) document.getElementById('dj_h'+i).value=effHarga(m); else if(p) document.getElementById('dj_h'+i).value=p.price; djNote(i); }
+function djPrice(i){ const id=document.getElementById('dj_p'+i)?.value, tn=document.getElementById('dj_t')?.value, tk=TOKO.find(t=>t.name===tn), m=tk&&MD.mapping.find(x=>!x.del&&x.status==='Aktif'&&x.produk===id&&x.toko===tk.id), p=PRODUCTS.find(x=>x.id===id); if(m) document.getElementById('dj_h'+i).value=numStr(effHarga(m)); else if(p) document.getElementById('dj_h'+i).value=numStr(p.price); djNote(i); }
 function djPriceAll(){ djIdx().forEach(i=>{ if(document.querySelector(`input[name="dj_pm${i}"]:checked`)?.value!=='free') djPrice(i); }); }
 function djForm(){ if(!can('sales.input')) return noAccess();
   const sales=SALES.filter(s=>['SPG / Promotor','Canvasing FMCG','Canvasing Elektronik'].includes(s.job)), tk=live('toko').filter(t=>t.status==='Aktif'); DJ_I=0;
@@ -2292,7 +2300,7 @@ function djForm(){ if(!can('sales.input')) return noAccess();
     <div class="field"><span>Produk <b class="req" aria-hidden="true">*</b></span><div id="dj_rows" style="display:grid;gap:10px">${djRow(0)}</div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px">${btn('Tambah produk',{v:'outline',size:'sm',icon:'plus',on:'djRowAdd()'})}<span class="sm muted" style="text-align:right"><span class="xs" id="dj_sum" style="display:block"></span>Total <b class="fg tabular" id="dj_tot"></b></span></div>
       <p class="xs muted" style="margin-top:6px">Produk di luar master tetap tercatat sebagai penjualan dan masuk daftar Produk dari sales (sementara).</p></div>
-    <label class="field"><span>Diskon transaksi (Rp) <span class="muted">· opsional</span></span><span class="inp"><input id="dj_dt" inputmode="numeric" placeholder="0" oninput="this.value=this.value.replace(/\D/g,'');djTotal()"><span class="unit">Rp</span></span><span class="xs muted" style="display:block;margin-top:4px">Dipotong dari subtotal semua produk, sudah masuk ke total transaksi.</span></label>
+    <label class="field"><span>Diskon transaksi (Rp) <span class="muted">· opsional</span></span><span class="inp"><input id="dj_dt" inputmode="numeric" data-num="int" placeholder="0" oninput="djTotal()"><span class="unit">Rp</span></span><span class="xs muted" style="display:block;margin-top:4px">Dipotong dari subtotal semua produk, sudah masuk ke total transaksi.</span></label>
     <label class="field"><span>No. invoice toko</span><span class="inp"><input id="dj_inv" placeholder="contoh: INV/EC/2610/04571" autocomplete="off"></span></label>
     <label class="field"><span>Alasan input dari dashboard <b class="req" aria-hidden="true">*</b></span>${sel(DJ_ALASAN,DJ_ALASAN[0],'',{label:'Alasan',id:'dj_a'})}</label>
     <label class="field"><span>Catatan</span><textarea class="ta" id="dj_n" style="min-height:60px" placeholder="contoh: nomor nota toko, konfirmasi Team Leader"></textarea></label>
@@ -2501,7 +2509,7 @@ function tgtModal(kind,key){
   const opts=isU?SALES.map(x=>[x.u,x.name+' – '+x.job]):live('toko').filter(t=>t.status==='Aktif').map(t=>[t.id,t.name]);
   openModal(`<h2 class="pt">${key?'Ubah':'Tambah'} target ${isU?'sales':'toko'}<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Periode ${LD_FULL[m]} 2026. Laporan penjualan, Overview, dan Insentif langsung memakai angka ini.</p>
   <div class="grid" style="gap:12px"><label class="field"><span>${isU?'Sales':'Toko'}</span>${sel(opts,key||opts[0][0],'',{label:isU?'Sales':'Toko',id:'tg_k'})}</label>
-  <label class="field"><span>Target (Rp)</span><span class="inp"><input id="tg_v" inputmode="numeric" value="${cur?cur.amount:''}" placeholder="contoh: 90000000"></span></label><p class="ferr" id="tg_e"></p></div>
+  <label class="field"><span>Target (Rp)</span><span class="inp"><input id="tg_v" inputmode="numeric" data-num="int" value="${cur?numStr(cur.amount):''}" placeholder="contoh: 90000000"></span></label><p class="ferr" id="tg_e"></p></div>
   <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan',{v:'accent',on:`tgtSave('${kind}',${m})`})}</div>`); }
 function tgtSave(kind,m){
   const isU=kind==='user', store=isU?MD.tgtnom:MD.tgttoko, f=isU?'u':'toko', k=document.getElementById('tg_k').value, v=parseInt(document.getElementById('tg_v').value.replace(/\D/g,''))||0;
@@ -3193,7 +3201,7 @@ function fieldHTML(fd,r){
   else if(t==='select') h=`<label class="field">${lab}<span class="sel" style="display:flex"><select id="${id}" style="width:100%" ${fd.onchange?`onchange="${fd.onchange}"`:''} ${fd.attrs||''}>${opts().map(([ov,ol])=>`<option value="${esc(ov)}" ${String(ov)===String(v??'')?'selected':''}>${esc(ol)}</option>`).join('')}</select>${I('chev',16)}</span>${hint}${err}</label>`;
   else if(t==='multi') h=`<div class="field">${lab}<div class="chips" id="${id}" role="group" aria-label="${fd.label}">${opts().map(([ov,ol])=>{const cur=fd.all&&r[fd.allKey]?[fd.all]:(v||[]);const on=cur.includes(ov);return `<button type="button" class="fchip ${on?'on':''}" aria-pressed="${on}" data-v="${esc(ov)}" onclick="multiTog(this${fd.all?`,'${fd.all}'`:''})">${esc(ol)}</button>`}).join('')}</div>${hint}${err}</div>`;
   else if(t==='textarea') h=`<label class="field">${lab}<textarea class="ta short" id="${id}" aria-describedby="e_${fd.k}">${esc(v||'')}</textarea>${hint}${err}</label>`;
-  else h=`<label class="field">${lab}<span class="inp"><input id="${id}" aria-describedby="e_${fd.k}" type="${t==='number'?'text':t}" ${t==='number'?'inputmode="decimal"':''} value="${esc(t==='number'&&v!=null?String(v).replace('.',','):(v??''))}" placeholder="${fd.ph||''}"></span>${hint}${err}</label>`;
+  else h=`<label class="field">${lab}<span class="inp"><input id="${id}" aria-describedby="e_${fd.k}" type="${t==='number'?'text':t}" ${t==='number'?'inputmode="decimal" data-num="dec"':''} value="${esc(t==='number'&&v!=null&&v!==''?numStr(v,true):(v??''))}" placeholder="${fd.ph||''}"></span>${hint}${err}</label>`;
   return fd.only?`<div data-only="${fd.only}" ${r.type!==fd.only?'style="display:none"':''}>${h}</div>`:h;
 }
 function openForm(ent,id,prefill){
@@ -3684,7 +3692,7 @@ function penTokoSave(){ const {t:id,sel:S}=ST.penPick, t=TOKO.find(x=>x.id===id)
   t.sales=[...S];
   MD.user.forEach(u=>{ const on=S.has(u.id), has=(u.toko||[]).includes(id); if(on&&!has) u.toko=[...(u.toko||[]),id]; if(!on&&has) u.toko=u.toko.filter(v=>v!==id); });
   audit('Mengatur '+S.size+' sales di toko '+t.name); closeLayer(); render(false); toast('Penempatan '+t.name+' disimpan',S.size+' sales ditugaskan. Aplikasi mobile ikut berubah.'); }
-function cvLimitModal(){ openModal(`<h2 class="pt">Ubah limit<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Nilai barang maksimal per hari.</p><label class="field"><span>Limit (Rp)</span><span class="inp"><input id="cv_l" inputmode="numeric" value="${CV_PARAM.limit}"></span></label>
+function cvLimitModal(){ openModal(`<h2 class="pt">Ubah limit<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Nilai barang maksimal per hari.</p><label class="field"><span>Limit (Rp)</span><span class="inp"><input id="cv_l" inputmode="numeric" data-num="int" value="${numStr(CV_PARAM.limit)}"></span></label>
   <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan',{v:'accent',on:'cvLimitSave()'})}</div>`); }
 function cvLimitSave(){ const v=parseInt(document.getElementById('cv_l').value.replace(/\D/g,''))||0; if(v<1){ toast('Periksa isian','Isi nominal limit.','danger'); return; } CV_PARAM.limit=v; shSet('canvasLimit',v); audit('Mengubah limit canvassing'); closeLayer(); render(false); toast('Limit tersimpan',rp(v)); }
 
@@ -3712,7 +3720,7 @@ function pagePenagihan(q){
 function arPanel(id){ const a=AR.find(x=>x.id===id); if(!a) return panelMissing('Tagihan'); const s=arSisa(a);
   openPanel(tokoName(a.toko),`${panelHero({eyebrow:a.no,title:esc(tokoName(a.toko)),sub:esc(byU(a.u).name),badge:s<=0?spill('Lunas','success'):spill(UMUR[arUmur(a)][0],UMUR[arUmur(a)][1]),metrics:[['Total',rp(a.total)],['Dibayar',rp(a.paid)],['Sisa',rp(s)]]})}
   <div class="xs muted" style="margin-bottom:8px">Riwayat pembayaran</div><div class="rows" style="margin-bottom:14px">${a.pays.length?a.pays.map(p=>`<div class="rowlink" style="cursor:default"><span class="sm fg" style="flex:1">${p.tgl} · ${p.m}</span><b class="tabular sm fg">${rp(p.n)}</b></div>`).join(''):'<p class="muted sm">Belum ada pembayaran.</p>'}</div>
-  ${s>0?`<div class="grid g2" style="gap:10px"><label class="field"><span>Nominal bayar (Rp)</span><span class="inp"><input id="ar_n" inputmode="numeric" value="${s}"></span></label><label class="field"><span>Metode</span>${sel(['Tunai','Transfer','Giro'],'Transfer','',{label:'Metode',id:'ar_m'})}</label></div>`:callout('Tagihan sudah lunas.','blue')}`,
+  ${s>0?`<div class="grid g2" style="gap:10px"><label class="field"><span>Nominal bayar (Rp)</span><span class="inp"><input id="ar_n" inputmode="numeric" data-num="int" value="${numStr(s)}"></span></label><label class="field"><span>Metode</span>${sel(['Tunai','Transfer','Giro'],'Transfer','',{label:'Metode',id:'ar_m'})}</label></div>`:callout('Tagihan sudah lunas.','blue')}`,
   s>0?`${btn('Tutup',{v:'outline',on:'closeLayer()'})}${btn('Catat pembayaran',{v:'accent',on:`arPay('${id}')`})}`:btn('Tutup',{v:'outline',on:'closeLayer()'}),{sub:a.no+' · '+byU(a.u).name}); }
 function arPay(id){ const a=AR.find(x=>x.id===id), n=parseInt(document.getElementById('ar_n').value.replace(/\D/g,''),10), s=arSisa(a);
   if(!(n>0)||n>s){ toast('Periksa isian','Nominal antara 1 dan '+rp(s)+'.','danger'); return; }

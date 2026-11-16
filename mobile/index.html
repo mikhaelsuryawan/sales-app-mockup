@@ -576,6 +576,14 @@ const val = id => (document.getElementById(id)?.value||'').trim();
 const SHARE_KEY='salesapp.shared.v1';
 const shGet=()=>{try{return JSON.parse(localStorage.getItem(SHARE_KEY))||{}}catch(e){return {}}};
 const shRead=(k,def)=>{const o=shGet();return o[k]!==undefined?o[k]:def};
+/* Pemisah ribuan: input dengan data-num diformat 1.234.567 saat diketik. data-num="dec" boleh memakai koma desimal. */
+const numStr=(n,dec)=>n==null||n===''||isNaN(n)?'':Number(n).toLocaleString('id-ID',{maximumFractionDigits:dec?8:0});
+function numFmt(el){ const dec=el.dataset.num==='dec', v=el.value, pos=el.selectionStart==null?v.length:el.selectionStart, keep=dec?/[^\d,]/g:/\D/g;
+  const before=v.slice(0,pos).replace(keep,'').length; let s=v.replace(keep,''); const parts=s.split(','); let i=parts[0].replace(/^0+(?=\d)/,'');
+  const g=i.replace(/\B(?=(\d{3})+(?!\d))/g,'.'), out=dec&&s.includes(',')?g+','+parts.slice(1).join(''):g; if(out===v) return; el.value=out;
+  let n=0,p=0; while(p<out.length&&n<before){ if(/[\d,]/.test(out[p])) n++; p++; } try{ el.setSelectionRange(p,p); }catch(e){} }
+document.addEventListener('input',e=>{ if(e.target.matches&&e.target.matches('input[data-num]')) numFmt(e.target); });
+
 const shSet=(k,v)=>{try{const o=shGet();o[k]=v;localStorage.setItem(SHARE_KEY,JSON.stringify(o))}catch(e){}};
 const shReset=()=>{try{localStorage.removeItem(SHARE_KEY)}catch(e){}};
 const SKU_TASK_DEFAULT=[{id:'T-11',prod:'kl2p',toko:'Electronic City Kemang',by:'Rina Marlina',st:'Sedang diperbaiki'},{id:'T-12',prod:'ap30',toko:'Best Denki Alam Sutera',by:'Fajar Nugroho',st:'Menunggu assign'},{id:'T-09',prod:'tv43',toko:'Electronic Solution Puri',by:'Putri Ayuningtyas',st:'Closed'}];
@@ -1988,7 +1996,7 @@ SCR['fm-promo'] = () => {
   const ok=fmPromoOk();
   return {note:'Price promo (MOM 10.2). Produk yang dicek sesuai setup admin di dashboard. Harga sebelum promo dari sistem, harga promo diinput sendiri oleh promotor, persen diskon dihitung otomatis. Lalu foto display dan foto price tag promo.',
   html:`${appbar('Price promo')}<main class="content">${promoCek().length?'':`<div class="empty">Admin belum menetapkan produk price promo untuk outlet ini.</div>`}${promoCek().map(x=>{ const v=(S.fm.promo||{})[x.id]||'', t=fmPromoPct(x.b,v); return `<div class="card" style="margin-bottom:10px"><b>${x.name}</b>
-    <div class="row" style="gap:8px;margin-top:10px;align-items:flex-end"><div class="grow"><div class="small muted">Harga sebelum promo</div><div class="num" style="font-weight:700;padding:10px 0">${rp(x.b)}</div></div><label class="field grow" style="margin:0"><span>Harga promo (Rp)</span><input class="input num" inputmode="numeric" value="${v}" placeholder="0" oninput="fmPromoSet('${x.id}',${x.b},this.value)"></label></div>
+    <div class="row" style="gap:8px;margin-top:10px;align-items:flex-end"><div class="grow"><div class="small muted">Harga sebelum promo</div><div class="num" style="font-weight:700;padding:10px 0">${rp(x.b)}</div></div><label class="field grow" style="margin:0"><span>Harga promo (Rp)</span><input class="input num" inputmode="numeric" data-num="int" value="${numStr(v)}" placeholder="0" oninput="fmPromoSet('${x.id}',${x.b},this.value)"></label></div>
     <div id="pp_${x.id}" class="small" style="margin-top:6px;font-weight:700;min-height:18px;color:${t.startsWith('Harga')?'var(--red)':'var(--green)'}">${t}</div>
     <div class="thumbs">${photoSlot('Foto display',S.fm.foto[x.id+'d'],`fmPhoto('${x.id}d')`)}${photoSlot('Price tag',S.fm.foto[x.id+'t'],`fmPhoto('${x.id}t')`)}</div></div>`}).join('')}
   </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="fmDraftSave('promo')">Simpan sementara</button><button class="btn" id="ppKirim" ${ok?'':'disabled'} onclick="fmMark('promo');back();toast('Price promo terkirim')">Kirim price promo</button></footer>`};
@@ -2554,7 +2562,7 @@ function shareAddSheet(){
   <label class="field"><span>Brand kompetitor</span><input class="input" id="sa_b" list="sa_bl" placeholder="Contoh: Samsung" maxlength="60"><datalist id="sa_bl">${compBrands().map(b=>`<option value="${esc(b)}">`).join('')}</datalist></label>
   <label class="field"><span>Kategori</span><input class="input" id="sa_c" list="sa_cl" value="${esc(katLabel(key))}" placeholder="Contoh: Peralatan Dapur › Blender" maxlength="80"><datalist id="sa_cl">${katFlat(S.shareBrand,true).map(p=>`<option value="${esc(katLabel(p))}">`).join('')}</datalist></label>
   <label class="field"><span>Nama produk</span><input class="input" id="sa_n" placeholder="Merek dan tipe"></label>
-  <div class="row" style="gap:10px"><label class="field grow"><span>Qty</span><input class="input num" id="sa_q" inputmode="numeric" value="1"></label><label class="field grow"><span>Harga (opsional)</span><input class="input num" id="sa_h" inputmode="numeric"></label></div>
+  <div class="row" style="gap:10px"><label class="field grow"><span>Qty</span><input class="input num" id="sa_q" inputmode="numeric" value="1"></label><label class="field grow"><span>Harga (opsional)</span><input class="input num" id="sa_h" inputmode="numeric" data-num="int" placeholder="Rp"></label></div>
   <button class="btn" onclick="shareAdd()">Tambah</button>`);
 }
 function shareAdd(){
