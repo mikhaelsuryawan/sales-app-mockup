@@ -3364,23 +3364,6 @@ function jpDel(id){ const x=jpAll().find(r=>r.id===id);
   act('jp/remove',{perm:'visit.create',run:()=>{ const L=jpAll().filter(r=>r.id!==id); L.filter(r=>r.u===x.u&&r.w===x.w&&r.d===x.d).sort((a,b)=>a.o-b.o).forEach((r,i)=>{ r.o=i+1; }); shSet('jpPlan',L); },audit:'Menghapus '+jpToko(x.t)+' dari journey plan '+byU(x.u).name,toast:['Dihapus dari plan',jpToko(x.t),'default']}); }
 function jpMove(id,dir){ const x=jpAll().find(r=>r.id===id);
   act('jp/order',{perm:'visit.create',run:()=>{ const L=jpAll().map(r=>({...r})), g=L.filter(r=>r.u===x.u&&r.w===x.w&&r.d===x.d).sort((a,b)=>a.o-b.o), i=g.findIndex(r=>r.id===id), j=i+dir; if(j<0||j>=g.length) return; const t=g[i].o; g[i].o=g[j].o; g[j].o=t; shSet('jpPlan',L); },audit:'Mengubah urutan rute '+byU(x.u).name,toast:['Urutan diubah',jpToko(x.t),'default'],close:false}); }
-function frekBody(){ const F=freqMap(), cats=[...new Set([...Object.keys(FREQ_DEFAULT),...TOKO.filter(t=>!t.del).map(t=>t.cat)])];
-  return card('Frekuensi kunjungan '+tag('Usulan','accent'),dataTable('frq',{rows:cats.map(c=>({_id:c,cat:c,n:F[c]??0,next:(freqNext().kat||{})[c],jml:TOKO.filter(t=>!t.del&&t.cat===c).length})),rowClick:r=>`frekModal('${r._id}')`,cols:[{label:'Kategori toko',render:r=>`<span class="fg" style="font-weight:500">${esc(r.cat)}</span>`,prim:true},{label:'Toko',render:r=>r.jml,align:'r',hide:true},{label:'Frekuensi',render:r=>`<b class="tabular fg">${r.n}</b> <span class="xs muted">kali per 4 minggu</span>${nextTag(r.n,r.next)}`}],acts:r=>btn('Ubah',{v:'outline',size:'sm',icon:'edit',on:`frekModal('${r._id}')`})}),{acts:freqPending()&&can('master.edit')?btn('Mulai siklus berikutnya ('+freqPending()+' perubahan)',{v:'accent',size:'sm',icon:'check',on:'frekApply()'}):'',desc:'Dipakai untuk memeriksa coverage journey plan. Angka dihitung per 4 minggu. Target siklus proporsional (mingguan seperempat, 2 mingguan setengah), dibulatkan ke atas. Contoh angka perlu dikonfirmasi klien. Perubahan berlaku mulai siklus berikutnya ('+SIKLUS_NEXT+'), siklus yang berjalan tidak berubah.'})
-  +`<div style="height:12px"></div>`+card('Frekuensi khusus per toko '+tag('Usulan','accent'),dataTable('frt',{rows:TOKO.filter(t=>!t.del&&t.status==='Aktif').map(t=>({_id:t.id,t,n:needOf(t),next:(freqNext().toko||{})[t.id],khusus:freqTokoMap()[t.id]!==undefined})),rowClick:r=>`frekTokoModal('${r._id}')`,cols:[{label:'Toko',render:r=>`<span class="fg" style="font-weight:500">${esc(r.t.name)}</span><span class="xs muted" style="display:block">${esc(r.t.cat)}</span>`,prim:true},{label:'Frekuensi',render:r=>`<b class="tabular fg">${r.n}</b> <span class="xs muted">kali per 4 minggu</span>${nextTag(r.n,r.next)}`},{label:'Sumber',render:r=>r.khusus?tag('Khusus toko','accent'):'<span class="muted">Default kategori</span>',hide:true}],acts:r=>btn('Ubah',{v:'outline',size:'sm',icon:'edit',on:`frekTokoModal('${r._id}')`})}),{desc:'Satu toko boleh punya angka sendiri. Kosongkan isian untuk kembali ke default kategori.'})
-  +`<div style="height:12px"></div>`+callout('<b>Batas kunjungan per hari</b> diatur per role di menu <a href="#/parameter" style="color:var(--accent-text);font-weight:600">Parameter</a>. Melebihi batas hanya memperingatkan.'); }
-function frekModal(c){ openModal(`<h2 class="pt">Frekuensi ${esc(c)}<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Berapa kali toko kategori ini dikunjungi dalam satu siklus 4 minggu. Berlaku mulai siklus berikutnya (${SIKLUS_NEXT}). Siklus yang berjalan tidak berubah.</p><label class="field"><span>Kali per 4 minggu</span><span class="inp"><input id="fq_n" inputmode="numeric" value="${(freqNext().kat||{})[c]??freqMap()[c]??0}"></span></label>
-  <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan',{v:'accent',on:`frekSave('${c}')`})}</div>`); }
-function frekSave(c){ const v=parseInt(document.getElementById('fq_n').value.replace(/\D/g,'')); if(isNaN(v)||v>12){ toast('Periksa isian','Isi angka 0 sampai 12.','danger'); return; }
-  act('jp/freq',{perm:'master.edit',run:()=>{ const n=freqNext(); shSet('freqNext',{...n,kat:{...(n.kat||{}),[c]:v}}); },audit:'Menjadwalkan frekuensi kunjungan '+c+' menjadi '+v+' kali per 4 minggu mulai '+SIKLUS_NEXT,toast:['Tersimpan untuk siklus berikutnya',c+': '+v+' kali per 4 minggu mulai '+SIKLUS_NEXT+'. Siklus berjalan tidak berubah.']}); }
-function frekTokoModal(id){ const t=TOKO.find(x=>x.id===id), nx=freqNext().toko||{}, cur=(id in nx)?nx[id]:freqTokoMap()[id];
-  openModal(`<h2 class="pt">Frekuensi ${esc(t.name)}<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Default kategori ${esc(t.cat)}: ${freqMap()[t.cat]??0} kali per 4 minggu. Kosongkan untuk memakai default. Berlaku mulai siklus berikutnya (${SIKLUS_NEXT}).</p><label class="field"><span>Kali per 4 minggu</span><span class="inp"><input id="ft_n" inputmode="numeric" value="${cur??''}" placeholder="${freqMap()[t.cat]??0}"></span></label>
-  <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan',{v:'accent',on:`frekTokoSave('${id}')`})}</div>`); }
-function frekTokoSave(id){ const raw=document.getElementById('ft_n').value.replace(/\D/g,''), t=TOKO.find(x=>x.id===id), v=raw===''?null:parseInt(raw);
-  if(v!==null&&v>12){ toast('Periksa isian','Isi angka 0 sampai 12, atau kosongkan.','danger'); return; }
-  act('jp/freq-toko',{perm:'master.edit',run:()=>{ const n=freqNext(); shSet('freqNext',{...n,toko:{...(n.toko||{}),[id]:v}}); },audit:v===null?'Menjadwalkan frekuensi '+t.name+' kembali ke default kategori mulai '+SIKLUS_NEXT:'Menjadwalkan frekuensi khusus '+t.name+' menjadi '+v+' kali per 4 minggu mulai '+SIKLUS_NEXT,toast:v===null?['Tersimpan untuk siklus berikutnya',t.name+': kembali ke default kategori mulai '+SIKLUS_NEXT+'.']:['Tersimpan untuk siklus berikutnya',t.name+': '+v+' kali per 4 minggu mulai '+SIKLUS_NEXT+'. Siklus berjalan tidak berubah.']}); }
-/* Simulasi pergantian siklus: perubahan yang menunggu mulai dipakai untuk coverage. */
-function frekApply(){ const n=freqNext();
-  act('jp/freq-apply',{perm:'master.edit',run:()=>{ const toko={...freqTokoMap()}; Object.entries(n.toko||{}).forEach(([id,v])=>{ if(v===null) delete toko[id]; else toko[id]=v; }); shSet('visitFreq',{...freqMap(),...(n.kat||{})}); shSet('visitFreqToko',toko); shSet('freqNext',{kat:{},toko:{}}); },audit:'Memulai siklus berikutnya: frekuensi baru berlaku',toast:['Siklus berikutnya dimulai','Frekuensi baru dipakai untuk coverage journey plan.']}); }
 function h1Modal(){ openModal(`<h2 class="pt">Jam kirim pengingat H-1<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Pengingat dikirim ke sales yang punya kunjungan besok, berdasarkan journey plan.</p><label class="field"><span>Jam (HH:MM)</span><span class="inp"><input id="h1_n" type="time" value="${esc(shRead('h1Jam','17:00'))}"></span></label>
   <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan',{v:'accent',on:'h1Save()'})}</div>`); }
 function h1Save(){ const v=document.getElementById('h1_n').value; if(!/^\d{2}:\d{2}$/.test(v)){ toast('Periksa isian','Isi jam dengan format HH:MM.','danger'); return; }
@@ -3498,35 +3481,61 @@ const PEN_SATU=['r3','r11'];
 const penBatas=(uid,n)=>{ const u=live('user').find(x=>x.id===uid); return u&&PEN_SATU.includes(u.role)&&n>1?u.name+' berperan sebagai '+roleName(u.role)+'. Role ini hanya boleh ditempatkan di satu toko.':''; };
 const penSales=()=>live('user').filter(u=>PEN_ROLES.includes(u.role)&&u.status==='Aktif');
 const penTipe=n=>n>1?tag('Bergerak','info'):n===1?tag('Diam','neutral'):tag('Belum ditugaskan','accent');
-function penTab(t){ setQ({tab:t,q:'',cat:'',f:'',sg:''}); }
+function penTab(t){ setQ({tab:t,q:'',cat:'',f:'',sg:'',cl:'',tk:'',cb:'',tp:'',kt:'',sl:'',rl:''}); }
+/* Filter tab Penugasan: dropdown Toko dan Sales hanya menawarkan data dalam cakupan client terpilih; client kosong berarti tanpa batas client. */
+const PEN_RESET="setQ({q:'',sg:'',f:'',cl:'',tk:'',cb:'',tp:'',kt:'',sl:'',rl:''})";
+const penDD=(lbl,opts,val,key,all,extra='')=>sel([['',all],...opts],val,`setQ({${key}:this.value${extra}})`,{label:lbl,cls:'sm'});
+const penClientDD=cl=>penDD('Client',live('client').filter(c=>c.status==='Aktif').map(c=>[c.id,c.name]),cl,'cl','Semua client',",tk:'',sl:''");
+const penClientNames=ids=>ids&&ids.length?`<span class="fg" style="font-weight:500">${ids.map(c=>esc(cName(c))).join(', ')}</span>`:'<span class="muted">–</span>';
+const penTokoPool=cl=>live('toko').filter(t=>t.status==='Aktif'&&(!cl||tokoClients(t).includes(cl)));
+const penUniq=a=>[...new Set(a)].sort((x,y)=>x.localeCompare(y)).map(v=>[v,v]);
+/* Client sebuah jadwal: client toko itu yang juga dimiliki sales; toko di luar master memakai client sales. */
+function visClients(v){ const uc=(MD.user.find(x=>x.id===v.u)||{}).clients||[], tk=TOKO.find(t=>!t.del&&t.name===v.place); if(!tk) return uc; const i=tokoClients(tk).filter(c=>uc.includes(c)); return i.length?i:uc; }
 function pagePenugasan(q){
-  const v=q.v==='toko'?'toko':'sales', psg=q.sg||'', pq=(q.q||'').toLowerCase();
-  let body='';
+  const v=q.v==='toko'?'toko':'sales', psg=q.sg||'', pq=(q.q||'').toLowerCase(), cl=q.cl||'';
+  const pool=penTokoPool(cl), tk=pool.some(t=>t.id===q.tk)?q.tk:'', cb=q.cb||'';
+  let body='', fsel='', rowsN=0;
   {
-    const table=v==='sales'
-      ?dataTable('pens',{rows:penSales().filter(u=>!psg||userSimcos(u).includes(psg)).filter(u=>!pq||u.name.toLowerCase().includes(pq)).map(u=>({...u,_id:u.id})),rowClick:r=>`penSalesModal('${r.id}')`,empty:'Belum ada sales aktif.',cols:[
+    const salesPool=penSales().filter(u=>!cl||(u.clients||[]).includes(cl)), sl=salesPool.some(u=>u.id===q.sl)?q.sl:'';
+    const tokoDD=penDD('Toko',pool.slice().sort((x,y)=>x.name.localeCompare(y.name)).map(t=>[t.id,t.name]),tk,'tk','Semua toko');
+    let table;
+    if(v==='sales'){
+      const tp=q.tp||'', tipeOf=n=>n>1?'Bergerak':n===1?'Diam':'Belum ditugaskan';
+      const rows=penSales().filter(u=>!psg||userSimcos(u).includes(psg)).filter(u=>!pq||u.name.toLowerCase().includes(pq)).filter(u=>!cl||(u.clients||[]).includes(cl)).filter(u=>!tk||tokoOfU(u.id).some(t=>t.id===tk)).filter(u=>!cb||u.cabang===cb).filter(u=>!tp||tipeOf(tokoOfU(u.id).length)===tp).map(u=>({...u,_id:u.id})); rowsN=rows.length;
+      fsel=simcoFilter(psg)+penClientDD(cl)+tokoDD+penDD('Cabang',penUniq(penSales().map(u=>u.cabang)),cb,'cb','Semua cabang')+penDD('Tipe',['Diam','Bergerak','Belum ditugaskan'].map(x=>[x,x]),tp,'tp','Semua tipe');
+      table=dataTable('pens',{rows,rowClick:r=>`penSalesModal('${r.id}')`,empty:'Tidak ada sales yang cocok.',cols:[
+          {label:'Client',render:r=>penClientNames(r.clients)},
           {label:'Sales',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(r.name)}<span><span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${esc(roleName(r.role))}</span></span></span>`,prim:true},
           {label:'Company',render:r=>esc(simcoName(r.simco)),hide:true},{label:'Cabang',k:'cabang',hide:true},
           {label:'Toko',render:r=>{ const a=tokoOfU(r.id); return a.length?`<span class="tabular fg">${a.length} toko</span><span class="xs muted" style="display:block">${esc(a.slice(0,2).map(t=>t.name).join(', '))}${a.length>2?' +'+(a.length-2):''}</span>`:'<span class="muted">–</span>'; }},
           {label:'Tipe',render:r=>penTipe(tokoOfU(r.id).length)}],
-        acts:r=>btn('Ubah',{v:'outline',size:'sm',icon:'edit',on:`penSalesModal('${r.id}')`})})
-      :dataTable('pent',{rows:live('toko').filter(t=>t.status==='Aktif').filter(t=>!pq||t.name.toLowerCase().includes(pq)).map(t=>({...t,_id:t.id})),rowClick:r=>`penTokoModal('${r.id}')`,empty:'Belum ada toko aktif.',cols:[
+        acts:r=>btn('Ubah',{v:'outline',size:'sm',icon:'edit',on:`penSalesModal('${r.id}')`})});
+    } else {
+      const kt=q.kt||'';
+      const rows=pool.filter(t=>!pq||t.name.toLowerCase().includes(pq)).filter(t=>!tk||t.id===tk).filter(t=>!cb||t.cabang===cb).filter(t=>!kt||t.cat===kt).filter(t=>!sl||t.sales.includes(sl)).map(t=>({...t,_id:t.id})); rowsN=rows.length;
+      fsel=penClientDD(cl)+tokoDD+penDD('Cabang',penUniq(pool.map(t=>t.cabang)),cb,'cb','Semua cabang')+penDD('Kategori',penUniq(pool.map(t=>t.cat)),kt,'kt','Semua kategori')+penDD('Sales',salesPool.slice().sort((x,y)=>x.name.localeCompare(y.name)).map(u=>[u.id,u.name]),sl,'sl','Semua sales');
+      table=dataTable('pent',{rows,rowClick:r=>`penTokoModal('${r.id}')`,empty:'Tidak ada toko yang cocok.',cols:[
+          {label:'Client',render:r=>penClientNames(tokoClients(r))},
           {label:'Toko',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${esc(r.addr)}</span>`,prim:true},
           {label:'Cabang',k:'cabang',hide:true},{label:'Kategori',render:r=>tag(r.cat,r.cat==='Modern Retail'?'accent':'neutral'),hide:true},
           {label:'Sales ditugaskan',render:r=>r.sales.length?`<span class="fg">${esc(r.sales.map(userName).join(', '))}</span>`:tag('Belum ada sales','accent')}],
         acts:r=>btn('Ubah',{v:'outline',size:'sm',icon:'edit',on:`penTokoModal('${r.id}')`})});
+    }
+    const anyF=q.q||psg||cl||tk||cb||(v==='sales'?q.tp:(q.kt||sl));
     body=card('Penugasan toko',`${callout('<b>Usulan.</b> Promotor FMCG dan promotor elektronik hanya satu toko. MD dan canvasser boleh lebih dari satu toko. Satu toko berarti sales Diam, lebih dari satu berarti Bergerak. Canvasser, taking order, dan mobile promotor tidak bisa ditempatkan di toko Modern Retail. Hanya toko yang dipetakan ke client sales (menu Mapping outlet) yang bisa dipasangkan.')}<div style="height:12px"></div>${table}`);
-    body=`<div class="fstack">${filterCard({search:searchBox(q.q,{ph:v==='sales'?'Cari nama sales':'Cari nama toko',label:'Cari penempatan'}),chips:{key:'v',val:v,label:'Tampilan',items:[['sales','Per sales'],['toko','Per toko']]},selects:v==='sales'?simcoFilter(psg):'',clear:(q.q||psg)?"setQ({q:'',sg:''})":''})}${body}</div>`;
+    body=`<div class="fstack">${filterCard({search:searchBox(q.q,{ph:v==='sales'?'Cari nama sales':'Cari nama toko',label:'Cari penempatan'}),chips:{key:'v',val:v,label:'Tampilan',items:[['sales','Per sales'],['toko','Per toko']]},selects:fsel,clear:anyF?PEN_RESET:'',summary:anyF?`Menampilkan <b class="fg">${rowsN}</b> ${v==='sales'?'sales':'toko'}.`:''})}${body}</div>`;
   }
-  const tab=['jadwal','jp','frek'].includes(q.tab)?q.tab:'tempat';
-  if(tab==='jadwal'){ const allv=visList().map(visLive), jf=q.f||'', jq=(q.q||'').toLowerCase(), vs=allv.filter(v=>!jf||v.status===jf).filter(v=>!jq||(byU(v.u).name+' '+v.place).toLowerCase().includes(jq)), jc=k=>allv.filter(v=>v.status===k).length;
-    body=`<div class="fstack">${filterCard({search:searchBox(q.q,{ph:'Cari sales atau toko',label:'Cari jadwal'}),chips:{key:'f',val:jf,label:'Status',items:[['','Semua',allv.length],...['Selesai','Berjalan','Belum','Terlewat'].map(k=>[k,k==='Belum'?'Belum dimulai':k,jc(k)])]},clear:(jf||q.q)?"setQ({f:'',q:''})":'',summary:(jf||q.q)?`Menampilkan <b class="fg">${vs.length}</b> dari ${allv.length} jadwal.`:''})}`+card('Jadwal kunjungan',dataTable('penj',{rows:vs.map(v=>({...v,_id:v.id})),rowClick:r=>`visPanel('${r.id}')`,acts:r=>rowActs(`visForm('${r.id}')`,`visDelAsk('${r.id}')`),empty:'Belum ada jadwal.',cols:[
-      {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(byU(r.u).name)}</span><span class="xs muted" style="display:block">${esc(byU(r.u).job)}</span>`,prim:true},{label:'Toko',render:r=>esc(r.place)+(r.by==='sales'?' '+tag('Dibuat '+esc(byU(r.u).job),'accent'):'')},
+  const tab=['jadwal','jp'].includes(q.tab)?q.tab:'tempat';
+  if(tab==='jadwal'){ const allv=visList().map(visLive), jf=q.f||'', jq=(q.q||'').toLowerCase(), cl=q.cl||'', rl=q.rl||'', ujr=v=>(MD.user.find(x=>x.id===v.u)||{}).role;
+    const inCl=v=>!cl||visClients(v).includes(cl), places=[...new Set(allv.filter(inCl).map(v=>v.place))], tk=places.includes(q.tk)?q.tk:'';
+    const vs=allv.filter(v=>!jf||v.status===jf).filter(v=>!jq||byU(v.u).name.toLowerCase().includes(jq)).filter(v=>!rl||ujr(v)===rl).filter(inCl).filter(v=>!tk||v.place===tk);
+    const anyF=jf||q.q||rl||cl||tk, roles=[...new Set(allv.map(ujr).filter(Boolean))].map(r=>[r,roleName(r)]);
+    body=`<div class="fstack">${filterCard({search:searchBox(q.q,{ph:'Cari nama sales',label:'Cari sales'}),selects:penDD('Role',roles,rl,'rl','Semua role')+penClientDD(cl)+penDD('Toko',places.sort((x,y)=>x.localeCompare(y)).map(x=>[x,x]),tk,'tk','Semua toko')+penDD('Status',[['Selesai','Selesai'],['Berjalan','Berjalan'],['Belum','Belum dimulai'],['Terlewat','Terlewat']],jf,'f','Semua status'),clear:anyF?PEN_RESET:'',summary:anyF?`Menampilkan <b class="fg">${vs.length}</b> dari ${allv.length} jadwal.`:''})}`+card('Jadwal kunjungan',dataTable('penj',{rows:vs.map(v=>({...v,_id:v.id})),rowClick:r=>`visPanel('${r.id}')`,acts:r=>rowActs(`visForm('${r.id}')`,`visDelAsk('${r.id}')`),empty:'Tidak ada jadwal yang cocok.',cols:[
+      {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(byU(r.u).name)}</span><span class="xs muted" style="display:block">${esc(byU(r.u).job)}</span>`,prim:true},{label:'Client',render:r=>penClientNames(visClients(r))},{label:'Toko',render:r=>esc(r.place)+(r.by==='sales'?' '+tag('Dibuat '+esc(byU(r.u).job),'accent'):'')},
       {label:'Periode',render:r=>`${esc(perLabel(r))}<span class="xs muted" style="display:block">${r.plan}</span>`},{label:'Status',render:r=>spill(r.status,r.status==='Selesai'?'success':r.status==='Berjalan'?'accent':r.status==='Terlewat'?'danger':'neutral'),hide:true}]}),
       {acts:btn('Buat jadwal',{v:'accent',size:'sm',icon:'plus',on:'visForm()'})})+`</div><div style="margin-top:12px">${callout('Penugasan mencakup penjadwalan (MOM 9 Nov bagian 4). Periode mingguan dan 2 mingguan wajib memilih hari, boleh hari apa saja. Jadwal yang sama tampil di menu Kunjungan beserta hasil check-in.')}</div>`; }
   if(tab==='jp') body=jpBody();
-  if(tab==='frek') body=frekBody();
-  return {title:'Penugasan & jadwal',html:`<div style="margin-bottom:4px">${utabs([['tempat','Penugasan toko'],['jadwal','Jadwal kunjungan',visList().length],['jp','Journey plan'],['frek','Frekuensi']],tab,'penTab')}</div>${body}`};
+  return {title:'Penugasan & jadwal',html:`<div style="margin-bottom:4px">${utabs([['tempat','Penugasan toko'],['jadwal','Jadwal kunjungan',visList().length],['jp','Journey plan']],tab,'penTab')}</div>${body}`};
 }
 function penSalesModal(u){ cvAssignModal(u); }
 function penTokoModal(id){
