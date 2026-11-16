@@ -471,6 +471,13 @@ a.stat:hover,button.stat:hover{background:var(--raised)}
 .dd-opt[aria-disabled=true]{opacity:.5;cursor:not-allowed}
 .dd-opt.clear{color:var(--muted)}
 .dd-empty{padding:24px 12px;text-align:center;font-size:14px;color:var(--muted)}
+.dd-empty:has(+.dd-new){display:none}
+.dd-new{display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 16px 16px;text-align:center}
+.dd-new-i{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:rgb(10 146 242 / .12);color:var(--accent-text,var(--accent-strong))}
+.dd-new b{font-size:14px;color:var(--fg)}
+.dd-new p{margin:0;font-size:13px;color:var(--muted);line-height:1.45}
+.dd-new .dd-add{margin-top:8px;width:100%;justify-content:center}
+.dd-new-q{font-family:ui-monospace,monospace;font-size:12px;opacity:.85;max-width:12rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dd-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);flex:none}
 .dd-foot .pgn{display:flex;align-items:center;gap:6px}
 .dd-foot button{width:28px;height:28px;border-radius:99px;border:1px solid var(--line);background:var(--card);display:inline-flex;align-items:center;justify-content:center;color:var(--fg)}
@@ -3750,7 +3757,7 @@ ENT.sbmenu={label:'Menu sidebar',lower:'menu sidebar',plural:'Struktur menu',pre
   fields:[
     {k:'label',label:'Nama menu',req:true,ph:'Contoh: Laporan harian'},
     {k:'parent',label:'Induk menu',type:'select',opts:sbParentOpts,roIf:r=>r.sistem,fmt:v=>v?sbTrail(MD.sidebar.find(x=>x.id===v)||{label:v}):'Level 1 (menu utama)',hint:'Pilih induk untuk membuat submenu. Induknya boleh grup atau menu yang punya halaman. Level tidak dibatasi.'},
-    {k:'path',label:'Path halaman',type:'select',opts:sbPathOpts,attrs:'data-add="sbPathNew" data-add-label="Tambah baru"',roIf:r=>r.sistem,hint:`Pilih halaman yang dibuka menu ini, atau pilih Grup kalau menu ini hanya folder untuk submenu. Path di luar daftar? <button type="button" class="btn b-outline sm" style="margin-left:6px" onclick="sbPathNew()">${I('plus',14,2.4)}Tambah baru</button>`,validate:(v,vals)=>!/^\/[a-z0-9\-\/]*$/i.test(v)?'Path harus diawali / dan hanya berisi huruf, angka, dan tanda hubung':MD.sidebar.some(x=>!x.del&&x.status==='Aktif'&&x.id!==(FORM&&FORM.id)&&String(x.path||'').toLowerCase()===v.toLowerCase())?'Path ini sudah dipakai menu lain':''},
+    {k:'path',label:'Path halaman',type:'select',opts:sbPathOpts,attrs:'data-add="sbPathNew" data-add-label="Tambah path" data-add-title="Path belum ada di daftar" data-add-desc="Tambahkan sebagai path halaman baru. Halamannya perlu dibuat terpisah agar bisa dibuka."',roIf:r=>r.sistem,hint:`Pilih halaman yang dibuka menu ini, atau pilih Grup kalau menu ini hanya folder untuk submenu.`,validate:(v,vals)=>!/^\/[a-z0-9\-\/]*$/i.test(v)?'Path harus diawali / dan hanya berisi huruf, angka, dan tanda hubung':MD.sidebar.some(x=>!x.del&&x.status==='Aktif'&&x.id!==(FORM&&FORM.id)&&String(x.path||'').toLowerCase()===v.toLowerCase())?'Path ini sudah dipakai menu lain':''},
     {k:'icon',label:'Ikon',type:'select',opts:()=>Object.keys(P).sort().map(k=>[k,k]),hint:'Ikon tampil di sidebar untuk menu level 1.'},
     {k:'badge',label:'Hitungan di samping menu',type:'select',opts:SB_BADGE,hint:'Angka tugas yang menunggu, hanya untuk menu yang punya halaman.'},
     {k:'roles',label:'Role yang melihat',type:'multi',opts:SB_ROLES.slice(1),roIf:r=>r.sistem,hint:'Kosong berarti semua role. Super Admin selalu melihat semua menu aktif.'}],
@@ -4552,7 +4559,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
     function draw(){ const words=st.q.trim().toLowerCase().split(/\s+/).filter(Boolean); st.items=all().filter(x=>words.every(w=>(x.t+' '+x.desc).toLowerCase().includes(w)));
       st.hi=Math.min(Math.max(st.hi,0),Math.max(0,st.items.length-1)); if(st.items[st.hi]?.dis){ const n=enabledFrom(st.hi,1); st.hi=n<0?st.hi:n; }
       const view=st.items.slice(0,CAP);
-      list.innerHTML=view.length?view.map((x,g)=>{ const on=x.i===sel.selectedIndex; return `<button type="button" tabindex="-1" role="option" id="${pid}-o${g}" class="dd-opt ${g===st.hi?'hi':''}" aria-selected="${on}" ${x.dis?'aria-disabled="true"':''} data-g="${g}"><span class="dd-tx"><span>${esc(x.t||'–')}</span>${x.why||x.desc?`<small>${esc(x.dis&&x.why?x.why:x.desc)}</small>`:''}</span>${on?`<span class="dd-ck">${I('check',16,2.5)}</span>`:''}</button>`; }).join(''):`<div class="dd-empty">${st.q.trim()?`Tidak ada hasil untuk "${esc(st.q.trim())}"`:'Tidak ada pilihan'}${sel.dataset.add&&st.q.trim()?`<button type="button" class="btn b-outline sm dd-add" style="margin-top:12px">${I('plus',14,2.4)}${esc(sel.dataset.addLabel||'Tambah baru')}</button>`:''}</div>`;
+      list.innerHTML=view.length?view.map((x,g)=>{ const on=x.i===sel.selectedIndex; return `<button type="button" tabindex="-1" role="option" id="${pid}-o${g}" class="dd-opt ${g===st.hi?'hi':''}" aria-selected="${on}" ${x.dis?'aria-disabled="true"':''} data-g="${g}"><span class="dd-tx"><span>${esc(x.t||'–')}</span>${x.why||x.desc?`<small>${esc(x.dis&&x.why?x.why:x.desc)}</small>`:''}</span>${on?`<span class="dd-ck">${I('check',16,2.5)}</span>`:''}</button>`; }).join(''):`<div class="dd-empty">${st.q.trim()?`Tidak ada hasil untuk "${esc(st.q.trim())}"`:'Tidak ada pilihan'}</div>${sel.dataset.add&&st.q.trim()?`<div class="dd-new"><span class="dd-new-i">${I('plus',18,2.4)}</span><b>${esc(sel.dataset.addTitle||'Belum ada di daftar')}</b><p>${esc(sel.dataset.addDesc||'Tambahkan sebagai pilihan baru.')}</p><button type="button" class="btn b-accent dd-add">${I('plus',16,2.4)}${esc(sel.dataset.addLabel||'Tambah baru')} <span class="dd-new-q">${esc(st.q.trim())}</span></button></div>`:''}`;
       cntr.textContent=total>20?`${st.items.length} dari ${total}`:'';
       foot.hidden=st.items.length<=CAP; foot.innerHTML=`<span>Menampilkan ${CAP} dari ${st.items.length}. Ketik untuk mempersempit.</span>`;
       inp.setAttribute('aria-activedescendant',view.length?`${pid}-o${st.hi}`:''); place();
