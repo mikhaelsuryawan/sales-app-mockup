@@ -1397,14 +1397,14 @@ function invDoc(w=200,h=260,scan=false){
     <rect x="18" y="206" width="162" height="1.5" fill="#D5DEE6"/><rect x="108" y="216" width="72" height="10" rx="3" fill="#0A6FE0" opacity=".85"/><rect x="18" y="234" width="50" height="6" rx="3" fill="#C6D2DC"/>
     ${scan?'<rect x="6" y="6" width="188" height="3" fill="#FF5A5F"><animate attributeName="y" values="8;248;8" dur="1.6s" repeatCount="indefinite"/></rect>':''}</svg>`;
 }
-function docCam({title,hint,phase,onShoot,onManual='manualInvoiceSheet()'}){
+function docCam({title,hint,phase,onShoot,onManual='manualInvoiceSheet()',art=null,scanHint='Membaca invoice (OCR)…',scanBottom='Mengenali no. invoice, tanggal, barang, qty, dan harga…',aria='Ambil foto invoice'}){
   const scan=phase==='scan';
   return `<div class="cam"><div class="topbar"><button class="ib" onclick="back()" aria-label="Kembali">${I('left',24,2)}</button><h1>${title}</h1></div>
-    <div class="hint-top">${scan?'Membaca invoice (OCR)…':hint}</div>
+    <div class="hint-top">${scan?scanHint:hint}</div>
     <div style="position:relative;width:260px;height:336px;display:grid;place-items:center">
       <div style="position:absolute;inset:0;border-radius:18px;border:2px solid ${scan?'#21CFF7':'rgba(255,255,255,.9)'};box-shadow:0 0 0 2000px rgba(0,0,0,.35)"></div>
-      <div style="transform:rotate(${phase==='ready'?'0':'-1.5'}deg)">${invDoc(220,286,scan)}</div></div>
-    <div class="bottom">${scan?`<div style="font-size:14px;font-weight:600;opacity:.9">Mengenali no. invoice, tanggal, barang, qty, dan harga…</div>`:`<button class="b-ghost" style="color:#fff;font-size:13px;font-weight:600;width:80px" onclick="${onManual}">Input manual</button><button class="shutter" onclick="${onShoot}" aria-label="Ambil foto invoice"><i></i></button><button class="b-ghost" style="color:#fff;font-size:13px;font-weight:600;width:80px" onclick="toast('Memilih dari galeri…','image')">Galeri</button>`}</div></div>`;
+      <div style="transform:rotate(${phase==='ready'?'0':'-1.5'}deg)">${art||invDoc(220,286,scan)}</div></div>
+    <div class="bottom">${scan?`<div style="font-size:14px;font-weight:600;opacity:.9">${scanBottom}</div>`:`<button class="b-ghost" style="color:#fff;font-size:13px;font-weight:600;width:80px" onclick="${onManual}">Input manual</button><button class="shutter" onclick="${onShoot}" aria-label="${aria}"><i></i></button><button class="b-ghost" style="color:#fff;font-size:13px;font-weight:600;width:80px" onclick="toast('Memilih dari galeri…','image')">Galeri</button>`}</div></div>`;
 }
 SCR['jual-invoice'] = p => {
   const ph=p.phase||'ready';
@@ -2552,24 +2552,60 @@ SCR.share = () => {
     <div class="sec-title">Produk klien (sesuai sistem)</div>
     <div class="list">${cl.map(p=>`<div class="li"><div class="grow"><div class="t">${p.name}</div><div class="s">${esc(katLabel(prodPath(p)))}</div></div><div class="stepper"><button onclick="act(()=>{S.shareClient['${p.id}']=Math.max(0,(S.shareClient['${p.id}']||0)-1);render(false,true)})" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${S.shareClient[p.id]||0}</span><button onclick="act(()=>{S.shareClient['${p.id}']=(S.shareClient['${p.id}']||0)+1;render(false,true)})" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>`).join('')||`<div class="empty">Belum ada produk klien di kategori ini.</div>`}</div>
     <div class="sec-title">Produk kompetitor <a onclick="shareAddSheet()">+ Tambah</a></div>
-    <div class="list">${comp.map(c=>`<div class="li"><div class="grow"><div class="t">${esc(c.nama)}</div><div class="s">${esc(c.brand)} · ${esc(katLabel(c.path))}${c.harga?' · '+rp(c.harga):''}</div></div><div class="stepper"><button onclick="act(()=>{S.shareComp[${c.i}].qty=Math.max(0,S.shareComp[${c.i}].qty-1);render(false,true)})" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${c.qty}</span><button onclick="act(()=>{S.shareComp[${c.i}].qty++;render(false,true)})" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>`).join('')||`<div class="empty">Belum ada produk kompetitor. Tambah dari tombol di atas.</div>`}</div>
+    <div class="list">${comp.map(c=>`<div class="li"><div class="grow"><div class="t">${esc(c.nama)}</div><div class="s">${esc(c.brand)} · ${esc(katLabel(c.path))}${c.hd?' · '+rp(c.hd)+(c.harga?' (normal '+rp(c.harga)+')':''):c.harga?' · '+rp(c.harga):''}</div></div><div class="stepper"><button onclick="act(()=>{S.shareComp[${c.i}].qty=Math.max(0,S.shareComp[${c.i}].qty-1);render(false,true)})" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${c.qty}</span><button onclick="act(()=>{S.shareComp[${c.i}].qty++;render(false,true)})" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>`).join('')||`<div class="empty">Belum ada produk kompetitor. Tambah dari tombol di atas.</div>`}</div>
     <p class="hint" style="margin-top:12px">Draft tidak masuk laporan. Data masuk laporan setelah kamu check-out dari toko.</p>
   </main><footer class="actions">${canDraft?`<button class="btn ghost" style="width:auto" onclick="act(()=>{S.shareState='draft';fmDraftSave('share',1);render(false,true)})">Simpan sementara</button>`:''}<button class="btn" onclick="act(()=>{S.shareState='kirim';fmMark('share');back();toast('Market share tersimpan')})">Simpan</button></footer>`};
 };
-function shareAddSheet(){
-  const key=S.sharePath.join('/');
-  sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Tambah produk kompetitor</h3>
-  <label class="field"><span>Brand kompetitor</span><input class="input" id="sa_b" list="sa_bl" placeholder="Contoh: Samsung" maxlength="60"><datalist id="sa_bl">${compBrands().map(b=>`<option value="${esc(b)}">`).join('')}</datalist></label>
-  <label class="field"><span>Kategori</span><input class="input" id="sa_c" list="sa_cl" value="${esc(katLabel(key))}" placeholder="Contoh: Peralatan Dapur › Blender" maxlength="80"><datalist id="sa_cl">${katFlat(S.shareBrand,true).map(p=>`<option value="${esc(katLabel(p))}">`).join('')}</datalist></label>
-  <label class="field"><span>Nama produk</span><input class="input" id="sa_n" placeholder="Merek dan tipe"></label>
-  <div class="row" style="gap:10px"><label class="field grow"><span>Qty</span><input class="input num" id="sa_q" inputmode="numeric" value="1"></label><label class="field grow"><span>Harga (opsional)</span><input class="input num" id="sa_h" inputmode="numeric" data-num="int" placeholder="Rp"></label></div>
-  <button class="btn" onclick="shareAdd()">Tambah</button>`);
+/* Produk kompetitor: pilih Scan label produk (OCR) atau Input manual. Hasil scan membuka halaman input manual yang sudah terisi. */
+function labelDoc(w=200,h=260,scan=false){
+  return `<svg viewBox="0 0 200 260" width="${w}" height="${h}" role="img" aria-label="Label produk"><rect x="6" y="40" width="188" height="180" rx="10" fill="#fff" stroke="#D5DEE6"/><rect x="6" y="40" width="188" height="34" rx="10" fill="#1B3A63"/><rect x="18" y="52" width="70" height="10" rx="3" fill="#fff" opacity=".9"/>
+    <rect x="18" y="88" width="150" height="9" rx="3" fill="#9FB1C1"/><rect x="18" y="104" width="110" height="7" rx="3" fill="#C6D2DC"/><rect x="18" y="120" width="132" height="7" rx="3" fill="#C6D2DC"/>
+    <rect x="18" y="146" width="62" height="8" rx="3" fill="#C6D2DC"/><rect x="18" y="158" width="92" height="16" rx="4" fill="#9FB1C1"/><rect x="18" y="186" width="70" height="9" rx="3" fill="#E0393F" opacity=".85"/><rect x="104" y="150" width="76" height="52" rx="8" fill="#FFD7B8" stroke="#EFA477"/><rect x="114" y="162" width="56" height="10" rx="3" fill="#C9743D"/><rect x="122" y="180" width="40" height="8" rx="3" fill="#C9743D" opacity=".7"/>
+    ${scan?'<rect x="6" y="46" width="188" height="3" fill="#FF5A5F"><animate attributeName="y" values="44;214;44" dur="1.6s" repeatCount="indefinite"/></rect>':''}</svg>`;
 }
+const SHARE_OCR=()=>({brand:'Samsung',nama:'Samsung Crystal UHD 50"',harga:7499000,hd:6799000,conf:94});
+const saBlank=()=>({brand:'',kat:katLabel(S.sharePath.join('/')),nama:'',qty:1,harga:'',hd:'',ocr:null});
+function shareAddSheet(){
+  sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:6px">Tambah produk kompetitor</h3><p class="muted small" style="margin-bottom:14px;line-height:1.5">Pilih cara mengisi data produk kompetitor.</p>
+  <div class="list"><button class="li" onclick="closeSheet();act(()=>go('share-label'))"><div class="ico-tile">${I('camera',20)}</div><div class="grow"><div class="t">Scan label produk</div><div class="s">Foto label di rak, brand, nama, dan harga terisi otomatis</div></div>${I('right',18)}</button>
+  <button class="li" onclick="closeSheet();act(()=>shareNew())"><div class="ico-tile tan">${I('edit',20)}</div><div class="grow"><div class="t">Input manual</div><div class="s">Ketik sendiri data produk</div></div>${I('right',18)}</button></div>`);
+}
+function shareNew(swap){ S.sa=saBlank(); swap?replace('share-add'):go('share-add'); }
+SCR['share-label'] = p => {
+  const ph=p.phase||'ready';
+  if(ph==='fail') return {note:'<span class="tagx">Usulan</span><b>OCR label gagal.</b> Foto ulang atau lanjut input manual.',
+    html:`<div class="result" style="padding-top:var(--sb)">${bigRing('#C93C33','x')}<h2>Label tidak terbaca</h2><p>Foto buram atau label terpotong. Pastikan seluruh label masuk bingkai, lalu foto ulang.</p></div>
+    <footer class="actions stack"><button class="btn" onclick="setP({phase:'ready'})">${I('camera',20)} Foto ulang</button><button class="btn ghost" onclick="shareNew(1)">Input manual</button></footer>`};
+  return {dark:true,note:'Scan label produk kompetitor. OCR membaca brand, nama produk, harga, dan harga setelah diskon dari label, lalu membuka form input manual yang sudah terisi. Sales tetap bisa memeriksa dan mengubah isinya.',
+    html:docCam({title:'Scan label produk',hint:'Masukkan seluruh label produk ke dalam bingkai',phase:ph,onShoot:'shareShoot()',onManual:'shareNew(1)',art:labelDoc(220,286,ph==='scan'),scanHint:'Membaca label (OCR)…',scanBottom:'Mengenali brand, nama produk, dan harga…',aria:'Ambil foto label produk'})};
+};
+function shareShoot(){
+  setP({phase:'scan'});
+  setTimeout(()=>{ if(cur().name!=='share-label') return; if(S.demo.ocr==='bad'){ setP({phase:'fail'}); return; }
+    const o=SHARE_OCR(), sa=saBlank(); Object.assign(sa,{brand:o.brand,nama:o.nama,harga:o.harga,hd:o.hd,ocr:{conf:o.conf}}); S.sa=sa; replace('share-add'); },1900);
+}
+const saSet=(k,v)=>{ S.sa[k]=v; };
+function saQty(d){ const n=Math.max(1,(parseInt(S.sa.qty)||0)+d); S.sa.qty=n; const e=document.getElementById('sa_q'); if(e) e.value=n; }
+SCR['share-add'] = () => {
+  const s=S.sa||(S.sa=saBlank()), key=S.sharePath.join('/'), o=!!s.ocr, ocr=f=>o&&s[f]!==''&&s[f]!=null?' <span class="chip green" style="padding:1px 6px;font-size:10.5px">OCR</span>':'';
+  return {note:'Input produk kompetitor. Hasil scan label mengisi brand, nama produk, harga, dan harga setelah diskon; sales memeriksa lalu menambahkan. Harga dan harga setelah diskon bersifat opsional. Data kompetitor diinput manual dan ikut komposisi market share.',
+  html:`${appbar(o?'Periksa hasil label':'Tambah produk kompetitor')}<main class="content">
+    ${o?`<div class="card" style="margin-bottom:6px"><div class="row"><div style="width:46px;height:60px;flex:none;border-radius:8px;overflow:hidden;box-shadow:0 4px 14px -6px rgba(0,40,120,.4)">${labelDoc(46,60)}</div><div class="grow"><div class="small muted">Label terbaca · keyakinan ${s.ocr.conf}%</div><b style="font-size:13px">Periksa isian bertanda OCR</b></div>${chip('Terisi otomatis','green')}</div></div>`:''}
+    <label class="field"><span>Brand kompetitor *${ocr('brand')}</span><input class="input" id="sa_b" list="sa_bl" value="${esc(s.brand)}" placeholder="Contoh: Samsung" maxlength="60" oninput="saSet('brand',this.value)"><datalist id="sa_bl">${compBrands().map(b=>`<option value="${esc(b)}">`).join('')}</datalist></label>
+    <label class="field"><span>Kategori *</span><input class="input" id="sa_c" list="sa_cl" value="${esc(s.kat)}" placeholder="Contoh: Peralatan Dapur › Blender" maxlength="80" oninput="saSet('kat',this.value)"><datalist id="sa_cl">${katFlat(S.shareBrand,true).map(p=>`<option value="${esc(katLabel(p))}">`).join('')}</datalist></label>
+    <label class="field"><span>Nama produk *${ocr('nama')}</span><input class="input" id="sa_n" value="${esc(s.nama)}" placeholder="Merek dan tipe" oninput="saSet('nama',this.value)"></label>
+    <div class="field"><span>Qty *</span><div class="qty"><button type="button" onclick="saQty(-1)" aria-label="Kurangi qty">${I('minus',20,2.2)}</button><input class="num" id="sa_q" inputmode="numeric" autocomplete="off" aria-label="Qty" value="${esc(s.qty)}" oninput="this.value=this.value.replace(/\\D/g,'');saSet('qty',this.value)" onblur="if(!(parseInt(this.value)>=1)){this.value=1;saSet('qty',1)}"><button type="button" onclick="saQty(1)" aria-label="Tambah qty">${I('plus',20,2.2)}</button></div></div>
+    <label class="field"><span>Harga (opsional)${ocr('harga')}</span><input class="input num" id="sa_h" inputmode="numeric" data-num="int" placeholder="Rp" value="${numStr(s.harga)}" oninput="saSet('harga',this.value)"></label>
+    <label class="field"><span>Harga setelah diskon (opsional)${ocr('hd')}</span><input class="input num" id="sa_hd" inputmode="numeric" data-num="int" placeholder="Rp" value="${numStr(s.hd)}" oninput="saSet('hd',this.value)"></label>
+    <div id="saerr"></div>
+  </main><footer class="actions"><button class="btn" onclick="shareAdd()">Tambah produk</button></footer>`};
+};
 function shareAdd(){
-  const cl=v=>v.replace(/['"\\<>`]/g,'').trim(), n=cl(val('sa_n')), br=cl(val('sa_b')), ct=cl(val('sa_c')), q=parseInt(val('sa_q'))||0;
-  if(!br||!ct||!n||q<1){ toast('Isi brand, kategori, nama produk, dan qty','alert'); return; }
-  S.shareComp.push({cb:S.shareBrand,brand:br,path:ct,free:true,nama:n,qty:q,harga:parseInt(val('sa_h').replace(/\D/g,''))||0});
-  closeSheet(); render(false,true); toast(n+' ditambahkan');
+  const cl=v=>String(v||'').replace(/['"\\<>`]/g,'').trim(), s=S.sa, n=cl(s.nama), br=cl(s.brand), ct=cl(s.kat), q=parseInt(s.qty)||0, num=v=>parseInt(String(v||'').replace(/\D/g,''))||0, h=num(s.harga), hd=num(s.hd), er=m=>{ $('#saerr').innerHTML=`<div class="err">${m}</div>`; };
+  if(!br||!ct||!n||q<1){ er('Isi brand, kategori, nama produk, dan qty.'); return; }
+  if(h&&hd&&hd>h){ er('Harga setelah diskon tidak boleh lebih besar dari harga.'); return; }
+  S.shareComp.push({cb:S.shareBrand,brand:br,path:ct,free:true,nama:n,qty:q,harga:h,hd});
+  S.sa=null; back(); toast(n+' ditambahkan');
 }
 
 /* ---------- Quiz, Leaderboard, Survey ---------- */
