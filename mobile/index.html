@@ -415,7 +415,8 @@ const USERS = {
   'md.rangga': {name:'Rangga Saputra', init:'RS', role:'fmcg', roleLabel:'Merchandising (MD)', nip:'SIM-23-01102', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
   'mobile.fikri':{name:'Fikri Ramadhan', init:'FR', role:'spg', menu:'mobile', roleLabel:'Mobile Promotor', nip:'SIM-24-01377', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Beberapa toko dan event', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
   'bantuan.eko':{name:'Eko Prabowo', init:'EP', role:'spg', menu:'bantuan', roleLabel:'Promotor Bantuan', nip:'BTN-0007', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
-  'bantuan.gita':{name:'Gita Puspita', init:'GP', role:'spg', menu:'bantuan', roleLabel:'Promotor Bantuan', nip:'BTN-0031', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}}
+  'bantuan.gita':{name:'Gita Puspita', init:'GP', role:'spg', menu:'bantuan', roleLabel:'Promotor Bantuan', nip:'BTN-0031', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
+  'super.admin':{name:'Super Admin', init:'SA', role:'spv', menu:'super', roleLabel:'Super Admin', nip:'SIM-00-00001', client:'Arunika Elektronik & BPR Mitra Usaha', unit:'Kantor Pusat', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
 };
 const PRODUCTS = [
   {id:'tv50',name:'VISTARA 4K Google TV 50"',sku:'AR-TV50G',cat:'TV',price:6499000},
@@ -740,6 +741,8 @@ const MENUS = {
   bantuan:[['Catat penjualan','bag',"act(()=>startSale())",1],['Riwayat penjualan','file',"tab('penjualan')"],['Kunjungan','route',"tab('kunjungan')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   spv:[['Approval','check',"go('approval')"],['Assign canvasser','route',"go('assign-canvas')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tugaskan tim','route',"act(()=>go('kunjungan-form',{spv:1}))",1],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Kunjungan','calendar',"tab('kunjungan')"],['Quiz','quiz',"go('quiz')"]]
 };
+/* Super Admin: semua menu mobile dari semua role, tanpa duplikat nama. */
+MENUS.super=(()=>{ const seen=new Set(), out=[]; Object.values(MENUS).forEach(l=>l.forEach(m=>{ if(!seen.has(m[0])){ seen.add(m[0]); out.push(m); } })); return out; })();
 function attCard(){
   const a=att(), m=mode();
   let st='none', title='Belum absen masuk', meta=`Jadwal ${m} · Shift 08:00 – 17:00`, btn=`<button class="btn" onclick="startAbsen('in')">${I('fingerprint',20)} Absen masuk</button>`;

@@ -146,6 +146,7 @@ a.stat:active,button.stat:active,.fchip:active,.pills button:active,.dd-opt:acti
 .nl.on{background:var(--accent-strong);color:#fff;box-shadow:var(--shadow-glow)}
 .nl.open{color:#fff}
 .nl.sub{height:36px;padding:0 12px 0 44px;font-size:13px}
+.nl.sub.grp{width:100%;border:0;background:none;font:inherit;font-size:13px;font-weight:500;cursor:pointer;text-align:left}
 .nl .lbl{overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
 .nl svg{flex:none}
 .nl .chv{display:grid;margin-left:auto;transition:transform .15s} .nl .chv svg{width:16px;height:16px} .nl .chv.up{transform:rotate(180deg)}
@@ -1675,7 +1676,7 @@ function tbAll(k,ids,on){ const S=ST.sel[k]; ids.forEach(i=>on?S.add(i):S.delete
    SHELL
    ===================================================================== */
 const SEC_ICON={'Ringkasan':'dash','Operasional lapangan':'finger','Penjualan':'chart','Kinerja & insentif':'award','Leads pinjaman':'users','Program & konten':'tag','Usulan SFA':'bulb','Client management':'building','Toko':'store','Master data':'grid','Master data user':'shield','Pengaturan aplikasi':'sliders','Sistem':'settings'};
-const NAV=[
+const NAV_DEFAULT=[
   ['Ringkasan',[['/','Overview','dash']]],
   ['Operasional lapangan',[['/absensi','Absensi','finger'],['/kunjungan','Kunjungan','route'],['/approval','Approval','checks','approval'],['/task-pending','Task pending','alert'],['/aktivitas','Aktivitas lapangan','route'],['/kepatuhan-kunjungan','Kepatuhan kunjungan','checks']]],
   ['Penjualan',[['/data-penjualan','Data penjualan','file'],['/penjualan','Laporan penjualan','chart'],['/pemesanan','Pemesanan','checks'],['/sell-in','Sell-in dealer','wallet'],['/canvassing','Canvassing','pkg'],['/sku-display','Laporan SKU display','grid'],['/market-share','Laporan market share','chart']]],
@@ -1690,9 +1691,11 @@ const NAV=[
   ['Pengaturan aplikasi',[['/konfigurasi-aktivitas','Aktivitas per role','sliders'],['/form-penjualan','Form penjualan','checks'],['/parameter','Parameter','sliders']]],
   ['Sistem',[['/pengaturan','Pengaturan','settings']]]
 ];
+/* NAV dibangun ulang dari MD.sidebar (halaman Sidebar Menu) tiap render, sesuai role akun. NAV_DEFAULT hanya bahan awal dan cadangan. */
+const NAV=[];
 /* Sesi demo dan izin. Penjaga di UI hanya kenyamanan: backend yang memutuskan izin sebenarnya. Role Supervisor berlabel Usulan. */
-const ACCOUNTS=[{id:'dewi',user:'dewi.kartika',name:'Dewi Kartika',role:'Admin SIM',key:'admin',email:'dewi.k@sim.co.id'},{id:'rudi',user:'rudi.hartono',name:'Rudi Hartono',role:'Supervisor',key:'spv',tl:'sari',email:'rudi.h@sim.co.id'}];
-const PERMS={admin:['*'],spv:['approval.decide','leads.assign','visit.create','info.create','order.create','sales.input']};
+const ACCOUNTS=[{id:'dewi',user:'dewi.kartika',name:'Dewi Kartika',role:'Admin SIM',key:'admin',email:'dewi.k@sim.co.id'},{id:'rudi',user:'rudi.hartono',name:'Rudi Hartono',role:'Supervisor',key:'spv',tl:'sari',email:'rudi.h@sim.co.id'},{id:'super',user:'super.admin',name:'Super Admin',role:'Super Admin',key:'super',email:'super.admin@sim.co.id'}];
+const PERMS={admin:['*'],super:['*'],spv:['approval.decide','leads.assign','visit.create','info.create','order.create','sales.input']};
 const SESSION_KEY='salesapp.dashboard.session';
 let ME=ACCOUNTS[0], AUTHED=false;
 const can=perm=>{ const p=PERMS[ME.key]||[]; return p.includes('*')||p.includes(perm); };
@@ -1716,12 +1719,12 @@ function wsList(){ return [['all','Semua klien'],...live('client').filter(c=>c.s
 
 /* ---------- Rail ---------- */
 function sidebarHTML(collapsed){
-  const path=parse().path, cur=leafOf(path), canExpand=innerWidth>=1280;
+  const path=parse().path, cur=leafOf(path), canExpand=innerWidth>=1280, tops=sbKids('').filter(n=>sbLeaves(n).length), byTop=tops.length===NAV.length;
   const rows=NAV.map(([sec,items],si)=>{
     const single=items.length===1, isCur=si===cur.si, n=secCount(items), first=items[0][0], lab=single?items[0][1]:sec, open=isCur&&!single&&!collapsed;
     if(collapsed) return `<a href="#${first}" class="nl ${isCur?'on':''}" ${isCur?'aria-current="page"':''} aria-label="${esc(lab)}${n?', '+n+' menunggu':''}" data-tip="${esc(lab)}" data-tip-side="right">${I(SEC_ICON[sec],20)}${n?`<span class="cnt w">${n>99?'99+':n}</span>`:''}</a>`;
     const head=`<a href="#${first}" class="nl ${isCur&&single?'on':''} ${open?'open':''}" ${isCur?'aria-current="page"':''} ${single?'':`aria-expanded="${open}"`}>${I(SEC_ICON[sec],20)}<span class="lbl">${esc(lab)}</span>${!open&&n?`<span class="cnt w">${n>99?'99+':n}</span>`:''}${single?'':`<span class="chv ${open?'up':''}">${I('chev',16)}</span>`}</a>`;
-    const subs=open?`<div class="subs">${items.map(([p,l,ic,ck])=>{ const on=cur.it[0]===p, c=ck?counts()[ck]:0; return `<a href="#${p}" class="nl sub ${on?'on':''}" ${on?'aria-current="page"':''}><span class="lbl">${esc(l)}</span>${c?`<span class="cnt w">${c>99?'99+':c}</span>`:''}</a>`; }).join('')}</div>`:'';
+    const subs=open?`<div class="subs">${byTop?sbSubsHTML(tops[si],0,cur.it[0]):items.map(([p,l,ic,ck])=>{ const on=cur.it[0]===p, c=ck?counts()[ck]:0; return `<a href="#${p}" class="nl sub ${on?'on':''}" ${on?'aria-current="page"':''}><span class="lbl">${esc(l)}</span>${c?`<span class="cnt w">${c>99?'99+':c}</span>`:''}</a>`; }).join('')}</div>`:'';
     return head+subs; }).join('');
   return `<aside class="sidebar ${collapsed?'collapsed':''}" aria-label="Navigasi utama">
     <a href="#/" class="sb-brand" aria-label="Sales Console, ke Overview"><span class="sb-mark">S</span><span class="sb-name"><b>Sales Console</b><small>SIMGROUP</small></span></a>
@@ -1792,7 +1795,7 @@ function secTabs(path){ const l=leafOf(path); if(l.items.length<2||l.it[0]!==pat
 /* ---------- Bar bawah (ponsel) dan sheet More ---------- */
 function bottomBar(path){
   const c=counts(), moreOn=!!document.querySelector('#layer .drawer'), it=(p,l,ic,n)=>{ const on=p==='/'?path==='/':(path===p||path.startsWith(p+'/')); return `<a href="#${p}" class="bb-i ${on?'on':''}" ${on?'aria-current="page"':''} aria-label="${l}${n?', '+n+' menunggu':''}" data-tip="${l}">${I(ic,20)}${n?`<span class="cnt w">${n>99?'99+':n}</span>`:''}</a>`; };
-  const itn=(p,n)=>{ const l=NAV.flatMap(x=>x[1]).find(x=>x[0]===p); return it(p,l[1],l[2],n); };
+  const itn=(p,n)=>{ const l=NAV.flatMap(x=>x[1]).find(x=>x[0]===p)||NAV_DEFAULT.flatMap(x=>x[1]).find(x=>x[0]===p); return it(p,l[1],l[2],n); };
   return `<nav class="bbar" aria-label="Navigasi cepat">${itn('/')}${itn('/approval',c.approval)}
     ${itn('/absensi')}${itn('/leads',c.leads)}
     <button type="button" class="bb-i bb-more ${moreOn?'on':''}" aria-label="Semua halaman" aria-haspopup="dialog" onclick="openMore()">${I('grid',20)}</button></nav>`;
@@ -1820,7 +1823,7 @@ function drawMore(){
 function moreGo(p,label){ const r=[{to:p,label},...recentNav().filter(x=>x.to!==p)].slice(0,4); store.set('salesapp.dashboard.recent',JSON.stringify(r)); closeLayer(); }
 
 /* Kepala halaman: satu kalimat tujuan layar. Papan langsung menampilkan waktu pembaruan. */
-const PAGE_DESC={'/penjualan':'Pantau penjualan per klien, cabang, toko, dan sales, lalu telusuri sampai transaksi.','/absensi':'Lihat kehadiran sales hari ini, jam masuk, mode kerja, dan hasil pencocokan wajah.','/kunjungan':'Pantau kunjungan sales ke toko: jadwal, durasi, dan hasilnya.','/approval':'Putuskan pengajuan dari lapangan: absen terlambat, cuti, hapus penjualan, batal pesanan, dan promo.','/target':'Atur target per sales, toko, dan bulan, lalu bandingkan dengan pencapaian.','/promo':'Kelola promo yang berjalan dan promo yang menunggu approval.','/insentif':'Hitung insentif sales per bulan dan cocokkan dengan data klien.','/grading':'Lihat skor grading sales dari penjualan, absensi, quiz, SKU, dan market share.','/leads':'Kelola leads pinjaman: assign ke manager atau sales, tindak lanjut, lalu kirim ke SIM.','/overdue':'Pantau leads yang melewati batas tindak lanjut.','/company-sim':'Kelola data company SIMGROUP yang menjadi induk klien.','/sektor':'Kelola sektor bisnis yang dipakai klien dan produk.','/client':'Kelola klien SaaS beserta sektor dan statusnya.','/kategori-toko':'Kelola kategori toko untuk pelaporan.','/toko':'Kelola toko yang dikunjungi sales, termasuk usulan toko baru dari lapangan.','/iam':'Atur hak akses tiap role: modul, aksi, dan menu di aplikasi mobile.','/produk':'Kelola produk dan harga, pemetaan produk ke toko, serta produk dari sales.','/penugasan':'Atur penugasan dan jadwal sales per toko.','/pemesanan':'Pantau pesanan dealer dari dibuat sampai lunas.','/sell-in':'Bandingkan sell-in dealer dengan target dan sell-out.','/user-sales':'Kelola sales lapangan yang tersinkron dari SIM.','/user-admin':'Kelola pengguna dashboard dan role-nya.','/parameter':'Atur parameter yang dipakai aplikasi dan perhitungan.','/task-pending':'Lihat tugas lapangan yang belum selesai, lalu assign atau tutup.','/aktivitas':'Lihat hasil kerja per sales dan log aktivitas toko.','/canvassing':'Pantau canvassing: barang dibawa, terjual, dan limit.','/posm':'Kelola campaign, POSM, dan planogram untuk toko.','/region':'Kelola region dan cabang.','/brand':'Kelola brand klien.','/kategori-produk':'Kelola kategori produk berjenjang.','/kompetitor':'Kelola kompetitor yang dipantau.','/cabang-client':'Kelola cabang tiap klien.','/mapping-outlet':'Petakan outlet ke klien dan cabang.','/data-penjualan':'Telusuri semua transaksi penjualan dari aplikasi dan dashboard.','/penagihan':'Pantau piutang dan penagihan menurut umur.','/klaim-biaya':'Putuskan klaim biaya sales berdasarkan bukti dan limit.','/kepatuhan-kunjungan':'Ukur kepatuhan kunjungan sales terhadap jadwal.','/pengumuman':'Kirim pengumuman ke sales menurut role dan klien.','/sinkron':'Cek status sinkron perangkat sales dan data dari SIM.','/satuan':'Kelola satuan produk.','/konversi':'Atur konversi satuan untuk semua produk (General) atau per produk.','/konfigurasi-aktivitas':'Atur aktivitas yang tampil di aplikasi tiap role.','/form-penjualan':'Susun field form catat penjualan di aplikasi.','/status-produk':'Kelola status produk.','/event':'Kelola event dan jadwalnya.','/mitra':'Kelola mitra dan pertanyaan monitoringnya.','/sku-display':'Lihat laporan SKU display per toko.','/market-share':'Lihat laporan market share per toko dan kategori.','/quiz':'Susun dan kelola quiz untuk sales.','/survey':'Susun dan kelola survey untuk sales.','/pengaturan':'Atur preferensi dashboard dan data demo.'};
+const PAGE_DESC={'/penjualan':'Pantau penjualan per klien, cabang, toko, dan sales, lalu telusuri sampai transaksi.','/absensi':'Lihat kehadiran sales hari ini, jam masuk, mode kerja, dan hasil pencocokan wajah.','/kunjungan':'Pantau kunjungan sales ke toko: jadwal, durasi, dan hasilnya.','/approval':'Putuskan pengajuan dari lapangan: absen terlambat, cuti, hapus penjualan, batal pesanan, dan promo.','/target':'Atur target per sales, toko, dan bulan, lalu bandingkan dengan pencapaian.','/promo':'Kelola promo yang berjalan dan promo yang menunggu approval.','/insentif':'Hitung insentif sales per bulan dan cocokkan dengan data klien.','/grading':'Lihat skor grading sales dari penjualan, absensi, quiz, SKU, dan market share.','/leads':'Kelola leads pinjaman: assign ke manager atau sales, tindak lanjut, lalu kirim ke SIM.','/overdue':'Pantau leads yang melewati batas tindak lanjut.','/company-sim':'Kelola data company SIMGROUP yang menjadi induk klien.','/sektor':'Kelola sektor bisnis yang dipakai klien dan produk.','/client':'Kelola klien SaaS beserta sektor dan statusnya.','/kategori-toko':'Kelola kategori toko untuk pelaporan.','/toko':'Kelola toko yang dikunjungi sales, termasuk usulan toko baru dari lapangan.','/iam':'Atur hak akses tiap role: modul, aksi, dan menu di aplikasi mobile.','/produk':'Kelola produk dan harga, pemetaan produk ke toko, serta produk dari sales.','/penugasan':'Atur penugasan dan jadwal sales per toko.','/pemesanan':'Pantau pesanan dealer dari dibuat sampai lunas.','/sell-in':'Bandingkan sell-in dealer dengan target dan sell-out.','/user-sales':'Kelola sales lapangan yang tersinkron dari SIM.','/user-admin':'Kelola pengguna dashboard dan role-nya.','/parameter':'Atur parameter yang dipakai aplikasi dan perhitungan.','/task-pending':'Lihat tugas lapangan yang belum selesai, lalu assign atau tutup.','/aktivitas':'Lihat hasil kerja per sales dan log aktivitas toko.','/canvassing':'Pantau canvassing: barang dibawa, terjual, dan limit.','/posm':'Kelola campaign, POSM, dan planogram untuk toko.','/region':'Kelola region dan cabang.','/brand':'Kelola brand klien.','/kategori-produk':'Kelola kategori produk berjenjang.','/kompetitor':'Kelola kompetitor yang dipantau.','/cabang-client':'Kelola cabang tiap klien.','/mapping-outlet':'Petakan outlet ke klien dan cabang.','/data-penjualan':'Telusuri semua transaksi penjualan dari aplikasi dan dashboard.','/penagihan':'Pantau piutang dan penagihan menurut umur.','/klaim-biaya':'Putuskan klaim biaya sales berdasarkan bukti dan limit.','/kepatuhan-kunjungan':'Ukur kepatuhan kunjungan sales terhadap jadwal.','/pengumuman':'Kirim pengumuman ke sales menurut role dan klien.','/sinkron':'Cek status sinkron perangkat sales dan data dari SIM.','/satuan':'Kelola satuan produk.','/konversi':'Atur konversi satuan untuk semua produk (General) atau per produk.','/sidebar-menu':'Atur susunan menu sidebar: nama, urutan, level, halaman, dan role yang melihatnya.','/konfigurasi-aktivitas':'Atur aktivitas yang tampil di aplikasi tiap role.','/form-penjualan':'Susun field form catat penjualan di aplikasi.','/status-produk':'Kelola status produk.','/event':'Kelola event dan jadwalnya.','/mitra':'Kelola mitra dan pertanyaan monitoringnya.','/sku-display':'Lihat laporan SKU display per toko.','/market-share':'Lihat laporan market share per toko dan kategori.','/quiz':'Susun dan kelola quiz untuk sales.','/survey':'Susun dan kelola survey untuk sales.','/pengaturan':'Atur preferensi dashboard dan data demo.'};
 const LIVE_PAGES=['/absensi','/sinkron','/kunjungan'];
 const timeLabel=()=>{ const d=new Date(nowMs()+7*36e5); return String(d.getUTCHours()).padStart(2,'0')+'.'+String(d.getUTCMinutes()).padStart(2,'0'); };
 const SCOPE_LABEL={q:'pencarian',f:'filter',u:'sales',st:'status',cat:'kategori',cl:'klien',cb:'cabang',tk:'toko',r:'peran'}, SCOPE_SKIP=['tab','per','p','preset','from','to','new'];
@@ -1885,6 +1888,7 @@ function syncPenugasanToko(){ try{ const m=Object.fromEntries(MD.user.map(u=>[u.
 function syncUserOff(){ try{ const m={}; MD.user.forEach(u=>{ if(u.off) m[u.id]=u.off; }); if(JSON.stringify(shRead('userOff',{}))!==JSON.stringify(m)) shSet('userOff',m); }catch(e){} }
 function syncTokoBaru(){ shRead('tokoBaruSales',[]).forEach(n=>{ if(TOKO.some(t=>t.id===n.id)) return; TOKO.push({id:n.id,name:n.name,cat:n.cat,cabang:'Jakarta Selatan',dealer:'–',sales:[n.u],addr:n.addr,client:'cl1',mapClients:['cl1'],sumber:'Input sales',status:'Takeout',radius:100,coord:'-6.2900, 106.8000'}); const us=MD.user.find(x=>x.id===n.u); if(us&&!(us.toko||[]).includes(n.id)) us.toko=[...(us.toko||[]),n.id]; }); }
 function render(scrollTop=true){
+  navRebuild();
   syncProducts(); refreshDerived(); syncApp(); syncTokoBaru(); syncUserOff(); syncUserBawa(); syncUserTambah(); syncPenugasanToko(); syncOwnVisits();
   const {path,q}=parse(); const app=$('#app');
   if(path==='/login'){ app.innerHTML=pageLogin(); lastPath=path; return; }
@@ -2620,7 +2624,8 @@ const MD={
     {id:'r17',name:'Admin Klien',desc:'Admin satu client: kelola user, role, master data, dan aturan client sendiri',scope:'Client sendiri',platform:'Web',appr:'Tanpa approval',perm:genPerm('admin'),status:'Aktif'},
     {id:'r18',name:'Direktur',desc:'Melihat ringkasan dan laporan semua client yang dipegang',scope:'Semua klien',platform:'Web',appr:'Tanpa approval',perm:genPerm('view'),status:'Aktif'},
     {id:'r19',name:'HR',desc:'Mengelola data karyawan (people) dan absensi. Tidak mengubah data penjualan',scope:'Semua klien',platform:'Web',appr:'Tanpa approval',perm:genPerm('view'),status:'Aktif'},
-    {id:'r20',name:'Manager',desc:'Memantau tim sales dan laporan client yang dipegang',scope:'Klien sendiri',platform:'Web',appr:'Tanpa approval',perm:genPerm('view'),status:'Aktif'}
+    {id:'r20',name:'Manager',desc:'Memantau tim sales dan laporan client yang dipegang',scope:'Klien sendiri',platform:'Web',appr:'Tanpa approval',perm:genPerm('view'),status:'Aktif'},
+    {id:'r90',name:'Super Admin',desc:'Akses penuh ke seluruh halaman dashboard dan semua menu aplikasi mobile. Satu-satunya role yang boleh mengatur menu sidebar',scope:'Semua klien',platform:'Web & Mobile',appr:'Tanpa approval',perm:genPerm('admin'),status:'Aktif'}
   ],
   user:[],
   sim:[
@@ -2686,11 +2691,11 @@ const isPeople=u=>u.akses==='Tanpa akses';
 const srcTag=s=>tag(s||'Integrasi SIM',(s||'Integrasi SIM')==='Integrasi SIM'?'info':'neutral');
 const xJoin=(a,b)=>a+(a&&b?'<div style="height:10px"></div>':'')+(b||'');
 const userSrcNote=r=>callout(r.sumber==='Input manual'?'<b>Input manual.</b> Data ini diisi admin, bukan dari SIM (BPR1). Contoh: Team Leader user client, Promotor Bantuan, atau karyawan di luar BPR.':'<b>Integrasi SIM.</b> NIP, nama, email, dan jabatan ditarik dari SIM (BPR1) dan tidak bisa diubah di sini.','blue');
-const ADMIN_ROLES=['r1','r17','r18','r19','r20'];
+const ADMIN_ROLES=['r1','r17','r18','r19','r20','r90'];
 const SEG={r18:['Umum','Tim / pendukung'],r19:['Umum','Tim / pendukung'],r20:['Umum','Tim / pendukung'],r17:['Umum','Tim / pendukung'],r1:['Umum','Tim / pendukung'],r2:['Umum','Tim / pendukung'],r3:['Elektronik','Diam di lokasi'],r4:['FMCG','Bergerak'],r21:['Elektronik','Bergerak'],r5:['FMCG','Bergerak'],r7:['Umum','Tim / pendukung'],r8:['Multi Finance','Tim / pendukung'],r9:['Multi Finance','Bergerak'],r10:['Multi Finance','Diam di lokasi'],r11:['FMCG','Diam di lokasi'],r12:['FMCG','Diam di lokasi'],r13:['Elektronik','Bergerak'],r14:['Umum','Diam di lokasi']};
 MD.role.forEach(r=>{ [r.segmen,r.tipe]=SEG[r.id]||['Umum','Diam di lokasi']; });
 const MKIND={r2:'spv',r3:'spg',r4:'canvas',r21:'canvas',r5:'order',r7:'spv',r8:'arco',r9:'cbd',r10:'leads',r11:'fmcg',r12:'fmcg',r13:'spg',r14:'bantuan'};
-MD.role.forEach(r=>{ r.mperm=genMPerm(MKIND[r.id]); if(r.bawa===undefined) r.bawa='Tidak'; if(r.tambah===undefined) r.tambah=['r4','r21','r5','r12'].includes(r.id)?'Ya':'Tidak'; });
+MD.role.forEach(r=>{ r.mperm=r.id==='r90'?Object.fromEntries(MOBILE_MENUS.map(m=>[m,true])):genMPerm(MKIND[r.id]); if(r.bawa===undefined) r.bawa='Tidak'; if(r.tambah===undefined) r.tambah=['r4','r21','r5','r12'].includes(r.id)?'Ya':'Tidak'; });
 const RJ=shRead('roleJadwal',{});
 MD.role.forEach(r=>{ r.jadwal=RJ[r.id]||(['r1','r2','r7','r11','r12'].includes(r.id)?'Ya':'Tidak'); });
 /* MOM 9 Nov bagian 4: modul Sales retail dan Sales automation dikeluarkan dari halaman Client, diatur per role di IAM. */
@@ -2718,6 +2723,8 @@ Object.assign(MD,{
 MD.katprod.forEach(k=>{ k.share='Ya'; k.cakupan='Client'; });
 /* Konversi punya dua cakupan: General berlaku untuk semua produk, Produk khusus satu produk dan menimpa General. */
 MD.konversi.forEach(k=>{ k.cakupan='Produk'; });
+MD.sidebar=sbSeed();
+MD.user.push({id:'superadmin',nip:'SIM-00-00001',name:'Super Admin',email:'super.admin@sim.co.id',jabatan:'Super Admin',role:'r90',clients:MD.client.map(c=>c.id),cabang:'Kantor Pusat',toko:[],ap1:'',ap2:'',akses:'Web & Mobile',face:'–',sumber:'Input manual',status:'Aktif'});
 MD.konversi.push({id:'kv30',cakupan:'General',satuan:'sa2',isi:12,dipakai:0,status:'Aktif'},{id:'kv31',cakupan:'General',satuan:'sa3',isi:6,dipakai:0,status:'Aktif'},
   {id:'kv32',cakupan:'General',satuan:'sa4',isi:1,dipakai:0,status:'Aktif'},{id:'kv33',cakupan:'General',satuan:'sa3',isi:10,dipakai:0,status:'Nonaktif'},{id:'kv40',cakupan:'Produk',produk:'fm1',satuan:'sa2',isi:24,dipakai:0,status:'Aktif'},{id:'kv41',cakupan:'Produk',produk:'fm2',satuan:'sa2',isi:24,dipakai:0,status:'Aktif'},{id:'kv42',cakupan:'Produk',produk:'fm3',satuan:'sa2',isi:24,dipakai:2,status:'Aktif'},{id:'kv43',cakupan:'Produk',produk:'fm5',satuan:'sa2',isi:40,dipakai:0,status:'Aktif'},{id:'kv44',cakupan:'Produk',produk:'fm5',satuan:'sa3',isi:5,dipakai:0,status:'Aktif'},{id:'kv45',cakupan:'Produk',produk:'fm6',satuan:'sa2',isi:24,dipakai:0,status:'Aktif'},{id:'kv46',cakupan:'Produk',produk:'fm7',satuan:'sa2',isi:100,dipakai:0,status:'Aktif'},{id:'kv47',cakupan:'Produk',produk:'nh1',satuan:'sa4',isi:1,dipakai:0,status:'Aktif'},{id:'kv48',cakupan:'Produk',produk:'nh2',satuan:'sa4',isi:1,dipakai:0,status:'Aktif'},{id:'kv49',cakupan:'Produk',produk:'nh3',satuan:'sa4',isi:1,dipakai:0,status:'Aktif'},{id:'kv50',cakupan:'Produk',produk:'nh4',satuan:'sa4',isi:1,dipakai:0,status:'Aktif'},{id:'kv51',cakupan:'Produk',produk:'mt5',satuan:'sa3',isi:12,dipakai:0,status:'Aktif'});
 /* MOM 9 Nov bagian 6: cakupan kategori dinamis. General berlaku untuk semua, Client spesifik. */
@@ -3704,6 +3711,73 @@ function posmDel(id){
   act('posm/remove',{perm:'master.edit',guard:()=>posmBlock(x),blockedTitle:'Tidak bisa dihapus',run:()=>{ x.del=true; },audit:'Menghapus brief '+x.name,toast:['Brief dihapus',x.name,'default']});
 }
 
+/* ---------- Sidebar Menu: konfigurasi menu sidebar, hanya Super Admin ---------- */
+const SB_ROLES=[['super','Super Admin'],['admin','Admin SIM'],['spv','Supervisor']];
+const SB_BADGE=[['','Tanpa hitungan'],['approval','Approval menunggu'],['leads','Leads belum di-assign'],['overdue','Leads overdue'],['usulan','Usulan toko baru']];
+/* Satu simpul: {id,parent,label,path,icon,badge,roles,bawaan,sistem,status}. Simpul tanpa path adalah grup yang boleh berisi submenu di level berapa pun. Urutan saudara mengikuti urutan array. */
+function sbSeed(){ const out=[];
+  NAV_DEFAULT.forEach(([sec,items],si)=>{ const gid='sm_g'+si; out.push({id:gid,parent:'',label:sec,path:'',icon:SEC_ICON[sec]||'grid',badge:'',roles:[],bawaan:true,status:'Aktif'});
+    items.forEach(([pt,l,ic,bd],j)=>out.push({id:'sm_'+si+'_'+j,parent:gid,label:l,path:pt,icon:ic||'grid',badge:bd||'',roles:[],bawaan:true,status:'Aktif'})); });
+  const sis=out.find(n=>n.label==='Sistem');
+  out.push({id:'sm_sidebar',parent:sis.id,label:'Sidebar Menu',path:'/sidebar-menu',icon:'sliders',badge:'',roles:['super'],bawaan:true,sistem:true,status:'Aktif'});
+  return out; }
+const sbKids=pid=>MD.sidebar.filter(n=>!n.del&&(n.parent||'')===pid);
+const sbSees=(n,key=ME.key)=>n.status==='Aktif'&&(key==='super'||!(n.roles||[]).length||n.roles.includes(key));
+function sbLeaves(n,key=ME.key){ if(!sbSees(n,key)) return []; if(n.path) return [n]; return sbKids(n.id).flatMap(c=>sbLeaves(c,key)); }
+function navBuild(key=ME.key){ const out=[]; sbKids('').forEach(n=>{ const lv=sbLeaves(n,key); if(!lv.length) return; SEC_ICON[n.label]=n.icon||'grid'; out.push([n.label,lv.map(l=>[l.path,l.label,l.icon||'grid',l.badge||undefined])]); }); return out.length?out:NAV_DEFAULT; }
+function navRebuild(){ NAV.splice(0,NAV.length,...navBuild()); }
+const sbHas=(n,pt)=>sbLeaves(n).some(l=>l.path===pt);
+const sbIsOpen=(n,pt)=>ST.sbOpen&&n.id in ST.sbOpen?ST.sbOpen[n.id]:sbHas(n,pt);
+function sbToggle(id){ ST.sbOpen=ST.sbOpen||{}; const n=MD.sidebar.find(x=>x.id===id); ST.sbOpen[id]=!sbIsOpen(n,leafOf(parse().path).it[0]); render(false); }
+function sbSubsHTML(n,depth,cur){ return sbKids(n.id).filter(c=>sbLeaves(c).length).map(c=>{ const pad=44+depth*14;
+  if(c.path){ const on=cur===c.path, cnt=c.badge?counts()[c.badge]:0; return `<a href="#${c.path}" class="nl sub ${on?'on':''}" ${on?'aria-current="page"':''} style="padding-left:${pad}px"><span class="lbl">${esc(c.label)}</span>${cnt?`<span class="cnt w">${cnt>99?'99+':cnt}</span>`:''}</a>`; }
+  const open=sbIsOpen(c,cur);
+  return `<button type="button" class="nl sub grp ${open?'open':''}" aria-expanded="${open}" onclick="sbToggle('${c.id}')" style="padding-left:${pad}px"><span class="lbl">${esc(c.label)}</span><span class="chv ${open?'up':''}">${I('chev',16)}</span></button>${open?`<div class="subs">${sbSubsHTML(c,depth+1,cur)}</div>`:''}`; }).join(''); }
+function sbFlat(pid='',depth=0,out=[]){ sbKids(pid).forEach(n=>{ out.push({...n,_depth:depth}); sbFlat(n.id,depth+1,out); }); return out; }
+const sbDesc=(id,out=new Set())=>{ sbKids(id).forEach(c=>{ out.add(c.id); sbDesc(c.id,out); }); return out; };
+const sbTrail=n=>{ const a=[]; let c=n; while(c){ a.unshift(c.label); c=c.parent?MD.sidebar.find(x=>x.id===c.parent):null; } return a.join(' › '); };
+const sbParentOpts=()=>{ const id=FORM&&FORM.id, bad=id?sbDesc(id):new Set(); return [['','Level 1 (menu utama)'],...sbFlat().filter(n=>!n.path&&n.id!==id&&!bad.has(n.id)).map(n=>[n.id,'Level '+(n._depth+1)+' · '+sbTrail(n)])]; };
+const sbPathLabel=pt=>(NAV_DEFAULT.flatMap(x=>x[1]).find(x=>x[0]===pt)||[])[1]||pt;
+const sbPathOpts=()=>[['','Grup (tanpa halaman, berisi submenu)'],...Object.keys(ROUTES).filter(pt=>pt!=='/login').sort((a,b)=>sbPathLabel(a).localeCompare(sbPathLabel(b))).map(pt=>[pt,sbPathLabel(pt)+' · '+pt])];
+const sbRoleNames=n=>!(n.roles||[]).length?'Semua role':n.roles.map(k=>(SB_ROLES.find(r=>r[0]===k)||[,k])[1]).join(', ');
+ENT.sbmenu={label:'Menu sidebar',lower:'menu sidebar',plural:'Struktur menu',prefix:'sm',store:()=>MD.sidebar,title:r=>r.label,search:r=>r.label+(r.path||''),blank:()=>({parent:'',path:'',icon:'grid',badge:'',roles:[]}),
+  extraTop:r=>r.sistem?callout('<b>Menu sistem.</b> Menu ini hanya untuk Super Admin dan tidak bisa dipindah, dinonaktifkan, atau dihapus supaya akses ke pengaturan ini tidak hilang. Nama, ikon, dan urutan tetap bisa diubah.'):'',
+  fields:[
+    {k:'label',label:'Nama menu',req:true,ph:'Contoh: Laporan harian'},
+    {k:'parent',label:'Induk menu',type:'select',opts:sbParentOpts,roIf:r=>r.sistem,fmt:v=>v?sbTrail(MD.sidebar.find(x=>x.id===v)||{label:v}):'Level 1 (menu utama)',hint:'Pilih induk untuk membuat submenu. Level submenu tidak dibatasi, selama induknya berupa grup.'},
+    {k:'path',label:'Halaman tujuan',type:'select',opts:sbPathOpts,roIf:r=>r.sistem,hint:'Pilih halaman yang dibuka. Biarkan Grup agar menu ini menjadi folder yang bisa berisi submenu.',validate:v=>MD.sidebar.some(x=>!x.del&&x.status==='Aktif'&&x.id!==(FORM&&FORM.id)&&x.path===v)?'Halaman ini sudah dipakai menu lain':''},
+    {k:'icon',label:'Ikon',type:'select',opts:()=>Object.keys(P).sort().map(k=>[k,k]),hint:'Ikon tampil di sidebar untuk menu level 1.'},
+    {k:'badge',label:'Hitungan di samping menu',type:'select',opts:SB_BADGE,hint:'Angka tugas yang menunggu, hanya untuk menu yang punya halaman.'},
+    {k:'roles',label:'Role yang melihat',type:'multi',opts:SB_ROLES.slice(1),roIf:r=>r.sistem,hint:'Kosong berarti semua role. Super Admin selalu melihat semua menu aktif.'}],
+  validateExtra:v=>{ const id=FORM&&FORM.id; if(v.path&&id&&sbKids(id).length) return 'Menu ini punya submenu, jadi harus berupa Grup. Pindahkan submenunya dulu.'; return ''; },
+  inUse:r=>r.sistem?'Menu sistem ini tidak bisa dihapus supaya Super Admin tetap bisa mengatur sidebar.':r.bawaan?'Menu bawaan tidak bisa dihapus. Nonaktifkan saja untuk menyembunyikannya dari sidebar.':sbKids(r.id).length?'Hapus atau pindahkan submenu di dalamnya dulu.':'',
+  lockStatus:r=>r.sistem?'Menu sistem tidak bisa dinonaktifkan.':'',
+  delNote:'Menu disembunyikan dari sidebar dan tetap tersimpan untuk audit (soft delete).'};
+function sbMove(id,dir){ const n=MD.sidebar.find(x=>x.id===id), sib=sbKids(n.parent||''), i=sib.indexOf(n), o=sib[i+dir];
+  if(!o){ toast(dir<0?'Sudah paling atas':'Sudah paling bawah',n.label+' sudah di ujung daftar level ini.'); return; }
+  act('sbmenu/move',{perm:'master.edit',run:()=>{ const a=MD.sidebar.indexOf(n), b=MD.sidebar.indexOf(o); [MD.sidebar[a],MD.sidebar[b]]=[MD.sidebar[b],MD.sidebar[a]]; },audit:'Memindah urutan menu '+n.label,toast:['Urutan menu diubah',n.label+' '+(dir<0?'naik':'turun')]}); }
+function sbReset(){ act('sbmenu/reset',{perm:'master.edit',run:()=>{ MD.sidebar.splice(0,MD.sidebar.length,...sbSeed()); ST.sbOpen={}; },audit:'Mengembalikan menu sidebar ke bawaan',toast:['Menu dikembalikan ke bawaan','Menu buatan sendiri dihapus.']}); }
+function sbResetAsk(){ confirmAsk({title:'Kembalikan menu ke bawaan?',desc:'Susunan, nama, level, dan akses semua menu kembali seperti awal. Menu yang kamu buat sendiri dihapus. Tindakan ini tercatat di audit.',confirmLabel:'Kembalikan',destructive:true,on:'sbReset()'}); }
+function sbPreview(pid,key,depth){ return sbKids(pid).filter(n=>sbLeaves(n,key).length).map(n=>`<div class="sm" style="display:flex;align-items:center;gap:8px;padding:5px 0 5px ${depth*16}px">${depth===0?I(n.icon||'grid',15):'<span class="muted" aria-hidden="true">└</span>'}<span class="${n.path?'':'fg'}" style="${n.path?'':'font-weight:600'}">${esc(n.label)}</span></div>${n.path?'':sbPreview(n.id,key,depth+1)}`).join(''); }
+function pageSidebarMenu(q){
+  if(ME.key!=='super') return {title:'Sidebar Menu',html:card('',emptyState({icon:'lock',title:'Hanya untuk Super Admin',desc:'Pengaturan menu sidebar hanya bisa dibuka oleh akun dengan role Super Admin.',action:btn('Kembali ke Overview',{v:'outline',on:"go('/')"})}))};
+  const all=sbFlat(), qq=(q.q||'').toLowerCase(), st=q.st||'', as=SB_ROLES.some(r=>r[0]===q.as)?q.as:'super';
+  const rows=all.filter(n=>!st||n.status===st).filter(n=>!qq||(n.label+' '+(n.path||'')).toLowerCase().includes(qq)).map(n=>({...n,_id:n.id}));
+  const dirty=qq||st;
+  ST.tb.sbm||(ST.tb.sbm={page:1,per:96,sort:null});
+  const maxLv=all.reduce((m,n)=>Math.max(m,n._depth+1),1);
+  const fc=filterCard({search:searchBox(q.q,{ph:'Cari menu atau halaman',label:'Cari menu'}),chips:{key:'st',val:st,label:'Status',items:[['','Semua',all.length],['Aktif','Aktif',all.filter(n=>n.status==='Aktif').length],['Nonaktif','Nonaktif',all.filter(n=>n.status!=='Aktif').length]]},clear:dirty?"setQ({q:'',st:''})":'',summary:dirty?`Menampilkan <b class="fg">${rows.length}</b> dari ${all.length} menu.`:`${all.length} menu, ${maxLv} level.`});
+  const tbl=dataTable('sbm',{rows,rowClick:r=>`openForm('sbmenu','${r.id}')`,empty:'Tidak ada menu yang cocok.',cols:[
+    {label:'Menu',render:r=>`<span style="display:flex;align-items:center;gap:8px;padding-left:${r._depth*22}px">${r._depth?'<span class="muted" aria-hidden="true">└</span>':''}<span class="muted" style="display:grid">${I(r.icon||'grid',16)}</span><span class="fg" style="font-weight:${r.path?500:700}">${esc(r.label)}</span>${r.path?'':tag('Grup','neutral')}${r.bawaan?'':tag('Baru','accent')}${r.sistem?tag('Sistem','info'):''}</span>`,prim:true},
+    {label:'Level',render:r=>tag('Level '+(r._depth+1),r._depth?'neutral':'accent'),hide:true},
+    {label:'Halaman',render:r=>r.path?`<span class="mono xs">${esc(r.path)}</span>`:'<span class="muted">–</span>',hide:true},
+    {label:'Role',render:r=>`<span class="xs">${esc(sbRoleNames(r))}</span>`,hide:true},
+    {label:'Status',render:r=>stPill(r.status)}],
+    acts:r=>`${ibtn('arrowup','Naik',`sbMove('${r.id}',-1)`,{size:'icon-sm'})}${ibtn('arrowdown','Turun',`sbMove('${r.id}',1)`,{size:'icon-sm'})}${r.path?'':ibtn('plus','Tambah submenu',`openForm('sbmenu',null,{parent:'${r.id}'})`,{size:'icon-sm'})}${rowActs(`openForm('sbmenu','${r.id}')`,`delAsk('sbmenu','${r.id}')`,{block:ENT.sbmenu.inUse(r)})}`});
+  const struct=card('Struktur menu',`${tbl}`,{acts:`${btn('Kembalikan ke bawaan',{v:'outline',size:'sm',on:'sbResetAsk()'})}${btn('Tambah menu level 1',{v:'accent',size:'sm',icon:'plus',on:"openForm('sbmenu')"})}`});
+  const prev=card('Pratinjau sidebar',`<label class="field" style="margin-bottom:12px"><span class="sr-only">Lihat sebagai</span>${sel(SB_ROLES,as,"setQ({as:this.value})",{label:'Lihat sebagai',cls:'sm'})}</label><div class="rows" style="max-height:34rem;overflow:auto">${sbPreview('',as,0)||'<p class="sm muted">Tidak ada menu yang terlihat untuk role ini.</p>'}</div>`);
+  return {title:'Sidebar Menu',html:`<div class="fstack">${fc}<div class="grid g-side">${struct}${prev}</div>${callout('<b>Cara pakai.</b> Klik baris untuk mengubah. Tombol panah mengatur urutan di level yang sama, tombol + menambah submenu di bawah grup, dan Induk menu di form memindahkan menu ke level lain. Level tidak dibatasi. Perubahan langsung dipakai sidebar semua akun sesuai role.')}</div>`};
+}
 /* ---------- Master tambahan ---------- */
 const pageRegion=q=>({title:'Region',html:`${crudList('region',q)}`});
 function brandTab(k){ setQ({tab:k==='client'?'':k,q:'',st:''}); }
@@ -4421,7 +4495,7 @@ function pageAktivitas(q){
   return {title:'Aktivitas lapangan',html:`<div style="margin-bottom:14px">${pills([['sales','Hasil kerja per sales'],['log','Log aktivitas toko']],tab,'aktTab')}</div>`+v.html};
 }
 
-const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi,'/kunjungan':pageKunjungan,'/approval':pageApproval,'/target':pageTarget,'/promo':pagePromo,'/insentif':pageInsentif,'/grading':pageGrading,'/leads':pageLeads,'/overdue':pageOverdue,'/company-sim':pageSimco,'/sektor':pageSektor,'/client':pageClient,'/kategori-toko':pageKategori,'/toko':pageToko,'/iam':pageIAM,'/produk':pageProduk,'/penugasan':pagePenugasan,'/pemesanan':pagePemesanan,'/sell-in':pageSellin,'/user-sales':pagePengguna,'/user-admin':pageAdmin,'/parameter':pageParameter,'/task-pending':pageTaskPending,'/aktivitas':pageAktivitas,'/canvassing':pageCanvassing,'/posm':pagePosm,'/region':pageRegion,'/brand':pageBrand,'/kategori-produk':pageKatProd,'/kompetitor':pageKompetitor,'/cabang-client':pageCabang,'/mapping-outlet':pageMapOutlet,'/data-penjualan':pageDataJual,'/penagihan':pagePenagihan,'/klaim-biaya':pageKlaim,'/kepatuhan-kunjungan':pageKepatuhan,'/pengumuman':pagePengumuman,'/sinkron':pageSinkron,'/satuan':pageSatuan,'/konversi':pageKonversi,'/konfigurasi-aktivitas':pageAktCfg,'/form-penjualan':pageFormJual,'/status-produk':pageStatProd,'/event':pageEvent,'/mitra':pageMitra,'/sku-display':pageSkuDisplay,'/market-share':pageMarketShare,'/quiz':q=>pageKonten(q,'Quiz'),'/survey':q=>pageKonten(q,'Survey'),'/pengaturan':pagePengaturan};
+const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi,'/kunjungan':pageKunjungan,'/approval':pageApproval,'/target':pageTarget,'/promo':pagePromo,'/insentif':pageInsentif,'/grading':pageGrading,'/leads':pageLeads,'/overdue':pageOverdue,'/company-sim':pageSimco,'/sektor':pageSektor,'/client':pageClient,'/kategori-toko':pageKategori,'/toko':pageToko,'/iam':pageIAM,'/produk':pageProduk,'/penugasan':pagePenugasan,'/pemesanan':pagePemesanan,'/sell-in':pageSellin,'/user-sales':pagePengguna,'/user-admin':pageAdmin,'/parameter':pageParameter,'/task-pending':pageTaskPending,'/aktivitas':pageAktivitas,'/canvassing':pageCanvassing,'/posm':pagePosm,'/region':pageRegion,'/brand':pageBrand,'/kategori-produk':pageKatProd,'/kompetitor':pageKompetitor,'/cabang-client':pageCabang,'/mapping-outlet':pageMapOutlet,'/data-penjualan':pageDataJual,'/penagihan':pagePenagihan,'/klaim-biaya':pageKlaim,'/kepatuhan-kunjungan':pageKepatuhan,'/pengumuman':pagePengumuman,'/sinkron':pageSinkron,'/satuan':pageSatuan,'/konversi':pageKonversi,'/sidebar-menu':pageSidebarMenu,'/konfigurasi-aktivitas':pageAktCfg,'/form-penjualan':pageFormJual,'/status-produk':pageStatProd,'/event':pageEvent,'/mitra':pageMitra,'/sku-display':pageSkuDisplay,'/market-share':pageMarketShare,'/quiz':q=>pageKonten(q,'Quiz'),'/survey':q=>pageKonten(q,'Survey'),'/pengaturan':pagePengaturan};
 /* ---------- Dropdown dengan pencarian dan pagination ----------
    Semua <select> otomatis diganti tombol + panel. Select asli tetap ada (tersembunyi), jadi value, onchange, dan id tetap bekerja. */
 (function(){
@@ -4488,7 +4562,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
 /* ---------- Penyimpanan data dashboard (D6) ----------
    Perubahan di dashboard disimpan sebagai snapshot berversi. Data bersama dengan mobile tetap di salesapp.shared.v1.
    Naikkan DASH_VER bila bentuk data contoh berubah, supaya snapshot lama dibuang dan data contoh baru dipakai. */
-const DASH_VER=11;
+const DASH_VER=12;
 const PARAM={};
 const dashData=()=>({D,MD,TOKO,TRX,INFO,POSM,AR,KLAIM,ATT,REK_ADJ,PARAM});
 function restoreInto(t,src){
