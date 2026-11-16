@@ -3742,20 +3742,23 @@ const sbDesc=(id,out=new Set())=>{ sbKids(id).forEach(c=>{ out.add(c.id); sbDesc
 const sbTrail=n=>{ const a=[]; let c=n; while(c){ a.unshift(c.label); c=c.parent?MD.sidebar.find(x=>x.id===c.parent):null; } return a.join(' › '); };
 const sbParentOpts=()=>{ const id=FORM&&FORM.id, bad=id?sbDesc(id):new Set(); return [['','Level 1 (menu utama)'],...sbFlat().filter(n=>n.id!==id&&!bad.has(n.id)).map(n=>[n.id,'Level '+(n._depth+1)+' · '+sbTrail(n)])]; };
 const sbPathLabel=pt=>(NAV_DEFAULT.flatMap(x=>x[1]).find(x=>x[0]===pt)||[])[1]||pt;
-const sbPathOpts=()=>[['','Grup (tanpa halaman, berisi submenu)'],...Object.keys(ROUTES).filter(pt=>pt!=='/login').sort((a,b)=>sbPathLabel(a).localeCompare(sbPathLabel(b))).map(pt=>[pt,sbPathLabel(pt)+' · '+pt])];
+const sbPathOpts=()=>[['','Pilih dari halaman yang sudah ada'],...Object.keys(ROUTES).filter(pt=>pt!=='/login').sort((a,b)=>sbPathLabel(a).localeCompare(sbPathLabel(b))).map(pt=>[pt,sbPathLabel(pt)+' · '+pt])];
 const sbRoleNames=n=>!(n.roles||[]).length?'Semua role':n.roles.map(k=>(SB_ROLES.find(r=>r[0]===k)||[,k])[1]).join(', ');
 ENT.sbmenu={label:'Menu sidebar',lower:'menu sidebar',plural:'Struktur menu',prefix:'sm',store:()=>MD.sidebar,title:r=>r.label,search:r=>r.label+(r.path||''),blank:()=>({parent:'',path:'',icon:'grid',badge:'',roles:[]}),
   extraTop:r=>r.sistem?callout('<b>Menu sistem.</b> Menu ini hanya untuk Super Admin dan tidak bisa dipindah, dinonaktifkan, atau dihapus supaya akses ke pengaturan ini tidak hilang. Nama, ikon, dan urutan tetap bisa diubah.'):'',
   fields:[
     {k:'label',label:'Nama menu',req:true,ph:'Contoh: Laporan harian'},
     {k:'parent',label:'Induk menu',type:'select',opts:sbParentOpts,roIf:r=>r.sistem,fmt:v=>v?sbTrail(MD.sidebar.find(x=>x.id===v)||{label:v}):'Level 1 (menu utama)',hint:'Pilih induk untuk membuat submenu. Induknya boleh grup atau menu yang punya halaman. Level tidak dibatasi.'},
-    {k:'path',label:'Halaman tujuan',type:'select',opts:sbPathOpts,roIf:r=>r.sistem,hint:'Pilih halaman yang dibuka. Biarkan Grup kalau menu ini hanya folder. Menu yang punya halaman tetap bisa berisi submenu.',validate:v=>MD.sidebar.some(x=>!x.del&&x.status==='Aktif'&&x.id!==(FORM&&FORM.id)&&x.path===v)?'Halaman ini sudah dipakai menu lain':''},
+    {k:'pilih',label:'Pilih halaman yang sudah ada',type:'select',opts:sbPathOpts,val:r=>r.path&&ROUTES[r.path]?r.path:'',onchange:'sbPick(this.value)',roIf:r=>r.sistem,hint:'Pilihan ini mengisi Path halaman di bawah. Kamu juga bisa mengetik path sendiri.'},
+    {k:'path',label:'Path halaman',ph:'/contoh-halaman',roIf:r=>r.sistem,hint:'Alamat halaman yang dibuka menu ini, diawali / (contoh: /laporan-harian). Kosongkan kalau menu ini hanya folder untuk submenu. Path yang belum punya halaman membuka Halaman tidak ditemukan sampai halamannya dibuat.',validate:(v,vals)=>!/^\/[a-z0-9\-\/]*$/i.test(v)?'Path harus diawali / dan hanya berisi huruf, angka, dan tanda hubung':MD.sidebar.some(x=>!x.del&&x.status==='Aktif'&&x.id!==(FORM&&FORM.id)&&String(x.path||'').toLowerCase()===v.toLowerCase())?'Path ini sudah dipakai menu lain':''},
     {k:'icon',label:'Ikon',type:'select',opts:()=>Object.keys(P).sort().map(k=>[k,k]),hint:'Ikon tampil di sidebar untuk menu level 1.'},
     {k:'badge',label:'Hitungan di samping menu',type:'select',opts:SB_BADGE,hint:'Angka tugas yang menunggu, hanya untuk menu yang punya halaman.'},
     {k:'roles',label:'Role yang melihat',type:'multi',opts:SB_ROLES.slice(1),roIf:r=>r.sistem,hint:'Kosong berarti semua role. Super Admin selalu melihat semua menu aktif.'}],
+  afterSave:r=>{ delete r.pilih; r.path=(r.path||'').toLowerCase(); },afterCreate:r=>{ delete r.pilih; r.path=(r.path||'').toLowerCase(); },
   inUse:r=>r.sistem?'Menu sistem ini tidak bisa dihapus supaya Super Admin tetap bisa mengatur sidebar.':r.bawaan?'Menu bawaan tidak bisa dihapus. Nonaktifkan saja untuk menyembunyikannya dari sidebar.':sbKids(r.id).length?'Hapus atau pindahkan submenu di dalamnya dulu.':'',
   lockStatus:r=>r.sistem?'Menu sistem tidak bisa dinonaktifkan.':'',
   delNote:'Menu disembunyikan dari sidebar dan tetap tersimpan untuk audit (soft delete).'};
+function sbPick(v){ const el=document.getElementById('f_path'); if(!el||!v) return; el.value=v; el.dispatchEvent(new Event('input',{bubbles:true})); }
 function sbMove(id,dir){ const n=MD.sidebar.find(x=>x.id===id), sib=sbKids(n.parent||''), i=sib.indexOf(n), o=sib[i+dir];
   if(!o){ toast(dir<0?'Sudah paling atas':'Sudah paling bawah',n.label+' sudah di ujung daftar level ini.'); return; }
   act('sbmenu/move',{perm:'master.edit',run:()=>{ const a=MD.sidebar.indexOf(n), b=MD.sidebar.indexOf(o); [MD.sidebar[a],MD.sidebar[b]]=[MD.sidebar[b],MD.sidebar[a]]; },audit:'Memindah urutan menu '+n.label,toast:['Urutan menu diubah',n.label+' '+(dir<0?'naik':'turun')]}); }
