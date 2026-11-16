@@ -430,6 +430,25 @@ a.stat:hover,button.stat:hover{background:var(--raised)}
 .qty .qi{width:56px;height:100%;border:0;background:none;outline:none;text-align:center;font-weight:600;color:var(--fg);min-width:0}
 .djrow{display:grid;gap:12px;padding:14px;border:1px solid var(--line);border-radius:var(--r-panel)}
 .djrow-h{display:flex;align-items:center;justify-content:space-between}
+.rp{position:relative;flex:0 0 auto}
+.rp-btn{width:auto;gap:8px;cursor:pointer;font-size:14px;color:var(--fg);white-space:nowrap}
+.rp-btn:hover{border-color:var(--accent)}
+.rp-pop{position:fixed;z-index:200;width:312px;max-width:calc(100vw - 24px);padding:14px;border-radius:var(--r-panel);border:1px solid var(--line);background:var(--card);box-shadow:var(--shadow-float);animation:rise .15s}
+.rp-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.rp-h b{font-size:14px}
+.rp-n{width:32px;height:32px;display:grid;place-items:center;border-radius:99px;color:var(--fg)}
+.rp-n:hover:not(:disabled){background:var(--accent-soft)}.rp-n:disabled{opacity:.3}
+.rp-g{display:grid;grid-template-columns:repeat(7,1fr);row-gap:2px}
+.rp-w{font-size:11px;color:var(--muted);text-align:center;padding:4px 0;font-weight:600}
+.rp-d{height:38px;font-size:13.5px;color:var(--fg);position:relative;border-radius:0}
+.rp-d:hover:not(:disabled){background:var(--accent-soft)}
+.rp-d:disabled{color:var(--muted);opacity:.4;cursor:not-allowed}
+.rp-d.in{background:var(--accent-soft);color:var(--accent-text)}
+.rp-d.st,.rp-d.en{background:var(--accent);color:#fff;font-weight:700}
+.rp-d.st{border-radius:99px 0 0 99px}.rp-d.en{border-radius:0 99px 99px 0}.rp-d.st.en{border-radius:99px}
+.rp-d.td::after{content:"";position:absolute;bottom:5px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:99px;background:currentColor}
+.rp-f{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.rp-f .chips{margin-top:8px}
 .inp{position:relative;display:flex;align-items:center;gap:10px;height:44px;border-radius:var(--r-panel);padding:0 16px;border:1px solid var(--line);background:var(--card);transition:border-color .15s,box-shadow .15s}
 .inp:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px rgb(10 146 242 / .2)}
 .inp input{border:0;background:none;outline:none;flex:1;min-width:0;font-size:14px;color:var(--fg)}
@@ -911,7 +930,7 @@ const P={
   bell:'M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4',
   cal:'M4 6h16v15H4zM4 10h16M8 3v4M16 3v4',
   down:'M12 4v12M7 11l5 5 5-5M4 20h16', up:'M12 16V4M7 9l5-5 5 5M4 16v4h16v-4',
-  x:'M6 6l12 12M18 6 6 18', left:'M15 5l-7 7 7 7', right:'M9 5l7 7-7 7', chev:'M6 9l6 6 6-6',
+  x:'M6 6l12 12M18 6 6 18', cal:'M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z', left:'M15 5l-7 7 7 7', right:'M9 5l7 7-7 7', chev:'M6 9l6 6 6-6',
   plus:'M12 5v14M5 12h14', minus:'M5 12h14', ext:'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',
   spark:'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z',
   logout:'M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10',
@@ -2175,9 +2194,40 @@ function ordFilter(k,v){ setQ({[k]:v}); }
 /* ---------- Data penjualan (MOM 9 Nov bagian 8): daftar transaksi + input dari dashboard bila input aplikasi gagal ---------- */
 const DJ_ALASAN=['Aplikasi error saat kirim','Sinyal hilang, data tidak terkirim','HP sales rusak atau hilang','Transaksi lupa diinput sales','Lainnya'];
 const isDash=t=>t.src==='Dashboard';
+/* Datepicker rentang: satu tombol, satu kalender. Klik tanggal mulai lalu tanggal akhir. */
+const RP={}, RP_MON=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const rpLab=(a,b)=>{ const f=x=>{ const o=isoDay(x); return o.d+' '+(LD_MN[o.m]||RP_MON[o.m-1].slice(0,3))+' 2026'; }; return a===b?f(a):f(a)+' – '+f(b); };
+function rangePicker({id,from,to,min,max,on,presets=[]}){
+  RP[id]={...(RP[id]||{}),id,a:from,b:to,min,max,on,presets,open:false,phase:'start',y:+to.slice(0,4),m:+to.slice(5,7)};
+  return `<div class="rp" id="rp_${id}"><button type="button" class="inp h40 rp-btn" aria-haspopup="dialog" aria-expanded="false" onclick="rpToggle('${id}')">${I('cal',16)}<span>${rpLab(from,to)}</span></button></div>`;
+}
+function rpPop(id){
+  const st=RP[id], first=new Date(st.y,st.m-1,1), off=(first.getDay()+6)%7, n=new Date(st.y,st.m,0).getDate(), pad=x=>String(x).padStart(2,'0');
+  const A=st.phase==='end'?st.a2:st.a, B=st.phase==='end'?(st.hov&&st.hov>=st.a2?st.hov:st.a2):st.b;
+  const cells=[...Array(off).fill('<span></span>'),...Array.from({length:n},(_,i)=>{ const d=i+1, iso=`${st.y}-${pad(st.m)}-${pad(d)}`, dis=iso<st.min||iso>st.max, cls=['rp-d',iso>A&&iso<B?'in':'',iso===A?'st':'',iso===B?'en':'',iso===st.max?'td':''].join(' ');
+    return `<button type="button" class="${cls}" ${dis?'disabled':''} aria-label="${d} ${RP_MON[st.m-1]} ${st.y}" aria-pressed="${iso===A||iso===B}" onclick="rpPick('${id}','${iso}')" onmouseenter="rpHover('${id}','${iso}')">${d}</button>`; })];
+  const prevOk=`${st.y}-${pad(st.m)}-01`>st.min, nextOk=`${st.y}-${pad(st.m)}-${pad(n)}`<st.max;
+  return `<div class="rp-h"><button type="button" class="rp-n" onclick="rpMonth('${id}',-1)" ${prevOk?'':'disabled'} aria-label="Bulan sebelumnya">${I('left',16)}</button><b>${RP_MON[st.m-1]} ${st.y}</b><button type="button" class="rp-n" onclick="rpMonth('${id}',1)" ${nextOk?'':'disabled'} aria-label="Bulan berikutnya">${I('right',16)}</button></div>
+    <div class="rp-g">${['Sen','Sel','Rab','Kam','Jum','Sab','Min'].map(w=>`<span class="rp-w">${w}</span>`).join('')}${cells.join('')}</div>
+    <div class="rp-f"><p class="xs muted" aria-live="polite">${st.phase==='end'?'Pilih tanggal akhir. Klik tanggal yang sama untuk satu hari.':'Pilih tanggal mulai, lalu tanggal akhir.'}</p>${st.presets.length?`<div class="chips">${st.presets.map(([k,l,r])=>`<button type="button" class="fchip" onclick="rpApply('${id}','${r[0]}','${r[1]}')">${l}</button>`).join('')}</div>`:''}</div>`;
+}
+function rpClose(){ document.querySelectorAll('.rp-pop').forEach(e=>e.remove()); document.querySelectorAll('.rp-btn[aria-expanded="true"]').forEach(b=>b.setAttribute('aria-expanded','false')); Object.values(RP).forEach(x=>{ x.open=false; }); }
+function rpToggle(id){ const st=RP[id], was=st.open; rpClose(); if(was) return; st.open=true; st.phase='start'; st.a2=null; st.hov=null; st.y=+st.b.slice(0,4); st.m=+st.b.slice(5,7);
+  const btn=document.querySelector('#rp_'+id+' .rp-btn'); btn.setAttribute('aria-expanded','true'); const pop=document.createElement('div'); pop.className='rp-pop'; pop.id='rpp_'+id; pop.setAttribute('role','dialog'); pop.setAttribute('aria-label','Pilih rentang tanggal'); pop.innerHTML=rpPop(id); document.body.appendChild(pop);
+  const r=btn.getBoundingClientRect(), w=pop.offsetWidth; pop.style.left=Math.max(12,Math.min(r.left,innerWidth-w-12))+'px'; pop.style.top=Math.min(r.bottom+8,innerHeight-pop.offsetHeight-8)+'px'; }
+const rpRedraw=id=>{ const p=document.getElementById('rpp_'+id); if(p) p.innerHTML=rpPop(id); };
+function rpMonth(id,d){ const st=RP[id]; let m=st.m+d, y=st.y; if(m<1){ m=12; y--; } if(m>12){ m=1; y++; } st.m=m; st.y=y; rpRedraw(id); }
+function rpHover(id,iso){ const st=RP[id]; if(st.phase!=='end'||st.hov===iso) return; st.hov=iso; const p=document.getElementById('rpp_'+id); if(!p) return; p.querySelectorAll('.rp-d').forEach(b=>{ const x=`${st.y}-${String(st.m).padStart(2,'0')}-${String(b.textContent).padStart(2,'0')}`; b.classList.toggle('in',x>st.a2&&x<iso); b.classList.toggle('en',x===iso&&iso>=st.a2); }); }
+function rpPick(id,iso){ const st=RP[id];
+  if(st.phase!=='end'){ st.phase='end'; st.a2=iso; st.hov=null; rpRedraw(id); return; }
+  let a=st.a2, b=iso; if(b<a) [a,b]=[b,a]; rpApply(id,a,b); }
+function rpApply(id,a,b){ const st=RP[id], cl=x=>x<st.min?st.min:x>st.max?st.max:x; rpClose(); window[st.on](cl(a),cl(b)); }
+document.addEventListener('mousedown',e=>{ if(document.querySelector('.rp-pop')&&!e.target.closest('.rp-pop,.rp-btn')) rpClose(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&document.querySelector('.rp-pop')){ const b=document.querySelector('.rp-btn[aria-expanded="true"]'); rpClose(); b?.focus(); } });
+addEventListener('resize',rpClose); addEventListener('scroll',e=>{ if(!e.target.closest?.('.rp-pop')) rpClose(); },true);
 const DJ_DEF=[isoOf(10,1),LD_END];
 function djRange(q){ const cl=x=>x<LD_START?LD_START:x>LD_END?LD_END:x; let f=cl(q.from||DJ_DEF[0]), t=cl(q.to||DJ_DEF[1]); if(f>t) [f,t]=[t,f]; return {from:f,to:t}; }
-function djDate(){ const f=document.getElementById('djf_from').value, t=document.getElementById('djf_to').value; setQ({from:f,to:t}); }
+function djDate(f,t){ setQ({from:f,to:t}); }
 const djField=(key,val,ph,label)=>`<form style="flex:1;min-width:200px" onsubmit="event.preventDefault();setQ({${key}:this.v.value.trim()})"><label class="inp h40"><span class="sr-only">${label}</span>${I('search',16)}<input name="v" value="${esc(val||'')}" placeholder="${ph}" autocomplete="off" onchange="setQ({${key}:this.value.trim()})"></label></form>`;
 function pageDataJual(q){
   const r=djRange(q), f=q.f||'', tr=(q.tr||'').toLowerCase(), iv=(q.iv||'').toLowerCase();
@@ -2191,7 +2241,7 @@ function pageDataJual(q){
     pOpts=[...new Set([...PRODUCTS.map(p=>p.name),...everyone.filter(t=>t.prodFree).flatMap(t=>trxLines(t).map(l=>lineProd(l).name))])].sort();
   const dText=r.from===r.to?fmtIso(r.to)+' 2026':fmtIso(r.from)+' sampai '+fmtIso(r.to)+' 2026';
   return {title:'Data penjualan',html:`
-  <div style="margin-bottom:16px">${filterCard({top:`<label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal mulai</span><input id="djf_from" type="date" min="${LD_START}" max="${LD_END}" value="${r.from}" onchange="djDate()" style="width:140px"></label><span class="muted xs">sampai</span><label class="inp h40" style="width:auto;flex:0 0 auto"><span class="sr-only">Tanggal akhir</span><input id="djf_to" type="date" min="${LD_START}" max="${LD_END}" value="${r.to}" onchange="djDate()" style="width:140px"></label>`,
+  <div style="margin-bottom:16px">${filterCard({top:rangePicker({id:'dj',from:r.from,to:r.to,min:LD_START,max:LD_END,on:'djDate',presets:REP_PRESETS}),
     search:`${djField('tr',q.tr,'No. transaksi','Cari no. transaksi')}${djField('iv',q.iv,'No. invoice toko','Cari no. invoice toko')}`,
     selects:`${sel([['','Semua sales'],...uOpts],q.u||'',"setQ({u:this.value})",{label:'Filter sales',cls:'sm'})}${sel([['','Semua client'],...cOpts],q.cl||'',"setQ({cl:this.value,tk:''})",{label:'Filter client',cls:'sm'})}${sel([['','Semua toko'],...tOpts],q.tk||'',"setQ({tk:this.value})",{label:'Filter toko',cls:'sm'})}${sel([['','Semua produk'],...pOpts],q.pr||'',"setQ({pr:this.value})",{label:'Filter produk',cls:'sm'})}${sel([['','Semua sumber'],['app','Dari aplikasi'],['dash','Input dashboard']],f,"setQ({f:this.value})",{label:'Filter sumber',cls:'sm'})}`,
     clear:dirty?"setQ({tr:'',iv:'',u:'',cl:'',tk:'',pr:'',f:'',from:'',to:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> transaksi, ${dText}.`})}</div>
