@@ -1704,7 +1704,7 @@ const NAV_DEFAULT=[
   ['Client management',[['/client','Client','building'],['/cabang-client','Cabang client','pin'],['/mapping-outlet','Mapping outlet','store'],['/penugasan','Penugasan & jadwal','cal']]],
   ['Toko',[['/toko','Toko','store','usulan'],['/region','Region','pin'],['/kategori-toko','Kategori toko','grid']]],
   ['Master data',[['/sektor','Sektor','grid'],['/brand','Brand','tag'],['/kompetitor','Kompetitor','tag'],['/kategori-produk','Kategori produk','grid'],['/produk','Produk & harga','pkg'],['/status-produk','Status produk','tag'],['/satuan','Satuan','sliders'],['/konversi','Konversi','grid']]],
-  ['Master data user',[['/company-sim','Company','building'],['/user-admin','User management','shield'],['/user-sales','Sales management','usercog'],['/iam','IAM','shield']]],
+  ['Master data user',[['/company-sim','Company','building'],['/user-admin','User management','shield'],['/user-sales','Sales management','usercog'],['/job','Job & role','sliders'],['/iam','IAM','shield']]],
   ['Pengaturan aplikasi',[['/konfigurasi-aktivitas','Aktivitas per role','sliders'],['/form-penjualan','Form penjualan','checks'],['/parameter','Parameter','sliders']]],
   ['Sistem',[['/pengaturan','Pengaturan','settings']]]
 ];
@@ -2319,7 +2319,10 @@ function attPanel(u){ const t=TODAY.find(x=>x.u===u); if(!t) return panelMissing
 const visList=()=>D.visits.filter(v=>!v.del);
 const FM_ST_TONE={'Selesai':'success','Draft':'warning','Belum Selesai':'danger'};
 const fmStates=()=>shRead('fmState',{});
-const visLive=v=>{ if(LEADS_USERS.some(l=>l.u===v.u)) return shRead('leadVisitDone',[]).some(d=>d.u===v.u&&d.place===v.place)?{...v,status:'Selesai'}:v; if(!isFm(v.u)) return v; const st=fmStates()[v.u+':'+v.id]; return st?{...v,...st}:v; };
+/* MOM 12 Nov: sales bergerak bisa menandai toko tutup dari mobile (kunci tokoTutup). Tidak dihitung terlewat. */
+const tutupOf=v=>{ const L=shRead('tokoTutup',[]); return (Array.isArray(L)?L:[]).find(t=>t.u===v.u&&t.toko===v.place); };
+const visLive=v=>{ const tt=tutupOf(v); if(tt) return {...visLive0(v),status:'Toko tutup',tutup:tt,cin:'',cout:''}; return visLive0(v); };
+const visLive0=v=>{ if(LEADS_USERS.some(l=>l.u===v.u)) return shRead('leadVisitDone',[]).some(d=>d.u===v.u&&d.place===v.place)?{...v,status:'Selesai'}:v; if(!isFm(v.u)) return v; const st=fmStates()[v.u+':'+v.id]; return st?{...v,...st}:v; };
 const fmTaskSt=(v,k)=>(v.tk||{})[k]||'Belum Selesai';
 const fmDone=v=>FM_TASK_KEYS.filter(([k])=>fmTaskSt(v,k)==='Selesai').length;
 function fmVisitSync(){ shSet('fmVisits',D.visits.filter(v=>isFm(v.u)&&!v.del).map(v=>({id:v.id,u:v.u,place:v.place,time:v.plan,by:v.by||'tl'}))); }
@@ -2327,19 +2330,20 @@ function pageKunjungan(q){
   const f=q.f||'', fu=q.u||'', fc=q.cat||'', all=visList().map(visLive).filter(v=>(!fu||v.u===fu)&&(!fc||tokoCat(v.place)===fc)), qv=(q.q||'').toLowerCase(), rows=all.filter(v=>!f||v.status===f).filter(v=>!qv||(byU(v.u).name+' '+v.place).toLowerCase().includes(qv)).map(v=>({...v,_id:v.id}));
   const c=k=>all.filter(v=>v.status===k).length;
   return {title:'Kunjungan',html:`
-  <div style="margin-bottom:16px">${filterCard({search:searchBox(q.q,{ph:'Cari sales atau tujuan',label:'Cari kunjungan'}),chips:{key:'f',val:f,items:[['','Semua',all.length],['Selesai','Selesai',c('Selesai')],['Berjalan','Berjalan',c('Berjalan')],['Belum','Belum dimulai',c('Belum')],['Terlewat','Terlewat',c('Terlewat')]]},selects:(fu||fc)?`<div class="chips">${fu?`<button class="fchip on" aria-pressed="true" onclick="setQ({u:''})">Sales: ${esc((byU(fu)||{}).name||fu)} ×</button>`:''}${fc?`<button class="fchip on" aria-pressed="true" onclick="setQ({cat:''})">Kategori: ${esc(fc)} ×</button>`:''}</div>`:'',clear:(fu||fc||f||q.q)?"setQ({u:'',cat:'',f:'',q:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> dari ${all.length} kunjungan.`})}</div>
-  <div class="stats">${[['','Semua',all.length],['Selesai','Selesai',c('Selesai')],['Berjalan','Berjalan',c('Berjalan')],['Belum','Belum dimulai',c('Belum')],['Terlewat','Terlewat',c('Terlewat')]].map(([k,l,v])=>`<button class="stat ${f===k?'on':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${v}</b></button>`).join('')}</div>
-  ${card('Kunjungan hari ini',dataTable('vis',{rows,rowClick:r=>`visPanel('${r.id}')`,acts:r=>rowActs(`visForm('${r.id}')`,`visDelAsk('${r.id}')`),cols:[
-    {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${byU(r.u).name}</span><span class="xs muted" style="display:block">${byU(r.u).job}</span>`,prim:true},{label:'Tujuan',render:r=>esc(r.place)+(r.by==='sales'?' '+tag('Dibuat '+esc(byU(r.u).job),'accent'):''),prim:false},{label:'Jadwal',render:r=>`${r.plan}${r.period&&r.period!=='Sekali'?` <span class="xs muted">· ${perLabel(r)}</span>`:''}`,hide:true},{label:'Check-in',render:r=>r.cin||'–'},{label:'Tugas',render:r=>isFm(r.u)?`<span class="tabular">${fmDone(r)}/${FM_TASK_KEYS.length}</span> selesai`:'<span class="muted">–</span>',hide:true},{label:'Foto',render:r=>r.photos,align:'r',hide:true},{label:'Status',render:r=>spill(r.status,r.status==='Selesai'?'success':r.status==='Berjalan'?'accent':r.status==='Terlewat'?'danger':'neutral')+(r.left&&!r.cout?' '+spill('Keluar radius','warning'):'')+(r.remote?' '+spill('Check-out luar radius','neutral'):'')}]}),
-    {acts:`${btn('Buat jadwal',{v:'accent',size:'sm',icon:'plus',on:"visForm()"})}${btn('Unduh laporan',{v:'outline',size:'sm',icon:'down',on:"toast('Laporan penugasan diunduh','Lengkap dengan foto dokumentasi.')"})}`})}`};
+  <div style="margin-bottom:16px">${filterCard({search:searchBox(q.q,{ph:'Cari sales atau tujuan',label:'Cari kunjungan'}),chips:{key:'f',val:f,items:[['','Semua',all.length],['Selesai','Selesai',c('Selesai')],['Berjalan','Berjalan',c('Berjalan')],['Belum','Belum dimulai',c('Belum')],['Terlewat','Terlewat',c('Terlewat')],['Toko tutup','Toko tutup',c('Toko tutup')]]},selects:(fu||fc)?`<div class="chips">${fu?`<button class="fchip on" aria-pressed="true" onclick="setQ({u:''})">Sales: ${esc((byU(fu)||{}).name||fu)} ×</button>`:''}${fc?`<button class="fchip on" aria-pressed="true" onclick="setQ({cat:''})">Kategori: ${esc(fc)} ×</button>`:''}</div>`:'',clear:(fu||fc||f||q.q)?"setQ({u:'',cat:'',f:'',q:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> dari ${all.length} kunjungan.`})}</div>
+  <div class="stats">${[['','Semua',all.length],['Selesai','Selesai',c('Selesai')],['Berjalan','Berjalan',c('Berjalan')],['Belum','Belum dimulai',c('Belum')],['Terlewat','Terlewat',c('Terlewat')],['Toko tutup','Toko tutup',c('Toko tutup')]].map(([k,l,v])=>`<button class="stat ${f===k?'on':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${v}</b></button>`).join('')}</div>
+  ${card('Hasil check-in hari ini',dataTable('vis',{rows,rowClick:r=>`visPanel('${r.id}')`,cols:[
+    {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${byU(r.u).name}</span><span class="xs muted" style="display:block">${byU(r.u).job}</span>`,prim:true},{label:'Tujuan',render:r=>esc(r.place)+(r.by==='sales'?' '+tag('Dibuat '+esc(byU(r.u).job),'accent'):''),prim:false},{label:'Jadwal',render:r=>`${r.plan}${r.period&&r.period!=='Sekali'?` <span class="xs muted">· ${perLabel(r)}</span>`:''}`,hide:true},{label:'Check-in',render:r=>r.cin||'–'},{label:'Tugas',render:r=>isFm(r.u)?`<span class="tabular">${fmDone(r)}/${FM_TASK_KEYS.length}</span> selesai`:'<span class="muted">–</span>',hide:true},{label:'Foto',render:r=>r.photos,align:'r',hide:true},{label:'Status',render:r=>spill(r.status,r.status==='Selesai'?'success':r.status==='Berjalan'?'accent':r.status==='Terlewat'?'danger':r.status==='Toko tutup'?'warning':'neutral')+(r.left&&!r.cout?' '+spill('Keluar radius','warning'):'')+(r.remote?' '+spill('Check-out luar radius','neutral'):'')}]}),
+    {acts:`${btn('Atur jadwal di Penugasan',{v:'outline',size:'sm',icon:'cal',on:"go('/penugasan?tab=jadwal')"})}${btn('Unduh laporan',{v:'outline',size:'sm',icon:'down',on:"toast('Laporan kunjungan diunduh','Lengkap dengan foto dokumentasi.')"})}`})}
+  <div style="margin-top:12px">${callout('<b>MOM 12 Nov.</b> Halaman ini hanya untuk memantau hasil check-in dan check-out. Jadwal kunjungan dibuat otomatis dari menu Penugasan &amp; jadwal.')}</div>`};
 }
 function visPanel(id){ const v0=D.visits.find(x=>x.id===id); if(!v0) return panelMissing('Kunjungan'); const v=visLive(v0), s=byU(v.u), fm=isFm(v.u);
-  openPanel(v.place,`${v.by==='sales'?callout('<b>Dibuat sendiri.</b> Jadwal ini dibuat oleh '+esc(s.name)+' ('+esc(s.job)+'), tanpa persetujuan Team Leader.')+'<div style="height:14px"></div>':''}${['Multi Finance','REA / SPG Multi Finance','CBD / Mediator'].includes(s.job)?`<div class="kv" style="margin-bottom:14px"><div><dt>Jadwal</dt><dd>${v.plan}</dd></div><div><dt>Status</dt><dd>${v.status}</dd></div></div>${callout('Multi Finance, REA, dan CBD tidak memakai check-in dan check-out ke nasabah.')}<div style="height:14px"></div>`:`<div class="kv" style="margin-bottom:14px"><div><dt>Jadwal</dt><dd>${v.plan}</dd></div><div><dt>Check-in</dt><dd>${v.cin||'–'}</dd></div><div><dt>Check-out</dt><dd>${v.cout||'–'}${v.dur?' · '+v.dur:''}</dd></div></div>`}
+  openPanel(v.place,`${v.tutup?banner({tone:'warning',title:'Toko tutup',body:`Ditandai ${esc(s.name)} pukul ${esc(v.tutup.jam||'–')}, ${esc(v.tutup.tgl||'')}. ${v.tutup.catatan?'Catatan: '+esc(v.tutup.catatan)+'. ':''}Ada ${v.tutup.foto||1} foto ber-watermark dan lokasi GPS. Tidak dihitung terlewat.`,cls:'mb'}):''}${v.by==='sales'?callout('<b>Dibuat sendiri.</b> Jadwal ini dibuat oleh '+esc(s.name)+' ('+esc(s.job)+'), tanpa persetujuan Team Leader.')+'<div style="height:14px"></div>':''}${['Multi Finance','REA / SPG Multi Finance','CBD / Mediator'].includes(s.job)?`<div class="kv" style="margin-bottom:14px"><div><dt>Jadwal</dt><dd>${v.plan}</dd></div><div><dt>Status</dt><dd>${v.status}</dd></div></div>${callout('Multi Finance, REA, dan CBD tidak memakai check-in dan check-out ke nasabah.')}<div style="height:14px"></div>`:`<div class="kv" style="margin-bottom:14px"><div><dt>Jadwal</dt><dd>${v.plan}</dd></div><div><dt>Check-in</dt><dd>${v.cin||'–'}</dd></div><div><dt>Check-out</dt><dd>${v.cout||'–'}${v.dur?' · '+v.dur:''}</dd></div></div>`}
   ${fm?`<div class="xs muted" style="margin-bottom:8px">Status tugas · ${fmDone(v)} dari ${FM_TASK_KEYS.length} selesai</div><div class="rows" style="margin-bottom:14px">${FM_TASK_KEYS.map(([k,l])=>`<div class="rowlink" style="cursor:default"><span style="flex:1" class="sm fg">${l}</span>${spill(fmTaskSt(v,k),FM_ST_TONE[fmTaskSt(v,k)])}</div>`).join('')}</div>
   ${callout('Check-out hanya bisa setelah semua tugas berstatus Selesai. Support task dikerjakan terpisah dan tidak wajib. Kalau lupa check-out, kunjungan ditutup otomatis saat check-in di toko berikutnya.')}<div style="height:14px"></div>`
   :`<div class="tile" style="margin-bottom:14px"><div class="xs muted">Tugas</div><b class="fg">${v.tasks}</b></div>${v.left&&!v.cout?callout('Sales keluar dari radius toko tanpa check-out. Notifikasi belum check-out sudah dikirim. Check-out bisa dilakukan saat check-in di toko berikutnya, tanpa harus di radius toko ini.')+'<div style="height:14px"></div>':''}${v.remote?callout('Check-out dilakukan dari luar radius toko, saat sales check-in di toko berikutnya.')+'<div style="height:14px"></div>':''}`}
   <div class="xs muted" style="margin-bottom:8px">Dokumentasi (${v.photos} foto, 1 foto per check-in dan check-out)</div><div class="thumbs">${v.photos?Array.from({length:v.photos}).map(()=>`<div class="thumb">${I('image',22)}</div>`).join(''):'<span class="muted sm">Belum ada foto.</span>'}</div>`,
-  `${btn('Hapus',{v:'danger-solid',icon:'trash',on:`visDelAsk('${id}')`})}<span style="flex:1"></span>${btn('Tutup',{v:'outline',on:'closeLayer()'})}${btn('Edit',{v:'accent',icon:'edit',on:`closeLayer();visForm('${id}')`})}`,{sub:s.name+' · '+s.job}); }
+  `<span style="flex:1"></span>${btn('Tutup',{v:'outline',on:'closeLayer()'})}`,{sub:s.name+' · '+s.job}); }
 function modalPill(k){ document.querySelectorAll('.modal .pills button').forEach(b=>{ const on=b.getAttribute('onclick').includes(`'${k}'`); b.classList.toggle('on',on); b.setAttribute('aria-selected',on); }); }
 const DAYS7=['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
 const needDays=p=>p==='Mingguan'||p==='2 mingguan';
@@ -2776,11 +2780,43 @@ MD.user.forEach(u=>{ u.simcos=[u.simco]; });
 ['dewi','hendra'].forEach(id=>{ const u=MD.user.find(x=>x.id===id); if(u){ u.allSimco=true; u.allClients=true; u.clients=MD.client.map(c=>c.id); } });
 { const w=MD.user.find(x=>x.id==='wulan'); if(w) w.simcos=['sg1','sg2']; }
 MD.client.forEach(c=>{ c.simco={cl1:'sg1',cl2:'sg3',cl4:'sg2',cl3:'sg4',cl5:'sg2',cl6:'sg3',cl7:'sg4',cl8:'sg1',cl9:'sg2'}[c.id]||'sg1'; });
+/* MOM 12 Nov: user bisa multi role dan multi cabang. Field lama role dan cabang tetap menyimpan yang utama (elemen pertama). */
+MD.user.forEach(u=>{ u.roles=u.roles||[u.role]; u.cabangs=u.cabangs||[u.cabang]; });
+[['rangga',['r12','r11']],['fikri',['r13','r3']],['sari',['r2','r7']]].forEach(([id,rs])=>{ const u=MD.user.find(x=>x.id===id); if(u){ u.roles=rs; u.role=rs[0]; } });
+[['budi',['Jakarta Selatan','Jakarta Barat']],['sari',['Jakarta Selatan','Jakarta Barat']],['irfan',['Jakarta Selatan','Tangerang']]].forEach(([id,cs])=>{ const u=MD.user.find(x=>x.id===id); if(u){ u.cabangs=cs; u.cabang=cs[0]; } });
+/* MOM 12 Nov: data job tetap ada dan dipetakan ke role (versi umum, pola Si Gesit perlu konfirmasi). Job dari SIM SIAP ikut sinkron; role user integrasi diambil dari mapping job. */
+MD.job=[...new Set(MD.user.map(u=>u.jabatan))].map((name,i)=>{ const us=MD.user.filter(u=>u.jabatan===name); return {id:'jb'+(i+1),code:'JOB-'+String(i+1).padStart(3,'0'),name,roles:[...new Set(us.flatMap(u=>u.roles))],src:us.some(u=>u.sumber==='Integrasi SIM')?'SIM SIAP':'Sales app',status:'Aktif'}; });
+MD.user.forEach(u=>{ u.job=(MD.job.find(j=>j.name===u.jabatan)||{}).id||''; });
+/* MOM 12 Nov: alamat toko lengkap sampai provinsi, kota/kabupaten, kecamatan, kelurahan. Data wilayah contoh (bukan daftar lengkap). */
+const WIL={'DKI Jakarta':{'Jakarta Selatan':{'Mampang Prapatan':['Bangka','Kuningan Barat'],'Pasar Minggu':['Pasar Minggu','Pejaten Timur','Jati Padang'],'Jagakarsa':['Jagakarsa','Lenteng Agung'],'Cilandak':['Cilandak Barat','Cilandak Timur','Gandaria Selatan'],'Kebayoran Baru':['Cipete Utara','Senayan']},
+    'Jakarta Pusat':{'Tanah Abang':['Gelora','Bendungan Hilir'],'Menteng':['Menteng','Gondangdia']},'Jakarta Barat':{'Kembangan':['Kembangan Utara','Kembangan Selatan'],'Kebon Jeruk':['Kebon Jeruk','Duri Kepa']}},
+  'Banten':{'Kota Tangerang Selatan':{'Ciputat':['Ciputat','Cipayung'],'Pondok Aren':['Pondok Karya','Jurang Mangu Barat'],'Serpong Utara':['Pakualam','Pondok Jagung'],'Serpong':['Rawa Mekar Jaya','Lengkong Gudang']},'Kota Tangerang':{'Ciledug':['Sudimara Barat','Tajur']}},
+  'Jawa Barat':{'Kota Bandung':{'Sumur Bandung':['Braga','Kebon Pisang']},'Kota Bekasi':{'Bekasi Selatan':['Marga Jaya','Pekayon Jaya']},'Kota Depok':{'Beji':['Kemiri Muka','Beji'],'Cinere':['Cinere','Gandul']}},
+  'Jawa Tengah':{'Kota Surakarta':{'Pasar Kliwon':['Kedung Lumbu','Pasar Kliwon']}},'Jawa Timur':{'Kota Surabaya':{'Genteng':['Embong Kaliasin','Genteng']}}};
+const WIL_SEED={t1:'DKI Jakarta|Jakarta Selatan|Mampang Prapatan|Bangka',t2:'DKI Jakarta|Jakarta Pusat|Tanah Abang|Gelora',c1:'DKI Jakarta|Jakarta Selatan|Pasar Minggu|Pasar Minggu',c2:'DKI Jakarta|Jakarta Selatan|Jagakarsa|Jagakarsa',c3:'DKI Jakarta|Jakarta Selatan|Jagakarsa|Lenteng Agung',o1:'DKI Jakarta|Jakarta Selatan|Cilandak|Cilandak Barat',o2:'Banten|Kota Tangerang Selatan|Ciputat|Ciputat',p1:'DKI Jakarta|Jakarta Barat|Kembangan|Kembangan Selatan',c4:'DKI Jakarta|Jakarta Barat|Kembangan|Kembangan Utara',p2:'Banten|Kota Tangerang Selatan|Serpong Utara|Pakualam',c5:'DKI Jakarta|Jakarta Selatan|Cilandak|Cilandak Barat',o3:'Banten|Kota Tangerang Selatan|Pondok Aren|Pondok Karya',bp1:'DKI Jakarta|Jakarta Selatan|Cilandak|Gandaria Selatan',bp2:'DKI Jakarta|Jakarta Selatan|Cilandak|Cilandak Timur',bp3:'DKI Jakarta|Jakarta Selatan|Pasar Minggu|Pejaten Timur',tb1:'Jawa Barat|Kota Bandung|Sumur Bandung|Kebon Pisang',tb2:'Jawa Barat|Kota Bandung|Sumur Bandung|Braga',tb3:'Jawa Tengah|Kota Surakarta|Pasar Kliwon|Kedung Lumbu',am_1:'DKI Jakarta|Jakarta Selatan|Cilandak|Gandaria Selatan',am_2:'Jawa Barat|Kota Bekasi|Bekasi Selatan|Marga Jaya',fm_1:'DKI Jakarta|Jakarta Selatan|Kebayoran Baru|Cipete Utara',fm_2:'DKI Jakarta|Jakarta Selatan|Pasar Minggu|Pasar Minggu',fm_3:'Banten|Kota Tangerang Selatan|Serpong|Rawa Mekar Jaya',mf_1:'Jawa Barat|Kota Bekasi|Bekasi Selatan|Pekayon Jaya',mf_2:'Jawa Barat|Kota Depok|Beji|Kemiri Muka',dg_a:'DKI Jakarta|Jakarta Pusat|Menteng|Gondangdia',dg_b:'Jawa Timur|Kota Surabaya|Genteng|Embong Kaliasin',dg_c:'DKI Jakarta|Jakarta Pusat|Menteng|Menteng',nb1:'Jawa Barat|Kota Depok|Cinere|Cinere'};
+TOKO.forEach(t=>{ if(t.prov) return; const s=(WIL_SEED[t.id]||'').split('|'); if(s.length===4) [t.prov,t.kota,t.kec,t.kel]=s; });
+/* MOM 12 Nov: cabang toko default kosong, admin men-set cabang belakangan. Contoh: toko baru dari sales belum punya cabang. */
+['nb1','fm_3'].forEach(id=>{ const t=TOKO.find(x=>x.id===id); if(t) t.cabang=''; });
+const wilLine=t=>[t.kel,t.kec,t.kota,t.prov].filter(Boolean).join(', ');
+const wilOpts=(lv,r)=>{ const P=WIL[r?.prov]||{}, K=P[r?.kota]||{}; return lv==='prov'?Object.keys(WIL):lv==='kota'?Object.keys(P):lv==='kec'?Object.keys(K):(K[r?.kec]||[]); };
+function wilChange(lv){ const g=k=>document.getElementById('f_'+k), r={prov:g('prov')?.value,kota:g('kota')?.value,kec:g('kec')?.value}, order=['prov','kota','kec','kel'], ph={kota:'Pilih kota / kabupaten',kec:'Pilih kecamatan',kel:'Pilih kelurahan'};
+  order.slice(order.indexOf(lv)+1).forEach(k=>{ const el=g(k); if(!el) return; if(k==='kota') r.kota=''; if(k==='kec') r.kec=''; el.innerHTML=`<option value="">${ph[k]}</option>`+wilOpts(k,r).map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join(''); }); }
+const jobOf=id=>MD.job.find(j=>j.id===id);
+const jobName=id=>(jobOf(id)||{}).name||'–';
+const isInteg=u=>(u.sumber||'Integrasi SIM')==='Integrasi SIM';
+const rolesOf=u=>(u.roles&&u.roles.length?u.roles:[u.role]).filter(Boolean);
+const rolesTags=u=>rolesOf(u).map((r,i)=>tag(roleName(r),i?'neutral':r==='r1'?'info':'accent')).join(' ');
+/* Sinkron role user integrasi dari mapping job: dipanggil saat mapping job diubah. */
+function syncJobRoles(){ MD.user.forEach(u=>{ if(!isInteg(u)) return; const j=jobOf(u.job); if(j&&j.roles.length){ u.roles=[...j.roles]; u.role=u.roles[0]; } }); }
+/* Cek duplikat terhadap data integrasi BPR 1 (direktori SIM dan user integrasi). Dipakai input manual dan upload. */
+function bprDup(v){ const lo=s=>String(s||'').trim().toLowerCase(), src=[...MD.sim.map(s=>({...s,_from:'Direktori SIM (BPR 1)'})),...MD.user.filter(u=>!u.del&&isInteg(u)).map(u=>({...u,_from:'User integrasi'}))];
+  const hit=src.find(s=>(v.nip&&lo(s.nip)===lo(v.nip))||(v.email&&lo(s.email)===lo(v.email))||(v.name&&lo(s.name)===lo(v.name)));
+  if(!hit) return ''; const by=v.nip&&lo(hit.nip)===lo(v.nip)?'NIP':v.email&&lo(hit.email)===lo(v.email)?'email':'nama'; return `${esc(hit.name)} (${esc(hit.nip)}) sudah ada dari integrasi BPR 1, cocok di ${by}. Sumber: ${hit._from}.`; }
 /* User = punya akses aplikasi. People = karyawan yang hanya didata (akses Tanpa akses). */
 const isPeople=u=>u.akses==='Tanpa akses';
 const srcTag=s=>tag(s||'Integrasi SIM',(s||'Integrasi SIM')==='Integrasi SIM'?'info':'neutral');
 const xJoin=(a,b)=>a+(a&&b?'<div style="height:10px"></div>':'')+(b||'');
-const userSrcNote=r=>callout(r.sumber==='Input manual'?'<b>Input manual.</b> Data ini diisi admin, bukan dari SIM (BPR1). Contoh: Team Leader user client, Promotor Bantuan, atau karyawan di luar BPR.':'<b>Integrasi SIM.</b> NIP, nama, email, dan jabatan ditarik dari SIM (BPR1) dan tidak bisa diubah di sini.','blue');
+const userSrcNote=r=>callout(r.sumber==='Input manual'?'<b>Input manual.</b> Data ini diisi admin, bukan dari SIM (BPR1). Contoh: Team Leader user client, Promotor Bantuan, atau karyawan di luar BPR.':'<b>Integrasi SIM SIAP.</b> Semua data user ini ditarik dari SIM SIAP (BPR 1) dan tidak bisa diubah di Sales app (MOM 12 Nov). Role mengikuti mapping job di menu Job &amp; role. Yang bisa diubah hanya user yang dibuat di Sales app.','blue');
 const ADMIN_ROLES=['r1','r17','r18','r19','r20','r90'];
 const SEG={r18:['Umum','Tim / pendukung'],r19:['Umum','Tim / pendukung'],r20:['Umum','Tim / pendukung'],r17:['Umum','Tim / pendukung'],r1:['Umum','Tim / pendukung'],r2:['Umum','Tim / pendukung'],r3:['Elektronik','Diam di lokasi'],r4:['FMCG','Bergerak'],r21:['Elektronik','Bergerak'],r5:['FMCG','Bergerak'],r7:['Umum','Tim / pendukung'],r8:['Multi Finance','Tim / pendukung'],r9:['Multi Finance','Bergerak'],r10:['Multi Finance','Diam di lokasi'],r11:['FMCG','Diam di lokasi'],r12:['FMCG','Diam di lokasi'],r13:['Elektronik','Bergerak'],r14:['Umum','Diam di lokasi']};
 MD.role.forEach(r=>{ [r.segmen,r.tipe]=SEG[r.id]||['Umum','Diam di lokasi']; });
@@ -2890,7 +2926,7 @@ MD.katprod.push({id:'kp30',name:'Elektronik Rumah Tangga',brand:'',parent:'',cak
 TOKO.forEach(t=>{ t.sumber=t.sumber||'Dari client'; t.mapClients=t.mapClients||[t.client]; });
 ['c3','o2'].forEach(id=>{ const t=TOKO.find(x=>x.id===id); if(t){ t.sumber='Input sales'; t.status='Takeout'; } });
 /* Usulan (11 Nov 2026): toko baru dari canvasser langsung aktif dan masuk Toko Sementara (status Takeout). */
-TOKO.push({id:'nb1',name:'Toko Maju Elektronik Cinere',cat:'Retail',cabang:'Jakarta Selatan',dealer:'CV Mitra Elektrindo',sales:['budi'],addr:'Jl. Cinere Raya 21',client:'cl1',mapClients:['cl1'],sumber:'Input sales',status:'Takeout',radius:100,coord:'-6.3260, 106.7790'});
+TOKO.push({id:'nb1',name:'Toko Maju Elektronik Cinere',cat:'Retail',cabang:'',prov:'Jawa Barat',kota:'Kota Depok',kec:'Cinere',kel:'Cinere',dealer:'CV Mitra Elektrindo',sales:['budi'],addr:'Jl. Cinere Raya 21',client:'cl1',mapClients:['cl1'],sumber:'Input sales',status:'Takeout',radius:100,coord:'-6.3260, 106.7790'});
 { const b=MD.user.find(x=>x.id==='budi'); if(b) b.toko=[...(b.toko||[]),'nb1']; }
 ['c1','o1'].forEach(id=>{ const t=TOKO.find(x=>x.id===id); if(t) t.mapClients=['cl1','cl4']; });
 const tokoClients=t=>t.mapClients&&t.mapClients.length?t.mapClients:[t.client];
@@ -2989,45 +3025,60 @@ const ENT={
       {label:'Toko',render:r=>live('toko').filter(t=>t.cat===r.name).length,align:'r'},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>{ const n=live('toko').filter(t=>t.cat===r.name).length; return n?`Kategori ini dipakai ${n} toko. Pindahkan tokonya ke kategori lain dulu, atau nonaktifkan kategori (BRD 2.4.4).`:''; },
     onRename:(old,nw)=>TOKO.forEach(t=>{ if(t.cat===old) t.cat=nw; })},
-  toko:{label:'Toko',plural:'Daftar toko',prefix:'t',store:()=>TOKO,title:r=>r.name,search:r=>r.name+r.addr+r.cabang+r.cat,unique:'name',hideCols:q=>q.src==='Input sales'?['Status']:[],stChips:q=>q.src==='Input sales'?[]:q.src==='Dari client'?['Aktif','Nonaktif']:['Aktif','Nonaktif','Takeout'],promote:{label:'Simpan ke Toko Client',fn:'tokoToClient'},filter:(r,q)=>!q.src||(r.sumber||'Dari client')===q.src,blank:()=>({client:'cl1',cat:'Retail',cabang:'Jakarta Selatan',dealer:dealerNames()[0],radius:100,sales:[],coord:'',sumber:'Dari client'}),
+  toko:{label:'Toko',plural:'Daftar toko',prefix:'t',store:()=>TOKO,title:r=>r.name,search:r=>r.name+r.addr+r.cabang+r.cat+wilLine(r),unique:'name',hideCols:q=>q.src==='Input sales'?['Status']:[],stChips:q=>q.src==='Input sales'?[]:q.src==='Dari client'?['Aktif','Nonaktif']:['Aktif','Nonaktif','Takeout'],promote:{label:'Simpan ke Toko Client',fn:'tokoToClient'},filter:(r,q)=>(!q.src||(r.sumber||'Dari client')===q.src)&&(!q.cbk||(q.cbk==='none'?!r.cabang:r.cabang===q.cbk))&&(!q.pv||r.prov===q.pv),blank:()=>({client:'cl1',cat:'Retail',cabang:'',prov:'',kota:'',kec:'',kel:'',dealer:dealerNames()[0],radius:100,sales:[],coord:'',sumber:'Dari client'}),
     fields:[{k:'name',label:'Nama toko',req:true},{k:'client',label:'Client pemilik data',type:'select',req:true,opts:()=>{ const cur=FORM&&FORM.id?(TOKO.find(t=>t.id===FORM.id)||{}).client:''; return live('client').filter(c=>c.status==='Aktif'||c.id===cur).map(c=>[c.id,c.name]); },hint:'Client lain yang dilayani toko ini diatur di menu Mapping outlet'},
       {k:'sumber',label:'Sumber toko',type:'ro',fmt:v=>v==='Input sales'?'Toko Sementara (input sales)':'Toko Client',hint:'Toko Sementara adalah hasil input sales di lapangan. Ubah jadi Toko Client lewat tombol Simpan ke Toko Client'},
       {k:'cat',label:'Kategori toko',type:'select',req:true,opts:()=>live('kat').filter(k=>k.status==='Aktif').map(k=>k.name)},
-      {k:'cabang',label:'Cabang client',type:'select',req:true,opts:()=>cabNames()},{k:'dealer',label:'Dealer',type:'select',opts:()=>dealerNames()},{k:'addr',label:'Alamat',req:true},
+      {k:'cabang',label:'Cabang client',type:'select',opts:()=>[['','Belum di-set'],...cabNames()],hint:'Boleh kosong dulu. Set cabang belakangan bila toko sudah ditentukan masuk cabang mana (MOM 12 Nov)'},{k:'dealer',label:'Dealer',type:'select',opts:()=>dealerNames()},
+      {k:'prov',label:'Provinsi',type:'select',req:true,opts:r=>[['','Pilih provinsi'],...wilOpts('prov',r)],onchange:"wilChange('prov')"},
+      {k:'kota',label:'Kota / kabupaten',type:'select',req:true,opts:r=>[['','Pilih kota / kabupaten'],...wilOpts('kota',r)],onchange:"wilChange('kota')"},
+      {k:'kec',label:'Kecamatan',type:'select',req:true,opts:r=>[['','Pilih kecamatan'],...wilOpts('kec',r)],onchange:"wilChange('kec')"},
+      {k:'kel',label:'Kelurahan / desa',type:'select',req:true,opts:r=>[['','Pilih kelurahan'],...wilOpts('kel',r)]},
+      {k:'addr',label:'Alamat jalan',req:true,ph:'Nama jalan, nomor, RT/RW, gedung'},
       {k:'coord',label:'Koordinat GPS',req:true,ph:'-6.2607, 106.8142',hint:'Titik acuan absen WFO dan check-in kunjungan',validate:v=>/^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/.test(v)?'':'Format: lintang, bujur'},
       {k:'radius',label:'Radius absen (meter)',type:'number',req:true,validate:v=>v<20||v>1000?'Isi antara 20 dan 1.000 m':''}],
-    cols:[{label:'Toko',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${esc(r.addr)}</span>`,prim:true},{label:'Client',render:r=>clientName(r.client),hide:true},
-      {label:'Kategori',render:r=>tag(r.cat,r.cat==='Modern Retail'?'accent':r.cat==='Grosir'?'info':'neutral')},{label:'Cabang',k:'cabang',hide:true},
+    cols:[{label:'Toko',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${esc(r.addr)}</span><span class="xs muted" style="display:block">${esc(wilLine(r)||'Wilayah belum diisi')}</span>`,prim:true},{label:'Client',render:r=>clientName(r.client),hide:true},
+      {label:'Kategori',render:r=>tag(r.cat,r.cat==='Modern Retail'?'accent':r.cat==='Grosir'?'info':'neutral')},{label:'Cabang',render:r=>r.cabang?esc(r.cabang):tag('Belum di-set','warning')},
       {label:'Sumber',render:r=>tag(r.sumber||'Dari client',(r.sumber||'Dari client')==='Dari client'?'neutral':'info')},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>TRX.some(t=>t.toko===r.name)||(MD.order||[]).some(o=>!o.del&&o.toko===r.id)?r.status==='Takeout'?'Toko sementara ini punya riwayat transaksi. Simpan ke Toko Client dulu supaya data transaksi tetap bisa dilacak.':'Toko ini punya riwayat transaksi. Data transaksi harus tetap bisa dilacak, jadi nonaktifkan toko saja (BRD 2.8.4).':'',
     alt:(r,id)=>r.status==='Takeout'?btn('Simpan ke Toko Client',{v:'accent',on:`closeLayer();tokoToClient('${id}')`}):r.status==='Aktif'?btn('Nonaktifkan saja',{v:'accent',on:`toggleStatus('toko','${id}')`}):'',
     lockStatus:r=>r.status==='Takeout'?'Toko sementara tidak punya status aktif atau nonaktif. Simpan ke Toko Client dulu.':'',
     afterCreate:rec=>{ rec.mapClients=[rec.client]; }},
   user:{label:'Sales',lower:'sales',plural:'Sales management',prefix:'u',store:()=>MD.user,filter:(r,q)=>!ADMIN_ROLES.includes(r.role)&&(!q.src||r.sumber===q.src)&&(!q.sg||userSimcos(r).includes(q.sg)),title:r=>r.name,code:r=>r.nip,search:r=>r.name+r.nip+r.email,
-    fields:[{k:'sumber',label:'Sumber data',type:'ro'},{k:'nip',label:'NIP / ID pegawai',req:true,roIf:r=>r.sumber!=='Input manual'},{k:'name',label:'Nama',req:true,roIf:r=>r.sumber!=='Input manual'},{k:'email',label:'Email',type:'email',req:true,roIf:r=>r.sumber!=='Input manual'},{k:'jabatan',label:'Jabatan',req:true,roIf:r=>r.sumber!=='Input manual'},{k:'off',label:'Jadwal off (dari BPR)',type:'ro',hint:'Hari libur individu selain weekend. Sumber BPR, disinkronkan sekali sehari (rekomendasi)'},{k:'npo',label:'NPO (dari BPR)',type:'ro',hint:'Dipakai untuk NIK client'},
-      {k:'simco',label:'Company',type:'select',req:true,opts:simcoOpts,hint:'Perusahaan di SIM Group, bukan perusahaan client'},
-      {k:'role',label:'Role aplikasi',type:'select',req:true,opts:()=>live('role').filter(r=>r.status==='Aktif'&&!ADMIN_ROLES.includes(r.id)).map(r=>[r.id,r.name]),hint:'Menentukan menu, modul (Sales retail atau Sales automation), dan akses data (IAM). Direktur, HR, dan Manager diatur di User management'},
+    roForm:r=>isInteg(r),
+    warn:(v,id)=>!id&&v.sumber==='Input manual'?bprDup(v):'',
+    beforeSave:(v,cur)=>{ if(v.roles&&v.roles.length) v.role=v.roles[0]; if(v.cabangs&&v.cabangs.length) v.cabang=v.cabangs[0]; if(v.job) v.jabatan=jobName(v.job); },
+    fields:[{k:'sumber',label:'Sumber data',type:'ro'},{k:'nip',label:'NIP / ID pegawai',req:true,roIf:r=>isInteg(r)},{k:'name',label:'Nama',req:true,roIf:r=>isInteg(r)},{k:'email',label:'Email',type:'email',req:true,roIf:r=>isInteg(r)},
+      {k:'job',label:'Job',type:'select',req:true,roIf:r=>isInteg(r),fmt:v=>jobName(v),opts:()=>live('job').filter(j=>j.status==='Aktif').map(j=>[j.id,j.name]),hint:'Role bawaan mengikuti mapping di menu Job & role'},
+      {k:'off',label:'Jadwal off (dari BPR)',type:'ro',hint:'Hari libur individu selain weekend. Sumber BPR, disinkronkan sekali sehari (rekomendasi)'},{k:'npo',label:'NPO (dari BPR)',type:'ro',hint:'Dipakai untuk NIK client'},
+      {k:'simco',label:'Company',type:'select',req:true,roIf:r=>isInteg(r),fmt:v=>simcoName(v),opts:simcoOpts,hint:'Perusahaan di SIM Group, bukan perusahaan client'},
+      {k:'roles',label:'Role aplikasi',type:'multi',req:true,roIf:r=>isInteg(r),fmt:v=>(v||[]).map(roleName).join(', ')||'–',opts:()=>live('role').filter(r=>r.status==='Aktif'&&!ADMIN_ROLES.includes(r.id)).map(r=>[r.id,r.name]),hint:r=>isInteg(r)?'Dari mapping job. Ubah di menu Job & role':'Boleh lebih dari satu role (MOM 12 Nov). Role pertama menjadi role utama, hak akses gabungan semua role'},
       {k:'clients',label:'Client',type:'ro',fmt:v=>(v||[]).map(clientName).join(', ')||'–',hint:'Hanya baca. Client sales ini tidak bisa diubah dari sini'},
-      {k:'cabang',label:'Cabang',type:'select',req:true,opts:()=>['Kantor Pusat',...cabNames()]},
-      {k:'bantuan',label:'Status bantuan',type:'select',opts:['Active','Non Active'],hint:'Hanya dipakai Promotor Bantuan. Non Active tidak bisa login (MOM 2.1)'}],
+      {k:'cabangs',label:'Cabang',type:'multi',req:true,roIf:r=>isInteg(r),fmt:v=>(v||[]).join(', ')||'–',opts:()=>['Kantor Pusat',...cabNames()],hint:'Boleh lebih dari satu cabang (MOM 12 Nov). Cabang pertama menjadi cabang utama'},
+      {k:'bantuan',label:'Status bantuan',type:'select',roIf:r=>isInteg(r),opts:['Active','Non Active'],hint:'Hanya dipakai Promotor Bantuan. Non Active tidak bisa login (MOM 2.1)'}],
     cols:[{label:'Nama',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(r.name)}<span><span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.nip)}</span></span></span>`,prim:true},
-      {label:'Role',render:r=>tag(roleName(r.role),r.role==='r1'?'info':r.role==='r2'?'accent':'neutral')},{label:'Sumber',render:r=>srcTag(r.sumber),hide:true},{label:'Company',render:r=>esc(simcoName(r.simco))},{label:'Client',render:r=>r.clients.map(clientName).join(', '),hide:true},
+      {label:'Role',render:r=>rolesTags(r)},{label:'Job',render:r=>esc(jobName(r.job)),hide:true},{label:'Cabang',render:r=>esc((r.cabangs||[r.cabang]).join(', ')),hide:true},{label:'Sumber',render:r=>srcTag(r.sumber),hide:true},{label:'Company',render:r=>esc(simcoName(r.simco))},{label:'Client',render:r=>r.clients.map(clientName).join(', '),hide:true},
       {label:'Penugasan',render:r=>(r.toko||[]).length>1?tag('Bergerak','info'):(r.toko||[]).length===1?tag('Diam','neutral'):'<span class="muted">–</span>',hide:true},{label:'Bantuan',render:r=>['r14'].includes(r.role)?tag(r.bantuan||'Active',(r.bantuan||'Active')==='Active'?'success':'neutral'):'<span class="muted">–</span>',hide:true},{label:'Wajah',render:r=>r.face==='–'?'<span class="muted">–</span>':tag(r.face,r.face==='Terekam'?'success':'warning'),hide:true},{label:'Status',render:r=>stPill(r.status)}],
-    inUse:r=>r.id==='dewi'?'Akun yang sedang login tidak bisa dihapus.':'',
+    inUse:r=>r.id==='dewi'?'Akun yang sedang login tidak bisa dihapus.':isInteg(r)?'User ini hasil integrasi SIM SIAP dan tidak bisa diubah atau dihapus di Sales app. Perubahan dilakukan di SIM SIAP.':'',
     delNote:'Akses aplikasi dicabut. Data pegawai tetap ada di SIM (BPR1) dan riwayat absensi/penjualannya tetap tersimpan.',
     extraTop:r=>xJoin(userSrcNote(r),['r14'].includes(r.role)?callout('Promotor Bantuan bisa dipindah client dan cabang, dengan hak akses terbatas. Ubah lewat field Client dan Cabang, aktifkan atau nonaktifkan lewat status.'):r.face==='Minta rekam ulang'?`<div class="callout">${I('face',18)}<span><b>${esc(r.name)}</b> meminta rekam ulang wajah referensi. <button type="button" style="color:var(--accent-text);font-weight:600" onclick="MD.user.find(x=>x.id==='${r.id}').face='Terekam';audit('Mengizinkan rekam ulang wajah ${esc(r.name)}');this.closest('.callout').remove();toast('Rekam ulang diizinkan','Diminta saat login berikutnya.')">Izinkan</button></span></div>`:'')},
   admin:{src:'user',label:'User',lower:'user',plural:'User management',prefix:'u',store:()=>MD.user,filter:(r,q)=>ADMIN_ROLES.includes(r.role)&&(!q.src||r.sumber===q.src)&&(!q.sg||userSimcos(r).includes(q.sg))&&(!q.ak||(q.ak==='people'?isPeople(r):!isPeople(r))),title:r=>r.name,code:r=>r.email,search:r=>r.name+r.email+(r.jabatan||''),
-    blank:()=>({role:'r17',clients:['cl1'],simcos:['sg1'],cabang:'Kantor Pusat',toko:[],ap1:'',ap2:'',akses:'Web',face:'–',jabatan:'',sumber:'Input manual'}),
+    blank:()=>({role:'r17',roles:['r17'],clients:['cl1'],simcos:['sg1'],cabang:'Kantor Pusat',cabangs:['Kantor Pusat'],toko:[],ap1:'',ap2:'',akses:'Web',face:'–',jabatan:'',job:'',sumber:'Input manual'}),
     extraTop:r=>r.id?userSrcNote(r):'',
-    fields:[{k:'sumber',label:'Sumber data',type:'ro'},{k:'name',label:'Nama',req:true,roIf:r=>r.sumber==='Integrasi SIM'},{k:'email',label:'Email',type:'email',req:true,roIf:r=>r.sumber==='Integrasi SIM',hint:'Dipakai untuk login. Akun di User management tidak harus terhubung ke SIM (BPR1)',validate:(v)=>MD.user.some(x=>!x.del&&x.id!==FORM.id&&String(x.email).toLowerCase()===v.toLowerCase())?'Email sudah dipakai':''},{k:'jabatan',label:'Jabatan',roIf:r=>r.sumber==='Integrasi SIM'},
-      {k:'simcos',label:'Company',type:'multi',req:true,all:'all',allKey:'allSimco',opts:()=>[['all','Semua company'],...simcoOpts()],hint:'Pilih Semua atau beberapa company yang boleh dikelola akun ini'},
-      {k:'role',label:'Role',type:'select',req:true,opts:()=>live('role').filter(r=>r.status==='Aktif'&&ADMIN_ROLES.includes(r.id)).map(r=>[r.id,r.name]),hint:'Direktur, HR, Manager, dan admin. Admin SIM mengelola semua client, Admin Klien hanya client yang dipilih (IAM)'},
-      {k:'akses',label:'Akses aplikasi',type:'select',req:true,opts:[['Web','Ya, akses dashboard web'],['Mobile & Web','Ya, akses web dan mobile'],['Tanpa akses','Tidak (people, hanya didata)']],hint:'User memakai aplikasi. People adalah karyawan yang perlu didata tapi tidak login (MOM 9 Nov bagian 5)'},
-      {k:'clients',label:'Client',type:'multi',req:true,all:'all',allKey:'allClients',opts:()=>[['all','Semua client'],...live('client').map(c=>[c.id,c.name])],hint:'Pilih Semua atau beberapa client yang boleh dikelola atau dipantau akun ini'}],
+    roForm:r=>isInteg(r),
+    warn:(v,id)=>!id&&v.sumber==='Input manual'?bprDup(v):'',
+    beforeSave:(v,cur)=>{ if(v.roles&&v.roles.length) v.role=v.roles[0]; if(v.cabangs&&v.cabangs.length) v.cabang=v.cabangs[0]; if(v.job) v.jabatan=jobName(v.job); },
+    fields:[{k:'sumber',label:'Sumber data',type:'ro'},{k:'name',label:'Nama',req:true,roIf:r=>isInteg(r)},{k:'email',label:'Email',type:'email',req:true,roIf:r=>isInteg(r),hint:'Dipakai untuk login. Akun di User management tidak harus terhubung ke SIM (BPR1)',validate:(v)=>MD.user.some(x=>!x.del&&x.id!==FORM.id&&String(x.email).toLowerCase()===v.toLowerCase())?'Email sudah dipakai':''},
+      {k:'job',label:'Job',type:'select',req:true,roIf:r=>isInteg(r),fmt:v=>jobName(v),opts:()=>live('job').filter(j=>j.status==='Aktif').map(j=>[j.id,j.name]),hint:'Role bawaan mengikuti mapping di menu Job & role'},
+      {k:'simcos',label:'Company',type:'multi',req:true,roIf:r=>isInteg(r),fmt:(v,r)=>simcoLabel(r),all:'all',allKey:'allSimco',opts:()=>[['all','Semua company'],...simcoOpts()],hint:'Pilih Semua atau beberapa company yang boleh dikelola akun ini'},
+      {k:'roles',label:'Role',type:'multi',req:true,roIf:r=>isInteg(r),fmt:v=>(v||[]).map(roleName).join(', ')||'–',opts:()=>live('role').filter(r=>r.status==='Aktif'&&ADMIN_ROLES.includes(r.id)).map(r=>[r.id,r.name]),hint:r=>isInteg(r)?'Dari mapping job. Ubah di menu Job & role':'Boleh lebih dari satu role (MOM 12 Nov). Direktur, HR, Manager, dan admin'},
+      {k:'cabangs',label:'Cabang',type:'multi',req:true,roIf:r=>isInteg(r),fmt:v=>(v||[]).join(', ')||'–',opts:()=>['Kantor Pusat',...cabNames()],hint:'Boleh lebih dari satu cabang (MOM 12 Nov)'},
+      {k:'akses',label:'Akses aplikasi',type:'select',req:true,roIf:r=>isInteg(r),opts:[['Web','Ya, akses dashboard web'],['Mobile & Web','Ya, akses web dan mobile'],['Tanpa akses','Tidak (people, hanya didata)']],hint:'User memakai aplikasi. People adalah karyawan yang perlu didata tapi tidak login (MOM 9 Nov bagian 5)'},
+      {k:'clients',label:'Client',type:'multi',req:true,roIf:r=>isInteg(r),fmt:(v,r)=>clientLabel(r),all:'all',allKey:'allClients',opts:()=>[['all','Semua client'],...live('client').map(c=>[c.id,c.name])],hint:'Pilih Semua atau beberapa client yang boleh dikelola atau dipantau akun ini'}],
     readExtra:()=>{ const rd=id=>[...document.querySelectorAll('#'+id+' .fchip.on')].map(b=>b.dataset.v); const c=rd('f_clients'), g=rd('f_simcos'), ac=c.includes('all'), as=g.includes('all'); return {allClients:ac,clients:ac?live('client').map(x=>x.id):c,allSimco:as,simcos:as?live('simco').map(x=>x.id):g}; },
     cols:[{label:'Nama',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(r.name)}<span><span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.email)}</span></span></span>`,prim:true},
-      {label:'Role',render:r=>tag(roleName(r.role),r.role==='r1'?'info':'accent')},{label:'Company',render:r=>esc(simcoLabel(r))},{label:'Jenis',render:r=>isPeople(r)?tag('People','neutral'):tag('User','success')},{label:'Sumber',render:r=>srcTag(r.sumber),hide:true},{label:'Jabatan',render:r=>esc(r.jabatan||'–'),hide:true},{label:'Client',render:r=>esc(clientLabel(r)),hide:true},{label:'Status',render:r=>stPill(r.status)}],
-    inUse:r=>r.id==='dewi'?'Akun yang sedang login tidak bisa dihapus.':'',
+      {label:'Role',render:r=>rolesTags(r)},{label:'Job',render:r=>esc(jobName(r.job)),hide:true},{label:'Company',render:r=>esc(simcoLabel(r))},{label:'Jenis',render:r=>isPeople(r)?tag('People','neutral'):tag('User','success')},{label:'Sumber',render:r=>srcTag(r.sumber),hide:true},{label:'Jabatan',render:r=>esc(r.jabatan||'–'),hide:true},{label:'Client',render:r=>esc(clientLabel(r)),hide:true},{label:'Status',render:r=>stPill(r.status)}],
+    inUse:r=>r.id==='dewi'?'Akun yang sedang login tidak bisa dihapus.':isInteg(r)?'User ini hasil integrasi SIM SIAP dan tidak bisa diubah atau dihapus di Sales app. Perubahan dilakukan di SIM SIAP.':'',
     delNote:'Akses akun ini dicabut. Riwayat aktivitasnya di log audit tetap tersimpan.'},
   role:{label:'Role',plural:'Role & hak akses',prefix:'r',store:()=>MD.role,title:r=>r.name,search:r=>r.name+r.desc,unique:'name',blank:()=>({scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',jadwal:'Tidak',bawa:'Tidak',tambah:'Tidak',perm:genPerm('none'),mperm:genMPerm('none')}),
     fields:[{k:'name',label:'Nama role',req:true},{k:'desc',label:'Keterangan',type:'textarea'},
@@ -3119,10 +3170,10 @@ function crudList(ent,q,{acts='',prefill='',sels='',top='',ban=''}={}){
   const rows=all.filter(r=>!f||r.status===f).filter(r=>!qq||E.search(r).toLowerCase().includes(qq)).map(r=>({...r,_id:r.id}));
   const addAct=ent==='user'?'simImport()':`openForm('${ent}'${prefill?`,null,${prefill}`:''})`;
   const stc=(E.stChips?E.stChips(q):['Aktif','Nonaktif']);
-  const dirty=qq||f||q.br||q.lv||q.ms||q.sk||q.tk||q.sg;
+  const dirty=qq||f||q.br||q.lv||q.ms||q.sk||q.tk||q.sg||q.cbk||q.pv;
   const fc=filterCard({top,search:searchBox(q.q,{ph:'Cari '+lc(E),label:'Cari '+lc(E)}),
     chips:stc.length?{key:'st',val:f,label:'Status',items:[['','Semua',all.length],...stc.map(x=>[x,x,all.filter(r=>r.status===x).length])]}:null,
-    selects:sels,clear:dirty?"setQ({q:'',st:'',sg:'',br:'',lv:'',ms:'',sk:'',tk:''})":'',
+    selects:sels,clear:dirty?"setQ({q:'',st:'',sg:'',br:'',lv:'',ms:'',sk:'',tk:'',cbk:'',pv:''})":'',
     summary:dirty?`Menampilkan <b class="fg">${rows.length}</b> dari ${all.length} ${lc(E)}.`:''});
   const tc=card(E.plural,`${can('master.edit')?'':banner({tone:'neutral',body:'Anda hanya dapat melihat data ini. Perubahan dilakukan oleh Admin SIM.',cls:'mb'})}${ban}
     ${dataTable('md_'+ent,{rows,rowClick:r=>`openForm('${ent}','${r.id}')`,acts:can('master.edit')?(r=>rowActs(`openForm('${ent}','${r.id}')`,`delAsk('${ent}','${r.id}')`,{block:E.inUse?.(r)||''})):null,cols:E.hideCols?E.cols.filter(c=>!E.hideCols(q).includes(c.label)):E.cols,empty:qq||f||q.br||q.lv||q.ms||q.sk||q.tk?`Tidak ada ${lc(E)} yang cocok. Ubah atau hapus filter di kartu Filter.`:`Belum ada ${lc(E)}.`})}`,
@@ -3137,7 +3188,7 @@ const fromSales=()=>!!(FORM&&FORM.prefill&&FORM.prefill._tmp);
 function fieldHTML(fd,r){
   const v=fd.val?fd.val(r):r[fd.k], t=((fd.lock&&r.id&&fd.lock(r))||(fd.roIf&&fd.roIf(r)))?'ro':(fd.type||'text'), id='f_'+fd.k;
   const lab=`<span>${fd.label}${(typeof fd.req==='function'?fd.req(r):fd.req)?' <b class="req" aria-hidden="true">*</b>':''}</span>`, hint=(ht=>ht?`<p class="xs muted" style="margin-top:6px">${ht}</p>`:'')(typeof fd.hint==='function'?fd.hint(r):fd.hint), err=`<p class="ferr" id="e_${fd.k}"></p>`;
-  const opts=()=>(typeof fd.opts==='function'?fd.opts():fd.opts).map(o=>Array.isArray(o)?o:[o,o]);
+  const opts=()=>(typeof fd.opts==='function'?fd.opts(r):fd.opts).map(o=>Array.isArray(o)?o:[o,o]);
   let h;
   if(t==='ro') h=`<div class="field">${lab}<div class="tile" style="padding:11px 16px;color:var(--fg)">${esc(fd.fmt?fd.fmt(v,r):Array.isArray(v)?(v.map(tokoNm).join(', ')||'–'):(v||'–'))}</div>${hint}</div>`;
   else if(t==='select') h=`<label class="field">${lab}<span class="sel" style="display:flex"><select id="${id}" style="width:100%" ${fd.onchange?`onchange="${fd.onchange}"`:''} ${fd.attrs||''}>${opts().map(([ov,ol])=>`<option value="${esc(ov)}" ${String(ov)===String(v??'')?'selected':''}>${esc(ol)}</option>`).join('')}</select>${I('chev',16)}</span>${hint}${err}</label>`;
@@ -3150,7 +3201,8 @@ function openForm(ent,id,prefill){
   const E=ENT[ent]; const r=id?E.store().find(x=>x.id===id):{status:'Aktif',...(E.blank?E.blank():{}),...(prefill||{})};
   FORM={ent,id:id||null,prefill};
   const body=`${E.extraTop?E.extraTop(r):''}<form id="mdform" onsubmit="event.preventDefault();saveForm()" class="grid" style="gap:14px;margin-top:${E.extraTop&&E.extraTop(r)?'14px':'0'}">${E.fields.map(fd=>fieldHTML(fd,r)).join('')}${E.extra?E.extra(r):''}<button type="submit" hidden></button></form>`;
-  const foot=E.foot?E.foot(r,id):id?`${btn('Hapus',{v:'danger',icon:'trash',on:`delAsk('${ent}','${id}')`})}<span style="flex:1"></span>${E.promote&&r.status==='Takeout'?btn(E.promote.label,{v:'card',on:`${E.promote.fn}('${id}')`}):btn(r.status==='Aktif'?'Nonaktifkan':'Aktifkan',{v:'card',on:`toggleStatus('${ent}','${id}')`})}${btn('Simpan perubahan',{v:'accent',on:'saveForm()'})}`
+  const lockAll=!!(id&&E.roForm&&E.roForm(r));
+  const foot=lockAll?`<span style="flex:1"></span>${btn('Tutup',{v:'outline',on:'closeLayer()'})}`:E.foot?E.foot(r,id):id?`${btn('Hapus',{v:'danger',icon:'trash',on:`delAsk('${ent}','${id}')`})}<span style="flex:1"></span>${E.promote&&r.status==='Takeout'?btn(E.promote.label,{v:'card',on:`${E.promote.fn}('${id}')`}):btn(r.status==='Aktif'?'Nonaktifkan':'Aktifkan',{v:'card',on:`toggleStatus('${ent}','${id}')`})}${btn('Simpan perubahan',{v:'accent',on:'saveForm()'})}`
     :`${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn(ent==='user'?'Daftarkan user':'Tambah '+lc(E),{v:'accent',on:'saveForm()'})}`;
   const ro=!can('master.edit');
   openPanel(id?E.title(r):(ent==='user'?'Daftarkan user':'Tambah '+lc(E)),body,foot,{sub:id?`${E.label}${E.code?' · '+E.code(r):''} · ${r.status}`:E.label+' baru'});
@@ -3178,6 +3230,10 @@ function saveForm(mode){
   showFormErrs(errs);
   if(keys.length){ FORM.tried=true; document.getElementById('f_'+keys[0])?.focus?.(); toast('Periksa isian',errs.__extra||'Ada '+keys.length+' isian yang perlu diperbaiki.','danger'); return; }
   Object.assign(vals,ex);
+  /* Peringatan sebelum simpan (mis. data sudah ada dari integrasi BPR 1). Klik simpan sekali lagi untuk tetap menyimpan. */
+  const wmsg=E.warn?E.warn({...base,...vals},id):'';
+  if(wmsg&&FORM.warned!==wmsg){ FORM.warned=wmsg; const f=document.getElementById('mdform'); document.getElementById('mdwarn')?.remove(); f?.insertAdjacentHTML('afterbegin',`<div id="mdwarn">${banner({tone:'warning',title:'Data sudah ada dari integrasi BPR 1',body:wmsg+' Pakai data integrasi bila orangnya sama. Klik simpan sekali lagi untuk tetap menyimpan sebagai input manual.'})}</div>`); f?.scrollIntoView?.({block:'start'}); toast('Periksa data','Data yang akan diinput sudah ada dari integrasi BPR 1.','danger'); return; }
+  E.beforeSave?.(vals,cur0);
   let rec;
   act(`${ent}/${mode==='publish'?'publish':id?'update':'create'}`,{
     run:()=>{
@@ -3210,11 +3266,49 @@ function doDel(ent,id){
   const E=ENT[ent], r=E.store().find(x=>x.id===id);
   act(`${ent}/remove`,{perm:'master.edit',guard:()=>E.inUse?.(r),blockedTitle:'Tidak bisa dihapus',run:()=>{ r.del=true; },audit:`Menghapus ${lc(E)} ${E.title(r)}`,toast:[`${E.label} dihapus`,E.title(r),'default']});
 }
+/* MOM 12 Nov: user dari SIM SIAP ditarik apa adanya (tanpa form edit). Job ikut dari SIM SIAP; role diambil dari mapping job. Job baru otomatis dibuat tanpa role dan perlu dipetakan. */
+const SIM_JOB_ROLE={'SPG':'SPG / Promotor','Supervisor Sales':'Team Leader (user client)','Canvasser':'Canvasing FMCG'};
+function simPull(nip){ const s=MD.sim.find(x=>x.nip===nip); if(!s) return;
+  const jn=SIM_JOB_ROLE[s.jabatan]||s.jabatan; let j=MD.job.find(x=>!x.del&&x.name===jn);
+  if(!j){ j={id:newId('jb'),code:'JOB-'+String(MD.job.length+1).padStart(3,'0'),name:jn,roles:[],src:'SIM SIAP',status:'Aktif'}; MD.job.push(j); }
+  const roles=j.roles.length?[...j.roles]:['r3'], id=newId('u');
+  MD.user.push({id,nip:s.nip,name:s.name,email:s.email,jabatan:j.name,job:j.id,role:roles[0],roles,clients:['cl1'],simco:'sg1',simcos:['sg1'],cabang:s.unit,cabangs:[s.unit],toko:[],ap1:'sari',ap2:'',akses:'Mobile',face:'Belum',sumber:'Integrasi SIM',off:'Sabtu',npo:'NPO-'+s.nip.slice(-5),status:'Aktif'});
+  audit('Menarik user '+s.name+' dari SIM SIAP (job '+j.name+')'); closeLayer(); render(false);
+  toast('User ditarik dari SIM SIAP',s.name+' · role '+roles.map(roleName).join(', ')+(j.roles.length?' dari mapping job.':'. Job baru, petakan role di menu Job & role.')); }
+/* Job & role (MOM 12 Nov, versi umum): job dari SIM SIAP atau dibuat di Sales app, dipetakan ke satu atau beberapa role. */
+ENT.job={label:'Job',lower:'job',plural:'Job & mapping role',prefix:'jb',store:()=>MD.job,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code,unique:'code',blank:()=>({src:'Sales app',roles:[]}),
+  extraTop:r=>callout(r.src==='SIM SIAP'?'<b>Dari SIM SIAP.</b> Kode dan nama job ikut sinkron SIM SIAP. Yang diatur di sini hanya role yang dipetakan. Role user integrasi dengan job ini ikut berubah.':'<b>Job Sales app.</b> Dipakai untuk user input manual. <b>Perlu konfirmasi:</b> pola mapping mengikuti Si Gesit.','blue'),
+  fields:[{k:'code',label:'Kode job',req:true,roIf:r=>r.src==='SIM SIAP'},{k:'name',label:'Nama job',req:true,roIf:r=>r.src==='SIM SIAP'},{k:'src',label:'Sumber',type:'ro'},
+    {k:'roles',label:'Role yang dipetakan',type:'multi',req:true,opts:()=>live('role').filter(r=>r.status==='Aktif').map(r=>[r.id,r.name]),hint:'Satu job boleh dipetakan ke beberapa role. Role pertama menjadi role utama user'}],
+  cols:[{label:'Job',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.code)}</span>`,prim:true},
+    {label:'Role',render:r=>r.roles.length?r.roles.map((x,i)=>tag(roleName(x),i?'neutral':'accent')).join(' '):tag('Belum dipetakan','warning')},
+    {label:'User',render:r=>live('user').filter(u=>u.job===r.id).length,align:'r',hide:true},{label:'Sumber',render:r=>tag(r.src,r.src==='SIM SIAP'?'info':'neutral'),hide:true},{label:'Status',render:r=>stPill(r.status)}],
+  afterSave:()=>syncJobRoles(),
+  inUse:r=>{ const n=live('user').filter(u=>u.job===r.id).length; return r.src==='SIM SIAP'?'Job dari SIM SIAP tidak bisa dihapus di Sales app.':n?`Job ini dipakai ${n} user. Pindahkan user ke job lain dulu, atau nonaktifkan job.`:''; }};
+function pageJob(q){ const um=live('job').filter(j=>!j.roles.length).length;
+  return {title:'Job & role',html:`${um?banner({tone:'warning',title:um+' job belum dipetakan ke role',body:'User integrasi dengan job ini memakai role bawaan sampai mapping diisi.',cls:'mb'}):''}${crudList('job',q)}
+  <div style="margin-top:12px">${callout('<b>MOM 12 Nov.</b> Data job user tetap ada. Role user integrasi SIM SIAP diambil dari mapping ini, jadi admin tidak mengubah role per user. User input manual boleh memilih role sendiri. Versi umum: pola Si Gesit perlu dikonfirmasi.')}</div>`}; }
+/* Upload user manual: tiap baris dicek terhadap data integrasi BPR 1 dan user yang sudah ada. */
+const UPLOAD_SAMPLE={user:[{nip:'BTN-0040',name:'Rini Astuti',email:'rini.a@bantuan.example',job:'Promotor Bantuan',cabang:'Jakarta Selatan'},{nip:'SIM-25-01402',name:'Lia Kurnia',email:'lia.kurnia@sim.co.id',job:'SPG / Promotor',cabang:'Jakarta Selatan'},{nip:'BTN-0041',name:'Dedi Kurniawan',email:'eko@sim.co.id',job:'Promotor Bantuan',cabang:'Jakarta Barat'},{nip:'BTN-0042',name:'Sekar Ayu',email:'sekar.a@bantuan.example',job:'Promotor Bantuan',cabang:'Tangerang'}],
+  admin:[{nip:'CLT-ADM-011',name:'Teguh Santoso',email:'teguh.s@arunika.example',job:'Area Manager',cabang:'Jakarta Selatan'},{nip:'SIM-19-00412',name:'Wulan Sari',email:'wulan.s@sim.co.id',job:'HR Officer',cabang:'Kantor Pusat'}]};
+function uploadRows(ent){ return UPLOAD_SAMPLE[ent].map((r,i)=>{ const dupEmail=MD.user.some(u=>!u.del&&String(u.email).toLowerCase()===r.email.toLowerCase())&&!bprDup({nip:r.nip}); const bpr=bprDup(r); return {...r,i,st:dupEmail?'email':bpr?'bpr':'baru',msg:dupEmail?'Email sudah dipakai user lain. Baris ini tidak bisa diimpor.':bpr||'Siap diimpor sebagai input manual.'}; }); }
+function userUpload(ent){ ST.upl={ent,rows:uploadRows(ent),sel:new Set(uploadRows(ent).filter(r=>r.st==='baru').map(r=>r.i))}; userUploadRender(); }
+function userUploadTog(i){ const S=ST.upl.sel, r=ST.upl.rows[i]; if(r.st==='email') return; S.has(i)?S.delete(i):S.add(i); userUploadRender(); }
+function userUploadRender(){ const {ent,rows,sel:S}=ST.upl, nb=rows.filter(r=>r.st==='bpr').length;
+  openModal(`<h2 class="pt">Upload user<i>.</i></h2><p class="sm muted" style="margin:6px 0 12px">File <span class="mono">user_${ent==='user'?'sales':'management'}.xlsx</span> · ${rows.length} baris. Data dicek terhadap integrasi BPR 1 sebelum disimpan.</p>
+  ${nb?banner({tone:'warning',title:nb+' baris sudah ada dari integrasi BPR 1',body:'Baris bertanda kuning tidak dicentang otomatis. Pakai data integrasi bila orangnya sama, atau centang untuk tetap menyimpan sebagai input manual.',cls:'mb'}):''}
+  <div class="rows" style="max-height:46vh;overflow:auto">${rows.map(r=>`<button class="rowlink" role="checkbox" aria-checked="${S.has(r.i)}" ${r.st==='email'?'aria-disabled="true" style="opacity:.6;cursor:not-allowed"':''} onclick="userUploadTog(${r.i})"><span class="cb ${S.has(r.i)?'on':''}">${S.has(r.i)?I('check',12,3):''}</span><span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${esc(r.name)} <span class="mono muted xs">${esc(r.nip)}</span></b><span class="xs muted">${esc(r.job)} · ${esc(r.cabang)} · ${esc(r.email)}</span><span class="xs" style="display:block;margin-top:2px">${r.msg}</span></span>${spill(r.st==='baru'?'Baru':r.st==='bpr'?'Sudah ada di BPR 1':'Ditolak',r.st==='baru'?'success':r.st==='bpr'?'warning':'danger')}</button>`).join('')}</div>
+  <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan '+S.size+' user',{v:'accent',on:'userUploadSave()',dis:!S.size})}</div>`); }
+function userUploadSave(){ const {ent,rows,sel:S}=ST.upl; if(!S.size) return; const admin=ent==='admin';
+  rows.filter(r=>S.has(r.i)).forEach(r=>{ let j=MD.job.find(x=>!x.del&&x.name===r.job); if(!j){ j={id:newId('jb'),code:'JOB-'+String(MD.job.length+1).padStart(3,'0'),name:r.job,roles:[admin?'r20':'r14'],src:'Sales app',status:'Aktif'}; MD.job.push(j); }
+    const roles=j.roles.length?[...j.roles]:[admin?'r20':'r14'];
+    MD.user.push({id:newId('u'),nip:r.nip,name:r.name,email:r.email,jabatan:j.name,job:j.id,role:roles[0],roles,clients:['cl1'],simco:'sg1',simcos:['sg1'],cabang:r.cabang,cabangs:[r.cabang],toko:[],ap1:admin?'':'sari',ap2:'',akses:admin?'Web':'Mobile',face:admin?'–':'Belum',sumber:'Input manual',off:'–',npo:'–',status:'Aktif'}); });
+  audit('Mengupload '+S.size+' user input manual'); closeLayer(); render(false); toast(S.size+' user ditambahkan','Tersimpan sebagai input manual. Baris yang tidak dicentang dilewati.'); }
 function simImport(){
   const reg=new Set(MD.user.filter(u=>!u.del).map(u=>u.nip)); const list=MD.sim.filter(s=>!reg.has(s.nip));
   openModal(`<h2 class="pt">Tambah dari SIM<i>.</i></h2><p class="sm muted" style="margin:6px 0 14px">Pilih pegawai dari direktori SIM (BPR1). Hanya pegawai terdaftar yang bisa login ke aplikasi.</p>
   <label class="inp h40" style="margin-bottom:10px">${I('search',16)}<input placeholder="Cari nama atau NIP" oninput="const q=this.value.toLowerCase();document.querySelectorAll('#simlist .rowlink').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(q)?'':'none')"></label>
-  <div class="rows" id="simlist">${list.length?list.map(s=>`<button class="rowlink" onclick="closeLayer();openForm('user',null,{nip:'${s.nip}',name:'${esc(s.name)}',email:'${s.email}',jabatan:'${esc(s.jabatan)}',cabang:'${s.unit}',simco:'sg1',clients:['cl1'],toko:[],role:'${s.jabatan.startsWith('Supervisor')?'r2':s.jabatan==='Canvasser'?'r4':'r3'}',ap1:'sari',ap2:'',akses:'${s.jabatan.startsWith('Supervisor')?'Mobile & Web':'Mobile'}',face:'Belum',status:'Aktif'})">${av(s.name)}<span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${esc(s.name)}</b><span class="xs muted"><span class="mono">${s.nip}</span> · ${s.jabatan} · ${s.unit}</span></span>${I('right',16)}</button>`).join(''):'<p class="muted sm" style="padding:16px;text-align:center">Semua pegawai SIM sudah terdaftar.</p>'}</div>
+  <div class="rows" id="simlist">${list.length?list.map(s=>`<button class="rowlink" onclick="simPull('${s.nip}')">${av(s.name)}<span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${esc(s.name)}</b><span class="xs muted"><span class="mono">${s.nip}</span> · ${s.jabatan} · ${s.unit}</span></span>${I('right',16)}</button>`).join(''):'<p class="muted sm" style="padding:16px;text-align:center">Semua pegawai SIM sudah terdaftar.</p>'}</div>
   <div style="display:flex;justify-content:flex-end;margin-top:14px">${btn('Tutup',{v:'outline',on:'closeLayer()'})}</div>`);
 }
 
@@ -3252,7 +3346,7 @@ function pageToko(q){
   const srcChips=utabs([['','Semua sumber',live('toko').length],['Dari client','Toko Client',live('toko').filter(t=>(t.sumber||'Dari client')==='Dari client').length],['Input sales','Toko Sementara',live('toko').filter(t=>t.sumber==='Input sales').length]],q.src||'','tkSrc');
   return {title:'Toko',html:`
   ${srcChips}
-  ${crudList('toko',q,{ban:(q.src||'')==='Input sales'?`<div style="margin-bottom:12px">${callout('<b>Toko Sementara</b> adalah toko hasil input sales di lapangan dan berstatus Takeout. Admin bisa melengkapi datanya, lalu menyimpannya ke Toko Client lewat detail toko.')}</div>`:'',acts:`${btn('Template',{v:'outline',size:'sm',icon:'down',on:"toast('Template diunduh','template_toko.xlsx')"})}${btn('Upload',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Toko')"})}`})}<div style="margin-top:12px">${callout('Sales yang ditugaskan tidak diatur di halaman ini, tapi di menu <a href="#/penugasan" style="color:var(--accent-text);font-weight:600">Penugasan &amp; jadwal</a>. Client lain yang dilayani toko diatur di <a href="#/mapping-outlet" style="color:var(--accent-text);font-weight:600">Mapping outlet</a>.')}</div>`};
+  ${crudList('toko',q,{sels:penDD('Cabang',[['none','Belum di-set ('+live('toko').filter(t=>!t.cabang).length+')'],...cabNames().map(c=>[c,c])],q.cbk||'','cbk','Semua cabang')+penDD('Provinsi',Object.keys(WIL).map(p=>[p,p]),q.pv||'','pv','Semua provinsi'),ban:(q.src||'')==='Input sales'?`<div style="margin-bottom:12px">${callout('<b>Toko Sementara</b> adalah toko hasil input sales di lapangan dan berstatus Takeout. Admin bisa melengkapi datanya, lalu menyimpannya ke Toko Client lewat detail toko.')}</div>`:'',acts:`${btn('Template',{v:'outline',size:'sm',icon:'down',on:"toast('Template diunduh','template_toko.xlsx')"})}${btn('Upload',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Toko')"})}`})}<div style="margin-top:12px">${callout('Sales yang ditugaskan tidak diatur di halaman ini, tapi di menu <a href="#/penugasan" style="color:var(--accent-text);font-weight:600">Penugasan &amp; jadwal</a>. Client lain yang dilayani toko diatur di <a href="#/mapping-outlet" style="color:var(--accent-text);font-weight:600">Mapping outlet</a>.')}</div>`};
 }
 function tkSrc(k){ setQ({src:k}); }
 function tkTab(t){ setQ({tab:t,q:'',st:'',src:''}); }
@@ -3290,12 +3384,12 @@ function usSrc(k){ setQ({src:k}); }
 function pagePengguna(q){ return {title:'Sales management',html:`
   ${banner({tone:'neutral',body:'Data pegawai dimiliki SIM (BPR1). Dashboard hanya membaca dan menambahkan jejak aktivitas lapangan.',cls:'mb'})}
   ${srcTabs('user',q)}
-  ${crudList('user',q,{sels:simcoFilter(q.sg||''),acts:`${btn('Input manual',{v:'outline',size:'sm',icon:'plus',on:"openForm('user',null,{sumber:'Input manual',nip:'',name:'',email:'',jabatan:'',simco:'sg1',clients:['cl1'],cabang:'Jakarta Selatan',toko:[],role:'r14',ap1:'sari',ap2:'',akses:'Mobile',face:'Belum',off:'–',npo:'–',status:'Aktif'})"})}${btn('Sinkron dari SIM',{v:'outline',size:'sm',icon:'refresh',on:"audit('Sinkron data pegawai dari SIM (BPR1)');toast('Data pegawai tersinkron','Profil dari SIM diperbarui, 0 perubahan.')"})}`})}
+  ${crudList('user',q,{sels:simcoFilter(q.sg||''),acts:`${btn('Input manual',{v:'outline',size:'sm',icon:'plus',on:"openForm('user',null,{sumber:'Input manual',nip:'',name:'',email:'',jabatan:'',job:'',simco:'sg1',clients:['cl1'],cabang:'Jakarta Selatan',cabangs:['Jakarta Selatan'],toko:[],role:'r14',roles:['r14'],ap1:'sari',ap2:'',akses:'Mobile',face:'Belum',off:'–',npo:'–',status:'Aktif'})"})}${btn('Upload user',{v:'outline',size:'sm',icon:'up',on:"userUpload('user')",perm:'master.edit'})}${btn('Sinkron dari SIM',{v:'outline',size:'sm',icon:'refresh',on:"audit('Sinkron data pegawai dari SIM (BPR1)');toast('Data pegawai tersinkron','Profil dari SIM diperbarui, 0 perubahan.')"})}`})}
   <div style="margin-top:12px">${callout('Sales management berisi tim lapangan: Promotor, Canvassing, Taking Order, Team Leader, dan sejenisnya. Direktur, HR, Manager, dan admin ada di <a href="#/user-admin" style="color:var(--accent-text);font-weight:600">User management</a> (MOM 9 Nov bagian 5).')}</div>`}; }
 function pageAdmin(q){ const all=live('user').filter(r=>ADMIN_ROLES.includes(r.role));
   return {title:'User management',html:`
   ${srcTabs('admin',q)}
-  ${crudList('admin',q,{sels:`${simcoFilter(q.sg||'')}<div class="chips" role="group" aria-label="Jenis">${[['','User & people',all.length],['user','User (akses app)',all.filter(r=>!isPeople(r)).length],['people','People (hanya didata)',all.filter(isPeople).length]].map(([k,l,n])=>`<button class="fchip ${(q.ak||'')===k?'on':''}" aria-pressed="${(q.ak||'')===k}" onclick="setQ({ak:'${k}'})">${l} <span class="n">${n}</span></button>`).join('')}</div>`})}
+  ${crudList('admin',q,{sels:`${simcoFilter(q.sg||'')}<div class="chips" role="group" aria-label="Jenis">${[['','User & people',all.length],['user','User (akses app)',all.filter(r=>!isPeople(r)).length],['people','People (hanya didata)',all.filter(isPeople).length]].map(([k,l,n])=>`<button class="fchip ${(q.ak||'')===k?'on':''}" aria-pressed="${(q.ak||'')===k}" onclick="setQ({ak:'${k}'})">${l} <span class="n">${n}</span></button>`).join('')}</div>`,acts:btn('Upload user',{v:'outline',size:'sm',icon:'up',on:"userUpload('admin')",perm:'master.edit'})})}
   <div style="margin-top:12px">${callout('<b>User</b> adalah orang yang memakai aplikasi. <b>People</b> adalah karyawan yang perlu didata tapi tidak perlu akses aplikasi, misalnya manager yang hanya menerima laporan.')}</div>`}; }
 function pageIAM(q){
   shSet('roleJadwal',Object.fromEntries(MD.role.map(r=>[r.id,r.jadwal])));
@@ -3540,9 +3634,11 @@ function pageCanvassing(){
 /* Role yang di-assign ke toko diambil dari IAM; tambah id role di sini bila role baru juga bergerak antar toko. */
 const CV_ASSIGN_ROLES=['r4','r21','r5','r13'];
 const cvAssignees=()=>live('user').filter(u=>CV_ASSIGN_ROLES.includes(u.role)&&u.status==='Aktif');
-function cvAssignModal(u){ const x=live('user').find(r=>r.id===u); ST.cvPick={u,cl:(x.clients||[])[0]||'',sel:new Set(tokoOfU(u).map(t=>t.id))}; cvAssignRender(); }
-function cvAssignClient(c){ ST.cvPick.cl=c; cvAssignRender(); }
-function cvAssignToggle(id){ const {u,sel:S}=ST.cvPick;
+/* Simpan isian jadwal yang sedang diketik sebelum modal digambar ulang. */
+function penSchedKeep(o){ const g=id=>document.getElementById(id); if(!g('pj_s')) return; o.j={start:g('pj_s').value,end:g('pj_e').value,period:g('pj_p').value,jam:g('pj_j').value,days:[...document.querySelectorAll('#pj_dw .fchip.on')].map(b=>b.dataset.d)}; }
+function cvAssignModal(u){ const x=live('user').find(r=>r.id===u), cur=tokoOfU(u); ST.cvPick={u,cl:(x.clients||[])[0]||'',sel:new Set(cur.map(t=>t.id)),j:{...(cur[0]?penJ(u,cur[0].id):penDefault(u,'baru'))}}; cvAssignRender(); }
+function cvAssignClient(c){ penSchedKeep(ST.cvPick); ST.cvPick.cl=c; cvAssignRender(); }
+function cvAssignToggle(id){ penSchedKeep(ST.cvPick); const {u,sel:S}=ST.cvPick;
   if(!S.has(id)){ const bl=penBatas(u,S.size+1); if(bl){ toast('Tidak bisa menambah toko',bl,'danger'); return; } S.add(id); } else S.delete(id);
   cvAssignRender(); }
 function cvAssignRender(){ const {u,cl,sel:S}=ST.cvPick, x=live('user').find(r=>r.id===u);
@@ -3550,9 +3646,11 @@ function cvAssignRender(){ const {u,cl,sel:S}=ST.cvPick, x=live('user').find(r=>
   const list=live('toko').filter(t=>t.status==='Aktif'&&tokoClients(t).includes(cl)&&!(t.cat==='Modern Retail'&&CV_ASSIGN_ROLES.includes(x.role))).sort((a,b)=>(a.cabang!==x.cabang)-(b.cabang!==x.cabang)||a.name.localeCompare(b.name));
   openModal(`<h2 class="pt">Assign ${esc(x.name.split(' ')[0])} ke toko<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">${PEN_SATU.includes(x.role)?'Pilih satu toko':'Pilih satu toko atau lebih'} dari client yang dipilih. Toko di cabang ${esc(x.cabang)} tampil lebih dulu.</p>
   <div style="margin-bottom:12px">${sel(x.clients.map(c=>[c,clientName(c)]),cl,"cvAssignClient(this.value)",{label:'Client'})}</div>
-  ${list.length?'':`<p class="sm muted" style="margin:0 0 12px">Belum ada toko untuk client ini.</p>`}<div class="rows" style="max-height:46vh;overflow:auto">${list.map(t=>`<button class="rowlink" role="checkbox" aria-checked="${S.has(t.id)}" onclick="cvAssignToggle('${t.id}')"><span class="cb ${S.has(t.id)?'on':''}">${S.has(t.id)?I('check',12,3):''}</span><span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${esc(t.name)}</b><span class="xs muted">${esc(t.addr)} · ${esc(t.cat)} · ${esc(t.cabang)}</span></span></button>`).join('')}</div>
+  ${list.length?'':`<p class="sm muted" style="margin:0 0 12px">Belum ada toko untuk client ini.</p>`}<div class="rows" style="max-height:46vh;overflow:auto">${list.map(t=>`<button class="rowlink" role="checkbox" aria-checked="${S.has(t.id)}" onclick="cvAssignToggle('${t.id}')"><span class="cb ${S.has(t.id)?'on':''}">${S.has(t.id)?I('check',12,3):''}</span><span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${esc(t.name)}</b><span class="xs muted">${esc(t.addr)} · ${esc(t.cat)} · ${esc(t.cabang||'Cabang belum di-set')}</span></span></button>`).join('')}</div>
+  ${penSchedHTML(ST.cvPick.j)}
   <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan'+(S.size?' '+S.size+' toko':''),{v:'accent',on:'cvAssignSave()',dis:!S.size})}</div>`); }
-function cvAssignSave(){ const {u,sel:S}=ST.cvPick; if(!S.size) return;
+function cvAssignSave(){ const {u,sel:S}=ST.cvPick; if(!S.size) return; const j=penSchedRead(); if(!j) return;
+  S.forEach(tid=>{ MD.penJadwal[penKey(u,tid)]={...j,days:[...j.days]}; });
   TOKO.forEach(t=>{ const on=S.has(t.id), has=t.sales.includes(u); if(on&&!has) t.sales.push(u); if(!on&&has) t.sales=t.sales.filter(v=>v!==u); });
   const rec=MD.user.find(r=>r.id===u); rec.toko=[...S];
   audit('Meng-assign '+S.size+' toko ke '+rec.name); closeLayer(); render(false); toast(S.size+' toko di-assign ke '+rec.name.split(' ')[0],'Daftar toko di aplikasi mobile ikut berubah.'); }
@@ -3563,14 +3661,54 @@ const PEN_SATU=['r3','r11'];
 const penBatas=(uid,n)=>{ const u=live('user').find(x=>x.id===uid); return u&&PEN_SATU.includes(u.role)&&n>1?u.name+' berperan sebagai '+roleName(u.role)+'. Role ini hanya boleh ditempatkan di satu toko.':''; };
 const penSales=()=>live('user').filter(u=>PEN_ROLES.includes(u.role)&&u.status==='Aktif');
 const penTipe=n=>n>1?tag('Bergerak','info'):n===1?tag('Diam','neutral'):tag('Belum ditugaskan','accent');
-function penTab(t){ setQ({tab:t,q:'',cat:'',f:'',sg:'',cl:'',tk:'',cb:'',tp:'',kt:'',sl:'',rl:''}); }
+function penTab(t){ setQ({tab:t,q:'',cat:'',f:'',sg:'',cl:'',tk:'',cb:'',tp:'',kt:'',sl:'',rl:'',pr:'',ms:''}); }
+function penPr(k){ setQ({pr:k}); }
 /* Filter tab Penugasan: dropdown Toko dan Sales hanya menawarkan data dalam cakupan client terpilih; client kosong berarti tanpa batas client. */
-const PEN_RESET="setQ({q:'',sg:'',f:'',cl:'',tk:'',cb:'',tp:'',kt:'',sl:'',rl:''})";
+const PEN_RESET="setQ({q:'',sg:'',f:'',cl:'',tk:'',cb:'',tp:'',kt:'',sl:'',rl:'',ms:''})";
 const penDD=(lbl,opts,val,key,all,extra='')=>sel([['',all],...opts],val,`setQ({${key}:this.value${extra}})`,{label:lbl,cls:'sm'});
 const penClientDD=cl=>penDD('Client',live('client').filter(c=>c.status==='Aktif').map(c=>[c.id,c.name]),cl,'cl','Semua client',",tk:'',sl:''");
 const penClientNames=ids=>ids&&ids.length?`<span class="fg" style="font-weight:500">${ids.map(c=>esc(cName(c))).join(', ')}</span>`:'<span class="muted">–</span>';
 const penTokoPool=cl=>live('toko').filter(t=>t.status==='Aktif'&&(!cl||tokoClients(t).includes(cl)));
 const penUniq=a=>[...new Set(a)].sort((x,y)=>x.localeCompare(y)).map(v=>[v,v]);
+/* ---------- MOM 12 Nov: jadwal kunjungan otomatis dari penugasan ----------
+   Tiap pasangan sales–toko punya masa penugasan (mulai, selesai) dan pola kunjungan (periode, hari, jam).
+   Jadwal kunjungan dibangkitkan dari pola ini, jadi tidak dibuat manual lagi. */
+const PEN_TODAY=new Date(2026,9,26), PEN_PERIODS=['Harian','Mingguan','2 mingguan','Bulanan'], PEN_DOW=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+MD.penJadwal=MD.penJadwal||{};
+const penKey=(u,t)=>u+'|'+t;
+function penDefault(u,t){ const usr=MD.user.find(x=>x.id===u)||{}, h=hash(u+t), r=usr.role;
+  const period=PEN_SATU.includes(r)?'Harian':r==='r12'?'2 mingguan':r==='r13'?'Bulanan':'Mingguan';
+  const days=period==='Harian'?['Sen','Sel','Rab','Kam','Jum','Sab']:period==='Bulanan'?[]:[DAYS7[h%5],DAYS7[(h+2)%5]].filter((d,i,a)=>a.indexOf(d)===i);
+  return {start:'2026-10-01',end:h%4===0?'2026-12-31':'2027-03-31',period,days,jam:['08:30','09:00','10:00','13:00'][h%4]}; }
+const penJ=(u,t)=>{ const k=penKey(u,t); if(!MD.penJadwal[k]) MD.penJadwal[k]=penDefault(u,t); return MD.penJadwal[k]; };
+const pDate=s=>{ const [y,m,d]=String(s).split('-').map(Number); return new Date(y,(m||1)-1,d||1); };
+const fmtTgl=s=>{ if(!s) return '–'; const d=pDate(s); return d.getDate()+' '+LD_MN[d.getMonth()+1]+' '+d.getFullYear(); };
+const penMasa=j=>pDate(j.end)<PEN_TODAY?'Berakhir':pDate(j.start)>PEN_TODAY?'Akan datang':'Berjalan';
+function penNext(j){ const s=pDate(j.start), e=pDate(j.end); let d=new Date(Math.max(s,PEN_TODAY));
+  for(let i=0;i<70&&d<=e;i++,d=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1)){ const dw=PEN_DOW[d.getDay()];
+    if(j.period==='Harian'&&(j.days.length?j.days.includes(dw):dw!=='Min')) return d;
+    if(j.period==='Mingguan'&&j.days.includes(dw)) return d;
+    if(j.period==='2 mingguan'&&j.days.includes(dw)&&Math.floor((d-s)/(7*864e5))%2===0) return d;
+    if(j.period==='Bulanan'&&d.getDate()===s.getDate()) return d; }
+  return null; }
+const penPola=j=>j.period+(j.period!=='Bulanan'&&j.days.length?' · '+j.days.join(', '):j.period==='Bulanan'?' · tiap tgl '+pDate(j.start).getDate():'')+' · '+j.jam;
+/* Blok isian masa penugasan dan pola kunjungan, dipakai di modal assign per sales dan per toko. */
+function penSchedHTML(j){ return `<div class="tile" style="margin-top:14px"><b class="fg sm" style="display:block;margin-bottom:10px">Masa penugasan &amp; jadwal kunjungan</b>
+  <div class="grid g2" style="gap:10px"><label class="field"><span>Tanggal mulai <b class="req" aria-hidden="true">*</b></span><span class="inp"><input id="pj_s" type="date" value="${j.start}"></span></label><label class="field"><span>Tanggal selesai <b class="req" aria-hidden="true">*</b></span><span class="inp"><input id="pj_e" type="date" value="${j.end}"></span></label></div>
+  <div class="grid g2" style="gap:10px;margin-top:10px"><label class="field"><span>Periode kunjungan</span>${sel(PEN_PERIODS,j.period,'penSchedDays()',{label:'Periode kunjungan',id:'pj_p'})}</label><label class="field"><span>Jam</span><span class="inp"><input id="pj_j" type="time" value="${j.jam}"></span></label></div>
+  <div class="field" id="pj_dw" style="margin-top:10px;display:${j.period==='Bulanan'?'none':''}"><span>Hari kunjungan</span><div class="chips" role="group" aria-label="Hari kunjungan">${DAYS7.map(d=>`<button type="button" class="fchip ${j.days.includes(d)?'on':''}" aria-pressed="${j.days.includes(d)}" data-d="${d}" onclick="multiTog(this)">${d}</button>`).join('')}</div></div>
+  <p class="xs muted" style="margin-top:8px">Jadwal kunjungan dibuat otomatis dari isian ini selama masa penugasan (MOM 12 Nov). Bulanan mengikuti tanggal mulai.</p><p class="ferr" id="pj_err"></p></div>`; }
+function penSchedDays(){ const e=document.getElementById('pj_dw'); if(e) e.style.display=document.getElementById('pj_p').value==='Bulanan'?'none':''; }
+function penSchedRead(){ const g=id=>document.getElementById(id), j={start:g('pj_s').value,end:g('pj_e').value,period:g('pj_p').value,jam:g('pj_j').value||'09:00',days:[...document.querySelectorAll('#pj_dw .fchip.on')].map(b=>b.dataset.d)}, err=g('pj_err');
+  const m=!j.start||!j.end?'Isi tanggal mulai dan selesai.':j.end<j.start?'Tanggal selesai harus setelah tanggal mulai.':j.period!=='Bulanan'&&!j.days.length?'Pilih minimal satu hari kunjungan.':'';
+  if(m){ if(err) err.textContent=m; toast('Periksa isian',m,'danger'); return null; } if(j.period==='Bulanan') j.days=[]; return j; }
+function penJadwalModal(u,t){ const j=penJ(u,t), x=MD.user.find(a=>a.id===u), tk=TOKO.find(a=>a.id===t);
+  openModal(`<h2 class="pt">Jadwal ${esc(x.name.split(' ')[0])} di ${esc(tk.name)}<i>.</i></h2><p class="muted sm" style="margin:6px 0 4px">${esc(roleName(x.role))} · ${esc(tk.cabang||'Cabang belum di-set')}</p>${penSchedHTML(j)}
+  <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan jadwal',{v:'accent',on:`penJadwalSave('${u}','${t}')`})}</div>`); }
+function penJadwalSave(u,t){ const j=penSchedRead(); if(!j) return; MD.penJadwal[penKey(u,t)]=j; const x=MD.user.find(a=>a.id===u), tk=TOKO.find(a=>a.id===t);
+  audit('Mengubah jadwal penugasan '+x.name+' di '+tk.name); closeLayer(); render(false); const n=penNext(j); toast('Jadwal diperbarui',n?'Kunjungan berikutnya '+PEN_DOW[n.getDay()]+', '+n.getDate()+' '+LD_MN[n.getMonth()+1]+'.':'Tidak ada kunjungan dalam masa penugasan.'); }
+/* Baris jadwal otomatis: semua pasangan sales–toko aktif. */
+const penJadwalRows=()=>live('toko').filter(t=>t.status==='Aktif').flatMap(t=>t.sales.filter(u=>MD.user.some(x=>x.id===u&&!x.del)).map(u=>{ const j=penJ(u,t.id); return {_id:penKey(u,t.id),u,t:t.id,toko:t.name,cabang:t.cabang,clients:tokoClients(t).filter(c=>((MD.user.find(x=>x.id===u)||{}).clients||[]).includes(c)),j,masa:penMasa(j),next:penNext(j)}; }));
 /* Client sebuah jadwal: client toko itu yang juga dimiliki sales; toko di luar master memakai client sales. */
 function visClients(v){ const uc=(MD.user.find(x=>x.id===v.u)||{}).clients||[], tk=TOKO.find(t=>!t.del&&t.name===v.place); if(!tk) return uc; const i=tokoClients(tk).filter(c=>uc.includes(c)); return i.length?i:uc; }
 function pagePenugasan(q){
@@ -3590,7 +3728,8 @@ function pagePenugasan(q){
           {label:'Sales',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(r.name)}<span><span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${esc(roleName(r.role))}</span></span></span>`,prim:true},
           {label:'Company',render:r=>esc(simcoName(r.simco)),hide:true},{label:'Cabang',k:'cabang',hide:true},
           {label:'Toko',render:r=>{ const a=tokoOfU(r.id); return a.length?`<span class="tabular fg">${a.length} toko</span><span class="xs muted" style="display:block">${esc(a.slice(0,2).map(t=>t.name).join(', '))}${a.length>2?' +'+(a.length-2):''}</span>`:'<span class="muted">–</span>'; }},
-          {label:'Tipe',render:r=>penTipe(tokoOfU(r.id).length)}],
+          {label:'Tipe',render:r=>penTipe(tokoOfU(r.id).length)},
+          {label:'Masa penugasan',render:r=>{ const js=tokoOfU(r.id).map(t=>penJ(r.id,t.id)); if(!js.length) return '<span class="muted">–</span>'; const s=js.map(j=>j.start).sort()[0], e=js.map(j=>j.end).sort().slice(-1)[0]; return `<span class="tabular xs">${fmtTgl(s)} – ${fmtTgl(e)}</span>`; },hide:true}],
         acts:r=>btn('Ubah',{v:'outline',size:'sm',icon:'edit',on:`penSalesModal('${r.id}')`})});
     } else {
       const kt=q.kt||'';
@@ -3608,29 +3747,35 @@ function pagePenugasan(q){
     body=`<div class="fstack">${filterCard({search:searchBox(q.q,{ph:v==='sales'?'Cari nama sales':'Cari nama toko',label:'Cari penempatan'}),chips:{key:'v',val:v,label:'Tampilan',items:[['sales','Per sales'],['toko','Per toko']]},selects:fsel,clear:anyF?PEN_RESET:'',summary:anyF?`Menampilkan <b class="fg">${rowsN}</b> ${v==='sales'?'sales':'toko'}.`:''})}${body}</div>`;
   }
   const tab=['jadwal','jp'].includes(q.tab)?q.tab:'tempat';
-  if(tab==='jadwal'){ const allv=visList().map(visLive), jf=q.f||'', jq=(q.q||'').toLowerCase(), cl=q.cl||'', rl=q.rl||'', ujr=v=>(MD.user.find(x=>x.id===v.u)||{}).role;
-    const inCl=v=>!cl||visClients(v).includes(cl), places=[...new Set(allv.filter(inCl).map(v=>v.place))], tk=places.includes(q.tk)?q.tk:'';
-    const vs=allv.filter(v=>!jf||v.status===jf).filter(v=>!jq||byU(v.u).name.toLowerCase().includes(jq)).filter(v=>!rl||ujr(v)===rl).filter(inCl).filter(v=>!tk||v.place===tk);
-    const anyF=jf||q.q||rl||cl||tk, roles=[...new Set(allv.map(ujr).filter(Boolean))].map(r=>[r,roleName(r)]);
-    body=`<div class="fstack">${filterCard({search:searchBox(q.q,{ph:'Cari nama sales',label:'Cari sales'}),selects:penDD('Role',roles,rl,'rl','Semua role')+penClientDD(cl)+penDD('Toko',places.sort((x,y)=>x.localeCompare(y)).map(x=>[x,x]),tk,'tk','Semua toko')+penDD('Status',[['Selesai','Selesai'],['Berjalan','Berjalan'],['Belum','Belum dimulai'],['Terlewat','Terlewat']],jf,'f','Semua status'),clear:anyF?PEN_RESET:'',summary:anyF?`Menampilkan <b class="fg">${vs.length}</b> dari ${allv.length} jadwal.`:''})}`+card('Jadwal kunjungan',dataTable('penj',{rows:vs.map(v=>({...v,_id:v.id})),rowClick:r=>`visPanel('${r.id}')`,acts:r=>rowActs(`visForm('${r.id}')`,`visDelAsk('${r.id}')`),empty:'Tidak ada jadwal yang cocok.',cols:[
-      {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(byU(r.u).name)}</span><span class="xs muted" style="display:block">${esc(byU(r.u).job)}</span>`,prim:true},{label:'Client',render:r=>penClientNames(visClients(r))},{label:'Toko',render:r=>esc(r.place)+(r.by==='sales'?' '+tag('Dibuat '+esc(byU(r.u).job),'accent'):'')},
-      {label:'Periode',render:r=>`${esc(perLabel(r))}<span class="xs muted" style="display:block">${r.plan}</span>`},{label:'Status',render:r=>spill(r.status,r.status==='Selesai'?'success':r.status==='Berjalan'?'accent':r.status==='Terlewat'?'danger':'neutral'),hide:true}]}),
-      {acts:btn('Buat jadwal',{v:'accent',size:'sm',icon:'plus',on:'visForm()'})})+`</div><div style="margin-top:12px">${callout('Penugasan mencakup penjadwalan (MOM 9 Nov bagian 4). Periode mingguan dan 2 mingguan wajib memilih hari, boleh hari apa saja. Jadwal yang sama tampil di menu Kunjungan beserta hasil check-in.')}</div>`; }
+  if(tab==='jadwal'){ const all=penJadwalRows(), pr=q.pr||'', jq=(q.q||'').toLowerCase(), cl=q.cl||'', rl=q.rl||'', cb=q.cb||'', ms=q.ms||'', ujr=r=>(MD.user.find(x=>x.id===r.u)||{}).role;
+    const inCl=r=>!cl||r.clients.includes(cl), base=all.filter(inCl).filter(r=>!cb||(cb==='none'?!r.cabang:r.cabang===cb)).filter(r=>!rl||ujr(r)===rl).filter(r=>!ms||r.masa===ms).filter(r=>!jq||(userName(r.u)+' '+r.toko).toLowerCase().includes(jq));
+    const tkOpts=[...new Set(base.map(r=>r.toko))].sort((x,y)=>x.localeCompare(y)), tk=tkOpts.includes(q.tk)?q.tk:'', b2=base.filter(r=>!tk||r.toko===tk), vs=b2.filter(r=>!pr||r.j.period===pr).sort((a,b)=>(a.next||9e15)-(b.next||9e15));
+    const cabs=[...new Set(all.filter(inCl).map(r=>r.cabang).filter(Boolean))].sort((x,y)=>x.localeCompare(y)), roles=[...new Set(all.map(ujr).filter(Boolean))].map(r=>[r,roleName(r)]);
+    const anyF=q.q||rl||cl||tk||cb||ms, nx=d=>d?`${PEN_DOW[d.getDay()]}, ${d.getDate()} ${LD_MN[d.getMonth()+1]}`:'<span class="muted">–</span>';
+    const ptabs=utabs([['','Semua',b2.length],...PEN_PERIODS.map(p=>[p,p,b2.filter(r=>r.j.period===p).length])],pr,'penPr');
+    body=`<div class="fstack">${filterCard({search:searchBox(q.q,{ph:'Cari sales atau toko',label:'Cari jadwal'}),selects:penClientDD(cl)+penDD('Cabang client',[['none','Belum di-set'],...cabs.map(c=>[c,c])],cb,'cb','Semua cabang')+penDD('Role',roles,rl,'rl','Semua role')+penDD('Toko',tkOpts.map(x=>[x,x]),tk,'tk','Semua toko')+penDD('Masa',[['Berjalan','Berjalan'],['Akan datang','Akan datang'],['Berakhir','Berakhir']],ms,'ms','Semua masa'),clear:anyF?PEN_RESET:'',summary:anyF?`Menampilkan <b class="fg">${b2.length}</b> dari ${all.length} jadwal.`:''})}
+      <div>${ptabs}</div>`+card('Jadwal kunjungan'+(pr?' '+pr.toLowerCase():''),dataTable('penj',{rows:vs,rowClick:r=>`penJadwalModal('${r.u}','${r.t}')`,acts:r=>btn('Ubah',{v:'outline',size:'sm',icon:'edit',on:`penJadwalModal('${r.u}','${r.t}')`}),empty:'Tidak ada jadwal yang cocok.',cols:[
+      {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(userName(r.u))}</span><span class="xs muted" style="display:block">${esc(roleName(ujr(r)))}</span>`,prim:true},{label:'Client',render:r=>penClientNames(r.clients),hide:true},
+      {label:'Toko',render:r=>`${esc(r.toko)}<span class="xs muted" style="display:block">${r.cabang?esc(r.cabang):'Cabang belum di-set'}</span>`},
+      {label:'Pola kunjungan',render:r=>esc(penPola(r.j))},{label:'Masa penugasan',render:r=>`<span class="tabular xs">${fmtTgl(r.j.start)} – ${fmtTgl(r.j.end)}</span>`,hide:true},
+      {label:'Kunjungan berikutnya',render:r=>nx(r.next)},{label:'Masa',render:r=>spill(r.masa,r.masa==='Berjalan'?'success':r.masa==='Akan datang'?'accent':'neutral'),hide:true}]}))+`</div><div style="margin-top:12px">${callout('<b>MOM 12 Nov.</b> Jadwal kunjungan dibuat otomatis dari penugasan: tiap sales–toko punya tanggal mulai, tanggal selesai, periode, hari, dan jam. Ubah pola di sini atau saat assign di tab Penugasan toko. Hasil check-in dipantau di menu <a href="#/kunjungan" style="color:var(--accent-text);font-weight:600">Kunjungan</a>.')}</div>`; }
   if(tab==='jp') body=jpBody();
-  return {title:'Penugasan & jadwal',html:`<div style="margin-bottom:4px">${utabs([['tempat','Penugasan toko'],['jadwal','Jadwal kunjungan',visList().length],['jp','Journey plan']],tab,'penTab')}</div>${body}`};
+  return {title:'Penugasan & jadwal',html:`<div style="margin-bottom:4px">${utabs([['tempat','Penugasan toko'],['jadwal','Jadwal kunjungan',penJadwalRows().length],['jp','Journey plan']],tab,'penTab')}</div>${body}`};
 }
 function penSalesModal(u){ cvAssignModal(u); }
 function penTokoModal(id){
-  const t=TOKO.find(x=>x.id===id); ST.penPick={t:id,sel:new Set(t.sales)}; penTokoRender(); }
-function penTokoToggle(u){ const S=ST.penPick.sel;
+  const t=TOKO.find(x=>x.id===id); ST.penPick={t:id,sel:new Set(t.sales),j:{...(t.sales[0]?penJ(t.sales[0],id):{start:'2026-11-01',end:'2027-03-31',period:'Mingguan',days:['Sen','Kam'],jam:'09:00'})}}; penTokoRender(); }
+function penTokoToggle(u){ penSchedKeep(ST.penPick); const S=ST.penPick.sel;
   if(!S.has(u)){ const n=tokoOfU(u).filter(t=>t.id!==ST.penPick.t).length+1, bl=penBatas(u,n); if(bl){ toast('Tidak bisa menambah sales',bl+' Lepas dulu dari toko lain.','danger'); return; } S.add(u); } else S.delete(u);
   penTokoRender(); }
 function penTokoRender(){ const {t:id,sel:S}=ST.penPick, t=TOKO.find(x=>x.id===id);
   const list=penSales().filter(u=>tokoClients(t).some(c=>u.clients.includes(c))&&!(t.cat==='Modern Retail'&&CV_ASSIGN_ROLES.includes(u.role))||S.has(u.id)).sort((a,b)=>(a.cabang!==t.cabang)-(b.cabang!==t.cabang)||a.name.localeCompare(b.name));
   openModal(`<h2 class="pt">Sales di ${esc(t.name)}<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Pilih sales yang ditugaskan di toko ini. Sales cabang ${esc(t.cabang)} tampil lebih dulu.</p>
   <div class="rows" style="max-height:46vh;overflow:auto">${list.length?list.map(u=>`<button class="rowlink" role="checkbox" aria-checked="${S.has(u.id)}" onclick="penTokoToggle('${u.id}')"><span class="cb ${S.has(u.id)?'on':''}">${S.has(u.id)?I('check',12,3):''}</span><span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${esc(u.name)}</b><span class="xs muted">${esc(roleName(u.role))} · ${esc(u.cabang)}</span></span></button>`).join(''):'<p class="muted sm" style="padding:16px;text-align:center">Belum ada sales yang cocok untuk toko ini.</p>'}</div>
+  ${penSchedHTML(ST.penPick.j)}
   <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan'+(S.size?' '+S.size+' sales':''),{v:'accent',on:'penTokoSave()'})}</div>`); }
-function penTokoSave(){ const {t:id,sel:S}=ST.penPick, t=TOKO.find(x=>x.id===id);
+function penTokoSave(){ const {t:id,sel:S}=ST.penPick, t=TOKO.find(x=>x.id===id); const j=S.size?penSchedRead():null; if(S.size&&!j) return;
+  S.forEach(u=>{ MD.penJadwal[penKey(u,id)]={...j,days:[...j.days]}; });
   t.sales=[...S];
   MD.user.forEach(u=>{ const on=S.has(u.id), has=(u.toko||[]).includes(id); if(on&&!has) u.toko=[...(u.toko||[]),id]; if(!on&&has) u.toko=u.toko.filter(v=>v!==id); });
   audit('Mengatur '+S.size+' sales di toko '+t.name); closeLayer(); render(false); toast('Penempatan '+t.name+' disimpan',S.size+' sales ditugaskan. Aplikasi mobile ikut berubah.'); }
@@ -3779,8 +3924,15 @@ const POSM_TARGET=['SPG / Promotor','Mobile Promotor','SPG / Promotor, Mobile Pr
 function pagePosm(){
   return {title:'Campaign, POSM & planogram',html:`
   ${card('Brief aktif',dataTable('psm',{rows:POSM.filter(x=>!x.del).map(x=>({...x,_id:x.id})),rowClick:r=>`posmModal('${r.id}')`,acts:r=>rowActs(`posmModal('${r.id}')`,`posmDelAsk('${r.id}')`),cols:[{label:'Brief',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${r.to}</span>`,prim:true},{label:'Jenis',render:r=>tag(r.kind,'accent'),hide:true},{label:'Terkirim',render:r=>r.done+'/'+r.of,align:'r'},{label:'Nilai',render:r=>r.avg,align:'r'}]}),{acts:`${btn('Upload brief',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Foto brief')"})}${btn('Buat brief',{v:'accent',size:'sm',icon:'plus',on:'posmModal()'})}`})}
-  <div style="margin-top:12px">${callout('<b>Rekomendasi.</b> Nilai simulasi. Ambang: 80 atau lebih lulus, 70 sampai 79 ditinjau Team Leader, di bawah 70 foto ulang.')}</div>`};
+  <div style="margin-top:16px">${card('Nilai foto dari lapangan',dataTable('psn',{rows:posmNilaiRows(),rowClick:r=>`toast('${esc(userName(r.u))}','${esc(r.brief)}: AI ${r.ai}, adjustment ${r.adj>0?'+':''}${r.adj}, akhir ${r.final}.')`,empty:'Belum ada foto yang dinilai.',cols:[
+    {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(userName(r.u))}</span><span class="xs muted" style="display:block">${esc(r.brief)} · ${esc(r.tgl)}</span>`,prim:true},
+    {label:'Nilai AI',render:r=>r.ai,align:'r',hide:true},{label:'Adjustment',render:r=>r.adj?`<b class="tabular ${r.adj<0?'':'fg'}">${r.adj>0?'+':''}${r.adj}</b>${r.alasan?`<span class="xs muted" style="display:block">${esc(r.alasan)}</span>`:''}`:'<span class="muted">0</span>',align:'r'},
+    {label:'Nilai akhir',render:r=>`<b class="tabular fg">${r.final}</b>`,align:'r'},{label:'Hasil',render:r=>spill(r.final>=80?'Lulus':r.final>=70?'Ditinjau':'Foto ulang',r.final>=80?'success':r.final>=70?'warning':'danger')}]}))}</div>
+  <div style="margin-top:12px">${callout('<b>MOM 12 Nov.</b> Selain nilai AI, SPG bisa memasukkan nilai adjustment beserta alasan di aplikasi. Nilai akhir = nilai AI + adjustment (0–100). <b>Rekomendasi</b> ambang: 80 atau lebih lulus, 70 sampai 79 ditinjau Team Leader, di bawah 70 foto ulang. Nilai AI simulasi.')}</div>`};
 }
+/* Nilai foto dari mobile (kunci posmNilai: AI + adjustment). Data contoh dipakai bila belum ada kiriman dari mobile. */
+const POSM_NILAI_DEFAULT=[{u:'rina',brief:'Planogram rak utama',ai:76,adj:6,final:82,alasan:'Rak tertutup troli saat foto, susunan sudah sesuai',tgl:'25 Okt'},{u:'fikri',brief:'POSM wobbler promo akhir tahun',ai:84,adj:0,final:84,alasan:'',tgl:'25 Okt'},{u:'rina',brief:'Campaign: penempatan barang promo akhir tahun',ai:72,adj:-5,final:67,alasan:'Label harga promo belum terpasang',tgl:'24 Okt'}];
+const posmNilaiRows=()=>{ const m=shRead('posmNilai',[]); return [...(Array.isArray(m)?m:[]),...POSM_NILAI_DEFAULT].map((r,i)=>({...r,_id:'pn'+i})); };
 function posmModal(id){ const x=id?POSM.find(a=>a.id===id):{name:'',kind:'Campaign',to:'SPG / Promotor'};
   openModal(`<h2 class="pt">${id?'Edit':'Buat'} brief<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Foto brief di-assign ke user, lalu user mengirim foto untuk dinilai.</p>
   <div class="grid" style="gap:12px"><label class="field"><span>Nama brief</span><span class="inp"><input id="pm_n" value="${esc(x.name)}" placeholder="contoh: POSM wobbler promo akhir tahun"></span></label>
@@ -4216,7 +4368,10 @@ function pageParameter(){
 }
 
 /* ---------- Konten: Quiz & survey (CRUD + assign by role) ---------- */
-const QTYPES={Quiz:[['pg','Pilihan ganda'],['bs','Benar / salah']],Survey:[['skala','Skala 1–5'],['bs','Benar / salah'],['singkat','Isian singkat'],['essay','Essay']]};
+/* MOM 12 Nov: tipe pertanyaan mengikuti Google Form. Quiz hanya tipe yang bisa dinilai otomatis. */
+const QTYPES={Quiz:[['pg','Pilihan ganda'],['cb','Kotak centang'],['dd','Drop-down'],['bs','Benar / salah']],
+  Survey:[['singkat','Jawaban singkat'],['essay','Paragraf'],['pg','Pilihan ganda'],['cb','Kotak centang'],['dd','Drop-down'],['skala','Skala linier'],['grid','Kisi pilihan ganda'],['tgl','Tanggal'],['jam','Waktu'],['file','Upload file'],['bs','Ya / tidak']]};
+const Q_OPT=['pg','cb','dd'];
 const QTN=Object.fromEntries([...QTYPES.Quiz,...QTYPES.Survey]);
 MD.konten=[
   {id:'Q-07',type:'Quiz',name:'Product knowledge VISTARA & Puraklin',desc:'Pengetahuan produk TV VISTARA dan air purifier untuk sales lapangan.',roles:['r3','r4','r5'],cabang:['Semua cabang'],start:'2026-10-20',end:'2026-10-31',limit:5,pass:70,urut:'Acak',feedback:'Ya',status:'Terbit',done:41,of:58,avg:82,
@@ -4228,35 +4383,53 @@ MD.konten=[
   {id:'Q-08',type:'Quiz',name:'Promo akhir tahun',desc:'Promo November–Desember untuk SPG.',roles:['r3'],cabang:['Jakarta Selatan'],start:'2026-11-01',end:'2026-11-15',limit:5,pass:70,urut:'Acak',feedback:'Ya',status:'Draft',done:0,of:0,avg:0,
     questions:[{q:'Promo bundling AC + Air Purifier bisa digabung dengan promo lain.',type:'bs',opts:['Benar','Salah'],key:1}]},
   {id:'S-03',type:'Survey',name:'Kondisi toko Oktober 2026',desc:'Ramai pengunjung, promo kompetitor, dan produk yang sering ditanyakan.',roles:['r3'],cabang:['Semua cabang'],start:'2026-10-15',end:'2026-10-31',limit:'',pass:'',urut:'Urut',feedback:'Tidak',jadwal:'Bulanan',status:'Terbit',done:22,of:31,avg:null,
-    questions:[{q:'Seberapa ramai pengunjung toko minggu ini?',type:'skala',dist:[2,4,7,6,3]},{q:'Ada promo kompetitor yang sedang berjalan?',type:'bs',opts:['Ya','Tidak'],dist:[15,7]},{q:'Produk apa yang paling sering ditanyakan?',type:'singkat',top:['VISTARA 50" (9)','AC Inverter (6)','Kulkas 2 pintu (4)']}]},
+    questions:[{q:'Seberapa ramai pengunjung toko minggu ini?',type:'skala',dist:[2,4,7,6,3]},{q:'Ada promo kompetitor yang sedang berjalan?',type:'bs',opts:['Ya','Tidak'],dist:[15,7]},{q:'Produk apa yang paling sering ditanyakan?',type:'singkat',top:['VISTARA 50" (9)','AC Inverter (6)','Kulkas 2 pintu (4)']},
+      {q:'Materi promosi apa saja yang terpasang di toko?',type:'cb',opts:['Wobbler','Banner','Standee','Brosur'],dist:[12,8,5,15]},{q:'Nilai kondisi toko',type:'grid',rows:['Kebersihan','Penataan produk'],cols:['Kurang','Cukup','Baik']},{q:'Kapan promo kompetitor berakhir?',type:'tgl',req:false},{q:'Foto area display utama',type:'file',req:false}]},
   {id:'S-04',type:'Survey',name:'Kepuasan aplikasi Sales App',desc:'Masukan pengguna untuk perbaikan aplikasi.',roles:['r3','r4','r5','r9','r10'],cabang:['Semua cabang'],start:'2026-11-01',end:'2026-11-14',limit:'',pass:'',urut:'Urut',feedback:'Tidak',jadwal:'Sekali',status:'Draft',done:0,of:0,avg:null,
     questions:[{q:'Seberapa mudah mencatat penjualan di aplikasi?',type:'skala'},{q:'Fitur apa yang ingin ditambahkan?',type:'essay'}]}
 ];
 const kontenKind=()=>document.getElementById('f_type')?.value||'Quiz';
+const qKeys=q=>Array.isArray(q.key)?q.key:(q.key>=0?[q.key]:[]);
+function qOptRow(o,j,q,keyed){ const on=qKeys(q).includes(j), ro=q.type==='bs'&&keyed;
+  return `<div class="qopt" style="display:flex;gap:8px;align-items:center;margin-top:6px">${keyed?`<button type="button" class="cb qk ${on?'on':''}" onclick="qKey(this)" aria-pressed="${on}" aria-label="Jadikan kunci jawaban">${on?I('check',12,3):''}</button>`:`<span class="xs muted" style="width:18px;text-align:center">${q.type==='cb'?'☐':q.type==='dd'?(j+1)+'.':'○'}</span>`}<span class="inp h40" style="flex:1;height:36px"><input class="qo" value="${esc(o)}" placeholder="Opsi ${j+1}" ${ro?'readonly':''}></span>${Q_OPT.includes(q.type)?ibtn('x','Hapus opsi','qOptDel(this)',{v:'ghost',size:'icon-sm'}):''}</div>`; }
 function qRow(q,i,kind){
-  const opts=q.type==='pg'?(q.opts&&q.opts.length===4?q.opts:['','','','']):q.type==='bs'?(kind==='Quiz'?['Benar','Salah']:(q.opts||['Ya','Tidak'])):[];
-  const keyed=kind==='Quiz';
+  const keyed=kind==='Quiz', t=q.type;
+  const opts=Q_OPT.includes(t)?(q.opts&&q.opts.length?q.opts:['','']):t==='bs'?(keyed?['Benar','Salah']:(q.opts&&q.opts.length===2?q.opts:['Ya','Tidak'])):[];
+  const sk=t==='skala'?`<div class="grid g2" style="gap:8px;margin-top:6px"><label class="field"><span class="xs">Dari</span>${sel([['0','0'],['1','1']],String(q.min??1),'',{label:'Skala dari',cls:'sm qmin'})}</label><label class="field"><span class="xs">Sampai</span>${sel([2,3,4,5,6,7,8,9,10].map(n=>[String(n),String(n)]),String(q.max??5),'',{label:'Skala sampai',cls:'sm qmax'})}</label>
+      <span class="inp h40" style="height:36px"><input class="qml" value="${esc(q.minLabel||'')}" placeholder="Label nilai terendah (opsional)"></span><span class="inp h40" style="height:36px"><input class="qxl" value="${esc(q.maxLabel||'')}" placeholder="Label nilai tertinggi (opsional)"></span></div>`:'';
+  const gr=t==='grid'?`<div class="grid g2" style="gap:8px;margin-top:6px"><label class="field"><span class="xs">Baris (satu per baris)</span><textarea class="ta short qrows">${esc((q.rows||['Pelayanan','Kebersihan']).join('\n'))}</textarea></label><label class="field"><span class="xs">Kolom (satu per baris)</span><textarea class="ta short qcols">${esc((q.cols||['Kurang','Cukup','Baik']).join('\n'))}</textarea></label></div>`:'';
+  const hint={singkat:'Responden menjawab dengan teks singkat.',essay:'Responden menjawab dengan teks panjang.',tgl:'Responden memilih tanggal.',jam:'Responden memilih jam.',file:'Responden mengunggah foto atau file (maks. 10 MB).'}[t]||'';
   return `<div class="qrow tile" style="margin-bottom:10px">
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><b class="fg sm qn" style="width:22px">${i+1}.</b>
-      <span class="sel sm" style="display:flex;flex:1"><select class="qt" onchange="qType(this)" style="width:100%" aria-label="Jenis pertanyaan ${i+1}">${QTYPES[kind].map(([k,l])=>`<option value="${k}" ${q.type===k?'selected':''}>${l}</option>`).join('')}</select>${I('chev',14)}</span>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap"><b class="fg sm qn" style="width:22px">${i+1}.</b>
+      <span class="sel sm" style="display:flex;flex:1;min-width:160px"><select class="qt" onchange="qType(this)" style="width:100%" aria-label="Jenis pertanyaan ${i+1}">${QTYPES[kind].map(([k,l])=>`<option value="${k}" ${t===k?'selected':''}>${l}</option>`).join('')}</select>${I('chev',14)}</span>
+      <button type="button" class="fchip qr ${q.req!==false?'on':''}" aria-pressed="${q.req!==false}" onclick="multiTog(this)">Wajib</button>
       ${ibtn('trash','Hapus pertanyaan','qDel(this)',{v:'ghost',size:'icon-sm'})}</div>
     <span class="inp h40" style="margin-bottom:6px"><input class="qq" value="${esc(q.q||'')}" placeholder="Tulis pertanyaan" aria-label="Pertanyaan ${i+1}"></span>
-    ${opts.length?opts.map((o,j)=>`<div style="display:flex;gap:8px;align-items:center;margin-top:6px">${keyed?`<button type="button" class="cb qk ${q.key===j?'on':''}" onclick="qKey(this)" aria-pressed="${q.key===j}" aria-label="Jadikan kunci jawaban">${q.key===j?I('check',12,3):''}</button>`:`<span class="xs muted" style="width:18px;text-align:center">${'ABCD'[j]}</span>`}<span class="inp h40" style="flex:1;height:36px"><input class="qo" value="${esc(o)}" placeholder="Opsi ${'ABCD'[j]}" ${q.type==='bs'&&keyed?'readonly':''}></span></div>`).join('')+(keyed?'<p class="xs muted" style="margin-top:6px">Centang kunci jawaban. Skor dihitung otomatis (BRD 6.1.9–6.1.10).</p>':'')
-      :`<p class="xs muted">${q.type==='skala'?'Responden memilih 1 (sangat kurang) sampai 5 (sangat baik).':q.type==='singkat'?'Responden menjawab dengan teks singkat.':'Responden menjawab dengan teks panjang.'}</p>`}
+    ${opts.length?`<div class="qopts">${opts.map((o,j)=>qOptRow(o,j,q,keyed)).join('')}</div>${Q_OPT.includes(t)?`<div style="margin-top:6px">${btn('Tambah opsi',{v:'ghost',size:'sm',icon:'plus',on:'qOptAdd(this)',attrs:'type="button"'})}</div>`:''}${keyed?`<p class="xs muted" style="margin-top:6px">${t==='cb'?'Centang semua jawaban benar. Skor penuh hanya bila pilihan peserta sama persis.':'Centang kunci jawaban.'} Skor dihitung otomatis (BRD 6.1.9–6.1.10).</p>`:''}`:''}
+    ${sk}${gr}${hint?`<p class="xs muted">${hint}</p>`:''}
   </div>`;
 }
-function qRead(row){ return {q:row.querySelector('.qq').value.trim(),type:row.querySelector('.qt').value,opts:[...row.querySelectorAll('.qo')].map(i=>i.value.trim()),key:[...row.querySelectorAll('.qk')].findIndex(b=>b.classList.contains('on'))}; }
+function qOptAdd(b){ const row=b.closest('.qrow'), box=row.querySelector('.qopts'), d=qRead(row), j=box.children.length; box.insertAdjacentHTML('beforeend',qOptRow('',j,{...d,key:[]},kontenKind()==='Quiz')); box.lastElementChild.querySelector('.qo').focus(); }
+function qOptDel(b){ const box=b.closest('.qopts'); if(box.children.length<=2){ toast('Minimal 2 opsi','Pertanyaan pilihan butuh paling sedikit dua opsi.','danger'); return; } b.closest('.qopt').remove(); }
+function qRead(row){ const g=c=>row.querySelector(c), t=row.querySelector('.qt').value, keys=[...row.querySelectorAll('.qk')].map((b,i)=>b.classList.contains('on')?i:-1).filter(i=>i>=0), lines=el=>el?el.value.split('\n').map(s=>s.trim()).filter(Boolean):[];
+  const d={q:g('.qq').value.trim(),type:t,req:!!g('.qr')?.classList.contains('on'),opts:[...row.querySelectorAll('.qo')].map(i=>i.value.trim()),key:t==='cb'?keys:(keys[0]??-1)};
+  if(t==='skala'){ d.min=+(g('.qmin select')?.value||1); d.max=+(g('.qmax select')?.value||5); d.minLabel=g('.qml')?.value.trim()||''; d.maxLabel=g('.qxl')?.value.trim()||''; }
+  if(t==='grid'){ d.rows=lines(g('.qrows')); d.cols=lines(g('.qcols')); }
+  return d; }
+/* Konten yang terbit dikirim ke mobile lewat data bersama (kunci kontenQ). */
+function syncKontenQ(){ try{ const L=MD.konten.filter(k=>!k.del&&k.status==='Terbit').map(k=>({id:k.id,type:k.type,name:k.name,desc:k.desc||'',roles:k.roles,questions:(k.questions||[]).map(q=>({q:q.q,type:q.type,opts:q.opts||[],key:q.key,req:q.req!==false,min:q.min,max:q.max,minLabel:q.minLabel,maxLabel:q.maxLabel,rows:q.rows,cols:q.cols}))})); if(JSON.stringify(shRead('kontenQ',null))!==JSON.stringify(L)) shSet('kontenQ',L); }catch(e){} }
 function qRenum(){ document.querySelectorAll('#qb .qrow').forEach((r,i)=>r.querySelector('.qn').textContent=(i+1)+'.'); }
 function qAdd(){ const kind=kontenKind(), n=document.querySelectorAll('#qb .qrow').length; document.getElementById('qb').insertAdjacentHTML('beforeend',qRow({q:'',type:QTYPES[kind][0][0],key:-1},n,kind)); document.querySelectorAll('#qb .qq')[n].focus(); }
-function qType(sel){ const row=sel.closest('.qrow'), d=qRead(row), i=[...row.parentElement.children].indexOf(row); d.type=sel.value; if(d.type==='pg'&&d.opts.length!==4) d.opts=['','','','']; d.key=-1; row.outerHTML=qRow(d,i,kontenKind()); }
+function qType(sel){ const row=sel.closest('.qrow'), d=qRead(row), i=[...row.parentElement.children].indexOf(row); const was=d.type; d.type=sel.value; if(Q_OPT.includes(d.type)&&!Q_OPT.includes(was)) d.opts=['','']; d.key=d.type==='cb'?[]:-1; row.outerHTML=qRow(d,i,kontenKind()); }
 function qDel(b){ b.closest('.qrow').remove(); qRenum(); }
-function qKey(b){ b.closest('.qrow').querySelectorAll('.qk').forEach(x=>{ const on=x===b; x.classList.toggle('on',on); x.setAttribute('aria-pressed',on); x.innerHTML=on?I('check',12,3):''; }); }
+function qKey(b){ const row=b.closest('.qrow'); if(row.querySelector('.qt').value==='cb'){ const on=!b.classList.contains('on'); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.innerHTML=on?I('check',12,3):''; return; }
+  row.querySelectorAll('.qk').forEach(x=>{ const on=x===b; x.classList.toggle('on',on); x.setAttribute('aria-pressed',on); x.innerHTML=on?I('check',12,3):''; }); }
 function kontenType(sel){
   const kind=sel.value; document.querySelectorAll('[data-only]').forEach(el=>el.style.display=el.dataset.only===kind?'':'none');
   const rows=[...document.querySelectorAll('#qb .qrow')].map(qRead).map(d=>({...d,type:QTYPES[kind].some(t=>t[0]===d.type)?d.type:QTYPES[kind][0][0],key:-1}));
   document.getElementById('qb').innerHTML=rows.map((d,i)=>qRow(d,i,kind)).join('');
 }
-ENT.konten={label:'Konten',lower:'konten',toastLabel:r=>r.type,onPublish:r=>{ if(!r.of) r.of=live('user').filter(u=>r.roles.includes(u.role)).length; },prefix:'K-',store:()=>MD.konten,title:r=>r.name,code:r=>r.type,search:r=>r.name+r.desc,
+ENT.konten={label:'Konten',lower:'konten',toastLabel:r=>r.type,onPublish:r=>{ if(!r.of) r.of=live('user').filter(u=>r.roles.includes(u.role)).length; setTimeout(syncKontenQ,0); },prefix:'K-',store:()=>MD.konten,title:r=>r.name,code:r=>r.type,search:r=>r.name+r.desc,
   blank:()=>({type:'Quiz',status:'Draft',roles:['r3'],cabang:['Semua cabang'],start:'2026-11-01',end:'2026-11-15',limit:5,pass:70,urut:'Acak',feedback:'Ya',done:0,of:0,avg:0,questions:[{q:'',type:'pg',opts:['','','',''],key:-1}]}),
   fields:[
     {k:'type',label:'Jenis',type:'select',req:true,opts:['Quiz','Survey'],onchange:'kontenType(this)'},
@@ -4273,7 +4446,10 @@ ENT.konten={label:'Konten',lower:'konten',toastLabel:r=>r.type,onPublish:r=>{ if
   extra:r=>`<div class="field"><span>Pertanyaan <b class="req" aria-hidden="true">*</b></span><div id="qb">${(r.questions||[]).map((q,i)=>qRow(q,i,r.type)).join('')}</div>${btn('Tambah pertanyaan',{v:'outline',size:'sm',icon:'plus',on:'qAdd()',attrs:'type="button"'})}<p class="ferr" id="e___extra"></p></div>`,
   readExtra:()=>({questions:[...document.querySelectorAll('#qb .qrow')].map(qRead)}),
   validateExtra:v=>{ if(!v.questions.length) return 'Tambahkan minimal satu pertanyaan.';
-    for(const [i,q] of v.questions.entries()){ if(!q.q) return `Pertanyaan ${i+1} belum diisi.`; if(q.type==='pg'&&q.opts.filter(Boolean).length<2) return `Pertanyaan ${i+1} butuh minimal 2 opsi jawaban.`; if(v.type==='Quiz'&&(q.key<0||!q.opts[q.key])) return `Pertanyaan ${i+1} belum punya kunci jawaban.`; } return ''; },
+    for(const [i,q] of v.questions.entries()){ if(!q.q) return `Pertanyaan ${i+1} belum diisi.`; if(Q_OPT.includes(q.type)&&q.opts.filter(Boolean).length<2) return `Pertanyaan ${i+1} butuh minimal 2 opsi jawaban.`;
+      if(q.type==='grid'&&(!(q.rows||[]).length||(q.cols||[]).length<2)) return `Pertanyaan ${i+1} butuh minimal 1 baris dan 2 kolom.`;
+      if(v.type==='Quiz'){ const ks=qKeys(q); if(!ks.length||ks.some(k=>!q.opts[k])) return `Pertanyaan ${i+1} belum punya kunci jawaban.`; } } return ''; },
+  afterSave:()=>syncKontenQ(),afterCreate:()=>syncKontenQ(),
   foot:(r,id)=>!id?`${btn('Batal',{v:'outline',on:'closeLayer()'})}<span style="flex:1"></span>${btn('Simpan draft',{v:'card',on:'saveForm()'})}${btn('Simpan & terbitkan',{v:'accent',on:"saveForm('publish')"})}`
     :`${btn('Hapus',{v:'danger',icon:'trash',on:`delAsk('konten','${id}')`})}<span style="flex:1"></span>${
       r.status==='Draft'?`${btn('Simpan draft',{v:'card',on:'saveForm()'})}${btn('Terbitkan',{v:'accent',on:"saveForm('publish')"})}`
@@ -4282,19 +4458,20 @@ ENT.konten={label:'Konten',lower:'konten',toastLabel:r=>r.type,onPublish:r=>{ if
   inUse:r=>r.done?`Sudah ada ${r.done} peserta yang mengerjakan. Supaya hasil dan leaderboard tetap tersimpan, tutup saja ${r.type.toLowerCase()} ini.`:'',
   alt:(r,id)=>r.status==='Terbit'?btn('Tutup '+r.type.toLowerCase(),{v:'accent',on:`setKonten('${id}','Selesai')`}):''
 };
-function setKonten(id,st){ const r=MD.konten.find(x=>x.id===id); r.status=st; if(st==='Terbit'&&!r.of) r.of=live('user').filter(u=>r.roles.includes(u.role)).length; audit(`${st==='Terbit'?'Menerbitkan':st==='Selesai'?'Menutup':'Menarik ke draft'} ${r.type.toLowerCase()} ${r.name}`); closeLayer(); render(false); toast(`${r.type} ${st==='Terbit'?'diterbitkan':st==='Selesai'?'ditutup':'ditarik ke draft'}`,r.name); }
+function setKonten(id,st){ const r=MD.konten.find(x=>x.id===id); r.status=st; setTimeout(syncKontenQ,0); if(st==='Terbit'&&!r.of) r.of=live('user').filter(u=>r.roles.includes(u.role)).length; audit(`${st==='Terbit'?'Menerbitkan':st==='Selesai'?'Menutup':'Menarik ke draft'} ${r.type.toLowerCase()} ${r.name}`); closeLayer(); render(false); toast(`${r.type} ${st==='Terbit'?'diterbitkan':st==='Selesai'?'ditutup':'ditarik ke draft'}`,r.name); }
 function dupKonten(id){ const r=MD.konten.find(x=>x.id===id); closeLayer(); openForm('konten',null,{...JSON.parse(JSON.stringify(r)),id:undefined,name:r.name+' (salinan)',status:'Draft',done:0,of:0,avg:0}); }
 function kontenResult(id){ const r=MD.konten.find(x=>x.id===id); const quiz=r.type==='Quiz';
   const people=live('user').filter(u=>r.roles.includes(u.role)).slice(0,6);
   openPanel(r.name,`<div class="kv" style="margin-bottom:14px"><div><dt>Peserta</dt><dd>${r.done}/${r.of||'–'}</dd></div><div><dt>${quiz?'Rata-rata':'Respons'}</dt><dd>${quiz?r.avg:Math.round(r.done/(r.of||1)*100)+'%'}</dd></div><div><dt>${quiz?'Lulus':'Jadwal'}</dt><dd>${quiz?Math.round(r.done*.83)+' orang':(r.jadwal||'Sekali')}</dd></div></div>
   <div class="xs muted" style="margin-bottom:8px">${quiz?'Jawaban benar per pertanyaan':'Ringkasan jawaban'}</div>
   <div class="rows" style="margin-bottom:14px">${r.questions.map((q,i)=>`<div style="padding:10px 0"><div class="sm fg" style="margin-bottom:6px">${i+1}. ${esc(q.q)}</div>${
-    quiz?`<div style="display:flex;gap:8px;align-items:center"><div class="bar" style="flex:1"><i style="width:${q.acc||0}%"></i></div><b class="tabular sm fg">${q.acc??0}%</b></div><span class="xs muted">Kunci: ${esc(q.opts[q.key]||'–')}</span>`
+    quiz?`<div style="display:flex;gap:8px;align-items:center"><div class="bar" style="flex:1"><i style="width:${q.acc||0}%"></i></div><b class="tabular sm fg">${q.acc??0}%</b></div><span class="xs muted">${esc((QTN[q.type]||q.type))} · Kunci: ${esc(qKeys(q).map(k=>q.opts[k]).filter(Boolean).join(', ')||'–')}</span>`
     :q.dist?`<div style="display:flex;gap:4px;align-items:flex-end;height:46px">${q.dist.map((n,j)=>`<div style="flex:1;text-align:center"><div style="height:${n/Math.max(...q.dist)*34}px;border-radius:6px;background:var(--s${j%5+1})"></div><span class="xs muted">${q.type==='skala'?j+1:q.opts[j]} · ${n}</span></div>`).join('')}</div>`
     :q.top?q.top.map(t=>tag(t,'neutral')).join(' '):'<span class="xs muted">Belum ada jawaban.</span>'}</div>`).join('')}</div>
   ${quiz&&r.done?`<div class="xs muted" style="margin-bottom:6px">Peserta</div><div class="rows">${people.map((u,i)=>`<div class="rowlink" style="cursor:default">${av(u.name)}<span style="flex:1" class="sm fg">${esc(u.name)}</span><span class="xs muted">${roleName(u.role)}</span><b class="tabular fg">${[95,90,85,80,100,70][i]}</b></div>`).join('')}</div>`:''}`,
   btn('Unduh hasil',{v:'accent',icon:'down',on:`toast('Hasil diunduh','${r.id}_hasil.xlsx')`}),{sub:r.type+' · '+r.id}); }
 function pageKonten(q,kind){
+  syncKontenQ();
   const fS=q.st||'', fR=q.role||'', qq=(q.q||'').toLowerCase(), all=live('konten').filter(r=>r.type===kind), isQuiz=kind==='Quiz';
   const rows=all.filter(r=>!fS||r.status===fS).filter(r=>!fR||r.roles.includes(fR)).filter(r=>!qq||(r.name+r.desc).toLowerCase().includes(qq)).map(r=>({...r,_id:r.id}));
   const cnt=(k,v)=>all.filter(r=>r[k]===v).length;
@@ -4599,7 +4776,7 @@ function pageAktivitas(q){
   return {title:'Aktivitas lapangan',html:`<div style="margin-bottom:14px">${pills([['sales','Hasil kerja per sales'],['log','Log aktivitas toko']],tab,'aktTab')}</div>`+v.html};
 }
 
-const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi,'/kunjungan':pageKunjungan,'/approval':pageApproval,'/target':pageTarget,'/promo':pagePromo,'/insentif':pageInsentif,'/grading':pageGrading,'/leads':pageLeads,'/overdue':pageOverdue,'/company-sim':pageSimco,'/sektor':pageSektor,'/client':pageClient,'/kategori-toko':pageKategori,'/toko':pageToko,'/iam':pageIAM,'/produk':pageProduk,'/penugasan':pagePenugasan,'/pemesanan':pagePemesanan,'/sell-in':pageSellin,'/user-sales':pagePengguna,'/user-admin':pageAdmin,'/parameter':pageParameter,'/task-pending':pageTaskPending,'/aktivitas':pageAktivitas,'/canvassing':pageCanvassing,'/posm':pagePosm,'/region':pageRegion,'/brand':pageBrand,'/kategori-produk':pageKatProd,'/kompetitor':pageKompetitor,'/cabang-client':pageCabang,'/mapping-outlet':pageMapOutlet,'/data-penjualan':pageDataJual,'/penagihan':pagePenagihan,'/klaim-biaya':pageKlaim,'/kepatuhan-kunjungan':pageKepatuhan,'/pengumuman':pagePengumuman,'/sinkron':pageSinkron,'/satuan':pageSatuan,'/konversi':pageKonversi,'/sidebar-menu':pageSidebarMenu,'/konfigurasi-aktivitas':pageAktCfg,'/form-penjualan':pageFormJual,'/status-produk':pageStatProd,'/event':pageEvent,'/mitra':pageMitra,'/sku-display':pageSkuDisplay,'/market-share':pageMarketShare,'/quiz':q=>pageKonten(q,'Quiz'),'/survey':q=>pageKonten(q,'Survey'),'/pengaturan':pagePengaturan};
+const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi,'/kunjungan':pageKunjungan,'/approval':pageApproval,'/target':pageTarget,'/promo':pagePromo,'/insentif':pageInsentif,'/grading':pageGrading,'/leads':pageLeads,'/overdue':pageOverdue,'/company-sim':pageSimco,'/sektor':pageSektor,'/client':pageClient,'/kategori-toko':pageKategori,'/toko':pageToko,'/iam':pageIAM,'/produk':pageProduk,'/penugasan':pagePenugasan,'/pemesanan':pagePemesanan,'/sell-in':pageSellin,'/user-sales':pagePengguna,'/job':pageJob,'/user-admin':pageAdmin,'/parameter':pageParameter,'/task-pending':pageTaskPending,'/aktivitas':pageAktivitas,'/canvassing':pageCanvassing,'/posm':pagePosm,'/region':pageRegion,'/brand':pageBrand,'/kategori-produk':pageKatProd,'/kompetitor':pageKompetitor,'/cabang-client':pageCabang,'/mapping-outlet':pageMapOutlet,'/data-penjualan':pageDataJual,'/penagihan':pagePenagihan,'/klaim-biaya':pageKlaim,'/kepatuhan-kunjungan':pageKepatuhan,'/pengumuman':pagePengumuman,'/sinkron':pageSinkron,'/satuan':pageSatuan,'/konversi':pageKonversi,'/sidebar-menu':pageSidebarMenu,'/konfigurasi-aktivitas':pageAktCfg,'/form-penjualan':pageFormJual,'/status-produk':pageStatProd,'/event':pageEvent,'/mitra':pageMitra,'/sku-display':pageSkuDisplay,'/market-share':pageMarketShare,'/quiz':q=>pageKonten(q,'Quiz'),'/survey':q=>pageKonten(q,'Survey'),'/pengaturan':pagePengaturan};
 /* ---------- Dropdown dengan pencarian dan pagination ----------
    Semua <select> otomatis diganti tombol + panel. Select asli tetap ada (tersembunyi), jadi value, onchange, dan id tetap bekerja. */
 (function(){
@@ -4666,7 +4843,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
 /* ---------- Penyimpanan data dashboard (D6) ----------
    Perubahan di dashboard disimpan sebagai snapshot berversi. Data bersama dengan mobile tetap di salesapp.shared.v1.
    Naikkan DASH_VER bila bentuk data contoh berubah, supaya snapshot lama dibuang dan data contoh baru dipakai. */
-const DASH_VER=15;
+const DASH_VER=18;
 const PARAM={};
 const dashData=()=>({D,MD,TOKO,TRX,INFO,POSM,AR,KLAIM,ATT,REK_ADJ,PARAM});
 function restoreInto(t,src){
