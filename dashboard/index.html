@@ -3475,14 +3475,17 @@ function pageCanvassing(){
 /* Role yang di-assign ke toko diambil dari IAM; tambah id role di sini bila role baru juga bergerak antar toko. */
 const CV_ASSIGN_ROLES=['r4','r21','r5','r13'];
 const cvAssignees=()=>live('user').filter(u=>CV_ASSIGN_ROLES.includes(u.role)&&u.status==='Aktif');
-function cvAssignModal(u){ ST.cvPick={u,sel:new Set(tokoOfU(u).map(t=>t.id))}; cvAssignRender(); }
+function cvAssignModal(u){ const x=live('user').find(r=>r.id===u); ST.cvPick={u,cl:(x.clients||[])[0]||'',sel:new Set(tokoOfU(u).map(t=>t.id))}; cvAssignRender(); }
+function cvAssignClient(c){ ST.cvPick.cl=c; cvAssignRender(); }
 function cvAssignToggle(id){ const {u,sel:S}=ST.cvPick;
   if(!S.has(id)){ const bl=penBatas(u,S.size+1); if(bl){ toast('Tidak bisa menambah toko',bl,'danger'); return; } S.add(id); } else S.delete(id);
   cvAssignRender(); }
-function cvAssignRender(){ const {u,sel:S}=ST.cvPick, x=live('user').find(r=>r.id===u);
-  const list=live('toko').filter(t=>t.status==='Aktif'&&tokoClients(t).some(c=>(x.clients||[]).includes(c))&&!(t.cat==='Modern Retail'&&CV_ASSIGN_ROLES.includes(x.role))).sort((a,b)=>(a.cabang!==x.cabang)-(b.cabang!==x.cabang)||a.name.localeCompare(b.name));
-  openModal(`<h2 class="pt">Assign ${esc(x.name.split(' ')[0])} ke toko<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">${PEN_SATU.includes(x.role)?'Pilih satu toko':'Pilih satu toko atau lebih'} dari client ${esc(x.clients.map(clientName).join(', '))}. Toko di cabang ${esc(x.cabang)} tampil lebih dulu.</p>
-  <div class="rows" style="max-height:46vh;overflow:auto">${list.map(t=>`<button class="rowlink" role="checkbox" aria-checked="${S.has(t.id)}" onclick="cvAssignToggle('${t.id}')"><span class="cb ${S.has(t.id)?'on':''}">${S.has(t.id)?I('check',12,3):''}</span><span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${esc(t.name)}</b><span class="xs muted">${esc(t.addr)} · ${esc(t.cat)} · ${esc(t.cabang)}</span></span></button>`).join('')}</div>
+function cvAssignRender(){ const {u,cl,sel:S}=ST.cvPick, x=live('user').find(r=>r.id===u);
+  /* Pilih client dulu, lalu toko yang dipetakan ke client itu. Pilihan toko dari client lain tetap tersimpan saat client diganti. */
+  const list=live('toko').filter(t=>t.status==='Aktif'&&tokoClients(t).includes(cl)&&!(t.cat==='Modern Retail'&&CV_ASSIGN_ROLES.includes(x.role))).sort((a,b)=>(a.cabang!==x.cabang)-(b.cabang!==x.cabang)||a.name.localeCompare(b.name));
+  openModal(`<h2 class="pt">Assign ${esc(x.name.split(' ')[0])} ke toko<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">${PEN_SATU.includes(x.role)?'Pilih satu toko':'Pilih satu toko atau lebih'} dari client yang dipilih. Toko di cabang ${esc(x.cabang)} tampil lebih dulu.</p>
+  <div style="margin-bottom:12px">${sel(x.clients.map(c=>[c,clientName(c)]),cl,"cvAssignClient(this.value)",{label:'Client'})}</div>
+  ${list.length?'':`<p class="sm muted" style="margin:0 0 12px">Belum ada toko untuk client ini.</p>`}<div class="rows" style="max-height:46vh;overflow:auto">${list.map(t=>`<button class="rowlink" role="checkbox" aria-checked="${S.has(t.id)}" onclick="cvAssignToggle('${t.id}')"><span class="cb ${S.has(t.id)?'on':''}">${S.has(t.id)?I('check',12,3):''}</span><span style="flex:1;min-width:0"><b class="fg sm" style="display:block">${esc(t.name)}</b><span class="xs muted">${esc(t.addr)} · ${esc(t.cat)} · ${esc(t.cabang)}</span></span></button>`).join('')}</div>
   <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan'+(S.size?' '+S.size+' toko':''),{v:'accent',on:'cvAssignSave()',dis:!S.size})}</div>`); }
 function cvAssignSave(){ const {u,sel:S}=ST.cvPick; if(!S.size) return;
   TOKO.forEach(t=>{ const on=S.has(t.id), has=t.sales.includes(u); if(on&&!has) t.sales.push(u); if(!on&&has) t.sales=t.sales.filter(v=>v!==u); });
