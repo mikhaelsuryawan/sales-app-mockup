@@ -2095,9 +2095,9 @@ const rowKV=(l,v)=>`<div class="rowlink" style="cursor:default;padding:8px 0"><s
 function trxPanel(id){ const t=allTrx().find(x=>x.id===id); if(!t) return panelMissing('Transaksi'); const p=trxProd(t), s=byU(t.u), iv=t.inv;
   const unitSys=Math.round(t.total/t.q), unitInv=iv?Math.round(iv.price/t.q):unitSys;
   openPanel(t.id,`${panelHero({eyebrow:'Transaksi · '+t.date+' 2026',title:trxLines(t).length>1?trxLines(t).length+' produk · '+t.q+' unit':esc(p.name)+(t.q>1?' ×'+t.q:''),sub:esc(s.name)+' · '+esc(t.toko),badge:spill(t.st,t.st==='Terkirim'?'success':'warning'),metrics:[['Total (invoice)',rp(iv?iv.price:t.total)],['Jumlah',t.q+' unit'],['Harga sistem',rp(t.total)]]})}
-  ${trxLines(t).length>1?`<div class="xs muted" style="margin-bottom:8px">Produk (${trxLines(t).length})</div><div class="rows" style="margin-bottom:14px">${trxLines(t).map(l=>{ const lp=lineProd(l); return `<div class="rowlink" style="cursor:default"><span class="sm fg" style="flex:1">${esc(lp.name)}<span class="xs muted" style="display:block">${rp(l.price||Math.round(l.total/l.q))} × ${l.q}</span></span><b class="tabular fg sm">${rp((l.price||Math.round(l.total/l.q))*l.q)}</b></div>`; }).join('')}</div>`
+  ${trxLines(t).length>1?`<div class="xs muted" style="margin-bottom:8px">Produk (${trxLines(t).length})</div><div class="rows" style="margin-bottom:14px">${trxLines(t).map(l=>{ const lp=lineProd(l); return `<div class="rowlink" style="cursor:default"><span class="sm fg" style="flex:1">${esc(lp.name)}<span class="xs muted" style="display:block">${rp(l.price||Math.round(l.total/l.q))} × ${l.q}${l.disc?' · diskon '+rp(l.disc)+'/unit':''}</span></span><b class="tabular fg sm">${rp((l.price||Math.round(l.total/l.q))*l.q)}</b></div>`; }).join('')}</div>`
   :`<div class="tile" style="margin-bottom:14px"><div class="xs muted">Produk</div><b class="fg">${p.name} ×${t.q}</b><div class="xs muted">${p.sku}${t.promo?' · promo '+t.promo:''}</div></div>`}
-  <div class="xs muted" style="margin-bottom:8px">Data dari aplikasi mobile</div><div class="rows" style="margin-bottom:14px">${rowKV('No. transaksi (sistem)',`<span class="mono">${esc(t.id)}</span>`)}${rowKV('No. invoice toko',invNoOf(t)?`<span class="mono">${esc(invNoOf(t))}</span>`:'<span class="muted">Tidak diisi</span>')}${rowKV('Tanggal',esc(t.date)+' 2026'+(t.time?' · '+esc(t.time):''))}${rowKV('Sales',esc(s.name))}${rowKV('Toko',esc(t.toko))}${t.cust?rowKV('Pembeli',esc(t.cust)):''}${rowKV('Sumber',t.src==='Dashboard'?'Input dashboard':'Aplikasi mobile')}</div>
+  <div class="xs muted" style="margin-bottom:8px">Data dari aplikasi mobile</div><div class="rows" style="margin-bottom:14px">${rowKV('No. transaksi (sistem)',`<span class="mono">${esc(t.id)}</span>`)}${rowKV('No. invoice toko',invNoOf(t)?`<span class="mono">${esc(invNoOf(t))}</span>`:'<span class="muted">Tidak diisi</span>')}${rowKV('Tanggal',esc(t.date)+' 2026'+(t.time?' · '+esc(t.time):''))}${rowKV('Sales',esc(s.name))}${rowKV('Toko',esc(t.toko))}${t.cust?rowKV('Pembeli',esc(t.cust)):''}${t.diskonTrx>0?rowKV('Subtotal produk',rp(t.sub))+rowKV('Diskon transaksi','−'+rp(t.diskonTrx))+rowKV('Total transaksi',`<b class="tabular">${rp(t.inv?t.inv.price:t.total)}</b>`):''}${rowKV('Sumber',t.src==='Dashboard'?'Input dashboard':'Aplikasi mobile')}</div>
   ${!iv&&t.invFoto>0?`<div class="xs muted" style="margin-bottom:8px">Foto invoice (${t.invFoto} foto)</div><div style="display:flex;gap:14px;margin-bottom:14px"><div style="width:120px;flex:none;border-radius:12px;overflow:hidden;box-shadow:var(--shadow-card);background:#fff">${invDocSvg(120,156)}</div><div style="flex:1;min-width:0"><div class="mono fg" style="margin-bottom:6px">${esc(invNoOf(t)||'–')}</div><div class="xs muted">Diunggah sales lewat Catat penjualan.</div></div></div>`:''}
   ${iv?`<div class="xs muted" style="margin-bottom:8px">Invoice dari lapangan</div><div style="display:flex;gap:14px;margin-bottom:14px"><div style="width:120px;flex:none;border-radius:12px;overflow:hidden;box-shadow:var(--shadow-card);background:#fff">${invDocSvg(120,156)}</div><div style="flex:1;min-width:0"><div class="mono fg" style="margin-bottom:8px">${esc(invNoOf(t))}</div><div class="rows">
     <div class="rowlink" style="cursor:default;padding:8px 0"><span class="sm muted" style="flex:1">Harga invoice (acuan)</span><b class="tabular fg">${rp(unitInv)}</b></div>
@@ -2177,9 +2177,14 @@ function djRow(i){ const g=PRODUCTS.filter(p=>p.status!=='Nonaktif');
     <div id="dj_p_m${i}">${sel(g.map(p=>[p.id,p.name]),g[0].id,`djPrice(${i})`,{label:'Produk',id:'dj_p'+i})}</div><div id="dj_p_f${i}" style="display:none"><span class="inp"><input id="dj_pf${i}" placeholder="Nama produk, contoh: Setrika Uap Mini"></span></div>
     <div class="grid g2" style="gap:10px"><label class="field"><span>Jumlah</span>${qtyBox('dj_q'+i,1,{on:`djNote(${i})`})}</label>
       <label class="field"><span>Harga satuan (Rp) <b class="req" aria-hidden="true">*</b></span><span class="inp"><input id="dj_h${i}" inputmode="numeric" value="${g[0].price}" oninput="djNote(${i})"><span class="unit">Rp</span></span></label></div>
+    <label class="field"><span>Diskon produk per unit (Rp) <span class="muted">· opsional</span></span><span class="inp"><input id="dj_dk${i}" inputmode="numeric" placeholder="0" oninput="this.value=this.value.replace(/\D/g,'');djNote(${i})"><span class="unit">Rp</span></span></label>
+    <div class="sm muted" style="text-align:right">Subtotal produk <b class="fg tabular" id="dj_sub${i}"></b></div>
     <div id="dj_note${i}" aria-live="polite"></div></div>`; }
 function djRenum(){ const rs=[...document.querySelectorAll('[data-djrow]')]; rs.forEach((r,k)=>{ r.querySelector('.dj-rn').textContent='Produk '+(k+1); r.querySelector('.djrow-h .btn').style.display=rs.length>1?'':'none'; }); djTotal(); }
-function djTotal(){ const t=document.getElementById('dj_tot'); if(!t) return; t.textContent=rp(djIdx().reduce((a,i)=>a+(parseInt(document.getElementById('dj_q'+i).value,10)||0)*(parseInt((document.getElementById('dj_h'+i).value||'').replace(/\D/g,''),10)||0),0)); }
+const djNum=id=>parseInt(((document.getElementById(id)||{}).value||'').replace(/\D/g,''),10)||0;
+const djLine=i=>Math.max(0,djNum('dj_h'+i)-djNum('dj_dk'+i))*djNum('dj_q'+i);
+function djTotal(){ const t=document.getElementById('dj_tot'); if(!t) return; djIdx().forEach(i=>{ const e=document.getElementById('dj_sub'+i); if(e) e.textContent=rp(djLine(i)); });
+  const sub=djIdx().reduce((a,i)=>a+djLine(i),0), d=djNum('dj_dt'); t.textContent=rp(Math.max(0,sub-d)); const m=document.getElementById('dj_sum'); if(m) m.textContent='Subtotal '+rp(sub)+(d?' · diskon transaksi −'+rp(d):''); }
 function djRowAdd(){ const i=++DJ_I; document.getElementById('dj_rows').insertAdjacentHTML('beforeend',djRow(i)); djRenum(); djPrice(i); document.getElementById('dj_p'+i)?.focus?.(); }
 function djRowDel(i){ if(djIdx().length<2) return; document.querySelector(`[data-djrow="${i}"]`).remove(); djRenum(); }
 function djTokoMode(v){ document.getElementById('dj_tk_m').style.display=v==='free'?'none':''; document.getElementById('dj_tk_f').style.display=v==='free'?'':'none'; }
@@ -2196,8 +2201,9 @@ function djForm(){ if(!can('sales.input')) return noAccess();
       <div id="dj_tk_m">${sel(tk.map(t=>[t.name,t.name]),tk[0]?.name||'','djPriceAll()',{label:'Toko',id:'dj_t'})}</div>
       <div id="dj_tk_f" style="display:none"><span class="inp"><input id="dj_tf" placeholder="Nama toko, contoh: Warung Elektronik Bu Siti"></span></div></div>
     <div class="field"><span>Produk <b class="req" aria-hidden="true">*</b></span><div id="dj_rows" style="display:grid;gap:10px">${djRow(0)}</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px">${btn('Tambah produk',{v:'outline',size:'sm',icon:'plus',on:'djRowAdd()'})}<span class="sm muted">Total <b class="fg tabular" id="dj_tot"></b></span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px">${btn('Tambah produk',{v:'outline',size:'sm',icon:'plus',on:'djRowAdd()'})}<span class="sm muted" style="text-align:right"><span class="xs" id="dj_sum" style="display:block"></span>Total <b class="fg tabular" id="dj_tot"></b></span></div>
       <p class="xs muted" style="margin-top:6px">Produk di luar master tetap tercatat sebagai penjualan dan masuk daftar Produk dari sales (sementara).</p></div>
+    <label class="field"><span>Diskon transaksi (Rp) <span class="muted">· opsional</span></span><span class="inp"><input id="dj_dt" inputmode="numeric" placeholder="0" oninput="this.value=this.value.replace(/\D/g,'');djTotal()"><span class="unit">Rp</span></span><span class="xs muted" style="display:block;margin-top:4px">Dipotong dari subtotal semua produk, sudah masuk ke total transaksi.</span></label>
     <label class="field"><span>No. invoice toko</span><span class="inp"><input id="dj_inv" placeholder="contoh: INV/EC/2610/04571" autocomplete="off"></span></label>
     <label class="field"><span>Alasan input dari dashboard <b class="req" aria-hidden="true">*</b></span>${sel(DJ_ALASAN,DJ_ALASAN[0],'',{label:'Alasan',id:'dj_a'})}</label>
     <label class="field"><span>Catatan</span><textarea class="ta" id="dj_n" style="min-height:60px" placeholder="contoh: nomor nota toko, konfirmasi Team Leader"></textarea></label>
@@ -2215,13 +2221,14 @@ function djSave(){
   if(!toko){ err.textContent='Isi nama toko.'; return; }
   if(!(day>=1&&day<=LD_TODAY)){ err.textContent='Tanggal antara 1 dan '+LD_TODAY+' Okt.'; return; }
   const idx=djIdx(), items=[]; let bad='';
-  idx.forEach((i,k)=>{ const pre=idx.length>1?'Produk '+(k+1)+': ':'', pfree=document.querySelector(`input[name="dj_pm${i}"]:checked`)?.value==='free', pname=pfree?clean(g('dj_pf'+i).value):'', qn=parseInt(g('dj_q'+i).value,10), h=parseInt(g('dj_h'+i).value.replace(/\D/g,''),10);
-    if(bad) return; if(pfree&&!pname){ bad=pre+'isi nama produk.'; return; } if(!(qn>0)){ bad=pre+'jumlah minimal 1.'; return; } if(!(h>0)){ bad=pre+'isi harga satuan lebih dari nol.'; return; }
-    items.push({p:pfree?null:g('dj_p'+i).value,pname:pfree?pname:undefined,prodFree:pfree,q:qn,price:h,total:h*qn}); });
+  idx.forEach((i,k)=>{ const pre=idx.length>1?'Produk '+(k+1)+': ':'', pfree=document.querySelector(`input[name="dj_pm${i}"]:checked`)?.value==='free', pname=pfree?clean(g('dj_pf'+i).value):'', qn=parseInt(g('dj_q'+i).value,10), h=parseInt(g('dj_h'+i).value.replace(/\D/g,''),10), dk=djNum('dj_dk'+i);
+    if(bad) return; if(pfree&&!pname){ bad=pre+'isi nama produk.'; return; } if(!(qn>0)){ bad=pre+'jumlah minimal 1.'; return; } if(!(h>0)){ bad=pre+'isi harga satuan lebih dari nol.'; return; } if(dk>=h){ bad=pre+'diskon harus lebih kecil dari harga satuan.'; return; }
+    items.push({p:pfree?null:g('dj_p'+i).value,pname:pfree?pname:undefined,prodFree:pfree,q:qn,list:h,disc:dk,price:h-dk,total:(h-dk)*qn}); });
   if(bad){ err.textContent=bad.charAt(0).toUpperCase()+bad.slice(1); return; }
-  const L=shRead('trxApp',[]), n=L.filter(t=>t.src==='Dashboard').length+1, tot=items.reduce((a,x)=>a+x.total,0), pc=x=>x.p?PRODUCTS.find(y=>y.id===x.p)?.cat:'';
+  const L=shRead('trxApp',[]), n=L.filter(t=>t.src==='Dashboard').length+1, sub=items.reduce((a,x)=>a+x.total,0), dTrx=djNum('dj_dt'), tot=sub-dTrx, pc=x=>x.p?PRODUCTS.find(y=>y.id===x.p)?.cat:'';
+  if(dTrx>sub){ err.textContent='Diskon transaksi melebihi subtotal produk ('+rp(sub)+').'; return; }
   items.forEach(x=>{ x.kat=pc(x)||''; });
-  const rec={id:'TRX-2610-D'+String(n).padStart(3,'0'),m:10,day,date:day+' Okt',d:ldAgo(10,day),u,toko,tokoFree:free,p:items[0].p,pname:items[0].pname,kat:items[0].kat,prodFree:items.some(x=>x.prodFree),q:items.reduce((a,x)=>a+x.q,0),total:tot,items,st:'Terkirim',inv:null,src:'Dashboard',invNo:clean(g('dj_inv').value).toUpperCase(),alasan:g('dj_a').value,note:clean(g('dj_n').value),by:ME.name};
+  const rec={id:'TRX-2610-D'+String(n).padStart(3,'0'),m:10,day,date:day+' Okt',d:ldAgo(10,day),u,toko,tokoFree:free,p:items[0].p,pname:items[0].pname,kat:items[0].kat,prodFree:items.some(x=>x.prodFree),q:items.reduce((a,x)=>a+x.q,0),total:tot,sub,diskonTrx:dTrx,items,st:'Terkirim',inv:null,src:'Dashboard',invNo:clean(g('dj_inv').value).toUpperCase(),alasan:g('dj_a').value,note:clean(g('dj_n').value),by:ME.name};
   shSet('trxApp',[rec,...L]);
   items.filter(x=>x.prodFree&&!D.prodTemp.some(y=>!y.master&&y.name.toLowerCase()===x.pname.toLowerCase())).forEach(x=>D.prodTemp.unshift({id:newId('pt'),name:x.pname,harga:x.price,note:'Dari input penjualan dashboard '+rec.id,by:u,toko,when:day+' Okt'})); audit('Menambahkan penjualan '+rec.id+' atas nama '+byU(u).name+' ('+rec.alasan+')');
   closeLayer(); render(false); toast('Penjualan ditambahkan',rec.id+' · '+rp(rec.total)+'. Masuk ke laporan dan target '+byU(u).name+'.'); }
@@ -4286,7 +4293,7 @@ function pagePengaturan(){
 const AKT_MOD=[['jual','Catat penjualan'],['sku','SKU display'],['share','Market share'],['stok','Stock opname'],['posm','Campaign, POSM & planogram']];
 const FTYPE=[['text','Teks'],['number','Angka'],['money','Rupiah'],['date','Tanggal'],['select','Dropdown'],['photo','Foto'],['tel','Telepon'],['calc','Hitung (rumus)']];
 const FSRC=[['','–'],['katprod','Master Kategori produk'],['statprod','Master Status produk'],['produk','Master Produk'],['manual','Opsi manual']];
-const FPERAN=[['','–'],['kategori','Kategori transaksi'],['produk','Nama produk transaksi'],['harga','Harga satuan transaksi'],['qty','Jumlah unit'],['pembeli','Nama pembeli'],['noinv','No. invoice toko'],['fotoinv','Foto invoice']];
+const FPERAN=[['','–'],['kategori','Kategori transaksi'],['produk','Nama produk transaksi'],['harga','Harga satuan transaksi'],['qty','Jumlah unit'],['pembeli','Nama pembeli'],['diskon','Diskon produk (per unit)'],['diskontrx','Diskon transaksi'],['noinv','No. invoice toko'],['fotoinv','Foto invoice']];
 const METRIK=[['qty','Quantity (unit)'],['nominal','Nominal (Rp)'],['akuisisi','Akuisisi pelanggan baru']];
 const SKU_METODE=[['qr','Scan QR'],['manual','Input manual']];
 const lbl=(L,k)=>(L.find(x=>x[0]===k)||[k,k])[1];
@@ -4296,10 +4303,10 @@ Object.assign(MD,{
   aktcfg:[{id:'ac1',role:'r3',lokasi:'penempatan',checkin:'Ya',akt:['jual','sku','share'],gated:['stok'],skuFoto:2,skuMetode:['qr','manual'],skuMulti:'Ya',shareDraft:'Ya',metrik:['qty'],dasar:'qty',status:'Aktif'}],
   formjual:[
     ['kategori','Kategori produk','select','katprod','','Produk','Ya','Ya','kategori'],['status','Status produk','select','statprod','','Produk','Ya','Ya',''],['nama','Nama produk','text','produk','','Produk','Ya','Ya','produk'],
-    ['harga','Harga','money','','','Produk','Ya','Ya',''],['diskon','Diskon','money','','','Produk','Tidak','Ya',''],['setelah','Harga setelah diskon','calc','','{harga} - {diskon}','Produk','Tidak','Tidak','harga'],
+    ['harga','Harga','money','','','Produk','Ya','Ya',''],['diskon','Diskon produk (per unit)','money','','','Produk','Tidak','Ya','diskon'],['setelah','Harga setelah diskon','calc','','{harga} - {diskon}','Produk','Tidak','Tidak','harga'],
     ['tanggal','Tanggal pembelian','date','','','Invoice','Ya','Ya',''],['jumlah','Jumlah produk','number','','','Produk','Ya','Ya','qty'],['foto','Foto produk','photo','','','Produk','Ya','Tidak',''],
     ['noinv','No. invoice','text','','','Invoice','Ya','Ya','noinv'],['fotoinv','Foto invoice','photo','','','Invoice','Ya','Tidak','fotoinv'],
-    ['pembeli','Nama pembeli','text','','','Pembeli','Ya','Tidak','pembeli'],['alamat','Alamat pembeli','text','','','Pembeli','Tidak','Tidak',''],['telepon','Telepon pembeli','tel','','','Pembeli','Ya','Tidak','']
+    ['pembeli','Nama pembeli','text','','','Pembeli','Ya','Tidak','pembeli'],['alamat','Alamat pembeli','text','','','Pembeli','Tidak','Tidak',''],['telepon','Telepon pembeli','tel','','','Pembeli','Ya','Tidak',''],['diskontrx','Diskon transaksi','money','','','Diskon','Tidak','Tidak','diskontrx']
   ].map(([key,label,type,src,rumus,bagian,wajib,ocr,peran],i)=>({id:'fj'+(i+1),key,label,type,src,rumus,opsi:'',bagian,wajib,ocr,peran,urut:i+1,roles:['r3'],status:'Aktif'})),
   tgtqty:[['TV',34],['Kulkas',18],['Mesin Cuci',14],['AC',8],['Air Purifier',6]].map(([kat,target],i)=>({id:'tq'+(i+1),u:'rina',kat,bulan:'Oktober 2026',target,status:'Aktif'}))
     .concat([['TV',20],['Kulkas',12],['Mesin Cuci',10],['AC',3]].map(([kat,target],i)=>({id:'tq'+(10+i),u:'sinta',kat,bulan:'Oktober 2026',target,status:'Aktif'})))
@@ -4620,7 +4627,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
 /* ---------- Penyimpanan data dashboard (D6) ----------
    Perubahan di dashboard disimpan sebagai snapshot berversi. Data bersama dengan mobile tetap di salesapp.shared.v1.
    Naikkan DASH_VER bila bentuk data contoh berubah, supaya snapshot lama dibuang dan data contoh baru dipakai. */
-const DASH_VER=14;
+const DASH_VER=15;
 const PARAM={};
 const dashData=()=>({D,MD,TOKO,TRX,INFO,POSM,AR,KLAIM,ATT,REK_ADJ,PARAM});
 function restoreInto(t,src){

@@ -176,6 +176,8 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .bar{height:8px;border-radius:99px;background:rgba(12,46,89,.08);overflow:hidden}
 .bar i{display:block;height:100%;border-radius:99px;background:var(--grad);box-shadow:0 0 10px rgba(10,146,242,.5)}
 .bar.tan i{background:var(--grad-tan);box-shadow:0 0 10px rgba(240,154,102,.5)}
+.prodbox{margin-top:16px;padding:2px 14px 14px;border:2px solid rgba(10,127,230,.4);border-radius:20px;background:rgba(255,255,255,.5)}
+.prodbox:first-of-type{margin-top:10px}
 .qty{display:flex;align-items:center;gap:8px;margin-top:6px}
 .qty button{width:48px;height:48px;flex:none;display:grid;place-items:center;border-radius:14px;color:var(--blue-700);background:rgba(255,255,255,.65);box-shadow:inset 0 0 0 1px var(--sep)}
 .qty button:active{background:var(--blue-100)}
@@ -2222,10 +2224,11 @@ const MASTER_DEF={
   produk:[['tv50','ARUNIKA','Google TV'],['tv43','ARUNIKA','LED TV'],['kl2p','ARUNIKA','Inverter'],['mc85','ARUNIKA','Top Load'],['ac1','ARUNIKA','AC Inverter'],['ap30','ARUNIKA','Air Purifier'],['rc18','KIRANA','Rice Cooker'],['bl11','KIRANA','Blender'],['kp16','KIRANA','Kipas Angin'],['ds72','KIRANA','Dispenser']].map(([id,brand,kat])=>{ const p=prodById(id); return {id,name:p.name,sku:p.sku,price:p.price,brand,kat}; }),
   aktcfg:{r3:{lokasi:'penempatan',checkin:'Ya',akt:['jual','sku','share'],gated:['stok'],skuFoto:2,skuMetode:['qr','manual'],skuMulti:'Ya',shareDraft:'Ya',metrik:['qty'],dasar:'qty'}},
   formjual:[['kategori','Kategori produk','select','katprod','','Produk','Ya','Ya','kategori'],['status','Status produk','select','statprod','','Produk','Ya','Ya',''],['nama','Nama produk','text','produk','','Produk','Ya','Ya','produk'],
-    ['harga','Harga','money','','','Produk','Ya','Ya',''],['diskon','Diskon','money','','','Produk','Tidak','Ya',''],['setelah','Harga setelah diskon','calc','','{harga} - {diskon}','Produk','Tidak','Tidak','harga'],
+    ['harga','Harga','money','','','Produk','Ya','Ya',''],['diskon','Diskon produk (per unit)','money','','','Produk','Tidak','Ya','diskon'],['setelah','Harga setelah diskon','calc','','{harga} - {diskon}','Produk','Tidak','Tidak','harga'],
     ['tanggal','Tanggal pembelian','date','','','Invoice','Ya','Ya',''],['jumlah','Jumlah produk','number','','','Produk','Ya','Ya','qty'],['foto','Foto produk','photo','','','Produk','Ya','Tidak',''],
     ['noinv','No. invoice','text','','','Invoice','Ya','Ya','noinv'],['fotoinv','Foto invoice','photo','','','Invoice','Ya','Tidak','fotoinv'],
-    ['pembeli','Nama pembeli','text','','','Pembeli','Ya','Tidak','pembeli'],['alamat','Alamat pembeli','text','','','Pembeli','Tidak','Tidak',''],['telepon','Telepon pembeli','tel','','','Pembeli','Ya','Tidak','']
+    ['pembeli','Nama pembeli','text','','','Pembeli','Ya','Tidak','pembeli'],['alamat','Alamat pembeli','text','','','Pembeli','Tidak','Tidak',''],['telepon','Telepon pembeli','tel','','','Pembeli','Ya','Tidak',''],
+    ['diskontrx','Diskon transaksi','money','','','Diskon','Tidak','Tidak','diskontrx']
   ].map(([key,label,type,src,rumus,bagian,wajib,ocr,peran])=>({key,label,type,src,rumus,opsi:'',bagian,wajib,ocr,peran,roles:['r3']})),
   tgtqty:[['TV',34,26],['Kulkas',18,12],['Mesin Cuci',14,9],['AC',8,6],['Air Purifier',6,5]].map(([kat,target,act])=>({u:'rina',kat,bulan:'Oktober 2026',target,act}))
 };
@@ -2347,7 +2350,9 @@ function fCalcRaw(f,i,seen=0){ if(seen>10) return 0; const expr=(f.rumus||'').re
 const fNum = (k,i) => { const f=formFields().find(x=>x.key===k); if(!f) return 0; return f.type==='calc'?Math.max(0,Math.round(fCalcRaw(f,i))):Number(fStore(f,i).v[k])||0; };
 const fUnit = i => { const f=fPeran('harga'); return f?fNum(f.key,i):0; };
 const fQty = i => { const f=fPeran('qty'); return f?parseInt(fStore(f,i).v[f.key])||0:1; };
-const sfTotal = () => S.sf.it.reduce((s,_,i)=>s+fUnit(i)*fQty(i),0);
+const sfSub = () => S.sf.it.reduce((s,_,i)=>s+fUnit(i)*fQty(i),0);
+const sfDisc = () => { const f=fPeran('diskontrx'); return f?Math.max(0,Number(S.sf.v[f.key])||0):0; };
+const sfTotal = () => Math.max(0,sfSub()-sfDisc());
 function fOpts(f,i){
   if(f.src==='katprod') return katOpts();
   if(f.src==='statprod') return STATUS_PRODUK().map(s=>[s,s]);
@@ -2357,7 +2362,7 @@ function fOpts(f,i){
 }
 function fRefresh(){ S.sf.it.forEach((_,i)=>{ formFields().filter(f=>f.type==='calc'&&isItem(f)).forEach(f=>{ const e=document.getElementById('ff_'+f.key+'_'+i), n=fNum(f.key,i); if(e) e.value=n?n.toLocaleString('id-ID'):''; });
     const sb=$('#sf_sub'+i); if(sb) sb.textContent=rp(fUnit(i)*fQty(i)); });
-  const t=$('#sf_tot'); if(t) t.textContent=rp(sfTotal()); }
+  const a=$('#sf_suball'); if(a) a.textContent=rp(sfSub()); const d=$('#sf_dtrx'); if(d) d.textContent=sfDisc()?'−'+rp(sfDisc()):'–'; const t=$('#sf_tot'); if(t) t.textContent=rp(sfTotal()); }
 function fSet(k,v,rerender,i){ const f=formFields().find(x=>x.key===k); fStore(f,i).v[k]=v; if(rerender) render(false,true); else fRefresh(); }
 /* Jumlah: tombol − dan +, angka tetap bisa diketik langsung */
 function fStep(k,i,d){ const f=formFields().find(x=>x.key===k), st=fStore(f,i), min=f.peran==='qty'?1:0, n=Math.max(min,(parseInt(st.v[k])||0)+d); st.v[k]=n; const e=document.getElementById('ff_'+k+'_'+(isItem(f)?i:'s')); if(e) e.value=n; fRefresh(); }
@@ -2380,7 +2385,7 @@ SCR['spg-jual-form'] = () => {
   const F=formFields(), groups=[...new Set(F.map(f=>f.bagian||'Lainnya'))], hasTot=fPeran('harga')&&fPeran('qty'), N=S.sf.it.length;
   const grp=(g,i0)=>{
     if(g!=='Produk') return `<div class="sec-title" ${i0?'':'style="margin-top:8px"'}>${esc(g)}</div>${F.filter(f=>(f.bagian||'Lainnya')===g).map(f=>fieldInput(f)).join('')}`;
-    return S.sf.it.map((_,i)=>`<div class="sec-title" id="it_${i}" ${i0&&!i?'':i?'':'style="margin-top:8px"'}>Produk${N>1?' '+(i+1):''}${N>1?`<button type="button" class="lnk-del" onclick="fDelItem(${i})" aria-label="Hapus produk ${i+1}">${I('trash',16)} Hapus</button>`:''}</div>${F.filter(isItem).map(f=>fieldInput(f,i)).join('')}${N>1&&hasTot?`<div class="kv"><span>Subtotal produk ${i+1}</span><span class="num" id="sf_sub${i}">${rp(fUnit(i)*fQty(i))}</span></div>`:''}`).join('')
+    return S.sf.it.map((_,i)=>`<section class="prodbox" id="it_${i}" aria-label="Produk ${i+1}"><div class="sec-title" style="margin-top:12px">Produk${N>1?' '+(i+1):''}${N>1?`<button type="button" class="lnk-del" onclick="fDelItem(${i})" aria-label="Hapus produk ${i+1}">${I('trash',16)} Hapus</button>`:''}</div>${F.filter(isItem).map(f=>fieldInput(f,i)).join('')}${hasTot?`<div class="kv"><span>Subtotal produk${N>1?' '+(i+1):''}</span><span class="num" id="sf_sub${i}">${rp(fUnit(i)*fQty(i))}</span></div>`:''}</section>`).join('')
       +`<button type="button" class="btn ghost" style="margin-top:12px" onclick="fAddItem()">${I('plus',20)} Tambah produk</button>`;
   };
   return {note:'Form dirender dari konfigurasi Form penjualan di dashboard: label, tipe isian, sumber pilihan (master Kategori produk, Status produk, Produk, atau opsi manual), rumus, wajib, dan field yang terisi dari OCR. Bagian Produk bisa diulang untuk lebih dari satu produk dalam satu transaksi; bagian lain diisi sekali. Jumlah memakai tombol − dan + atau diketik langsung. Peran field (kategori, nama produk, harga satuan, jumlah, pembeli) menghubungkan isian ke total transaksi, target quantity, dan laporan.',
@@ -2388,7 +2393,7 @@ SCR['spg-jual-form'] = () => {
     ${S.sf.ocr?`<div class="card" style="margin-bottom:6px"><div class="row"><div style="width:46px;height:60px;flex:none;border-radius:8px;overflow:hidden;box-shadow:0 4px 14px -6px rgba(0,40,120,.4)">${invDoc(46,60)}</div><div class="grow"><div class="small muted">Invoice terbaca · keyakinan ${S.sf.ocr.conf}%</div><b class="mono" style="font-size:12.5px">${S.sf.ocr.no}</b></div>${chip('Terisi otomatis','green')}</div>
       <p class="hint" style="margin-bottom:0">Periksa field bertanda OCR, lalu lengkapi sisanya.</p></div>`:''}
     ${groups.map((g,i)=>grp(g,i)).join('')}
-    ${hasTot?`<div class="kv" style="font-size:15px"><span style="color:var(--ink);font-weight:700">Total transaksi${N>1?' ('+N+' produk)':''}</span><span class="num" id="sf_tot">${rp(sfTotal())}</span></div>`:''}
+    ${hasTot?`<div class="card" style="margin-top:14px"><div class="kv"><span>Subtotal produk${N>1?' ('+N+')':''}</span><span class="num" id="sf_suball">${rp(sfSub())}</span></div>${fPeran('diskontrx')?`<div class="kv"><span>Diskon transaksi</span><span class="num" id="sf_dtrx">${sfDisc()?'−'+rp(sfDisc()):'–'}</span></div>`:''}<div class="kv" style="font-size:16px"><span style="color:var(--ink);font-weight:700">Total transaksi</span><span class="num" id="sf_tot">${rp(sfTotal())}</span></div></div>`:''}
     <div id="sferr"></div>
   </main><footer class="actions"><button class="btn" onclick="spgSave()">Simpan transaksi</button></footer>`};
 };
@@ -2402,16 +2407,18 @@ function spgSave(){
   if(neg.length){ $('#sferr').innerHTML=`<div class="err">${esc(neg.join(', '))} tidak boleh minus. Periksa isian angkanya.</div>`; return; }
   const fp=fPeran('produk'), fc=fPeran('pembeli'), fk=fPeran('kategori');
   const lines=S.sf.it.map((it,i)=>{ const name=(fp?it.v[fp.key]:'')||'Produk', q=fQty(i)||1, unit=fUnit(i), pr=mProd().find(p=>p.name===name), kv=fk?(it.v[fk.key]||''):'';
-    return {name,q,unit,pr,kat:kv.split('/')[1]||pr?.kat||'',vals:F.filter(isItem).map(f=>[f.label,fDisp(f,i)])}; });
-  const tot=lines.reduce((s,l)=>s+l.unit*l.q,0), sys=lines.reduce((s,l)=>s+(l.pr?.price||l.unit)*l.q,0), qAll=lines.reduce((s,l)=>s+l.q,0);
+    const fd=fPeran('diskon'); return {name,q,unit,disc:fd?fNum(fd.key,i):0,pr,kat:kv.split('/')[1]||pr?.kat||'',vals:F.filter(isItem).map(f=>[f.label,fDisp(f,i)])}; });
+  const sub=lines.reduce((s,l)=>s+l.unit*l.q,0), dTrx=sfDisc();
+  if(dTrx>sub){ $('#sferr').innerHTML=`<div class="err">Diskon transaksi melebihi subtotal produk (${rp(sub)}).</div>`; return; }
+  const tot=sub-dTrx, sys=lines.reduce((s,l)=>s+(l.pr?.price||l.unit)*l.q,0), qAll=lines.reduce((s,l)=>s+l.q,0);
   const id='TRX-2610-0'+(100+S.sales.length), o=visitOpen(), toko=o?o.place:spgToko().name, cust=fc?String(S.sf.v[fc.key]||'').trim():'';
   const vals=[...(N>1?lines.flatMap((l,i)=>l.vals.map(([a,b])=>['Produk '+(i+1)+' · '+a,b])):lines[0].vals),...F.filter(f=>!isItem(f)).map(f=>[f.label,fDisp(f)])];
   const fn=fPeran('noinv'), invNo=((fn?S.sf.v[fn.key]:'')||S.sf.ocr?.no||'').toString().replace(/['"<>`]/g,'').trim().toUpperCase(), ffi=fPeran('fotoinv'), invFoto=ffi?(S.sf.ph[ffi.key]||0):(S.sf.ocr?1:0);
   const inv=S.sf.ocr?{no:S.sf.ocr.no,total:tot,sys,flag:false}:null, hh=('10:'+String(15+spgTrx().length*7).padStart(2,'0'));
-  S.sales.unshift({id,toko,items:lines.map(l=>({id:l.pr?.id||null,name:l.name,q:l.q,price:l.unit})),total:tot,time:hh,cust,vals,invNo,invFoto,status:S.demo.offline?'Menunggu sinkron':'Terkirim',d:0,ci:true,inv});
+  S.sales.unshift({id,toko,items:lines.map(l=>({id:l.pr?.id||null,name:l.name,q:l.q,price:l.unit,disc:l.disc})),total:tot,time:hh,cust,vals,invNo,invFoto,status:S.demo.offline?'Menunggu sinkron':'Terkirim',d:0,ci:true,inv});
   // Terkirim ke dashboard (Laporan penjualan › Transaksi)
   const L0=lines[0];
-  shSet('trxApp',[{id,u:uid(),toko,date:'26 Okt',d:0,p:L0.pr?.id||null,pname:L0.name,kat:L0.kat,q:qAll,total:inv?sys:tot,items:lines.map(l=>({p:l.pr?.id||null,pname:l.name,kat:l.kat,q:l.q,price:l.unit,total:l.unit*l.q,vals:l.vals})),st:'Terkirim',invNo,invFoto,cust,time:hh,inv:inv?{no:inv.no,price:tot,sys,pct:sys?tot/sys*100-100:0,flag:false,conf:S.sf.ocr.conf}:null,vals:F.filter(f=>!isItem(f)).map(f=>[f.label,fDisp(f)])},...shRead('trxApp',[])]);
+  shSet('trxApp',[{id,u:uid(),toko,date:'26 Okt',d:0,p:L0.pr?.id||null,pname:L0.name,kat:L0.kat,q:qAll,total:inv?sys:tot,sub,diskonTrx:dTrx,items:lines.map(l=>({p:l.pr?.id||null,pname:l.name,kat:l.kat,q:l.q,price:l.unit,disc:l.disc,total:l.unit*l.q,vals:l.vals})),st:'Terkirim',invNo,invFoto,cust,time:hh,inv:inv?{no:inv.no,price:tot,sys,pct:sys?tot/sys*100-100:0,flag:false,conf:S.sf.ocr.conf}:null,vals:F.filter(f=>!isItem(f)).map(f=>[f.label,fDisp(f)])},...shRead('trxApp',[])]);
   S.stack=S.stack.filter(e=>!['spg-jual-form','spg-invoice'].includes(e.name)); render(true);
   toast(id+' tersimpan'+(S.demo.offline?', menunggu sinkron':''));
 }
