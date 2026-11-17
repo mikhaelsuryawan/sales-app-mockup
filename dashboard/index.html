@@ -2869,7 +2869,7 @@ const userSrcNote=r=>callout(r.sumber==='Input manual'?'<b>Input manual.</b> Dat
 const ADMIN_ROLES=['r1','r17','r18','r19','r20','r90'];
 /* Akses sistem user input manual: Ya = akun ikut tampil di User management (record yang sama, bukan salinan). */
 const sysAkses=r=>r.aksesSistem||(r.akses==='Tanpa akses'?'Tidak':'Ya');
-const inUserMgmt=r=>ADMIN_ROLES.includes(r.role)||(!isInteg(r)&&sysAkses(r)==='Ya');
+const inUserMgmt=r=>ADMIN_ROLES.includes(r.role)||sysAkses(r)==='Ya';
 const SEG={r18:['Umum','Tim / pendukung'],r19:['Umum','Tim / pendukung'],r20:['Umum','Tim / pendukung'],r17:['Umum','Tim / pendukung'],r1:['Umum','Tim / pendukung'],r2:['Umum','Tim / pendukung'],r3:['Elektronik','Diam di lokasi'],r4:['FMCG','Bergerak'],r21:['Elektronik','Bergerak'],r5:['FMCG','Bergerak'],r7:['Umum','Tim / pendukung'],r8:['Multi Finance','Tim / pendukung'],r9:['Multi Finance','Bergerak'],r10:['Multi Finance','Diam di lokasi'],r11:['FMCG','Diam di lokasi'],r12:['FMCG','Diam di lokasi'],r13:['Elektronik','Bergerak'],r14:['Umum','Diam di lokasi']};
 MD.role.forEach(r=>{ [r.segmen,r.tipe]=SEG[r.id]||['Umum','Diam di lokasi']; });
 const MKIND={r2:'spv',r3:'spg',r4:'canvas',r21:'canvas',r5:'order',r7:'spv',r8:'arco',r9:'cbd',r10:'leads',r11:'fmcg',r12:'fmcg',r13:'spg',r14:'bantuan'};
