@@ -1776,6 +1776,8 @@ function tbAll(k,ids,on){ const S=ST.sel[k]; ids.forEach(i=>on?S.add(i):S.delete
 /* =====================================================================
    SHELL
    ===================================================================== */
+/* Section yang disembunyikan dari sidebar secara bawaan. Bisa diaktifkan lagi di Sidebar Menu. */
+const SEC_HIDE=['Usulan SFA'];
 const SEC_ICON={'Ringkasan':'dash','Operasional lapangan':'finger','Penjualan':'chart','Kinerja & insentif':'award','Leads pinjaman':'users','Program & konten':'tag','Usulan SFA':'bulb','Client management':'building','Toko':'store','Master data':'grid','Master data user':'shield','Pengaturan aplikasi':'sliders','Sistem':'settings'};
 const NAV_DEFAULT=[
   ['Ringkasan',[['/','Overview','dash']]],
@@ -4109,8 +4111,8 @@ const SB_ROLES=[['super','Super Admin'],['admin','Admin SIM'],['spv','Supervisor
 const SB_BADGE=[['','Tanpa hitungan'],['approval','Approval menunggu'],['leads','Leads belum di-assign'],['overdue','Leads overdue'],['usulan','Usulan toko baru']];
 /* Satu simpul: {id,parent,label,path,icon,badge,roles,bawaan,sistem,status}. Simpul tanpa path adalah grup; simpul dengan path juga boleh berisi submenu di level berapa pun. Urutan saudara mengikuti urutan array. */
 function sbSeed(){ const out=[];
-  NAV_DEFAULT.forEach(([sec,items],si)=>{ const gid='sm_g'+si; out.push({id:gid,parent:'',label:sec,path:'',icon:SEC_ICON[sec]||'grid',badge:'',roles:[],bawaan:true,status:'Aktif'});
-    items.forEach(([pt,l,ic,bd],j)=>out.push({id:'sm_'+si+'_'+j,parent:gid,label:l,path:pt,icon:ic||'grid',badge:bd||'',roles:[],bawaan:true,status:'Aktif'})); });
+  NAV_DEFAULT.forEach(([sec,items],si)=>{ const gid='sm_g'+si; out.push({id:gid,parent:'',label:sec,path:'',icon:SEC_ICON[sec]||'grid',badge:'',roles:[],bawaan:true,status:SEC_HIDE.includes(sec)?'Nonaktif':'Aktif'});
+    items.forEach(([pt,l,ic,bd],j)=>out.push({id:'sm_'+si+'_'+j,parent:gid,label:l,path:pt,icon:ic||'grid',badge:bd||'',roles:[],bawaan:true,status:SEC_HIDE.includes(sec)?'Nonaktif':'Aktif'})); });
   const sis=out.find(n=>n.label==='Sistem');
   out.push({id:'sm_sidebar',parent:sis.id,label:'Sidebar Menu',path:'/sidebar-menu',icon:'sliders',badge:'',roles:['super'],bawaan:true,sistem:true,status:'Aktif'});
   return out; }
@@ -4999,7 +5001,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
 /* ---------- Penyimpanan data dashboard (D6) ----------
    Perubahan di dashboard disimpan sebagai snapshot berversi. Data bersama dengan mobile tetap di salesapp.shared.v1.
    Naikkan DASH_VER bila bentuk data contoh berubah, supaya snapshot lama dibuang dan data contoh baru dipakai. */
-const DASH_VER=24;
+const DASH_VER=25;
 const PARAM={};
 const dashData=()=>({D,MD,TOKO,TRX,INFO,POSM,AR,KLAIM,ATT,REK_ADJ,PARAM});
 function restoreInto(t,src){
