@@ -379,6 +379,12 @@ a.stat:hover,button.stat:hover{background:var(--raised)}
 .ch.has-tb .tbtitle{flex:0 0 auto}.ch.has-tb .acts{margin-left:auto}
 .tbpanel{margin:-4px 0 16px;padding:16px;border-radius:var(--r-panel);background:var(--raised)}
 .tbpanel[hidden]{display:none}
+.tbfbtn svg{transition:transform .3s cubic-bezier(.22,1,.36,1)}
+.tbfbtn[aria-expanded=true] svg{transform:rotate(90deg) scale(1.05)}
+.tbpanel.tb-in .tbgrid>.field,.tbpanel.tb-in .tbp-page,.tbpanel.tb-in .tbfoot{animation:tbf .42s cubic-bezier(.22,1,.36,1) both}
+.tbpanel.tb-in .tbgrid>.field:nth-child(1){animation-delay:.04s}.tbpanel.tb-in .tbgrid>.field:nth-child(2){animation-delay:.07s}.tbpanel.tb-in .tbgrid>.field:nth-child(3){animation-delay:.10s}.tbpanel.tb-in .tbgrid>.field:nth-child(4){animation-delay:.13s}.tbpanel.tb-in .tbgrid>.field:nth-child(5){animation-delay:.16s}.tbpanel.tb-in .tbgrid>.field:nth-child(6){animation-delay:.19s}.tbpanel.tb-in .tbgrid>.field:nth-child(n+7){animation-delay:.22s}
+.tbpanel.tb-in .tbfoot{animation-delay:.24s}
+@keyframes tbf{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .tbpanel .field>span:first-child{font-size:12px}
 .tbp-page{display:grid;gap:10px;margin-bottom:14px}
 .tbp-page .frow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -1740,7 +1746,14 @@ function tbBar(key,t,cols,T,total,shown,nCol,qs,pg){
   return `<div class="tbbar" data-k="${key}"><form class="tbq" onsubmit="event.preventDefault();tbApply('${key}')"><label class="inp h40"><span class="sr-only">Cari di tabel</span>${I('search',16)}<input id="tbq_${key}" name="q" value="${esc(qs)}" placeholder="Cari" autocomplete="off"></label></form><button type="button" class="btn b-outline tbfbtn" aria-expanded="${!!t.open}" aria-controls="tbp_${key}" onclick="tbToggle('${key}')">${I('filter',16)}<span>Filter</span>${nAct?`<span class="tbn">${nAct}</span>`:''}</button></div>
   <div class="tbpanel" id="tbp_${key}" role="group" aria-label="Filter tabel" ${t.open?'':'hidden'}>${page}${fields?`<div class="tbgrid">${fields}</div>`:''}<div class="tbfoot"><span class="xs muted">${sum}</span><span class="tbfa">${dirty?`<button type="button" class="btn b-ghost sm" onclick="tbReset('${key}');${pg.clear||'render(false)'}">Hapus filter</button>`:''}<button type="button" class="btn b-accent sm" onclick="tbApply('${key}')">Terapkan</button></span></div></div>`;
 }
-function tbToggle(k){ const t=ST.tb[k]; t.open=!t.open; const p=document.getElementById('tbp_'+k); if(p) p.hidden=!t.open; document.querySelector(`.tbbar[data-k="${k}"] .tbfbtn`)?.setAttribute('aria-expanded',String(t.open)); }
+function tbToggle(k){ const t=ST.tb[k]; t.open=!t.open; const p=document.getElementById('tbp_'+k); document.querySelector(`.tbbar[data-k="${k}"] .tbfbtn`)?.setAttribute('aria-expanded',String(t.open)); if(!p) return;
+  p.getAnimations().forEach(a=>a.cancel()); if(reduceMotion()||!p.animate){ p.hidden=!t.open; return; }
+  const cs=getComputedStyle(p), pad=[cs.paddingTop,cs.paddingBottom,cs.marginBottom]; p.style.overflow='hidden';
+  const shut={height:'0px',opacity:0,paddingTop:'0px',paddingBottom:'0px',marginBottom:'0px',transform:'translateY(-8px)'};
+  if(t.open){ p.hidden=false; p.classList.add('tb-in'); const h=p.offsetHeight;
+    p.animate([shut,{height:h+'px',opacity:1,paddingTop:pad[0],paddingBottom:pad[1],marginBottom:pad[2],transform:'none'}],{duration:360,easing:'cubic-bezier(.22,1,.36,1)'}).finished.catch(()=>{}).then(()=>{ p.style.overflow=''; p.classList.remove('tb-in'); }); }
+  else { const h=p.offsetHeight; p.classList.remove('tb-in');
+    p.animate([{height:h+'px',opacity:1,paddingTop:pad[0],paddingBottom:pad[1],marginBottom:pad[2],transform:'none'},shut],{duration:240,easing:'cubic-bezier(.4,0,.2,1)'}).finished.then(()=>{ if(!t.open) p.hidden=true; p.style.overflow=''; },()=>{}); } }
 function tbApply(k){ const t=ST.tb[k], f={}; document.querySelectorAll(`#tbp_${k} select[data-col]`).forEach(s=>{ const v=[...s.selectedOptions].map(o=>o.value); if(v.length) f[s.dataset.col]=v; }); t.f=f; t.qs=(document.getElementById('tbq_'+k)?.value||'').trim(); t.page=1; t.shown=6; t.open=false; render(false); }
 function tbReset(k){ const t=ST.tb[k]; t.f={}; t.qs=''; t.page=1; t.shown=6; t.open=false; }
 /* Pasang toolbar ke kepala kartu tabel. Satu tabel di halaman: judul diganti kotak cari. Beberapa tabel: judul tetap, kotak cari dan Filter di kanannya. */
