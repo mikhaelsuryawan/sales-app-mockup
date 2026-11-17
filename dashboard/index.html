@@ -490,6 +490,9 @@ a.stat:hover,button.stat:hover{background:var(--raised)}
 .dd-btn[aria-expanded=true]{border-color:var(--accent)}
 .dd-btn[aria-expanded=true] svg{transform:rotate(180deg)}
 .dd-btn:disabled{opacity:.5;cursor:not-allowed}
+.dd-x{flex:none;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:99px;color:var(--muted);cursor:pointer}.dd-x:hover,.dd-x:focus-visible{background:var(--raised);color:var(--fg)}.dd-x[hidden]{display:none}
+.dd-btn .dd-x svg{opacity:1;color:inherit}
+.dd-clr{flex:none;font-size:12px;font-weight:600;color:var(--accent-text);padding:4px 8px;border-radius:99px}.dd-clr:hover{background:var(--canvas)}.dd-clr[hidden]{display:none}
 .sel.soft .dd-btn{border-color:transparent;background:var(--canvas)}
 .sel.sm .dd-btn{height:36px;border-radius:99px;border-color:transparent;box-shadow:var(--shadow-card);font-size:13px;font-weight:500;padding:0 12px 0 14px;min-width:110px}
 .sel.sm .dd-btn[aria-expanded=true]{box-shadow:var(--shadow-card),0 0 0 2px rgb(10 146 242 / .3)}
@@ -4895,14 +4898,16 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
   const vd=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value');
   Object.defineProperty(HTMLSelectElement.prototype,'value',{configurable:true,get(){return vd.get.call(this)},set(v){ vd.set.call(this,v); if(this._ddPaint) this._ddPaint(); }});
   const label=sel=>{ const l=sel.closest('label'); const sp=l&&l.querySelector('span'); return (sel.getAttribute('aria-label')||(sp&&!sp.querySelector('select,.sel')?sp.textContent:'')||'').replace(/\s*\*\s*$/,'').trim(); };
-  function paintMulti(sel){ const b=sel._ddBtn; if(!b) return; const on=[...sel.selectedOptions].map(o=>o.text), ph=!on.length, t=ph?(sel.dataset.ph||'Pilih'):on.length>2?on.slice(0,2).join(', ')+' +'+(on.length-2):on.join(', '); const tt=b.querySelector('.dd-t'); tt.textContent=t; tt.classList.toggle('ph',ph); const n=label(sel); b.setAttribute('aria-label',(n?n+': ':'')+(ph?'Pilih':on.join(', '))); b.disabled=sel.disabled; }
+  function paintMulti(sel){ const b=sel._ddBtn; if(!b) return; const on=[...sel.selectedOptions].map(o=>o.text), ph=!on.length, t=ph?(sel.dataset.ph||'Pilih'):on.length>2?on.slice(0,2).join(', ')+' +'+(on.length-2):on.join(', '); const tt=b.querySelector('.dd-t'); tt.textContent=t; tt.classList.toggle('ph',ph); const x=b.querySelector('.dd-x'); if(x) x.hidden=ph||sel.disabled; const n=label(sel); b.setAttribute('aria-label',(n?n+': ':'')+(ph?'Pilih':on.join(', '))); b.disabled=sel.disabled; }
   function paint(sel){ if(sel.multiple) return paintMulti(sel); const b=sel._ddBtn; if(!b) return; const o=sel.options[sel.selectedIndex], t=o?o.text:'', ph=!o||o.value===''&&(!t||t==='–'); const tt=b.querySelector('.dd-t'); tt.textContent=ph?(sel.dataset.ph||'Pilih'):t; tt.classList.toggle('ph',!!ph); const n=label(sel); b.setAttribute('aria-label',(n?n+': ':'')+(ph?'Pilih':t)); b.disabled=sel.disabled; }
   function enhance(sel){ if(sel._dd||(sel.hasAttribute('multiple')&&!sel.closest('.sel'))||sel.size>1) return; sel._dd=1;
-    const b=document.createElement('button'); b.type='button'; b.className='dd-btn'; b.setAttribute('role','combobox'); b.setAttribute('aria-haspopup','listbox'); b.setAttribute('aria-expanded','false'); b.innerHTML='<span class="dd-t"></span>'+I('chev',16);
+    const b=document.createElement('button'); b.type='button'; b.className='dd-btn'; b.setAttribute('role','combobox'); b.setAttribute('aria-haspopup','listbox'); b.setAttribute('aria-expanded','false'); b.innerHTML='<span class="dd-t"></span>'+(sel.multiple?`<span class="dd-x" role="button" tabindex="0" aria-label="Hapus pilihan" data-tip="Hapus pilihan" hidden>${I('x',14,2.4)}</span>`:'')+I('chev',16);
     if(sel.style.width) b.style.width=sel.style.width;
     sel.parentNode.insertBefore(b,sel); sel._ddBtn=b; sel._ddPaint=()=>paint(sel);
     sel.classList.add('dd-native'); sel.tabIndex=-1; sel.setAttribute('aria-hidden','true');
-    b.addEventListener('click',e=>{ e.preventDefault(); cur&&cur.sel===sel?close(true):openDD(sel); });
+    const clearAll=()=>{ [...sel.options].forEach(o=>o.selected=false); paint(sel); sel.dispatchEvent(new Event('input',{bubbles:true})); sel.dispatchEvent(new Event('change',{bubbles:true})); };
+    b.addEventListener('click',e=>{ e.preventDefault(); if(e.target.closest('.dd-x')){ e.stopPropagation(); clearAll(); return; } cur&&cur.sel===sel?close(true):openDD(sel); });
+    b.addEventListener('keydown',e=>{ if(e.target.closest&&e.target.closest('.dd-x')&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); e.stopPropagation(); clearAll(); } },true);
     b.addEventListener('keydown',e=>{ if(['ArrowDown','ArrowUp'].includes(e.key)){ e.preventDefault(); openDD(sel); } });
     sel.addEventListener('change',()=>paint(sel));
     new MutationObserver(()=>paint(sel)).observe(sel,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled','selected']});
@@ -4918,7 +4923,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
     else { list.style.maxHeight=Math.max(120,Math.min(256,below-chrome))+'px'; pop.style.top=(r.bottom+6)+'px'; } }
   function openDD(sel){ close(false); const btn=sel._ddBtn, pop=document.createElement('div'), phone=isPhone(), pid='ddp'+(++seq);
     pop.className='dd-pop'+(phone?' dd-sheet':''); pop.id=pid;
-    pop.innerHTML=`<div class="dd-search">${I('search',16)}<input type="text" role="combobox" aria-expanded="true" aria-controls="${pid}-l" aria-autocomplete="list" aria-label="Cari opsi" placeholder="Cari…" autocomplete="off" autocorrect="off" spellcheck="false"><span class="cntr"></span></div><div class="dd-list" role="listbox" id="${pid}-l"></div><div class="dd-foot" hidden></div>`;
+    pop.innerHTML=`<div class="dd-search">${I('search',16)}<input type="text" role="combobox" aria-expanded="true" aria-controls="${pid}-l" aria-autocomplete="list" aria-label="Cari opsi" placeholder="Cari…" autocomplete="off" autocorrect="off" spellcheck="false"><span class="cntr"></span>${sel.multiple?'<button type="button" class="dd-clr" hidden>Hapus pilihan</button>':''}</div><div class="dd-list" role="listbox" id="${pid}-l"></div><div class="dd-foot" hidden></div>`;
     let back=null; if(phone){ back=document.createElement('div'); back.className='overlay'; back.style.zIndex=199; back.addEventListener('pointerdown',e=>{ e.preventDefault(); close(true); }); document.body.appendChild(back); }
     document.body.appendChild(pop); btn.setAttribute('aria-expanded','true'); btn.setAttribute('aria-controls',pid+'-l');
     const st={sel,btn,pop,back,phone,q:'',hi:0,items:[]}; cur=st;
@@ -4930,7 +4935,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
       st.hi=Math.min(Math.max(st.hi,0),Math.max(0,st.items.length-1)); if(st.items[st.hi]?.dis){ const n=enabledFrom(st.hi,1); st.hi=n<0?st.hi:n; }
       const view=st.items.slice(0,CAP);
       list.innerHTML=view.length?view.map((x,g)=>{ const on=sel.multiple?sel.options[x.i].selected:x.i===sel.selectedIndex; return `<button type="button" tabindex="-1" role="option" id="${pid}-o${g}" class="dd-opt ${g===st.hi?'hi':''}" aria-selected="${on}" ${x.dis?'aria-disabled="true"':''} data-g="${g}"><span class="dd-tx"><span>${esc(x.t||'–')}</span>${x.why||x.desc?`<small>${esc(x.dis&&x.why?x.why:x.desc)}</small>`:''}</span>${on?`<span class="dd-ck">${I('check',16,2.5)}</span>`:''}</button>`; }).join(''):`<div class="dd-empty">${st.q.trim()?`Tidak ada hasil untuk "${esc(st.q.trim())}"`:'Tidak ada pilihan'}</div>${sel.dataset.add&&st.q.trim()?`<div class="dd-new"><span class="dd-new-i">${I('plus',18,2.4)}</span><b>${esc(sel.dataset.addTitle||'Belum ada di daftar')}</b><p>${esc(sel.dataset.addDesc||'Tambahkan sebagai pilihan baru.')}</p><button type="button" class="btn b-accent dd-add">${I('plus',16,2.4)}${esc(sel.dataset.addLabel||'Tambah baru')} <span class="dd-new-q">${esc(st.q.trim())}</span></button></div>`:''}`;
-      cntr.textContent=total>20?`${st.items.length} dari ${total}`:'';
+      cntr.textContent=total>20?`${st.items.length} dari ${total}`:''; const clr=pop.querySelector('.dd-clr'); if(clr) clr.hidden=!sel.selectedOptions.length;
       foot.hidden=st.items.length<=CAP; foot.innerHTML=`<span>Menampilkan ${CAP} dari ${st.items.length}. Ketik untuk mempersempit.</span>`;
       inp.setAttribute('aria-activedescendant',view.length?`${pid}-o${st.hi}`:''); place();
       const h=list.querySelector('.hi'); if(h){ const o=h.offsetTop; if(o<list.scrollTop) list.scrollTop=Math.max(0,o-4); else if(o+h.offsetHeight>list.scrollTop+list.clientHeight) list.scrollTop=o+h.offsetHeight-list.clientHeight+4; } }
@@ -4945,8 +4950,8 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
       else if(k==='ArrowDown'||k==='ArrowUp'){ e.preventDefault(); const d=k==='ArrowDown'?1:-1, n=enabledFrom(st.hi+d,d); if(n>=0){ st.hi=n; draw(); } }
       else if(k==='PageDown'||k==='PageUp'){ e.preventDefault(); const d=k==='PageDown'?1:-1, n=enabledFrom(Math.max(0,Math.min(st.items.length-1,st.hi+8*d)),d); if(n>=0){ st.hi=n; draw(); } }
       else if(k==='Enter'){ e.preventDefault(); choose(st.hi); } });
-    pop.addEventListener('mousedown',e=>{ if(e.target.closest('.dd-opt,.dd-add')) e.preventDefault(); });
-    pop.addEventListener('click',e=>{ const o=e.target.closest('.dd-opt'); if(o) choose(+o.dataset.g); const a=e.target.closest('.dd-add'); if(a){ const q=st.q.trim(); close(false); window[sel.dataset.add]?.(q); } });
+    pop.addEventListener('mousedown',e=>{ if(e.target.closest('.dd-opt,.dd-add,.dd-clr')) e.preventDefault(); });
+    pop.addEventListener('click',e=>{ if(e.target.closest('.dd-clr')){ [...sel.options].forEach(o=>o.selected=false); const top=list.scrollTop; paint(sel); draw(); list.scrollTop=top; sel.dispatchEvent(new Event('input',{bubbles:true})); sel.dispatchEvent(new Event('change',{bubbles:true})); return; } const o=e.target.closest('.dd-opt'); if(o) choose(+o.dataset.g); const a=e.target.closest('.dd-add'); if(a){ const q=st.q.trim(); close(false); window[sel.dataset.add]?.(q); } });
     pop.addEventListener('mousemove',e=>{ const o=e.target.closest('.dd-opt'); if(o&&+o.dataset.g!==st.hi&&o.getAttribute('aria-disabled')!=='true'){ st.hi=+o.dataset.g; list.querySelectorAll('.dd-opt').forEach(n=>n.classList.toggle('hi',+n.dataset.g===st.hi)); inp.setAttribute('aria-activedescendant',`${pid}-o${st.hi}`); } });
     const pos=all().findIndex(x=>x.i===sIdx); st.hi=Math.max(0,pos); draw();
     addEventListener('resize',place); addEventListener('scroll',onScroll,true); inp.focus({preventScroll:true}); }
