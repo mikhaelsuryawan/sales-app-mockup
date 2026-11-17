@@ -2818,6 +2818,8 @@ MD.user.forEach(u=>{ if(['putri','kevin','fajar'].includes(u.id)) u.clients=['cl
 /* MOM 9 Nov bagian 2 dan 5: sales bisa multi client dan punya flag sumber data. */
 ['budi','dimas'].forEach(id=>{ const u=MD.user.find(x=>x.id===id); if(u) u.clients=['cl1','cl4']; });
 MD.user.forEach(u=>{ u.sumber=['sari','maya','eko','gita'].includes(u.id)?'Input manual':'Integrasi SIM'; });
+/* Data contoh: sales tanpa akses sistem (tidak masuk User management). Dua dari Integrasi SIM, dua dari Input manual. */
+['kevin','fajar','eko','gita'].forEach(id=>{ const u=MD.user.find(x=>x.id===id); if(u) u.akses='Tanpa akses'; });
 MD.user.push(
   {id:'hendra',nip:'SIM-12-00008',name:'Hendra Gunawan',email:'hendra.g@sim.co.id',jabatan:'Direktur Operasional',role:'r18',clients:['cl1','cl2','cl4'],cabang:'Kantor Pusat',toko:[],ap1:'',ap2:'',akses:'Web',face:'–',sumber:'Integrasi SIM',status:'Aktif'},
   {id:'wulan',nip:'SIM-19-00412',name:'Wulan Sari',email:'wulan.s@sim.co.id',jabatan:'HR Officer',role:'r19',clients:['cl1','cl4'],cabang:'Kantor Pusat',toko:[],ap1:'',ap2:'',akses:'Web',face:'–',sumber:'Integrasi SIM',status:'Aktif'},
@@ -4910,7 +4912,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
 /* ---------- Penyimpanan data dashboard (D6) ----------
    Perubahan di dashboard disimpan sebagai snapshot berversi. Data bersama dengan mobile tetap di salesapp.shared.v1.
    Naikkan DASH_VER bila bentuk data contoh berubah, supaya snapshot lama dibuang dan data contoh baru dipakai. */
-const DASH_VER=18;
+const DASH_VER=19;
 const PARAM={};
 const dashData=()=>({D,MD,TOKO,TRX,INFO,POSM,AR,KLAIM,ATT,REK_ADJ,PARAM});
 function restoreInto(t,src){
