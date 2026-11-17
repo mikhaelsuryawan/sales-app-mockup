@@ -1127,7 +1127,7 @@ SCR.kunjungan = p => {
     ${seg==='hari'?`<div class="card" style="margin-bottom:14px"><div class="row between"><b>Progres hari ini</b><span class="num small muted">${v.filter(x=>x.status==='Selesai').length} dari ${v.length} selesai${nTT?' · '+nTT+' tutup':''}</span></div><div class="bar" style="margin-top:10px"><i style="width:${Math.max(3,v.filter(x=>x.status==='Selesai').length/(v.length||1)*100)}%"></i></div></div>${ml?visitList(v,false):`<div class="list">${v.map(visitRow).join('')}</div>`}${teamV}`:
     `<div class="list">${S.plans.map(x=>`<div class="li"><div class="ico-tile tan">${I('calendar',20)}</div><div class="grow"><div class="t">${x.place}</div><div class="s">${x.date}</div></div>${chip(x.status,x.status==='Disetujui'?'green':'amber')}</div>`).join('')}
     <div class="li"><div class="ico-tile">${I('refresh',20)}</div><div class="grow"><div class="t">Kunjungan rutin mingguan</div><div class="s">Setiap Senin & Kamis · Okt – Des 2026</div></div>${chip('Berkala','blue')}</div></div>`}
-    ${canSchedule(r)?`<button class="btn sec" style="margin-top:16px" onclick="act(()=>go('kunjungan-form',{spv:${r==='spv'?1:0}}))">${I('plus',20)} ${r==='spv'?'Tugaskan ke tim':'Tambah kunjungan'}${isLocked()?' '+I('lock',16):''}</button>`:''}${(r!=='spv'&&r!=='leads'&&bisaTambah())?`<button class="btn sec" style="margin-top:12px" onclick="act(()=>unplSheet())">${I('plus',20)} Kunjungan di luar rencana</button>`:''}${canSchedule(r)?'':`<p class="hint" style="margin-top:14px">${r==='spv'?'':(bisaTambah()?'Kamu ditugaskan di satu toko saja, jadi jadwal kunjungan mengikuti Team Leader.':'Role kamu tidak menambah kunjungan sendiri. Jadwal kunjungan mengikuti Team Leader.')}</p>`}
+    ${canSchedule(r)?`<button class="btn sec" style="margin-top:16px" onclick="act(()=>go('kunjungan-form',{spv:${r==='spv'?1:0}}))">${I('plus',20)} ${r==='spv'?'Tugaskan ke tim':'Tambah kunjungan'}${isLocked()?' '+I('lock',16):''}</button>`:''}${canSchedule(r)?'':`<p class="hint" style="margin-top:14px">${r==='spv'?'':(bisaTambah()?'Kamu ditugaskan di satu toko saja, jadi jadwal kunjungan mengikuti Team Leader.':'Role kamu tidak menambah kunjungan sendiri. Jadwal kunjungan mengikuti Team Leader.')}</p>`}
   </main>`};
 };
 SCR['kunjungan-detail'] = p => {
@@ -2948,9 +2948,11 @@ function visitListRow(v,i,akt){
   const open=v.cin&&!v.cout, fin=v.status==='Selesai', tt=v.status==='Toko tutup', blocked=v.status==='Terlewat'||v.status==='Dijadwal ulang', fm=role()==='fmcg';
   const cat=tokoCat(v.place), jr=jarakText(v.place), lk=isLocked(), lock=lk?' '+I('lock',14):'';
   let b='';
+  if(akt){
   if(open) b=`<button class="btn sm sec ${lk?'locked':''}" onclick="act(()=>visitAction('${v.id}'))">${I('check',16,2.2)} Check-out${lock}</button>`;
   else if(fin&&fm) b=`<button class="btn sm ghost" onclick="act(()=>visitAction('${v.id}'))">Check-in lagi${lock}</button>`;
   else if(!fin&&!tt&&!blocked&&!v.cin) b=`<button class="btn sm ${lk?'locked':''}" onclick="act(()=>visitAction('${v.id}'))">${I('pin',16)} Check-in${lock}</button>${canTutup()?`<button class="btn sm ghost" onclick="act(()=>startTutup('${v.id}'))">Toko tutup${lock}</button>`:''}`;
+  }
   if(!akt) b+=`<button class="btn sm ghost" onclick="go('kunjungan-detail',{id:'${v.id}'})">Lihat</button>`;
   else if(open) b+=`<button class="btn sm ghost" onclick="go('aktivitas-toko',{id:'${v.id}'})">${I('grid',16)} Aktivitas Toko</button>`;
   const meta=[v.time, cat, jr, v.cin?'check-in '+v.cin:'', v.cout?'check-out '+v.cout:'', tt&&v.tutup?'tutup '+v.tutup.jam:''].filter(Boolean).join(' · ');
