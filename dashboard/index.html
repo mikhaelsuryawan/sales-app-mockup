@@ -3096,14 +3096,21 @@ const ENT={
   user:{label:'Sales',lower:'sales',plural:'Sales management',prefix:'u',store:()=>MD.user,filter:(r,q)=>!ADMIN_ROLES.includes(r.role)&&(!q.src||r.sumber===q.src)&&(!q.sg||userSimcos(r).includes(q.sg)),title:r=>r.name,code:r=>r.nip,search:r=>r.name+r.nip+r.email,
     roForm:r=>isInteg(r),
     warn:(v,id)=>!id&&v.sumber==='Input manual'?bprDup(v):'',
-    beforeSave:(v,cur)=>{ if(v.roles&&v.roles.length) v.role=v.roles[0]; if(v.cabangs&&v.cabangs.length) v.cabang=v.cabangs[0]; if(v.job) v.jabatan=jobName(v.job); },
+    beforeSave:(v,cur)=>{ if(v.roles&&v.roles.length) v.role=v.roles[0]; if(v.cabangs&&v.cabangs.length) v.cabang=v.cabangs[0]; if(v.job) v.jabatan=jobName(v.job);
+      if(v.client){ v.clients=[v.client]; delete v.client; }
+      if(v.cabang&&!v.cabangs) v.cabangs=[v.cabang];
+      if(v.aksesSistem){ const was=cur&&cur.akses&&cur.akses!=='Tanpa akses'?cur.akses:'Mobile'; v.akses=v.aksesSistem==='Ya'?was:'Tanpa akses'; } },
+    hideCols:()=>['Role'],
     fields:[{k:'sumber',label:'Sumber data',type:'ro'},{k:'nip',label:'NIP / ID pegawai',req:true,roIf:r=>isInteg(r)},{k:'name',label:'Nama',req:true,roIf:r=>isInteg(r)},{k:'email',label:'Email',type:'email',req:true,roIf:r=>isInteg(r)},
       {k:'job',label:'Job',type:'select',req:true,roIf:r=>isInteg(r),fmt:v=>jobName(v),opts:()=>live('job').filter(j=>j.status==='Aktif').map(j=>[j.id,j.name]),hint:'Role bawaan mengikuti mapping di menu Job & role'},
-      {k:'off',label:'Jadwal off (dari BPR)',type:'ro',hint:'Hari libur individu selain weekend. Sumber BPR, disinkronkan sekali sehari (rekomendasi)'},{k:'npo',label:'NPO (dari BPR)',type:'ro',hint:'Dipakai untuk NIK client'},
+      {k:'off',label:'Jadwal off (dari BPR)',type:'ro',hideIf:r=>!isInteg(r),hint:'Hari libur individu selain weekend. Sumber BPR, disinkronkan sekali sehari (rekomendasi)'},{k:'npo',label:'NPO (dari BPR)',type:'ro',hideIf:r=>!isInteg(r),hint:'Dipakai untuk NIK client'},
       {k:'simco',label:'Company',type:'select',req:true,roIf:r=>isInteg(r),fmt:v=>simcoName(v),opts:simcoOpts,hint:'Perusahaan di SIM Group, bukan perusahaan client'},
-      {k:'roles',label:'Role aplikasi',type:'multi',req:true,roIf:r=>isInteg(r),fmt:v=>(v||[]).map(roleName).join(', ')||'–',opts:()=>live('role').filter(r=>r.status==='Aktif'&&!ADMIN_ROLES.includes(r.id)).map(r=>[r.id,r.name]),hint:r=>isInteg(r)?'Dari mapping job. Ubah di menu Job & role':'Boleh lebih dari satu role (MOM 12 Nov). Role pertama menjadi role utama, hak akses gabungan semua role'},
-      {k:'clients',label:'Client',type:'ro',fmt:v=>(v||[]).map(clientName).join(', ')||'–',hint:'Hanya baca. Client sales ini tidak bisa diubah dari sini'},
-      {k:'cabangs',label:'Cabang',type:'multi',req:true,roIf:r=>isInteg(r),fmt:v=>(v||[]).join(', ')||'–',opts:()=>['Kantor Pusat',...cabNames()],hint:'Boleh lebih dari satu cabang (MOM 12 Nov). Cabang pertama menjadi cabang utama'},
+      {k:'roles',label:'Role aplikasi',type:'multi',req:true,hideIf:r=>!isInteg(r),roIf:r=>isInteg(r),fmt:v=>(v||[]).map(roleName).join(', ')||'–',opts:()=>live('role').filter(r=>r.status==='Aktif'&&!ADMIN_ROLES.includes(r.id)).map(r=>[r.id,r.name]),hint:r=>isInteg(r)?'Dari mapping job. Ubah di menu Job & role':'Boleh lebih dari satu role (MOM 12 Nov). Role pertama menjadi role utama, hak akses gabungan semua role'},
+      {k:'clients',label:'Client',type:'ro',hideIf:r=>!isInteg(r),fmt:v=>(v||[]).map(clientName).join(', ')||'–',hint:'Hanya baca. Client sales ini tidak bisa diubah dari sini'},
+      {k:'cabangs',label:'Cabang',type:'multi',req:true,hideIf:r=>!isInteg(r),roIf:r=>isInteg(r),fmt:v=>(v||[]).join(', ')||'–',opts:()=>['Kantor Pusat',...cabNames()],hint:'Boleh lebih dari satu cabang (MOM 12 Nov). Cabang pertama menjadi cabang utama'},
+      {k:'client',label:'Client',type:'select',req:true,hideIf:r=>isInteg(r),val:r=>(r.clients||[])[0]||'',opts:()=>[['','Pilih client'],...live('client').filter(c=>c.status==='Aktif').map(c=>[c.id,c.name])],hint:'Dari master data client'},
+      {k:'cabang',label:'Cabang',type:'select',req:true,hideIf:r=>isInteg(r),opts:()=>[['','Pilih cabang'],...['Kantor Pusat',...cabNames()].map(n=>[n,n])],hint:'Dari master data cabang'},
+      {k:'aksesSistem',label:'Akses sistem',type:'select',req:true,hideIf:r=>isInteg(r),val:r=>r.aksesSistem||(r.akses==='Tanpa akses'?'Tidak':'Ya'),opts:[['Ya','Ya'],['Tidak','Tidak']],hint:'Ya: akun otomatis terintegrasi dengan User management. Tidak: akun tidak terintegrasi ke User management'},
       {k:'bantuan',label:'Status bantuan',type:'select',roIf:r=>isInteg(r),opts:['Active','Non Active'],hint:'Hanya dipakai Promotor Bantuan. Non Active tidak bisa login (MOM 2.1)'}],
     cols:[{label:'Nama',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(r.name)}<span><span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.nip)}</span></span></span>`,prim:true},
       {label:'Role',render:r=>rolesTags(r)},{label:'Job',render:r=>esc(jobName(r.job)),hide:true},{label:'Cabang',render:r=>esc((r.cabangs||[r.cabang]).join(', ')),hide:true},{label:'Sumber',render:r=>srcTag(r.sumber),hide:true},{label:'Company',render:r=>esc(simcoName(r.simco))},{label:'Client',render:r=>r.clients.map(clientName).join(', '),hide:true},
@@ -3214,7 +3221,7 @@ const lc=E=>E.lower||E.label.toLowerCase();
 function cbT(b){ const on=!b.classList.contains('on'); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.innerHTML=on?I('check',12,3):''; }
 
 /* generic list */
-function crudList(ent,q,{acts='',prefill='',sels='',top='',ban=''}={}){
+function crudList(ent,q,{acts='',prefill='',sels='',top='',ban='',noAdd=false}={}){
   const E=ENT[ent], f=q.st||'', qq=(q.q||'').toLowerCase(), all=live(E.src||ent).filter(r=>E.filter?E.filter(r,q):true);
   const rows=all.filter(r=>!f||r.status===f).filter(r=>!qq||E.search(r).toLowerCase().includes(qq)).map(r=>({...r,_id:r.id}));
   const addAct=ent==='user'?'simImport()':`openForm('${ent}'${prefill?`,null,${prefill}`:''})`;
@@ -3226,7 +3233,7 @@ function crudList(ent,q,{acts='',prefill='',sels='',top='',ban=''}={}){
     summary:dirty?`Menampilkan <b class="fg">${rows.length}</b> dari ${all.length} ${lc(E)}.`:''});
   const tc=card(E.plural,`${can('master.edit')?'':banner({tone:'neutral',body:'Anda hanya dapat melihat data ini. Perubahan dilakukan oleh Admin SIM.',cls:'mb'})}${ban}
     ${dataTable('md_'+ent,{rows,rowClick:r=>`openForm('${ent}','${r.id}')`,acts:can('master.edit')?(r=>rowActs(`openForm('${ent}','${r.id}')`,`delAsk('${ent}','${r.id}')`,{block:E.inUse?.(r)||''})):null,cols:E.hideCols?E.cols.filter(c=>!E.hideCols(q).includes(c.label)):E.cols,empty:qq||f||q.br||q.lv||q.ms||q.sk||q.tk?`Tidak ada ${lc(E)} yang cocok. Ubah atau hapus filter di kartu Filter.`:`Belum ada ${lc(E)}.`})}`,
-    {acts:`${acts}${btn(ent==='user'?'Tambah dari SIM':'Tambah '+lc(E),{v:'accent',size:'sm',icon:'plus',on:addAct,perm:'master.edit'})}`},);
+    {acts:`${acts}${noAdd?'':btn(ent==='user'?'Tambah dari SIM':'Tambah '+lc(E),{v:'accent',size:'sm',icon:'plus',on:addAct,perm:'master.edit'})}`},);
   return `<div class="fstack">${fc}${tc}</div>`;
 }
 
@@ -3235,6 +3242,7 @@ let FORM=null;
 function multiTog(b,all){ b.classList.toggle('on'); const on=b.classList.contains('on'); b.setAttribute('aria-pressed',on); if(all&&on) b.parentElement.querySelectorAll('.fchip').forEach(x=>{ if(x!==b&&(b.dataset.v===all||x.dataset.v===all)){ x.classList.remove('on'); x.setAttribute('aria-pressed','false'); } }); }
 const fromSales=()=>!!(FORM&&FORM.prefill&&FORM.prefill._tmp);
 function fieldHTML(fd,r){
+  if(fd.hideIf&&fd.hideIf(r)) return '';
   const v=fd.val?fd.val(r):r[fd.k], t=((fd.lock&&r.id&&fd.lock(r))||(fd.roIf&&fd.roIf(r)))?'ro':(fd.type||'text'), id='f_'+fd.k;
   const lab=`<span>${fd.label}${(typeof fd.req==='function'?fd.req(r):fd.req)?' <b class="req" aria-hidden="true">*</b>':''}</span>`, hint=(ht=>ht?`<p class="xs muted" style="margin-top:6px">${ht}</p>`:'')(typeof fd.hint==='function'?fd.hint(r):fd.hint), err=`<p class="ferr" id="e_${fd.k}"></p>`;
   const opts=()=>(typeof fd.opts==='function'?fd.opts(r):fd.opts).map(o=>Array.isArray(o)?o:[o,o]);
@@ -3267,7 +3275,7 @@ function openForm(ent,id,prefill){
 }
 function saveForm(mode){
   const {ent,id,prefill}=FORM, E=ENT[ent]; const vals={}, errs={}; const cur0=id?E.store().find(x=>x.id===id):null, base=cur0||{...(E.blank?E.blank():{}),...(prefill||{})};
-  E.fields.forEach(fd=>{ if(fd.type==='ro'||(fd.lock&&cur0&&fd.lock(cur0))||(fd.roIf&&fd.roIf(base))) return; const el=document.getElementById('f_'+fd.k); let v;
+  E.fields.forEach(fd=>{ if(fd.hideIf&&fd.hideIf(base)) return; if(fd.type==='ro'||(fd.lock&&cur0&&fd.lock(cur0))||(fd.roIf&&fd.roIf(base))) return; const el=document.getElementById('f_'+fd.k); let v;
     if(fd.type==='multi') v=[...el.querySelectorAll('.fchip.on')].map(b=>b.dataset.v);
     else if(fd.type==='number'){ const raw=el.value.trim().replace(/\./g,'').replace(',','.'); v=raw===''?'':Number(raw); if(raw!==''&&isNaN(v)) errs[fd.k]=fd.label+' harus berupa angka.'; }
     else v=el.value.trim();
@@ -3440,7 +3448,7 @@ function usSrc(k){ setQ({src:k}); }
 function pagePengguna(q){ return {title:'Sales management',html:`
   ${banner({tone:'neutral',body:'Data pegawai dimiliki SIM (BPR1). Dashboard hanya membaca dan menambahkan jejak aktivitas lapangan.',cls:'mb'})}
   ${srcTabs('user',q)}
-  ${crudList('user',q,{sels:simcoFilter(q.sg||''),acts:`${btn('Input manual',{v:'outline',size:'sm',icon:'plus',on:"openForm('user',null,{sumber:'Input manual',nip:'',name:'',email:'',jabatan:'',job:'',simco:'sg1',clients:['cl1'],cabang:'Jakarta Selatan',cabangs:['Jakarta Selatan'],toko:[],role:'r14',roles:['r14'],ap1:'sari',ap2:'',akses:'Mobile',face:'Belum',off:'–',npo:'–',status:'Aktif'})"})}${btn('Upload user',{v:'outline',size:'sm',icon:'up',on:"userUpload('user')",perm:'master.edit'})}${btn('Sinkron dari SIM',{v:'outline',size:'sm',icon:'refresh',on:"audit('Sinkron data pegawai dari SIM (BPR1)');toast('Data pegawai tersinkron','Profil dari SIM diperbarui, 0 perubahan.')"})}`})}
+  ${crudList('user',q,{sels:simcoFilter(q.sg||''),acts:`${q.src==='Integrasi SIM'?'':btn('Input manual',{v:'outline',size:'sm',icon:'plus',on:"openForm('user',null,{sumber:'Input manual',nip:'',name:'',email:'',jabatan:'',job:'',simco:'sg1',clients:[],cabang:'',cabangs:[],toko:[],role:'r14',roles:['r14'],ap1:'sari',ap2:'',akses:'Mobile',face:'Belum',status:'Aktif'})"})}${btn('Upload user',{v:'outline',size:'sm',icon:'up',on:"userUpload('user')",perm:'master.edit'})}${q.src==='Input manual'?'':btn('Sinkron dari SIM',{v:'outline',size:'sm',icon:'refresh',on:"audit('Sinkron data pegawai dari SIM (BPR1)');toast('Data pegawai tersinkron','Profil dari SIM diperbarui, 0 perubahan.')"})}`,noAdd:!!q.src})}
   <div style="margin-top:12px">${callout('Sales management berisi tim lapangan: Promotor, Canvassing, Taking Order, Team Leader, dan sejenisnya. Direktur, HR, Manager, dan admin ada di <a href="#/user-admin" style="color:var(--accent-text);font-weight:600">User management</a> (MOM 9 Nov bagian 5).')}</div>`}; }
 function pageAdmin(q){ const all=live('user').filter(r=>ADMIN_ROLES.includes(r.role));
   return {title:'User management',html:`
