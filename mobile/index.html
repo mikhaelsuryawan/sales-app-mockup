@@ -2340,7 +2340,9 @@ const MASTER_DEF={
   konversi:[{produk:'rc18',satuan:'sa2',isi:4},{produk:'bl11',satuan:'sa2',isi:6},{produk:'bl11',satuan:'sa3',isi:3},{produk:'kp16',satuan:'sa2',isi:8},{produk:'ds72',satuan:'sa2',isi:2},{produk:'tv50',satuan:'sa4',isi:1},{produk:'tv43',satuan:'sa4',isi:1},{produk:'kl2p',satuan:'sa4',isi:1},{produk:'mc85',satuan:'sa4',isi:1},{produk:'ac1',satuan:'sa4',isi:1},{produk:'ap30',satuan:'sa4',isi:1},{produk:'f1',satuan:'sa2',isi:12},{produk:'f2',satuan:'sa2',isi:40},{produk:'f2',satuan:'sa3',isi:5},{produk:'f3',satuan:'sa2',isi:24},{produk:'f4',satuan:'sa2',isi:20},{produk:'f5',satuan:'sa2',isi:24}],
   brand:[['ARUNIKA','Client'],['KIRANA','Client'],['Samsung','Kompetitor'],['LG','Kompetitor'],['Polytron','Kompetitor']].map(([name,jenis])=>({name,jenis})),
   katprod:[['TV','ARUNIKA',''],['Smart TV','ARUNIKA','TV'],['Google TV','ARUNIKA','Smart TV'],['Android TV','ARUNIKA','Smart TV'],['LED TV','ARUNIKA','TV'],['Kulkas','ARUNIKA',''],['2 Pintu','ARUNIKA','Kulkas'],['Inverter','ARUNIKA','2 Pintu'],['Non inverter','ARUNIKA','2 Pintu'],['1 Pintu','ARUNIKA','Kulkas'],['Mesin Cuci','ARUNIKA',''],['Top Load','ARUNIKA','Mesin Cuci'],['Front Load','ARUNIKA','Mesin Cuci'],['AC','ARUNIKA',''],['AC Inverter','ARUNIKA','AC'],['AC Standar','ARUNIKA','AC'],['Air Purifier','ARUNIKA',''],['Small Appliances','ARUNIKA',''],
-    ['Peralatan Dapur','KIRANA',''],['Rice Cooker','KIRANA','Peralatan Dapur'],['Blender','KIRANA','Peralatan Dapur'],['Dispenser','KIRANA','Peralatan Dapur'],['Perawatan Rumah','KIRANA',''],['Kipas Angin','KIRANA','Perawatan Rumah']].map(([name,brand,parent])=>({name,brand,parent,share:'Ya'})),
+    ['Peralatan Dapur','KIRANA',''],['Rice Cooker','KIRANA','Peralatan Dapur'],['Blender','KIRANA','Peralatan Dapur'],['Dispenser','KIRANA','Peralatan Dapur'],['Perawatan Rumah','KIRANA',''],['Kipas Angin','KIRANA','Perawatan Rumah'],
+    // Kategori demo untuk nota OCR di luar elektronik; tidak ikut market share.
+    ...['Makanan','Minuman','Susu','Perawatan Tubuh','Komponen Elektronik'].map(n=>[n,'KIRANA','','Tidak'])].map(([name,brand,parent,share])=>({name,brand,parent,share:share||'Ya'})),
   produk:[['tv50','ARUNIKA','Google TV'],['tv43','ARUNIKA','LED TV'],['kl2p','ARUNIKA','Inverter'],['mc85','ARUNIKA','Top Load'],['ac1','ARUNIKA','AC Inverter'],['ap30','ARUNIKA','Air Purifier'],['rc18','KIRANA','Rice Cooker'],['bl11','KIRANA','Blender'],['kp16','KIRANA','Kipas Angin'],['ds72','KIRANA','Dispenser']].map(([id,brand,kat])=>{ const p=prodById(id); return {id,name:p.name,sku:p.sku,price:p.price,brand,kat}; }),
   aktcfg:{r3:{lokasi:'penempatan',checkin:'Ya',akt:['jual','sku','share'],gated:['stok'],skuFoto:2,skuMetode:['qr','manual'],skuMulti:'Ya',shareDraft:'Ya',metrik:['qty'],dasar:'qty'}},
   formjual:[['kategori','Kategori produk','select','katprod','','Produk','Ya','Ya','kategori'],['status','Status produk','select','statprod','','Produk','Ya','Ya',''],['nama','Nama produk','text','produk','','Produk','Ya','Ya','produk'],
@@ -2502,7 +2504,7 @@ async function spgOcr(file){
   }
 }
 /* Demo: kategori dan status produk ditebak dari nama produk hasil OCR. Tidak ada padanan, kategori dikosongkan. */
-const OCR_KAT_SINONIM=[['TV',/televisi|\btv\b|\bled\b|\buhd\b|google tv|android tv/],['Kulkas',/kulkas|refrigerator|\bfridge\b/],['Mesin Cuci',/mesin cuci|washer|top load|front load/],['AC',/\bac\b|air conditioner|\bsplit\b/],['Air Purifier',/purifier|pemurni udara/],['Rice Cooker',/rice cooker|magic ?com|penanak nasi/],['Blender',/blender/],['Dispenser',/dispenser/],['Kipas Angin',/kipas|\bfan\b/],['Small Appliances',/setrika|vacuum|hair ?dryer|teko listrik|kettle|toaster|mixer/]];
+const OCR_KAT_SINONIM=[['Susu',/susu|milk|cimory|ultra|indomilk|tiga sapi|kental manis|yogurt|yoghurt/],['Minuman',/air mineral|minerale|amdk|aqua|pure life|frestea|teh|kopi|jus\b|minuman|sirup|cola|coffee/],['Perawatan Tubuh',/ciptadent|pasta gigi|sikat gigi|formula|sabun|dettol|shampo|skincare|body wash|\bbw\b|bee ?& ?flo/],['Komponen Elektronik',/\bc[ao]p\b|kapasitor|ohm|resistor|mosfet|\btny ?\d|\bbuc ?\d|\bp ?\d+n\d+|\d ?(uf|nf|pf)\b|dioda|transistor|trafo/],['Makanan',/mie|mi instan|steak|kanzl|knzler|sngles|bakso|nugget|sosis|ice cream|\baice\b|nutrijel|jelly|muffin|kecap|roti|biskuit|snack|melon|naga|buah|beras|telur|daging|ayam|sapi|nasi|singles/],['TV',/televisi|\btv\b|\bled\b|\buhd\b|google tv|android tv/],['Kulkas',/kulkas|refrigerator|\bfridge\b/],['Mesin Cuci',/mesin cuci|washer|top load|front load/],['AC',/\bac\b|air conditioner|\bsplit\b/],['Air Purifier',/purifier|pemurni udara/],['Rice Cooker',/rice cooker|magic ?com|penanak nasi/],['Blender',/blender/],['Dispenser',/dispenser/],['Kipas Angin',/kipas|\bfan\b/],['Small Appliances',/setrika|vacuum|hair ?dryer|teko listrik|kettle|toaster|mixer/]];
 function ocrGuessKat(name){
   const n=String(name||'').toLowerCase(); if(!n) return '';
   const opts=katOpts().map(([v])=>v), leaf=v=>v.split('/').pop(), words=t=>new RegExp('(^|[^a-z0-9])'+t.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'([^a-z0-9]|$)');
@@ -2515,7 +2517,7 @@ function ocrGuessKat(name){
 }
 function ocrGuessStatus(name){
   const n=String(name||'').toLowerCase(), o=STATUS_PRODUK(); if(!n||!o.length) return '';
-  const k=[[/display|pajangan/,'display'],[/cuci gudang|clearance/,'cuci gudang'],[/bundling|paket|bundle/,'bundling']];
+  const k=[[/display|pajangan/,'display'],[/cuci gudang|clearance|diskon|promo|obral/,'cuci gudang'],[/bundling|paket|bundle/,'bundling']];
   for(const [re,t] of k){ if(re.test(n)){ const m=o.find(x=>String(x).toLowerCase().includes(t)); if(m) return m; } }
   return o.find(x=>/baru/i.test(x))||o[0];
 }
