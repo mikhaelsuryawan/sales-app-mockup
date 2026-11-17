@@ -3226,7 +3226,7 @@ const lc=E=>E.lower||E.label.toLowerCase();
 function cbT(b){ const on=!b.classList.contains('on'); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.innerHTML=on?I('check',12,3):''; }
 
 /* generic list */
-function crudList(ent,q,{acts='',prefill='',sels='',top='',ban='',noAdd=false}={}){
+function crudList(ent,q,{acts='',prefill='',sels='',top='',ban='',noAdd=false,addLabel=''}={}){
   const E=ENT[ent], f=q.st||'', qq=(q.q||'').toLowerCase(), all=live(E.src||ent).filter(r=>E.filter?E.filter(r,q):true);
   const rows=all.filter(r=>!f||r.status===f).filter(r=>!qq||E.search(r).toLowerCase().includes(qq)).map(r=>({...r,_id:r.id}));
   const addAct=ent==='user'?'simImport()':`openForm('${ent}'${prefill?`,null,${prefill}`:''})`;
@@ -3238,7 +3238,7 @@ function crudList(ent,q,{acts='',prefill='',sels='',top='',ban='',noAdd=false}={
     summary:dirty?`Menampilkan <b class="fg">${rows.length}</b> dari ${all.length} ${lc(E)}.`:''});
   const tc=card(E.plural,`${can('master.edit')?'':banner({tone:'neutral',body:'Anda hanya dapat melihat data ini. Perubahan dilakukan oleh Admin SIM.',cls:'mb'})}${ban}
     ${dataTable('md_'+ent,{rows,rowClick:r=>`openForm('${ent}','${r.id}')`,acts:can('master.edit')?(r=>rowActs(`openForm('${ent}','${r.id}')`,`delAsk('${ent}','${r.id}')`,{block:E.inUse?.(r)||''})):null,cols:E.hideCols?E.cols.filter(c=>!E.hideCols(q).includes(c.label)):E.cols,empty:qq||f||q.br||q.lv||q.ms||q.sk||q.tk?`Tidak ada ${lc(E)} yang cocok. Ubah atau hapus filter di kartu Filter.`:`Belum ada ${lc(E)}.`})}`,
-    {acts:`${acts}${noAdd?'':btn(ent==='user'?'Tambah dari SIM':'Tambah '+lc(E),{v:'accent',size:'sm',icon:'plus',on:addAct,perm:'master.edit'})}`},);
+    {acts:`${acts}${noAdd?'':btn(addLabel||(ent==='user'?'Tambah dari SIM':'Tambah '+lc(E)),{v:'accent',size:'sm',icon:'plus',on:addAct,perm:'master.edit'})}`},);
   return `<div class="fstack">${fc}${tc}</div>`;
 }
 
@@ -3454,12 +3454,12 @@ function usSrc(k){ setQ({src:k}); }
 function pagePengguna(q){ return {title:'Sales management',html:`
   ${banner({tone:'neutral',body:'Data pegawai dimiliki SIM (BPR1). Dashboard hanya membaca dan menambahkan jejak aktivitas lapangan.',cls:'mb'})}
   ${srcTabs('user',q)}
-  ${crudList('user',q,{sels:simcoFilter(q.sg||''),acts:`${q.src==='Integrasi SIM'?'':btn('Input manual',{v:'outline',size:'sm',icon:'plus',on:"openForm('user',null,{sumber:'Input manual',nip:'',name:'',email:'',jabatan:'',job:'',simco:'sg1',clients:[],cabang:'',cabangs:[],toko:[],role:'r14',roles:['r14'],ap1:'sari',ap2:'',akses:'Mobile',face:'Belum',status:'Aktif'})"})}${btn('Upload user',{v:'outline',size:'sm',icon:'up',on:"userUpload('user')",perm:'master.edit'})}${q.src==='Input manual'?'':btn('Sinkron dari SIM',{v:'outline',size:'sm',icon:'refresh',on:"audit('Sinkron data pegawai dari SIM (BPR1)');toast('Data pegawai tersinkron','Profil dari SIM diperbarui, 0 perubahan.')"})}`,noAdd:!!q.src})}
+  ${crudList('user',q,{sels:simcoFilter(q.sg||''),acts:`${q.src==='Integrasi SIM'?'':btn('Input manual',{v:'accent',size:'sm',icon:'plus',on:"openForm('user',null,{sumber:'Input manual',nip:'',name:'',email:'',jabatan:'',job:'',simco:'sg1',clients:[],cabang:'',cabangs:[],toko:[],role:'r14',roles:['r14'],ap1:'sari',ap2:'',akses:'Mobile',face:'Belum',status:'Aktif'})"})}${btn('Upload user',{v:'outline',size:'sm',icon:'up',on:"userUpload('user')",perm:'master.edit'})}${q.src==='Input manual'?'':btn('Sinkron dari SIM',{v:'outline',size:'sm',icon:'refresh',on:"audit('Sinkron data pegawai dari SIM (BPR1)');toast('Data pegawai tersinkron','Profil dari SIM diperbarui, 0 perubahan.')"})}`,noAdd:true})}
   <div style="margin-top:12px">${callout('Sales management berisi tim lapangan: Promotor, Canvassing, Taking Order, Team Leader, dan sejenisnya. Direktur, HR, Manager, dan admin ada di <a href="#/user-admin" style="color:var(--accent-text);font-weight:600">User management</a> (MOM 9 Nov bagian 5).')}</div>`}; }
 function pageAdmin(q){ const all=live('user').filter(inUserMgmt);
   return {title:'User management',html:`
   ${srcTabs('admin',q)}
-  ${crudList('admin',q,{sels:`${simcoFilter(q.sg||'')}<div class="chips" role="group" aria-label="Jenis">${[['','User & people',all.length],['user','User (akses app)',all.filter(r=>!isPeople(r)).length],['people','People (hanya didata)',all.filter(isPeople).length]].map(([k,l,n])=>`<button class="fchip ${(q.ak||'')===k?'on':''}" aria-pressed="${(q.ak||'')===k}" onclick="setQ({ak:'${k}'})">${l} <span class="n">${n}</span></button>`).join('')}</div>`,acts:btn('Upload user',{v:'outline',size:'sm',icon:'up',on:"userUpload('admin')",perm:'master.edit'})})}
+  ${crudList('admin',q,{sels:`${simcoFilter(q.sg||'')}<div class="chips" role="group" aria-label="Jenis">${[['','User & people',all.length],['user','User (akses app)',all.filter(r=>!isPeople(r)).length],['people','People (hanya didata)',all.filter(isPeople).length]].map(([k,l,n])=>`<button class="fchip ${(q.ak||'')===k?'on':''}" aria-pressed="${(q.ak||'')===k}" onclick="setQ({ak:'${k}'})">${l} <span class="n">${n}</span></button>`).join('')}</div>`,acts:q.src==='Integrasi SIM'?'':btn('Upload user',{v:'outline',size:'sm',icon:'up',on:"userUpload('admin')",perm:'master.edit'}),noAdd:q.src==='Integrasi SIM',addLabel:q.src?'':'Input manual'})}
   <div style="margin-top:12px">${callout('<b>User</b> adalah orang yang memakai aplikasi. <b>People</b> adalah karyawan yang perlu didata tapi tidak perlu akses aplikasi, misalnya manager yang hanya menerima laporan.')}</div>`}; }
 function pageIAM(q){
   shSet('roleJadwal',Object.fromEntries(MD.role.map(r=>[r.id,r.jadwal])));
