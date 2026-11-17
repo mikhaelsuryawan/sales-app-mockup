@@ -2501,6 +2501,24 @@ async function spgOcr(file){
       :{phase:'fail',title:'Invoice gagal diproses',msg:'Invoice belum bisa dibaca. Coba foto ulang atau lanjut input manual.'});
   }
 }
+/* Demo: kategori dan status produk ditebak dari nama produk hasil OCR. Tidak ada padanan, kategori dikosongkan. */
+const OCR_KAT_SINONIM=[['TV',/televisi|\btv\b|\bled\b|\buhd\b|google tv|android tv/],['Kulkas',/kulkas|refrigerator|\bfridge\b/],['Mesin Cuci',/mesin cuci|washer|top load|front load/],['AC',/\bac\b|air conditioner|\bsplit\b/],['Air Purifier',/purifier|pemurni udara/],['Rice Cooker',/rice cooker|magic ?com|penanak nasi/],['Blender',/blender/],['Dispenser',/dispenser/],['Kipas Angin',/kipas|\bfan\b/],['Small Appliances',/setrika|vacuum|hair ?dryer|teko listrik|kettle|toaster|mixer/]];
+function ocrGuessKat(name){
+  const n=String(name||'').toLowerCase(); if(!n) return '';
+  const opts=katOpts().map(([v])=>v), leaf=v=>v.split('/').pop(), words=t=>new RegExp('(^|[^a-z0-9])'+t.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'([^a-z0-9]|$)');
+  const pr=mProd().find(p=>n.includes(p.name.toLowerCase())); if(pr) return pr.brand+'/'+prodPath(pr);
+  let best='',bd=-1;
+  opts.forEach(v=>{ const d=v.split('/').length; if(words(leaf(v)).test(n)&&d>bd){ best=v; bd=d; } });
+  if(best) return best;
+  for(const [lf,re] of OCR_KAT_SINONIM){ if(!re.test(n)) continue; const c=opts.filter(v=>leaf(v)===lf).sort((a,b)=>a.split('/').length-b.split('/').length)[0]; if(c) return c; }
+  return '';
+}
+function ocrGuessStatus(name){
+  const n=String(name||'').toLowerCase(), o=STATUS_PRODUK(); if(!n||!o.length) return '';
+  const k=[[/display|pajangan/,'display'],[/cuci gudang|clearance/,'cuci gudang'],[/bundling|paket|bundle/,'bundling']];
+  for(const [re,t] of k){ if(re.test(n)){ const m=o.find(x=>String(x).toLowerCase().includes(t)); if(m) return m; } }
+  return o.find(x=>/baru/i.test(x))||o[0];
+}
 function spgApplyOcr(r,file){
   const items=Array.isArray(r.items)?r.items:[];
   if(!items.length){ setP({phase:'fail',msg:'Tidak ada barang yang terbaca. Pastikan seluruh invoice masuk bingkai dan foto tidak buram.'}); return; }
@@ -2516,7 +2534,7 @@ function spgApplyOcr(r,file){
     if(d!=='') anyDisc=true;
     F.filter(isItem).forEach(f=>{
       if(f.type==='calc'||f.type==='photo') return;
-      put(st,f,f.type==='date'?dateVal:f.peran==='produk'?(x.name||''):f.peran==='qty'?q:(f.peran==='harga'||f.key==='harga')?up:(f.peran==='diskon'||f.key==='diskon')?d:'');
+      put(st,f,f.type==='date'?dateVal:f.peran==='kategori'?ocrGuessKat(x.name):f.src==='statprod'?ocrGuessStatus(x.name):f.peran==='produk'?(x.name||''):f.peran==='qty'?q:(f.peran==='harga'||f.key==='harga')?up:(f.peran==='diskon'||f.key==='diskon')?d:'');
     });
     sf.it.push(st);
   });
