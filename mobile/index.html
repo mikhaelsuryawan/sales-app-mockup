@@ -1153,8 +1153,6 @@ SCR['kunjungan-detail'] = p => {
     ${role()==='fmcg'?fmTaskSummary(x):`<div class="list">${x.tasks.map(t=>/^(Quiz|Survey)$/.test(t)?`<button class="li" onclick="go('${t.toLowerCase()}')"><div class="ico-tile tan">${I(t==='Quiz'?'quiz':'survey',18,2)}</div><div class="grow"><div class="t">${t}</div><div class="s">Dikerjakan di dalam kunjungan</div></div>${I('right',18)}</button>`:`<div class="li"><div class="ico-tile">${I('check',18,2.2)}</div><div class="grow"><div class="t">${t}</div></div></div>`).join('')}</div>`}
     ${x.cin?`<div class="sec-title">Foto check-in</div><div class="thumbs">${visitPhotos(x,'in')}</div>`:''}
     ${x.cout?`<div class="sec-title">Foto check-out</div><div class="thumbs">${visitPhotos(x,'out')}</div>`:''}
-    ${visitFormHTML(x)}
-    <label class="field" style="margin-top:14px"><span>Catatan (opsional)</span><textarea class="input" placeholder="Hasil kunjungan, kendala, dll."></textarea></label>
   </main><footer class="actions">${foot}</footer>`};
 };
 const VISIT_FORM={
@@ -1295,6 +1293,7 @@ SCR['kunjungan-foto'] = p => {
     ${p.remote?`<div class="banner amber" style="margin-bottom:14px">${I('pin',18)}<span>Check-out toko sebelumnya tidak perlu berada di radius toko. Foto diambil di posisi kamu sekarang.</span></div>`:`<div class="banner ${S.demo.inRadius?'blue':'red'}" style="margin-bottom:14px">${I('pin',18)}<span>${S.demo.inRadius?'Check-in dan check-out harus di lokasi yang sama. Posisi kamu sesuai.':'Posisi kamu di luar lokasi toko. Check-in dan check-out harus di lokasi yang sama.'}</span></div>`}
     <div class="thumbs" style="margin-top:0">${Array.from({length:n}).map(()=>wmPhoto(x.place,time)).join('')}${n<1?`<button class="wm-photo add" onclick="setP({n:${n+1}})" aria-label="Ambil foto">${I('camera',26)}<span class="small">Ambil foto</span></button>`:''}</div>
     <p class="hint" style="margin-top:12px">${n<1?'Masih perlu 1 foto.':'Foto siap dikirim.'}</p>
+    ${isIn?'':`${visitFormHTML(x)}<label class="field" style="margin-top:14px"><span>Catatan (opsional)</span><textarea class="input" placeholder="Hasil kunjungan, kendala, dll."></textarea></label>`}
   </main><footer class="actions"><button class="btn" ${n<1?'disabled':''} onclick="saveVisitPhotos()">${isIn?'Simpan check-in':canv?'Submit & check-out otomatis':'Simpan check-out'}</button></footer>`};
 };
 function saveVisitPhotos(){
