@@ -1268,16 +1268,11 @@ function fmGate(fn){ act(()=>{ if(role()==='fmcg'&&!visitOpen()){ sheet(`<h3 sty
 function closeVisit(v,time,dur){ v.cout=time; v.dur=dur; v.status='Selesai'; v.auto=true; v.pOut=v.pOut||0; }
 function startCheckin(id){
   const open=visitOpen();
-  if(open&&open.id!==id&&isFieldVisit()){
-    sheet(`<h3 style="font-size:18px;font-weight:800">Belum check-out</h3><p class="muted small" style="margin:6px 0 16px;line-height:1.5">Kamu masih check-in di ${open.place} sejak ${open.cin}. Check-out toko itu dulu sebelum check-in di toko ini. Check-out tidak perlu di radius toko sebelumnya.</p>
-    <button class="btn" onclick="closeSheet();S.pendingIn='${id}';go('kunjungan-foto',{id:'${open.id}',mode:'out',remote:true})">Check-out ${open.place}</button>
-    <button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Nanti saja</button>`);
-    return;
-  }
   if(open&&open.id!==id){
-    sheet(`<h3 style="font-size:18px;font-weight:800">Kamu lupa check-out</h3><p class="muted small" style="margin:6px 0 16px;line-height:1.5">Kamu check-in di ${open.place} pukul ${open.cin} dan belum check-out. Sistem akan check-out otomatis dari toko itu, tanpa foto, sebelum kamu masuk ke toko ini.</p>
-    <button class="btn" onclick="closeSheet();closeVisit(visitById('${open.id}'),'10:01','Otomatis');toast('Check-out otomatis dari ${open.place}','pin');go('kunjungan-foto',{id:'${id}',mode:'in'})">Check-out otomatis & lanjut</button>
-    <button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Batal</button>`);
+    const out=role()==='fmcg'?`fmOut('${open.id}')`:`go('kunjungan-foto',{id:'${open.id}',mode:'out',remote:true})`;
+    sheet(`<h3 style="font-size:18px;font-weight:800">Check-out dulu</h3><p class="muted small" style="margin:6px 0 16px;line-height:1.5">Kamu masih check-in di ${open.place} sejak ${open.cin}. Check-in hanya bisa di satu toko. Check-out di toko sebelumnya dulu, baru check-in di toko ini.</p>
+    <button class="btn" onclick="closeSheet();${role()==='fmcg'?'':`S.pendingIn='${id}';`}${out}">Check-out ${open.place}</button>
+    <button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Mengerti</button>`);
     return;
   }
   go('kunjungan-foto',{id,mode:'in'});
@@ -2294,7 +2289,7 @@ SCR.akt = () => {
   const L=aktStores(), o=visitOpen(), multi=L.length>1, nas=role()==='leads';
   const storeRow=v=>{ const open=v.cin&&!v.cout, tt=v.status==='Toko tutup', fin=v.status==='Selesai'||tt, lab=open?'Check-out':tt?'Toko tutup':fin?'Selesai':'Check-in';
     return `<div class="li"><div class="ico-tile ${tt?'tan':fin?'green':''}">${I(tt?'lock':fin?'check':'pin',20,fin?2.2:2)}</div><div class="grow"><div class="t">${esc(v.place)}</div><div class="s">${v.time}${v.cin?' · check-in '+v.cin:''}${v.cout?' · check-out '+v.cout:''}</div></div><button class="btn sm ${open?'sec':''}" style="width:auto" ${fin?'disabled':''} onclick="act(()=>visitAction('${v.id}'))">${lab}</button></div>`; };
-  const head = o
+  const head = multi ? '' : o
     ? `<div class="card" style="margin-bottom:14px"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="small muted">Sedang di ${nas?'lokasi':'toko'}</div><div class="t" style="font-weight:800">${esc(o.place)}</div><div class="small muted">Check-in ${o.cin}</div></div>${chip('Berjalan','blue')}</div>
       <button class="btn sm" style="margin-top:12px" onclick="act(()=>visitAction('${o.id}'))">${I('check',18,2.2)} Check-out & selesai</button></div>`
     : !L.length ? `<div class="empty">Belum ada jadwal kunjungan. Team Leader membuat jadwalnya.</div>`
@@ -2302,10 +2297,19 @@ SCR.akt = () => {
     : `<div class="list" style="margin-bottom:14px">${storeRow(L[0])}</div><p class="hint" style="margin:-6px 0 14px">Kamu punya 1 tujuan hari ini. Check-in, kerjakan tugas, lalu check-out.</p>`;
   // MOM 12 Nov 2026: daftar toko langsung di halaman, menggantikan popup Pilih toko
   const others = multi ? visitList(L,true) : '';
-  return {tab:'akt', note:'<b>MOM 12 Nov:</b> daftar toko hari ini tampil langsung di halaman sesuai urutan journey plan, tanpa popup Pilih toko. Tiap baris punya tombol sendiri: Check-in, Check-out, Toko tutup, atau Lihat. Halaman Aktivitas untuk pilih toko, check-in, dan check-out, mengikuti pola Promotor FMCG. Menu pekerjaan ada di halaman ini, tidak di Beranda: pilih toko jika lebih dari satu, check-in, kerjakan pekerjaan, lalu check-out. Judul: Aktivitas Saya untuk 1 toko, Aktivitas Toko untuk lebih dari 1 toko. Pekerjaan yang terikat lokasi terkunci sampai check-in. Check-out tidak mewajibkan semua tugas selesai (aturan itu hanya untuk Promotor FMCG dan MD).',
+  return {tab:'akt', note:'<b>MOM 12 Nov:</b> daftar toko hari ini tampil langsung di halaman sesuai urutan journey plan, tanpa popup Pilih toko. Tiap baris punya tombol sendiri: Check-in, Check-out, Toko tutup, atau Lihat. Halaman Aktivitas untuk pilih toko, check-in, dan check-out, mengikuti pola Promotor FMCG. Menu pekerjaan ada di halaman Aktivitas Toko, dibuka lewat tombol Aktivitas Toko di baris toko setelah check-in, tidak di Beranda: pilih toko jika lebih dari satu, check-in, kerjakan pekerjaan, lalu check-out. Judul: Aktivitas Saya untuk 1 toko, Aktivitas Toko untuk lebih dari 1 toko. Pekerjaan yang terikat lokasi terkunci sampai check-in. Check-out tidak mewajibkan semua tugas selesai (aturan itu hanya untuk Promotor FMCG dan MD).',
   html:`${appbar(aktLabel(),{backBtn:false})}<main class="content">
     ${head}
-    ${others}${aktPekerjaan(o)}</main>`};
+    ${multi?others:aktPekerjaan(o)}</main>`};
+};
+/* Halaman Aktivitas Toko: menu pekerjaan satu toko, dibuka dari tombol Aktivitas Toko di daftar toko setelah check-in. */
+SCR['aktivitas-toko'] = p => {
+  const o=visitById(p.id)||visitOpen();
+  if(!o||!o.cin||o.cout) return {html:`${appbar('Aktivitas Toko')}<main class="content"><div class="empty">Check-in di toko dulu untuk membuka pekerjaan.</div></main>`};
+  return {tab:role()==='fmcg'?'aktivitas':'akt', note:'<b>Usulan:</b> menu pekerjaan dipindah dari halaman daftar toko ke halaman ini. Tombol Aktivitas Toko di baris toko hanya muncul setelah check-in.',
+    html:`${appbar('Aktivitas Toko')}<main class="content">
+    <div class="card" style="margin-bottom:14px"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="small muted">Sedang di toko</div><div class="t" style="font-weight:800">${esc(o.place)}</div><div class="small muted">Check-in ${o.cin}</div></div>${chip('Berjalan','blue')}</div></div>
+    ${role()==='fmcg'?mdTasks(o):aktPekerjaan(o)}</main>`};
 };
 const fmStores = () => S.visits.fmcg||[];
 function mdTasks(o){
@@ -2318,7 +2322,7 @@ SCR.aktivitas = () => {
   const L=fmStores(), o=visitOpen(), multi=L.length>1;
   const storeRow=v=>{ const open=v.cin&&!v.cout, tt=v.status==='Toko tutup', fin=v.status==='Selesai', lab=open?'Check-out':tt?'Toko tutup':fin?'Check-in lagi':'Check-in';
     return `<div class="li"><div class="ico-tile ${tt?'tan':fin?'green':''}">${I(tt?'lock':fin?'check':'pin',20,fin?2.2:2)}</div><div class="grow"><div class="t">${esc(v.place)}</div><div class="s">${v.time}${v.cin?' · check-in '+v.cin:''}${v.cout?' · check-out '+v.cout:''}</div></div><button class="btn sm ${open?'sec':''}" style="width:auto" ${tt?'disabled':''} onclick="act(()=>visitAction('${v.id}'))">${lab}</button></div>`; };
-  const head = o
+  const head = multi ? '' : o
     ? `<div class="card" style="margin-bottom:14px"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="small muted">Sedang di toko</div><div class="t" style="font-weight:800">${esc(o.place)}</div><div class="small muted">Check-in ${o.cin}</div></div>${chip('Berjalan','blue')}</div>
       <button class="btn sm" style="margin-top:12px" onclick="act(()=>fmOut('${o.id}'))">${I('check',18,2.2)} Check-out & selesai</button></div>`
     : !L.length ? `<div class="empty">Belum ada jadwal kunjungan. Admin atau Team Leader membuat jadwalnya.</div>`
@@ -2326,10 +2330,10 @@ SCR.aktivitas = () => {
     : `<div class="list" style="margin-bottom:14px">${storeRow(L[0])}</div><p class="hint" style="margin:-6px 0 14px">Kamu ditugaskan di 1 toko. Check-in, kerjakan aktivitas, lalu check-out.</p>${L[0].status==='Belum'&&!L[0].cin?`<button class="btn sm ghost" style="margin:-4px 0 14px" onclick="act(()=>startTutup('${L[0].id}'))">${I('lock',16)} Toko tutup</button>`:''}`;
   // MOM 12 Nov 2026: daftar toko langsung di halaman, menggantikan popup Pilih toko
   const others = multi ? visitList(L,true) : '';
-  return {tab:'aktivitas', note:'<b>MOM 12 Nov:</b> jika ditugaskan di lebih dari satu toko, daftar toko tampil langsung di halaman tanpa popup, masing-masing dengan Check-in, Check-out, Toko tutup, atau Lihat. Toko tutup wajib 1 foto dan tidak dihitung terlewat. Halaman Aktivitas Promotor FMCG dan MD untuk pilih toko, check-in, dan check-out. Menu tugas ada di Beranda: pilih toko (jika ditugaskan di lebih dari satu), check-in, kerjakan tugas, lalu check-out. Judul halaman: Aktivitas Saya jika hanya 1 toko, Aktivitas Toko jika lebih dari 1 toko. Menu pekerjaan (Cek stok, Price promo, Facing display, Market share, Support task) ada di halaman ini untuk Promotor FMCG dan MD, bukan di Beranda. Lupa check-out: muncul informasi saat check-in di toko berikutnya, lalu toko sebelumnya ditutup otomatis.',
+  return {tab:'aktivitas', note:'<b>MOM 12 Nov:</b> jika ditugaskan di lebih dari satu toko, daftar toko tampil langsung di halaman tanpa popup, masing-masing dengan Check-in, Check-out, Toko tutup, atau Lihat. Toko tutup wajib 1 foto dan tidak dihitung terlewat. Halaman Aktivitas Promotor FMCG dan MD untuk pilih toko, check-in, dan check-out. Menu tugas ada di Beranda: pilih toko (jika ditugaskan di lebih dari satu), check-in, kerjakan tugas, lalu check-out. Judul halaman: Aktivitas Saya jika hanya 1 toko, Aktivitas Toko jika lebih dari 1 toko. Menu pekerjaan (Cek stok, Price promo, Facing display, Market share, Support task) ada di halaman Aktivitas Toko, dibuka lewat tombol Aktivitas Toko di baris toko setelah check-in, bukan di Beranda. Check-in hanya bisa di satu toko: bila belum check-out, muncul informasi untuk check-out di toko sebelumnya dulu.',
   html:`${appbar(fmAktLabel(),{backBtn:false})}<main class="content">
     ${head}
-    ${others}${mdTasks(o)}</main>`};
+    ${multi?others:mdTasks(o)}</main>`};
 };
 
 /* ---------- Aktivitas saya (dikonfigurasi dari dashboard) ----------
@@ -2940,19 +2944,20 @@ const canTutup = () => multiRole() && !noCheckin();
 const tokoCat = name => (tokoByName(name)||{}).cat || (/^Event /.test(name||'')?'Event':'');
 
 /* Daftar toko hari ini langsung di halaman, urutan mengikuti journey plan (S.visits sudah diurutkan jpSyncVisits). Menggantikan popup Pilih toko. */
-function visitListRow(v,i){
+function visitListRow(v,i,akt){
   const open=v.cin&&!v.cout, fin=v.status==='Selesai', tt=v.status==='Toko tutup', blocked=v.status==='Terlewat'||v.status==='Dijadwal ulang', fm=role()==='fmcg';
   const cat=tokoCat(v.place), jr=jarakText(v.place), lk=isLocked(), lock=lk?' '+I('lock',14):'';
   let b='';
   if(open) b=`<button class="btn sm sec ${lk?'locked':''}" onclick="act(()=>visitAction('${v.id}'))">${I('check',16,2.2)} Check-out${lock}</button>`;
   else if(fin&&fm) b=`<button class="btn sm ghost" onclick="act(()=>visitAction('${v.id}'))">Check-in lagi${lock}</button>`;
   else if(!fin&&!tt&&!blocked&&!v.cin) b=`<button class="btn sm ${lk?'locked':''}" onclick="act(()=>visitAction('${v.id}'))">${I('pin',16)} Check-in${lock}</button>${canTutup()?`<button class="btn sm ghost" onclick="act(()=>startTutup('${v.id}'))">Toko tutup${lock}</button>`:''}`;
-  b+=`<button class="btn sm ghost" onclick="go('kunjungan-detail',{id:'${v.id}'})">Lihat</button>`;
+  if(!akt) b+=`<button class="btn sm ghost" onclick="go('kunjungan-detail',{id:'${v.id}'})">Lihat</button>`;
+  else if(open) b+=`<button class="btn sm ghost" onclick="go('aktivitas-toko',{id:'${v.id}'})">${I('grid',16)} Aktivitas Toko</button>`;
   const meta=[v.time, cat, jr, v.cin?'check-in '+v.cin:'', v.cout?'check-out '+v.cout:'', tt&&v.tutup?'tutup '+v.tutup.jam:''].filter(Boolean).join(' · ');
   return `<div class="li vrow"><div class="ico-tile ${fin?'green':tt?'tan':open?'':''}">${I(fin?'check':tt?'lock':'store',20,fin?2.2:1.8)}</div><div class="grow"><div class="t"><span class="no">${i+1}</span>${esc(v.place)}${v.unplanned?' '+chip('Unplanned','amber'):''}</div><div class="s">${meta}</div></div>${chip(open?'Berjalan':v.status,visitTone(open?'Berjalan':v.status))}<div class="acts">${b}</div></div>`;
 }
 function visitList(L,title){
-  return `${title?`<div class="sec-title">Toko hari ini <span class="small muted num">${L.filter(x=>x.status==='Selesai').length}/${L.length} selesai</span></div>`:''}<div class="list" style="margin-bottom:14px">${L.map((v,i)=>visitListRow(v,i)).join('')}</div>`;
+  return `${title?`<div class="sec-title">Toko hari ini <span class="small muted num">${L.filter(x=>x.status==='Selesai').length}/${L.length} selesai</span></div>`:''}<div class="list" style="margin-bottom:14px">${L.map((v,i)=>visitListRow(v,i,title)).join('')}</div>`;
 }
 
 /* Status toko tutup: pengganti check-in. Disimpan ke tokoTutup (dibaca dashboard). */
