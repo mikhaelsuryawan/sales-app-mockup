@@ -3084,7 +3084,7 @@ const ENT={
       {k:'kec',label:'Kecamatan',type:'select',req:true,opts:r=>[['','Pilih kecamatan'],...wilOpts('kec',r)],onchange:"wilChange('kec')"},
       {k:'kel',label:'Kelurahan / desa',type:'select',req:true,opts:r=>[['','Pilih kelurahan'],...wilOpts('kel',r)]},
       {k:'addr',label:'Alamat jalan',req:true,ph:'Nama jalan, nomor, RT/RW, gedung'},
-      {k:'coord',label:'Koordinat GPS',req:true,ph:'-6.2607, 106.8142',hint:'Titik acuan absen WFO dan check-in kunjungan',validate:v=>/^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/.test(v)?'':'Format: lintang, bujur'},
+      {k:'coord',label:'Koordinat GPS',req:true,ph:'-6.2607, 106.8142',hint:'Titik acuan absen WFO dan check-in kunjungan',oninput:'coordMapSync()',after:r=>coordMapHTML(r.coord),validate:v=>/^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/.test(v)?'':'Format: lintang, bujur'},
       {k:'radius',label:'Radius absen (meter)',type:'number',req:true,validate:v=>v<20||v>1000?'Isi antara 20 dan 1.000 m':''}],
     cols:[{label:'Toko',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${esc(r.addr)}</span><span class="xs muted" style="display:block">${esc(wilLine(r)||'Wilayah belum diisi')}</span>`,prim:true},{label:'Client',render:r=>clientName(r.client),hide:true},
       {label:'Kategori',render:r=>tag(r.cat,r.cat==='Modern Retail'?'accent':r.cat==='Grosir'?'info':'neutral')},{label:'Cabang',render:r=>r.cabang?esc(r.cabang):tag('Belum di-set','warning')},
@@ -3243,9 +3243,16 @@ function fieldHTML(fd,r){
   else if(t==='select') h=`<label class="field">${lab}<span class="sel" style="display:flex"><select id="${id}" style="width:100%" ${fd.onchange?`onchange="${fd.onchange}"`:''} ${fd.attrs||''}>${opts().map(([ov,ol])=>`<option value="${esc(ov)}" ${String(ov)===String(v??'')?'selected':''}>${esc(ol)}</option>`).join('')}</select>${I('chev',16)}</span>${hint}${err}</label>`;
   else if(t==='multi') h=`<div class="field">${lab}<div class="chips" id="${id}" role="group" aria-label="${fd.label}">${opts().map(([ov,ol])=>{const cur=fd.all&&r[fd.allKey]?[fd.all]:(v||[]);const on=cur.includes(ov);return `<button type="button" class="fchip ${on?'on':''}" aria-pressed="${on}" data-v="${esc(ov)}" onclick="multiTog(this${fd.all?`,'${fd.all}'`:''})">${esc(ol)}</button>`}).join('')}</div>${hint}${err}</div>`;
   else if(t==='textarea') h=`<label class="field">${lab}<textarea class="ta short" id="${id}" aria-describedby="e_${fd.k}">${esc(v||'')}</textarea>${hint}${err}</label>`;
-  else h=`<label class="field">${lab}<span class="inp"><input id="${id}" aria-describedby="e_${fd.k}" type="${t==='number'?'text':t}" ${t==='number'?'inputmode="decimal" data-num="dec"':''} value="${esc(t==='number'&&v!=null&&v!==''?numStr(v,true):(v??''))}" placeholder="${fd.ph||''}"></span>${hint}${err}</label>`;
+  else h=`<label class="field">${lab}<span class="inp"><input id="${id}" aria-describedby="e_${fd.k}" type="${t==='number'?'text':t}" ${t==='number'?'inputmode="decimal" data-num="dec"':''} value="${esc(t==='number'&&v!=null&&v!==''?numStr(v,true):(v??''))}" placeholder="${fd.ph||''}" ${fd.oninput?`oninput="${fd.oninput}"`:''}></span>${hint}${err}${fd.after?fd.after(r):''}</label>`;
   return fd.only?`<div data-only="${fd.only}" ${r.type!==fd.only?'style="display:none"':''}>${h}</div>`:h;
 }
+/* peta pratinjau koordinat GPS (OpenStreetMap embed, tanpa pustaka) */
+function coordParse(v){ const m=/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/.exec(v||''); if(!m) return null; const la=+m[1], lo=+m[2]; return la>=-90&&la<=90&&lo>=-180&&lo<=180?[la,lo]:null; }
+function coordMapHTML(v){ const c=coordParse(v), d=.004;
+  return `<span class="coordmap" id="coordmap" style="display:block;margin-top:10px;height:180px;border-radius:16px;overflow:hidden;background:var(--raised);position:relative"><iframe title="Peta lokasi toko" loading="lazy" referrerpolicy="no-referrer" style="width:100%;height:100%;border:0;${c?'':'display:none'}" ${c?`src="${coordSrc(c,d)}"`:''}></iframe><span class="xs muted" style="${c?'display:none;':''}position:absolute;inset:0;align-items:center;justify-content:center;text-align:center;padding:16px;display:${c?'none':'flex'}">Isi koordinat dengan format lintang, bujur untuk melihat lokasi di peta</span></span>`; }
+const coordSrc=([la,lo],d=.004)=>`https://www.openstreetmap.org/export/embed.html?bbox=${(lo-d).toFixed(5)},${(la-d).toFixed(5)},${(lo+d).toFixed(5)},${(la+d).toFixed(5)}&layer=mapnik&marker=${la},${lo}`;
+let _cmT;
+function coordMapSync(){ clearTimeout(_cmT); _cmT=setTimeout(()=>{ const box=document.getElementById('coordmap'), inp=document.getElementById('f_coord'); if(!box||!inp) return; const c=coordParse(inp.value), f=box.querySelector('iframe'), ph=box.querySelector('span'); if(c){ const u=coordSrc(c); if(f.getAttribute('src')!==u) f.src=u; f.style.display=''; ph.style.display='none'; } else { f.style.display='none'; ph.style.display='flex'; } },400); }
 function openForm(ent,id,prefill){
   const E=ENT[ent]; const r=id?E.store().find(x=>x.id===id):{status:'Aktif',...(E.blank?E.blank():{}),...(prefill||{})};
   FORM={ent,id:id||null,prefill};
