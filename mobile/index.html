@@ -619,7 +619,7 @@ function freshState(){
     plans:[{place:'Rudi Hartanto (nasabah)',date:'28 Okt 2026',status:'Menunggu approval'}],
     canvasArea:{'sales.budi':['c1','c2','c3','c4']}, cabang:'Fatmawati', sharePrice:{}, vform:{}, skuFoto:{},
     sku:{t1:null,t2:null}, disp:[], dispDone:false, dispDraft:false, sf:null, 
-    fm:{stok:{},extra:[],stokDone:false,foto:{},facing:0,tasks:[{t:'Bersihkan etalase depan',from:'Dari Team Leader',done:false}]}, posm:{}, mitraLog:{}, cbdDone:false, notifOn:{in:true,out:true}, sound:'Bawaan',
+    fm:{stok:{},extra:[],stokDone:false,foto:{},facing:0,tasks:[]}, posm:{}, mitraLog:{}, cbdDone:false, notifOn:{in:true,out:true}, sound:'Bawaan',
     bawa:{rc18:8,bl11:6,st3:9,kp16:5,ds72:2}, kembali:{}, muatInv:[], receipt:false,
     shareClient:{tv50:6,tv43:12}, shareComp:[{cb:'ARUNIKA',brand:'Samsung',path:'TV/Smart TV',nama:'Samsung Crystal 55"',qty:14,harga:0},{cb:'ARUNIKA',brand:'LG',path:'TV/Smart TV/Google TV',nama:'LG UHD 50"',qty:10,harga:0},{cb:'ARUNIKA',brand:'Samsung',path:'Kulkas/2 Pintu/Inverter',nama:'Samsung 2 Pintu 300 L',qty:5,harga:0}], shareBrand:'ARUNIKA', sharePath:['TV'], shareState:null,
     quizDone:false, quizScore:null, surveyDone:false,
@@ -1253,7 +1253,7 @@ function fmLogDetail(k){
   if(k==='promo') return promoCek().map(x=>{ const v=+(S.fm.promo||{})[x.id]; return x.name+': '+rp(x.b)+' → '+(v?rp(v)+' ('+fmPromoPct(x.b,v).replace('Diskon ','')+')':'belum diisi'); }).join('; ');
   if(k==='facing') return facingList().map(x=>x.name+' '+((S.facing||{})[x.id]||'–')).join(', ');
   if(k==='share') return 'Input market share tersimpan';
-  return S.fm.tasks.map(t=>t.t+(t.done?' (selesai)':t.draft?' (draft)':'')).join('; ');
+  return supTasks().map(t=>t.t+(t.done?' (selesai)':t.draft?' (draft)':'')).join('; ');
 }
 const FM_JENIS={stok:'Cek stok',promo:'Price promo',facing:'Facing display',share:'Market share',support:'Support task'};
 function fmLogPush(k,status){
@@ -1300,7 +1300,7 @@ function saveVisitPhotos(){
   const {id,mode,n}=cur().p, v=visitById(id);
   const remote=cur().p.remote;
   if(!S.demo.inRadius&&!remote){ toast(mode==='in'?'Kamu belum berada di lokasi toko (radius 100 m)':'Check-out harus di lokasi yang sama dengan check-in','alert'); return; }
-  if(mode==='in'){ if(role()==='fmcg'){ v.done={}; S.fm={...S.fm,stok:{},extra:[],stokDone:false,foto:{},fac:{},draft:{},promo:{}}; S.posm={}; S.facing={}; S.facingSaved={}; S.shareState=null; S.sku={t1:null,t2:null}; S.skuFoto={}; S.skuDone={}; } v.cin=VISIT_NOW.in; v.pIn=n; v.status='Berjalan'; back(); toast('Check-in tercatat di '+v.place,'pin'); return; }
+  if(mode==='in'){ if(role()==='fmcg'){ v.done={}; v.sup={}; S.fm={...S.fm,stok:{},extra:[],stokDone:false,foto:{},fac:{},draft:{},promo:{}}; S.posm={}; S.facing={}; S.facingSaved={}; S.shareState=null; S.sku={t1:null,t2:null}; S.skuFoto={}; S.skuDone={}; } v.cin=VISIT_NOW.in; v.pIn=n; v.status='Berjalan'; back(); toast('Check-in tercatat di '+v.place,'pin'); return; }
   v.cout=VISIT_NOW.out; v.dur='39 mnt'; v.pOut=n; v.status='Selesai'; if(remote) v.remoteOut=true; if(S.leftOpen===v.id) S.leftOpen=null;
   back();
   if(remote&&S.pendingIn){ const nx=S.pendingIn; S.pendingIn=null; toast('Check-out '+v.place+' tercatat, lanjut check-in','check'); go('kunjungan-foto',{id:nx,mode:'in'}); return; }
@@ -2096,22 +2096,28 @@ SCR['facing-detail'] = p => {
 };
 function facingShoot(id){ S.facing=S.facing||{}; S.facing[id]=86; render(false,true); toast('Foto dinilai: 86','camera'); }
 function facingSave(id){ S.facingSaved=S.facingSaved||{}; S.facingSaved[id]=true; S.fm.draft=S.fm.draft||{}; S.fm.draft.facing=true; fmLogPush('facing','Draft'); back(); toast('Item disimpan ke draft'); }
-SCR['fm-task'] = () => ({note:'Support task (MOM 10.2). Sales membuat task sendiri, atau task di-assign outlet atau Team Leader. Team Leader melihat hasilnya tanpa approval.',
+/* Support task: dibuat di dashboard per client (shared 'supportTasks'), berlaku untuk semua toko milik client itu. Hasil dicatat per kunjungan (v.sup). */
+const SUP_DEFAULT=[{id:'stk1',client:'cl1',clientName:'Arunika Elektronik',tasks:[{name:'Bersihkan etalase depan',foto:true},{name:'Rapikan freezer',foto:true},{name:'Cek label harga',foto:false}],due:'2026-11-30',status:'Aktif'},{id:'stk2',client:'cl4',clientName:'PT Nusantara Home Appliances',tasks:[{name:'Pasang wobbler promo akhir tahun',foto:true},{name:'Pasang standing banner',foto:true}],due:'',status:'Aktif'}];
+function supClientTasks(){ const cl=U()?.client, cur=shRead('supportTasks',null), recs=Array.isArray(cur)&&cur.length&&cur.every(r=>r.client&&Array.isArray(r.tasks))?cur:SUP_DEFAULT;
+  return recs.filter(r=>!r.del&&r.status==='Aktif'&&r.clientName===cl).flatMap(r=>r.tasks.map((t,i)=>({key:r.id+':'+i,t:t.name,foto:t.foto!==false}))); }
+function supTasks(){ const o=visitOpen(), st=k=>(o&&(o.sup||{})[k])||{};
+  return [...supClientTasks().map(c=>({t:c.t,from:'Dari client',key:c.key,foto:c.foto,sync:true,done:!!st(c.key).done,draft:!!st(c.key).draft})),...S.fm.tasks]; }
+SCR['fm-task'] = () => { const L=supTasks(); return {note:'Support task (MOM 10.2). Task dari client dibuat di dashboard dan berlaku untuk semua toko milik client itu. Sales juga boleh membuat task sendiri. Team Leader melihat hasilnya tanpa approval.',
   html:`${appbar('Support task',{right:`<button class="ib" onclick="act(()=>go('fm-task-form',{}))" aria-label="Buat task">${I('plus',24,2)}</button>`})}<main class="content">
-    <div class="list">${S.fm.tasks.map((x,i)=>`<button class="li" onclick="act(()=>go('fm-task-form',{i:${i}}))"><div class="ico-tile ${x.done?'green':'tan'}">${I(x.done?'check':'clock',20,2)}</div><div class="grow"><div class="t">${esc(x.t)}</div><div class="s">${x.from}</div></div>${stChip(x.done?'Selesai':x.draft?'Draft':'Belum Selesai')}</button>`).join('')}</div>
-  </main>`});
+    ${L.length?`<div class="list">${L.map((x,i)=>`<button class="li" onclick="act(()=>go('fm-task-form',{i:${i}}))"><div class="ico-tile ${x.done?'green':'tan'}">${I(x.done?'check':'clock',20,2)}</div><div class="grow"><div class="t">${esc(x.t)}</div><div class="s">${x.from||'Dibuat sendiri'}</div></div>${stChip(x.done?'Selesai':x.draft?'Draft':'Belum Selesai')}</button>`).join('')}</div>`:`<div class="empty">Belum ada support task untuk client ini.</div>`}
+  </main>`}; };
 SCR['fm-task-form'] = p => {
-  const x=p.i!=null?S.fm.tasks[p.i]:null;
-  return {note:'Isi task: foto before, foto after, dan catatan.',
+  const x=p.i!=null?supTasks()[p.i]:null, foto=!x||x.foto!==false;
+  return {note:'Isi task: foto before, foto after (bila diwajibkan), dan catatan.',
   html:`${appbar(x?'Isi task':'Buat task')}<main class="content">
-    ${x?`<div class="card"><b>${esc(x.t)}</b><div class="small muted">${x.from}</div></div>`:`<label class="field"><span>Nama task</span><input class="input" id="ft_t" value="${esc(p.t||'')}" placeholder="Contoh: Bersihkan freezer"></label>`}
-    <div class="thumbs" style="margin-top:12px">${photoSlot('Foto before',p.b,`cur().p.t=val('ft_t');setP({b:1})`)}${photoSlot('Foto after',p.a,`cur().p.t=val('ft_t');setP({a:1})`)}</div>
+    ${x?`<div class="card"><b>${esc(x.t)}</b><div class="small muted">${x.from||'Dibuat sendiri'}</div></div>`:`<label class="field"><span>Nama task</span><input class="input" id="ft_t" value="${esc(p.t||'')}" placeholder="Contoh: Bersihkan freezer"></label>`}
+    ${foto?`<div class="thumbs" style="margin-top:12px">${photoSlot('Foto before',p.b,`cur().p.t=val('ft_t');setP({b:1})`)}${photoSlot('Foto after',p.a,`cur().p.t=val('ft_t');setP({a:1})`)}</div>`:`<p class="hint" style="margin-top:12px">Task ini tidak wajib foto.</p>`}
     <label class="field" style="margin-top:14px"><span>Catatan</span><textarea class="input" id="ft_n"></textarea></label>
-  </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="fmTaskSave(1)">Simpan sementara</button><button class="btn" ${p.b&&p.a?'':'disabled'} onclick="fmTaskSave()">Simpan task</button></footer>`};
+  </main><footer class="actions"><button class="btn ghost" style="width:auto" onclick="fmTaskSave(1)">Simpan sementara</button><button class="btn" ${!foto||(p.b&&p.a)?'':'disabled'} onclick="fmTaskSave()">Simpan task</button></footer>`};
 };
 function fmTaskSave(draft){
   const p=cur().p;
-  if(p.i!=null){ const x=S.fm.tasks[p.i]; if(draft) x.draft=true; else { x.done=true; x.draft=false; } }
+  if(p.i!=null){ const x=supTasks()[p.i]; if(x.sync){ const o=visitOpen(); if(o){ o.sup=o.sup||{}; o.sup[x.key]={done:!draft,draft:!!draft}; } } else if(draft) x.draft=true; else { x.done=true; x.draft=false; } }
   else { const t=val('ft_t'); if(!t){ toast('Isi nama task','alert'); return; } S.fm.tasks.unshift({t,from:'Dibuat sendiri',done:!draft,draft:!!draft}); }
   fmLogPush('support',draft?'Draft':'Selesai'); back(); toast(draft?'Disimpan sementara, status Draft':'Task tersimpan, Team Leader bisa melihatnya');
 }
@@ -3009,7 +3015,7 @@ function capItems(){
   else if(isSpg()){ const c=aktCfg(), st={jual:spgTrx().length>0,sku:S.dispDone,share:S.shareState==='kirim',stok:S.fm.stokDone,posm:POSM.every(a=>S.posm[a.id])}, m=(c.akt||[]).filter(k=>k in st); out.push({c:'job',label:'Aktivitas saya',done:m.filter(k=>st[k]).length,total:m.length,sub:'modul hari ini',go:"go('spg-akt')"}); }
   else if(isMobilePromo()) out.push({c:'job',label:'Campaign & POSM',done:POSM.filter(a=>S.posm[a.id]).length,total:POSM.length,sub:'brief dinilai',go:"go('posm')"});
   else if(r==='spg'){ const n=salesList().filter(x=>!x.d).length; out.push({c:'job',label:'Transaksi',done:Math.min(n,3),total:3,sub:'target 3 per hari',go:"tab('penjualan')"}); }
-  if(r==='fmcg') out.push({c:'task',label:'Support task',done:S.fm.tasks.filter(t=>t.done).length,total:S.fm.tasks.length,sub:'dari Team Leader',go:"fmGate(()=>go('fm-task'))"});
+  if(r==='fmcg') out.push({c:'task',label:'Support task',done:supTasks().filter(t=>t.done).length,total:supTasks().length,sub:'dari client dan buatan sendiri',go:"fmGate(()=>go('fm-task'))"});
   else out.push(qItem);
   return out;
 }
