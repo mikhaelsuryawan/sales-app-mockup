@@ -98,3 +98,11 @@ Semua fase selesai dan diverifikasi:
 - Fase 5: 53 rute plus Quiz dan Survey diperiksa tanpa error konsol, tanpa overflow horizontal, tanpa kotak cari atau chip di dalam kartu tabel, di lebar 375, 768, dan 1440. Tema terang dan gelap sudah dicoba (375 dan 768 gelap, 1440 terang).
 - Pengecualian yang disengaja: Matrix approval (matriks konfigurasi tetap) dan tabel kecil tanpa status (Live tracking, Sinkron, POSM, SKU display, Market share, Kepatuhan kunjungan, Canvassing, Task pending, Insentif, Target) tetap hanya kartu tabel.
 - Perbaikan sampingan: chip Semua di Klaim biaya sebelumnya kembali ke Menunggu; sekarang menampilkan semua klaim.
+
+## 7. Revisi: toolbar tabel dengan tombol Filter
+
+Menggantikan kartu Filter terpisah (bagian 2).
+- Setiap `dataTable` membuat toolbar sendiri: kotak cari dan tombol Filter. Satu tabel di halaman: judul kartu diganti kotak cari. Beberapa tabel: judul tetap, kotak cari dan Filter di kanannya (`tbLayout`).
+- Tombol Filter membuka panel berisi satu dropdown multi-pilih untuk tiap kolom tabel (nilai diambil dari tampilan sel), plus kontrol lingkup halaman dari `filterCard` (periode, bulan). Tombol Terapkan menjalankan filter, Hapus filter mengosongkannya.
+- `filterCard` kini hanya menitipkan `top`, `selects`, `clear`, dan `summary` ke panel; cari dan chip lama dihapus.
+- Tidak tercakup: tabel mentah di luar `dataTable` (Gantt kehadiran, tabel aktivitas) dan filter rentang angka atau tanggal per kolom.

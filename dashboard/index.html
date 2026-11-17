@@ -371,6 +371,21 @@ a.stat:hover,button.stat:hover{background:var(--raised)}
 .seg button[aria-checked=true].t-success{background:var(--success);color:#fff} .seg button[aria-checked=true].t-warning{background:var(--warning);color:#fff} .seg button[aria-checked=true].t-danger{background:var(--danger);color:#fff}
 .seg.sm button{height:32px;font-size:12px} .seg.touch{display:flex;width:100%} .seg.touch button{height:48px}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
+.tbbar{display:flex;gap:8px;align-items:center;flex:1 1 320px;min-width:0;max-width:560px}
+.tbbar .tbq{flex:1;min-width:0}.tbbar .tbq .inp{width:100%}
+.tbfbtn{height:40px;gap:8px;flex:none}
+.tbfbtn[aria-expanded=true]{border-color:var(--accent)}
+.tbn{min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:var(--accent-strong);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.ch.has-tb .tbtitle{flex:0 0 auto}.ch.has-tb .acts{margin-left:auto}
+.tbpanel{margin:-4px 0 16px;padding:16px;border-radius:var(--r-panel);background:var(--raised)}
+.tbpanel[hidden]{display:none}
+.tbpanel .field>span:first-child{font-size:12px}
+.tbp-page{display:grid;gap:10px;margin-bottom:14px}
+.tbp-page .frow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tbgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px 14px}
+.tbfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px}
+.tbfa{display:flex;gap:8px;align-items:center}
+@media (max-width:767px){.tbbar{flex:1 1 100%;max-width:none;order:5}.tbgrid{grid-template-columns:1fr}.tbfoot{flex-direction:column;align-items:stretch}.tbfa{justify-content:flex-end}}
 .fcard .frow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.fcard .frow+.frow{margin-top:12px}.fcard .fsum{margin-top:12px}.fstack{display:grid;gap:16px;min-width:0}
 .chips.nowrap{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;max-width:100%}
 .chips.nowrap::-webkit-scrollbar{display:none}
@@ -916,7 +931,7 @@ const P={
   store:'M4 9l1.5-5h13L20 9M4 9h16v2a3 3 0 0 1-6 0 3 3 0 0 1-4 0 3 3 0 0 1-6 0zM5 13v8h14v-8M10 21v-5h4v5',
   pkg:'M3 7.5 12 3l9 4.5v9L12 21l-9-4.5zM3 7.5l9 4.5 9-4.5M12 12v9',
   usercog:'M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM3 21a7 7 0 0 1 10-6.3M18 15v.01M18 15a3 3 0 1 0 0 .01M18 11v1M18 18v1M21 15h1M14 15h1',
-  sliders:'M4 7h10M18 7h2M4 17h4M12 17h8M16 5v4M10 15v4',
+  sliders:'M4 7h10M18 7h2M4 17h4M12 17h8M16 5v4M10 15v4', filter:'M3 5h18l-7 8v6l-4-2v-4z',
   bulb:'M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z',
   settings:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z',
   menu:'M4 6h16M4 12h16M4 18h16',
@@ -1013,11 +1028,9 @@ const rowActs=(editOn,delOn,{del=true,edit=true,block=''}={})=>{ const why=Strin
 const card=(title,body,{acts='',cls='',icon='',desc='',count=0}={})=>`<section class="card ${cls}">${title?`<div class="ch"><div><h2>${icon?I(icon,18):''}${title}${countBadge(count)}</h2>${desc?`<p class="d">${desc}</p>`:''}</div>${acts?`<div class="acts">${acts}</div>`:''}</div>`:''}${body}</section>`;
 /* Kartu Filter standar: filter selalu di kartu sendiri di atas kartu tabel. top = baris periode, lalu cari, chip, select, hapus filter, dan ringkasan hasil. */
 const searchBox=(val,{ph='Cari',label='Cari',fn='setQ'}={})=>`<form style="flex:1;min-width:220px" onsubmit="event.preventDefault();${fn}({q:this.q.value})"><label class="inp h40"><span class="sr-only">${label}</span>${I('search',16)}<input name="q" value="${esc(val||'')}" placeholder="${ph}"></label></form>`;
-const filterCard=({top='',search='',chips=null,selects='',clear='',summary=''}={})=>{
-  const chipH=chips?`<div class="chips" role="group" aria-label="${chips.label||'Status'}">${chips.items.map(([k,l,n])=>`<button class="fchip ${chips.val===k?'on':''}" aria-pressed="${chips.val===k}" onclick="setQ({${chips.key||'st'}:'${k}'})">${l}${n!=null?` <span class="n">${n}</span>`:''}</button>`).join('')}</div>`:'';
-  const row2=`${search}${chipH}${selects}${clear?btn('Hapus filter',{v:'ghost',size:'sm',on:clear}):''}`;
-  return card('Filter',`${top?`<div class="frow">${top}</div>`:''}${row2?`<div class="frow">${row2}</div>`:''}${summary?`<p class="xs muted fsum">${summary}</p>`:''}`,{cls:'fcard'});
-};
+/* Filter dipindah ke tombol Filter di toolbar tabel (lihat dataTable). filterCard hanya menitipkan kontrol lingkup halaman (periode, bulan), tombol Hapus filter, dan ringkasan ke panel; cari dan filter per kolom dibuat otomatis oleh dataTable. */
+let PG={top:'',selects:'',clear:'',summary:''};
+const filterCard=({top='',selects='',clear='',summary=''}={})=>{ PG={top:PG.top+top,selects:PG.selects+selects,clear:clear||PG.clear,summary:summary||PG.summary}; return ''; };
 const BICON={info:'bulb',warning:'alert',danger:'alert',success:'check',accent:'bulb',neutral:'bulb'};
 const banner=({tone='info',title='',body='',icon,actions='',dismiss=false,raw='',cls=''}={})=>`<div class="banner ${tone} ${cls}" role="${tone==='danger'?'alert':'status'}"><span class="bi">${I(icon||BICON[tone],16)}</span><div class="bt">${raw||`${title?`<b>${title}</b>`:''}${body?`<p>${body}</p>`:''}`}</div>${actions?`<div class="ba">${actions}</div>`:''}${dismiss?ibtn('x','Tutup',"this.closest('.banner').remove()",{size:'icon-sm'}):''}</div>`;
 const callout=(html,cls='')=>banner({tone:cls==='blue'?'accent':'info',raw:html});
@@ -1684,22 +1697,51 @@ function meter(score){ const n=36, f=Math.round(score/100*n), col=score>=85?'var
 function tbSig(){ return location.hash.split('?')[1]||''; }
 function dataTable(key,{cols,rows,rowClick,select,acts,empty='Belum ada data',emptyDesc='Data muncul di sini setelah dicatat dari aplikasi atau dashboard.',perOpts=[12,24,48,96],sort:dsort=null,rowCls=null}){
   const t=ST.tb[key]||(ST.tb[key]={page:1,per:12,sort:dsort?{i:dsort.i,dir:dsort.dir}:null});
-  const sig=tbSig(); if(t.sig!==undefined&&t.sig!==sig){ t.page=1; t.shown=6; } t.sig=sig;
+  const sig=tbSig(); if(t.sig!==undefined&&t.sig!==sig){ t.page=1; t.shown=6; t.f={}; t.qs=''; t.open=false; } t.sig=sig;
   const phone=isPhone(); if(!t.shown) t.shown=6;
-  let data=rows;
+  const pg=PG; PG={top:'',selects:'',clear:'',summary:''};
+  /* Cari dan filter per kolom: teks tiap sel diambil dari tampilan kolom, jadi semua kolom bisa difilter */
+  const T=rows.map(r=>cols.map(c=>cellText(c,r))), fl=t.f||(t.f={}), qs=t.qs||'';
+  const act=Object.keys(fl).filter(i=>fl[i]&&fl[i].length), words=qs.toLowerCase().split(/\s+/).filter(Boolean);
+  let data=rows.filter((r,ri)=>{ const tx=T[ri]; if(words.length){ const hay=tx.join(' ').toLowerCase(); if(!words.every(w=>hay.includes(w))) return false; } return act.every(i=>fl[i].includes(tx[i])); });
+  const bar=tbBar(key,t,cols,T,rows.length,data.length,act.length,qs,pg);
   if(t.sort&&cols[t.sort.i]){ const c=cols[t.sort.i], get=typeof c.sort==='function'?c.sort:r=>r[c.k];
-    data=[...rows].sort((a,b)=>{ const x=get(a), y=get(b); if(x==null||x==='') return 1; if(y==null||y==='') return -1; const d=(typeof x==='number'&&typeof y==='number')?x-y:String(x).localeCompare(String(y),'id',{numeric:true}); return d*t.sort.dir; }); }
+    data=[...data].sort((a,b)=>{ const x=get(a), y=get(b); if(x==null||x==='') return 1; if(y==null||y==='') return -1; const d=(typeof x==='number'&&typeof y==='number')?x-y:String(x).localeCompare(String(y),'id',{numeric:true}); return d*t.sort.dir; }); }
   const pages=Math.max(1,Math.ceil(data.length/t.per)); if(t.page>pages) t.page=pages;
   const view=phone?data.slice(0,t.shown):data.slice((t.page-1)*t.per,t.page*t.per); const S=ST.sel[key]||(ST.sel[key]=new Set());
   const allOn=view.length&&view.every(r=>S.has(r._id));
   const hc=(c,i)=>`${c.hide||(!c.keep&&i>=4)?'hide-m':''} ${c.hideBelow?'hb-'+c.hideBelow:''}`;
   const th=(c,i)=>{ const on=t.sort&&t.sort.i===i; return `<th class="${c.align||''} ${hc(c,i)}" ${c.sort?`aria-sort="${on?(t.sort.dir>0?'ascending':'descending'):'none'}"`:''}>${c.sort?`<button type="button" class="sort" onclick="tbSort('${key}',${i})">${c.label}${I(on?(t.sort.dir>0?'up':'down'):'updown',14)}</button>`:c.label}</th>`; };
-  return `<div class="tbl-wrap"><table class="tbl resp"><thead><tr>${select?`<th style="width:34px"><button type="button" class="cb ${allOn?'on':''}" aria-label="Pilih semua di halaman" onclick="tbAll('${key}',[${view.map(r=>`'${r._id}'`).join(',')}],${!allOn})">${allOn?I('check',12,3):''}</button></th>`:''}${cols.map(th).join('')}${acts?'<th class="r">Aksi</th>':''}</tr></thead>
+  return `${bar}<div class="tbl-wrap"><table class="tbl resp"><thead><tr>${select?`<th style="width:34px"><button type="button" class="cb ${allOn?'on':''}" aria-label="Pilih semua di halaman" onclick="tbAll('${key}',[${view.map(r=>`'${r._id}'`).join(',')}],${!allOn})">${allOn?I('check',12,3):''}</button></th>`:''}${cols.map(th).join('')}${acts?'<th class="r">Aksi</th>':''}</tr></thead>
     <tbody>${view.length?view.map(r=>`<tr class="${rowClick?'click':''} ${rowCls?rowCls(r)||'':''}" ${rowClick?`onclick="${rowClick(r)}"`:''}>${select?`<td onclick="event.stopPropagation()"><button type="button" class="cb ${S.has(r._id)?'on':''}" aria-label="Pilih ${esc(r._id)}" onclick="tbSel('${key}','${r._id}')">${S.has(r._id)?I('check',12,3):''}</button></td>`:''}${cols.map((c,ci)=>`<td data-l="${c.label}" class="${c.align||''} ${c.prim?'prim':''} ${hc(c,ci)} ${c.strong?'strong':''} ${rowClick&&ci===0?'has-open':''}">${c.render?c.render(r):esc(r[c.k])}${rowClick&&ci===0?`<button type="button" class="rowopen" aria-label="Buka rincian" data-tip="Buka" onclick="event.stopPropagation();${rowClick(r)}">${I('ext',14)}</button>`:''}</td>`).join('')}${acts?`<td data-l="Aksi" class="r acts-c" onclick="event.stopPropagation()"><div class="row-acts">${acts(r)}</div></td>`:''}</tr>`).join('')
       :`<tr><td colspan="${cols.length+(select?1:0)+(acts?1:0)}">${emptyState({icon:'file',title:empty,desc:emptyDesc,compact:true})}</td></tr>`}</tbody></table></div>
     ${phone?(t.shown<data.length?`<div class="more-row">${btn(`${data.length-t.shown} lagi · Muat`,{v:'outline',on:`tbMore('${key}')`})}</div>`:''):''}
     <div class="pager" ${phone?'hidden':''}><span class="tabular">${data.length?`${(t.page-1)*t.per+1}–${Math.min(t.page*t.per,data.length)} dari ${data.length}`:'0 data'}</span>
       <div class="pg"><span>Baris</span>${sel(perOpts,t.per,`tbPer('${key}',this.value)`,{cls:'sm',label:'Baris per halaman'})}${ibtn('left','Halaman sebelumnya',`tbPage('${key}',-1)`,{v:'outline',size:'icon-sm',attrs:t.page<=1?'disabled':''})}<span class="tabular">${t.page}/${pages}</span>${ibtn('right','Halaman berikutnya',`tbPage('${key}',1)`,{v:'outline',size:'icon-sm',attrs:t.page>=pages?'disabled':''})}</div></div>`;
+}
+
+/* ---------- Toolbar tabel: cari + tombol Filter + panel filter multi-pilih ---------- */
+const plainTx=h=>String(h==null?'':h).replace(/<[^>]*>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+const cellText=(c,r)=>{ try{ return plainTx(c.render?c.render(r):r[c.k])||'–'; }catch(e){ return '–'; } };
+function tbBar(key,t,cols,T,total,shown,nCol,qs,pg){
+  const nAct=nCol+(pg.clear?1:0), dirty=nAct>0||!!qs;
+  const fields=cols.map((c,i)=>{ if(!c.label) return ''; const vals=[...new Set(T.map(x=>x[i]))]; if(!vals.length||(vals.length===1&&vals[0]==='–')) return '';
+    vals.sort((a,b)=>a==='–'?1:b==='–'?-1:a.localeCompare(b,'id',{numeric:true})); const cur=(t.f&&t.f[i])||[];
+    return `<label class="field"><span>${c.label}</span><span class="sel" style="display:flex"><select multiple data-col="${i}" data-ph="Semua" style="width:100%" aria-label="Filter ${esc(c.label)}">${vals.slice(0,500).map(v=>`<option value="${esc(v)}" ${cur.includes(v)?'selected':''}>${esc(v)}</option>`).join('')}</select>${I('chev',16)}</span></label>`; }).join('');
+  const page=pg.top||pg.selects?`<div class="tbp-page">${pg.top?`<div class="frow">${pg.top}</div>`:''}${pg.selects?`<div class="frow">${pg.selects}</div>`:''}</div>`:'';
+  const sum=pg.summary||(dirty?`Menampilkan <b class="fg">${shown}</b> dari ${total} data.`:`${total} data.`);
+  return `<div class="tbbar" data-k="${key}"><form class="tbq" onsubmit="event.preventDefault();tbApply('${key}')"><label class="inp h40"><span class="sr-only">Cari di tabel</span>${I('search',16)}<input id="tbq_${key}" name="q" value="${esc(qs)}" placeholder="Cari" autocomplete="off"></label></form><button type="button" class="btn b-outline tbfbtn" aria-expanded="${!!t.open}" aria-controls="tbp_${key}" onclick="tbToggle('${key}')">${I('filter',16)}<span>Filter</span>${nAct?`<span class="tbn">${nAct}</span>`:''}</button></div>
+  <div class="tbpanel" id="tbp_${key}" role="group" aria-label="Filter tabel" ${t.open?'':'hidden'}>${page}${fields?`<div class="tbgrid">${fields}</div>`:''}<div class="tbfoot"><span class="xs muted">${sum}</span><span class="tbfa">${dirty?`<button type="button" class="btn b-ghost sm" onclick="tbReset('${key}');${pg.clear||'render(false)'}">Hapus filter</button>`:''}<button type="button" class="btn b-accent sm" onclick="tbApply('${key}')">Terapkan</button></span></div></div>`;
+}
+function tbToggle(k){ const t=ST.tb[k]; t.open=!t.open; const p=document.getElementById('tbp_'+k); if(p) p.hidden=!t.open; document.querySelector(`.tbbar[data-k="${k}"] .tbfbtn`)?.setAttribute('aria-expanded',String(t.open)); }
+function tbApply(k){ const t=ST.tb[k], f={}; document.querySelectorAll(`#tbp_${k} select[data-col]`).forEach(s=>{ const v=[...s.selectedOptions].map(o=>o.value); if(v.length) f[s.dataset.col]=v; }); t.f=f; t.qs=(document.getElementById('tbq_'+k)?.value||'').trim(); t.page=1; t.shown=6; t.open=false; render(false); }
+function tbReset(k){ const t=ST.tb[k]; t.f={}; t.qs=''; t.page=1; t.shown=6; t.open=false; }
+/* Pasang toolbar ke kepala kartu tabel. Satu tabel di halaman: judul diganti kotak cari. Beberapa tabel: judul tetap, kotak cari dan Filter di kanannya. */
+function tbLayout(){ const main=document.getElementById('main'); if(!main) return; const bars=[...main.querySelectorAll('.tbbar')], solo=bars.length===1;
+  bars.forEach(bar=>{ const card=bar.closest('.card'); if(!card||card.querySelector('.tbbar')!==bar) return; const panel=document.getElementById('tbp_'+bar.dataset.k);
+    let ch=[...card.children].find(x=>x.classList.contains('ch')); if(!ch){ ch=document.createElement('div'); ch.className='ch'; card.prepend(ch); }
+    const title=ch.firstElementChild; if(title&&!title.classList.contains('acts')){ if(solo) title.hidden=true; else title.classList.add('tbtitle'); }
+    ch.insertBefore(bar,ch.querySelector('.acts')); ch.classList.add('has-tb'); ch.after(panel); });
 }
 function tbMore(k){ ST.tb[k].shown=(ST.tb[k].shown||6)+6; render(false); }
 function tbSort(k,i){ const t=ST.tb[k], c=t.sort; t.sort=!c||c.i!==i?{i,dir:1}:c.dir>0?{i,dir:-1}:null; t.page=1; render(false); }
@@ -1933,6 +1975,7 @@ function render(scrollTop=true){
   if(path==='/login'){ app.innerHTML=pageLogin(); lastPath=path; return; }
   if(!AUTHED){ ST.from=location.hash.slice(1)||'/'; location.replace('#/login'); return; }
   if(lastPath!==path) ST.scope=Object.keys(q).length&&NAVTYPE==='push'?{path,q:{...q}}:null;
+  PG={top:'',selects:'',clear:'',summary:''};
   const page=(ROUTES[path]||pageNotFound)(q);
   if(ST.sidebar===null){ const s=store.get(KEY.rail,null,'sim-sidebar'); ST.sidebar=s===null?true:s==='1'; }
   const railCollapsed=!ST.sidebar||innerWidth<1280;
@@ -1957,7 +2000,7 @@ function render(scrollTop=true){
   NAVTYPE=''; if(ST.searchOpen) document.querySelector('.hsearch-m input')?.focus();
   const key=location.hash.split('?')[1]||'';
   if(!reduceMotion()){ if(lastPath!==path) fxBegin('full'); else if(FX.key!==key) fxBegin('soft'); else fxApply(); }
-  FX.key=key; lastPath=path; saveDash(); syncTabsFade(); syncChips(); syncLayer(); drawCharts();
+  FX.key=key; lastPath=path; saveDash(); tbLayout(); syncTabsFade(); syncChips(); syncLayer(); drawCharts();
   page.after?.();
 }
 
@@ -3232,9 +3275,7 @@ function crudList(ent,q,{acts='',prefill='',sels='',top='',ban='',noAdd=false,ad
   const addAct=ent==='user'?'simImport()':`openForm('${ent}'${prefill?`,null,${prefill}`:''})`;
   const stc=(E.stChips?E.stChips(q):['Aktif','Nonaktif']);
   const dirty=qq||f||q.br||q.lv||q.ms||q.sk||q.tk||q.sg||q.cbk||q.pv;
-  const fc=filterCard({top,search:searchBox(q.q,{ph:'Cari '+lc(E),label:'Cari '+lc(E)}),
-    chips:stc.length?{key:'st',val:f,label:'Status',items:[['','Semua',all.length],...stc.map(x=>[x,x,all.filter(r=>r.status===x).length])]}:null,
-    selects:sels,clear:dirty?"setQ({q:'',st:'',sg:'',br:'',lv:'',ms:'',sk:'',tk:'',cbk:'',pv:''})":'',
+  const fc=filterCard({top,clear:dirty?"setQ({q:'',st:'',sg:'',br:'',lv:'',ms:'',sk:'',tk:'',cbk:'',pv:''})":'',
     summary:dirty?`Menampilkan <b class="fg">${rows.length}</b> dari ${all.length} ${lc(E)}.`:''});
   const tc=card(E.plural,`${can('master.edit')?'':banner({tone:'neutral',body:'Anda hanya dapat melihat data ini. Perubahan dilakukan oleh Admin SIM.',cls:'mb'})}${ban}
     ${dataTable('md_'+ent,{rows,rowClick:r=>`openForm('${ent}','${r.id}')`,acts:can('master.edit')?(r=>rowActs(`openForm('${ent}','${r.id}')`,`delAsk('${ent}','${r.id}')`,{block:E.inUse?.(r)||''})):null,cols:E.hideCols?E.cols.filter(c=>!E.hideCols(q).includes(c.label)):E.cols,empty:qq||f||q.br||q.lv||q.ms||q.sk||q.tk?`Tidak ada ${lc(E)} yang cocok. Ubah atau hapus filter di kartu Filter.`:`Belum ada ${lc(E)}.`})}`,
