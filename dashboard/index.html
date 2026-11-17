@@ -1722,10 +1722,13 @@ function dataTable(key,{cols,rows,rowClick,select,acts,empty='Belum ada data',em
 
 /* ---------- Toolbar tabel: cari + tombol Filter + panel filter multi-pilih ---------- */
 const plainTx=h=>String(h==null?'':h).replace(/<[^>]*>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+/* Kolom nominal, angka, atau persentase tidak diberi filter */
+const NUM_RE=/^[-+−]?\s*(?:Rp\.?\s*|IDR\s*)?[-+−]?\d[\d.,]*\s*(?:%|jt|rb|juta|ribu|unit|pcs|hari|jam|menit|km|toko|item|x)?$/i;
+const isNumCol=(T,i)=>{ const v=T.map(x=>x[i]).filter(x=>x!=='–'); return v.length>0&&v.every(x=>NUM_RE.test(x)); };
 const cellText=(c,r)=>{ try{ return plainTx(c.render?c.render(r):r[c.k])||'–'; }catch(e){ return '–'; } };
 function tbBar(key,t,cols,T,total,shown,nCol,qs,pg){
   const nAct=nCol+(pg.clear?1:0), dirty=nAct>0||!!qs;
-  const fields=cols.map((c,i)=>{ if(!c.label) return ''; const vals=[...new Set(T.map(x=>x[i]))]; if(!vals.length||(vals.length===1&&vals[0]==='–')) return '';
+  const fields=cols.map((c,i)=>{ if(!c.label||isNumCol(T,i)) return ''; const vals=[...new Set(T.map(x=>x[i]))]; if(!vals.length||(vals.length===1&&vals[0]==='–')) return '';
     vals.sort((a,b)=>a==='–'?1:b==='–'?-1:a.localeCompare(b,'id',{numeric:true})); const cur=(t.f&&t.f[i])||[];
     return `<label class="field"><span>${c.label}</span><span class="sel" style="display:flex"><select multiple data-col="${i}" data-ph="Semua" style="width:100%" aria-label="Filter ${esc(c.label)}">${vals.slice(0,500).map(v=>`<option value="${esc(v)}" ${cur.includes(v)?'selected':''}>${esc(v)}</option>`).join('')}</select>${I('chev',16)}</span></label>`; }).join('');
   const page=pg.top||pg.selects?`<div class="tbp-page">${pg.top?`<div class="frow">${pg.top}</div>`:''}${pg.selects?`<div class="frow">${pg.selects}</div>`:''}</div>`:'';
