@@ -1105,6 +1105,7 @@ const tokoDefault=()=>{ const r=role(), u=uid();
   if(r==='canvas') return TOKO.canvas.map(t=>t.name);
   if(r==='order') return TOKO.order.map(t=>t.name);
   if(u==='rangga') return ['Best Denki Senayan City','Electronic City Kemang'];
+  if(u==='eko') return ['Electronic City Kemang','Best Denki Senayan City'];
   if(isMobilePromo()) return TOKO.spg.map(t=>t.name);
   return U()?.place?[U().place]:[]; };
 const tokoDitugaskan=()=>{ const m=shRead('penugasanToko',null); return (m&&m[uid()])?m[uid()]:tokoDefault(); };
@@ -3172,7 +3173,7 @@ function renderPanel(){
     <h2>Mockup Sales App</h2>
     <p class="sub">Atur skenario demo di sini. Semua data adalah dummy, nanti diganti API SIM (BPR1). Label <span class="tagx">Usulan</span>menandai fitur tambahan di luar BRD.</p>
     <a href="../dashboard/" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-4px 0 14px;padding:10px 12px;border-radius:12px;background:var(--blue-50);color:var(--blue-700);font-size:12.5px;font-weight:700">Buka dashboard web ${I('right',16,2.2)}</a>
-    <div class="pgroup"><h3>Login sebagai</h3><div class="ulist">${Object.entries(USERS).map(([k,x])=>`<button class="${u===k?'on':''}" onclick="loginAs('${k}');togglePanel(false)"><span class="av blue">${x.init}</span><span><b>${x.name}</b><small>${x.roleLabel}</small></span></button>`).join('')}</div></div>
+    <div class="pgroup"><h3>Login sebagai</h3><div class="ulist">${Object.entries(USERS).filter(([k,x],i,a)=>a.findIndex(([,y])=>y.roleLabel===x.roleLabel)===i||u===k).map(([k,x])=>`<button class="${u===k?'on':''}" onclick="loginAs('${k}');togglePanel(false)"><span class="av blue">${x.init}</span><span><b>${x.name}</b><small>${x.roleLabel}</small></span></button>`).join('')}</div></div>
     <div class="pgroup"><h3>Data bersama dengan dashboard</h3><button class="btn ghost sm" onclick="shReset();toast('Data bersama direset','refresh')">Reset data bersama</button></div>
     <div class="pgroup"><h3>Scheduler kunjungan 23.59</h3><button class="btn ghost sm" onclick="eodRunMobile()">Jalankan simulasi 23.59</button><div class="hint" style="margin-top:6px">Kunjungan yang belum check-in menjadi Terlewat. Hanya untuk kunjungan, bukan absensi.</div></div>
     <div class="pgroup"><h3>Jadwal hari ini</h3><div class="seg"><button class="${m==='WFO'?'on':''}" onclick="demoSet('mode','WFO')">WFO</button><button class="${m==='WFA'?'on':''}" onclick="demoSet('mode','WFA')">WFA</button><button class="${m==='OFF'?'on':''}" onclick="demoSet('mode','OFF')">OFF</button></div></div>
