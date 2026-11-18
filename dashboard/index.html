@@ -1274,7 +1274,7 @@ const tokoOfU=u=>TOKO.filter(t=>!t.del&&t.sales.includes(u));
 const tokoLabel=u=>{ const a=tokoOfU(u); return !a.length?'Belum di-assign':a.length===1?a[0].name:a.length+' toko · '+a[0].name+' +'+(a.length-1); };
 SALES.filter(s=>ASSIGN_JOBS.includes(s.job)).forEach(s=>Object.defineProperty(s,'toko',{get:()=>tokoLabel(s.u),enumerable:true}));
 const FM_TASKS_LABEL='Semua aktivitas toko, kecuali support task';
-const FM_TASK_KEYS=[['stok','Cek stok'],['promo','Price promo'],['facing','Facing display'],['share','Market share']];
+const FM_TASK_KEYS=[['stok','Cek stok'],['promo','Price promo'],['facing','Facing display'],['share','Display share']];
 const D={
   usulan:[{id:'u1',name:'Toko Sumber Makmur',by:'budi',owner:'Pak Hasan',phone:'0812-7781-2290',addr:'Jl. Moh. Kahfi I No. 21, Jagakarsa',cat:'Retail',when:'26 Okt, 13:20',status:'Menunggu verifikasi'}],
   /* Produk free text dari sales: tabel sementara, TIDAK masuk master Produk & harga (MOM 9 Nov bagian 6). */
@@ -1318,7 +1318,7 @@ const D={
   ],
   visits:[
     {u:'rina',place:'Electronic City Kemang',plan:'08:00',cin:'08:03',cout:'',dur:'',tasks:'Cek SKU display, Penjualan',photos:1,status:'Berjalan'},
-    {u:'rina',place:'Best Denki Senayan City',plan:'14:00',cin:'',cout:'',dur:'',tasks:'Survey toko, Market share',photos:0,status:'Belum'},
+    {u:'rina',place:'Best Denki Senayan City',plan:'14:00',cin:'',cout:'',dur:'',tasks:'Survey toko, Display share',photos:0,status:'Belum'},
     {u:'budi',place:'Toko Sinar Jaya Elektronik',plan:'09:00',cin:'09:02',cout:'09:31',dur:'29 mnt',tasks:'Penjualan, Ambil retur',photos:2,status:'Selesai'},
     {u:'budi',place:'Toko Makmur Abadi',plan:'10:30',cin:'10:36',cout:'',dur:'',tasks:'Penjualan',photos:1,status:'Berjalan',left:true},
     {u:'budi',place:'Toko Berkah Elektronik',plan:'13:00',cin:'',cout:'',dur:'',tasks:'Penjualan, Cek display',photos:0,status:'Belum'},
@@ -1560,7 +1560,7 @@ function deriveInc(m){ return REPU.map(u=>{ const dealer=mainDealer(u,m), dr=dea
   const ok=dAch>60&&sAch>dAch; return {u,dealer,dAch,sAch,gross,ok,final:ok?Math.min(gross,2*UMK):0}; }); }
 // Isi file rekap klien (demo). Hanya selisih terhadap hitungan sistem yang disimpan di sini.
 const REK_FILE={delta:-120000,why:'1 transaksi tidak ada di data klien'}, REK_ADJ={};
-// Skor dari modul lain (quiz, SKU display, market share); penjualan dan absensi dihitung di bawah.
+// Skor dari modul lain (quiz, SKU display, display share); penjualan dan absensi dihitung di bawah.
 const GRADE_IN={putri:{quiz:100,sku:88,share:80,kunj:95},rina:{quiz:95,sku:90,share:76,kunj:92},sinta:{quiz:90,sku:84,share:70,kunj:90},kevin:{quiz:85,sku:70,share:60,kunj:100},fajar:{quiz:100,sku:78,share:72,kunj:88},budi:{quiz:85,sku:65,share:58,kunj:92}};
 /* Kepatuhan kunjungan masuk komponen grading (jawaban klien 12 Nov 2026, K5). Bobot dari formula klien dan role, bawaan bila belum ada. */
 const GW_DEFAULT={jual:35,absen:20,quiz:10,sku:15,share:10,kunj:10};
@@ -1723,7 +1723,7 @@ const SEC_ICON={'Ringkasan':'dash','Operasional lapangan':'finger','Penjualan':'
 const NAV_DEFAULT=[
   ['Ringkasan',[['/','Overview','dash']]],
   ['Operasional lapangan',[['/absensi','Absensi','finger'],['/kunjungan','Kunjungan','route'],['/approval','Approval','checks','approval'],['/task-pending','Task pending','alert'],['/aktivitas','Aktivitas lapangan','route'],['/kepatuhan-kunjungan','Kepatuhan kunjungan','checks']]],
-  ['Penjualan',[['/data-penjualan','Data penjualan','file'],['/penjualan','Laporan penjualan','chart'],['/pemesanan','Pemesanan','checks'],['/sell-in','Sell-in dealer','wallet'],['/canvassing','Canvassing','pkg'],['/sku-display','Laporan SKU display','grid'],['/market-share','Laporan market share','chart']]],
+  ['Penjualan',[['/data-penjualan','Data penjualan','file'],['/penjualan','Laporan penjualan','chart'],['/pemesanan','Pemesanan','checks'],['/sell-in','Sell-in dealer','wallet'],['/canvassing','Canvassing','pkg'],['/sku-display','Laporan SKU display','grid'],['/market-share','Laporan display share','chart']]],
   ['Kinerja & insentif',[['/target','Target & sell-in','target'],['/insentif','Insentif','wallet'],['/grading','Grading','award']]],
   ['Leads pinjaman',[['/leads','Leads pinjaman','users','leads'],['/overdue','Overdue','alert','overdue'],['/mitra','Mitra','users']]],
   ['Program & konten',[['/promo','Promo','tag'],['/event','Event','tag'],['/posm','Campaign, POSM & planogram','grid'],['/quiz','Quiz','bulb'],['/survey','Survey','checks']]],
@@ -1867,7 +1867,7 @@ function drawMore(){
 function moreGo(p,label){ const r=[{to:p,label},...recentNav().filter(x=>x.to!==p)].slice(0,4); store.set('salesapp.dashboard.recent',JSON.stringify(r)); closeLayer(); }
 
 /* Kepala halaman: satu kalimat tujuan layar. Papan langsung menampilkan waktu pembaruan. */
-const PAGE_DESC={'/penjualan':'Pantau penjualan per klien, cabang, toko, dan sales, lalu telusuri sampai transaksi.','/absensi':'Lihat kehadiran sales hari ini, jam masuk, mode kerja, dan hasil pencocokan wajah.','/kunjungan':'Pantau kunjungan sales ke toko: jadwal, durasi, dan hasilnya.','/approval':'Putuskan pengajuan dari lapangan: absen terlambat, cuti, hapus penjualan, batal pesanan, dan promo.','/target':'Atur target per sales, toko, dan bulan, lalu bandingkan dengan pencapaian.','/promo':'Kelola promo yang berjalan dan promo yang menunggu approval.','/insentif':'Hitung insentif sales per bulan dan cocokkan dengan data klien.','/grading':'Lihat skor grading sales dari penjualan, absensi, quiz, SKU, dan market share.','/leads':'Kelola leads pinjaman: assign ke manager atau sales, tindak lanjut, lalu kirim ke SIM.','/overdue':'Pantau leads yang melewati batas tindak lanjut.','/company-sim':'Kelola data company SIMGROUP yang menjadi induk klien.','/sektor':'Kelola sektor bisnis yang dipakai klien dan produk.','/client':'Kelola klien SaaS beserta sektor dan statusnya.','/kategori-toko':'Kelola kategori toko untuk pelaporan.','/toko':'Kelola toko yang dikunjungi sales, termasuk usulan toko baru dari lapangan.','/iam':'Atur hak akses tiap role: modul, aksi, dan menu di aplikasi mobile.','/produk':'Kelola produk dan harga, pemetaan produk ke toko, serta produk dari sales.','/penugasan':'Atur penugasan dan jadwal sales per toko.','/pemesanan':'Pantau pesanan dealer dari dibuat sampai lunas.','/sell-in':'Bandingkan sell-in dealer dengan target dan sell-out.','/user-sales':'Kelola sales lapangan yang tersinkron dari SIM.','/user-admin':'Kelola pengguna dashboard dan role-nya.','/parameter':'Atur parameter yang dipakai aplikasi dan perhitungan.','/task-pending':'Lihat tugas lapangan yang belum selesai, lalu assign atau tutup.','/aktivitas':'Lihat hasil kerja per sales dan log aktivitas toko.','/canvassing':'Pantau canvassing: barang dibawa, terjual, dan limit.','/posm':'Kelola campaign, POSM, dan planogram untuk toko.','/region':'Kelola region dan cabang.','/brand':'Kelola brand klien.','/kategori-produk':'Kelola kategori produk berjenjang.','/kompetitor':'Kelola kompetitor yang dipantau.','/cabang-client':'Kelola cabang tiap klien.','/mapping-outlet':'Petakan outlet ke klien dan cabang.','/data-penjualan':'Telusuri semua transaksi penjualan dari aplikasi dan dashboard.','/penagihan':'Pantau piutang dan penagihan menurut umur.','/klaim-biaya':'Putuskan klaim biaya sales berdasarkan bukti dan limit.','/kepatuhan-kunjungan':'Ukur kepatuhan kunjungan sales terhadap jadwal.','/pengumuman':'Kirim pengumuman ke sales menurut role dan klien.','/sinkron':'Cek status sinkron perangkat sales dan data dari SIM.','/satuan':'Kelola satuan produk.','/konversi':'Atur konversi satuan untuk semua produk (General) atau per produk.','/sidebar-menu':'Atur susunan menu sidebar: nama, urutan, level, halaman, dan role yang melihatnya.','/konfigurasi-aktivitas':'Atur aktivitas yang tampil di aplikasi tiap role.','/form-penjualan':'Susun field form catat penjualan di aplikasi.','/status-produk':'Kelola status produk.','/event':'Kelola event dan jadwalnya.','/mitra':'Kelola mitra dan pertanyaan monitoringnya.','/sku-display':'Lihat laporan SKU display per toko.','/market-share':'Lihat laporan market share per toko dan kategori.','/quiz':'Susun dan kelola quiz untuk sales.','/survey':'Susun dan kelola survey untuk sales.','/pengaturan':'Atur preferensi dashboard dan data demo.'};
+const PAGE_DESC={'/penjualan':'Pantau penjualan per klien, cabang, toko, dan sales, lalu telusuri sampai transaksi.','/absensi':'Lihat kehadiran sales hari ini, jam masuk, mode kerja, dan hasil pencocokan wajah.','/kunjungan':'Pantau kunjungan sales ke toko: jadwal, durasi, dan hasilnya.','/approval':'Putuskan pengajuan dari lapangan: absen terlambat, cuti, hapus penjualan, batal pesanan, dan promo.','/target':'Atur target per sales, toko, dan bulan, lalu bandingkan dengan pencapaian.','/promo':'Kelola promo yang berjalan dan promo yang menunggu approval.','/insentif':'Hitung insentif sales per bulan dan cocokkan dengan data klien.','/grading':'Lihat skor grading sales dari penjualan, absensi, quiz, SKU, dan display share.','/leads':'Kelola leads pinjaman: assign ke manager atau sales, tindak lanjut, lalu kirim ke SIM.','/overdue':'Pantau leads yang melewati batas tindak lanjut.','/company-sim':'Kelola data company SIMGROUP yang menjadi induk klien.','/sektor':'Kelola sektor bisnis yang dipakai klien dan produk.','/client':'Kelola klien SaaS beserta sektor dan statusnya.','/kategori-toko':'Kelola kategori toko untuk pelaporan.','/toko':'Kelola toko yang dikunjungi sales, termasuk usulan toko baru dari lapangan.','/iam':'Atur hak akses tiap role: modul, aksi, dan menu di aplikasi mobile.','/produk':'Kelola produk dan harga, pemetaan produk ke toko, serta produk dari sales.','/penugasan':'Atur penugasan dan jadwal sales per toko.','/pemesanan':'Pantau pesanan dealer dari dibuat sampai lunas.','/sell-in':'Bandingkan sell-in dealer dengan target dan sell-out.','/user-sales':'Kelola sales lapangan yang tersinkron dari SIM.','/user-admin':'Kelola pengguna dashboard dan role-nya.','/parameter':'Atur parameter yang dipakai aplikasi dan perhitungan.','/task-pending':'Lihat tugas lapangan yang belum selesai, lalu assign atau tutup.','/aktivitas':'Lihat hasil kerja per sales dan log aktivitas toko.','/canvassing':'Pantau canvassing: barang dibawa, terjual, dan limit.','/posm':'Kelola campaign, POSM, dan planogram untuk toko.','/region':'Kelola region dan cabang.','/brand':'Kelola brand klien.','/kategori-produk':'Kelola kategori produk berjenjang.','/kompetitor':'Kelola kompetitor yang dipantau.','/cabang-client':'Kelola cabang tiap klien.','/mapping-outlet':'Petakan outlet ke klien dan cabang.','/data-penjualan':'Telusuri semua transaksi penjualan dari aplikasi dan dashboard.','/penagihan':'Pantau piutang dan penagihan menurut umur.','/klaim-biaya':'Putuskan klaim biaya sales berdasarkan bukti dan limit.','/kepatuhan-kunjungan':'Ukur kepatuhan kunjungan sales terhadap jadwal.','/pengumuman':'Kirim pengumuman ke sales menurut role dan klien.','/sinkron':'Cek status sinkron perangkat sales dan data dari SIM.','/satuan':'Kelola satuan produk.','/konversi':'Atur konversi satuan untuk semua produk (General) atau per produk.','/sidebar-menu':'Atur susunan menu sidebar: nama, urutan, level, halaman, dan role yang melihatnya.','/konfigurasi-aktivitas':'Atur aktivitas yang tampil di aplikasi tiap role.','/form-penjualan':'Susun field form catat penjualan di aplikasi.','/status-produk':'Kelola status produk.','/event':'Kelola event dan jadwalnya.','/mitra':'Kelola mitra dan pertanyaan monitoringnya.','/sku-display':'Lihat laporan SKU display per toko.','/market-share':'Lihat laporan display share per toko dan kategori.','/quiz':'Susun dan kelola quiz untuk sales.','/survey':'Susun dan kelola survey untuk sales.','/pengaturan':'Atur preferensi dashboard dan data demo.'};
 const LIVE_PAGES=['/absensi','/sinkron','/kunjungan'];
 const timeLabel=()=>{ const d=new Date(nowMs()+7*36e5); return String(d.getUTCHours()).padStart(2,'0')+'.'+String(d.getUTCMinutes()).padStart(2,'0'); };
 const SCOPE_LABEL={q:'pencarian',f:'filter',u:'sales',st:'status',cat:'kategori',cl:'klien',cb:'cabang',tk:'toko',r:'peran'}, SCOPE_SKIP=['tab','per','p','preset','from','to','new'];
@@ -2606,7 +2606,7 @@ function pageGrading(q){
 }
 function gradePanel(u){ const g=GRADE.find(x=>x.u===u); if(!g) return panelMissing('Grading'); const s=byU(u);
   openPanel(s.name,`<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px"><span class="hero-n tabular">${g.total}</span>${tag('Grade '+g.grade,g.grade==='A'?'success':g.grade==='B'?'accent':'warning')}</div>
-  <div class="rows">${(()=>{ const w=gwOf(u); return [['Penjualan',g.jual,w.jual+'%'],['Absensi',g.absen,w.absen+'%'],['Quiz',g.quiz,w.quiz+'%'],['SKU display',g.sku,w.sku+'%'],['Market share',g.share,w.share+'%'],['Kepatuhan kunjungan',g.kunj||0,w.kunj+'%']]; })().map(([l,v,w])=>`<div class="rowlink" style="cursor:default"><span style="width:110px" class="sm">${l} <span class="xs muted">${w}</span></span>${meter(v)}<b class="tabular fg" style="width:28px;text-align:right">${v}</b></div>`).join('')}</div>`,
+  <div class="rows">${(()=>{ const w=gwOf(u); return [['Penjualan',g.jual,w.jual+'%'],['Absensi',g.absen,w.absen+'%'],['Quiz',g.quiz,w.quiz+'%'],['SKU display',g.sku,w.sku+'%'],['Display share',g.share,w.share+'%'],['Kepatuhan kunjungan',g.kunj||0,w.kunj+'%']]; })().map(([l,v,w])=>`<div class="rowlink" style="cursor:default"><span style="width:110px" class="sm">${l} <span class="xs muted">${w}</span></span>${meter(v)}<b class="tabular fg" style="width:28px;text-align:right">${v}</b></div>`).join('')}</div>`,
   `${btn('Ubah grade',{v:'card',icon:'edit',on:"closeLayer();toast('Grade diperbarui','Menimpa hasil perhitungan sistem.')"})}`,{sub:s.job+' · '+s.cabang}); }
 
 /* ---------- Leads ---------- */
@@ -2714,9 +2714,9 @@ function pageOverdue(q){
 const MODULES=['Absensi','Kunjungan','Approval','Penjualan','Pesanan','Target','Promo','Insentif','Grading','Leads','Overdue','Master data','IAM'];
 const ACTS=['Lihat','Buat','Ubah','Hapus','Approve'];
 /* Menu aplikasi mobile (sama dengan menu Beranda dan tab bawah di mockup mobile). Hak akses mobile cukup aktif atau tidak per menu. */
-const MOBILE_MENUS=['Absen','Aktivitas','Kunjungan','Penjualan','Pesanan','Stok bawaan','SKU display','Market share','Stock opname','Campaign & POSM','Leads','Mitra saya','Task Team Leader','Assign leads','Assign canvasser','Approval','Task pending','Tim saya','Data overdue','Target','Quiz','Survey','Ajukan izin','Notifikasi'];
+const MOBILE_MENUS=['Absen','Aktivitas','Kunjungan','Penjualan','Pesanan','Stok bawaan','SKU display','Display share','Stock opname','Campaign & POSM','Leads','Mitra saya','Task Team Leader','Assign leads','Assign canvasser','Approval','Task pending','Tim saya','Data overdue','Target','Quiz','Survey','Ajukan izin','Notifikasi'];
 const MOBILE_OWN={
-  spg:['Absen','Aktivitas','Kunjungan','Penjualan','SKU display','Market share','Stock opname','Campaign & POSM','Target','Quiz','Survey','Ajukan izin','Notifikasi'],
+  spg:['Absen','Aktivitas','Kunjungan','Penjualan','SKU display','Display share','Stock opname','Campaign & POSM','Target','Quiz','Survey','Ajukan izin','Notifikasi'],
   canvas:['Absen','Aktivitas','Kunjungan','Penjualan','Stok bawaan','Target','Quiz','Survey','Ajukan izin','Notifikasi'],
   order:['Absen','Aktivitas','Kunjungan','Pesanan','Target','Quiz','Survey','Ajukan izin','Notifikasi'],
   leads:['Absen','Leads','Target','Quiz','Survey','Ajukan izin','Notifikasi'],
@@ -2761,7 +2761,7 @@ const MD={
   role:[
     {id:'r1',name:'Admin SIM',desc:'Kelola semua klien, master data, parameter, dan IAM',scope:'Semua klien',platform:'Web',appr:'Tanpa approval',perm:genPerm('admin'),status:'Aktif'},
     {id:'r2',name:'Team Leader (SPV 1)',desc:'User client (SPV 1 / CRH). Pantau tim, approval, assign leads dan penugasan',scope:'Tim sendiri',platform:'Web & Mobile',appr:'1 tingkat',perm:genPerm('spv'),status:'Aktif'},
-    {id:'r3',name:'SPG / Promotor',desc:'Penjualan di toko, SKU display, market share',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('spg'),status:'Aktif'},
+    {id:'r3',name:'SPG / Promotor',desc:'Penjualan di toko, SKU display, display share',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('spg'),status:'Aktif'},
     {id:'r4',name:'Canvasing FMCG',bawa:'Ya',desc:'Membawa barang dari gudang. Di-assign ke satu toko atau lebih dan diatur rutenya. Halaman Aktivitas: pilih toko, check-in, kerjakan pekerjaan (jual dari stok, stok bawaan, catat retur), lalu check-out. Sisa barang wajib kembali dalam batas jam. Usulan toko',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('canvas'),status:'Aktif'},
     {id:'r21',name:'Canvasing Elektronik',bawa:'Tidak',desc:'Tidak membawa barang dari gudang. Di-assign ke satu toko atau lebih dan diatur rutenya. Halaman Aktivitas: pilih toko, check-in, isi form kunjungan, lalu check-out. Usulan toko langsung aktif',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('canvas'),status:'Aktif'},
     {id:'r5',name:'Taking Order',desc:'Di-assign ke satu toko atau lebih. Halaman Aktivitas: pilih toko, check-in, kerjakan pekerjaan (buat pesanan, follow up), lalu check-out. Usulan toko',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('order'),status:'Aktif'},
@@ -2769,8 +2769,8 @@ const MD={
     {id:'r8',name:'Arco (Leader SPG)',desc:'User client di luar BPR. Assign leads ke promotor di cabangnya',scope:'Tim sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('arco'),status:'Aktif'},
     {id:'r9',name:'CBD / Mediator',desc:'Memonitor mitra lewat pertanyaan monitoring dan boleh menjual. Tanpa check-in dan Kunjungan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('leads'),status:'Aktif'},
     {id:'r10',name:'REA / SPG Multi Finance',desc:'Call dan Visit menghasilkan Booking. Hasil dihitung sebagai insentif. Tanpa check-in dan Kunjungan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('leads'),status:'Aktif'},
-    {id:'r11',name:'Promotor FMCG',desc:'Halaman Aktivitas: pilih toko, check-in, kerjakan pekerjaan (cek stok, price promo, facing display, market share, support task), lalu check-out. Tanpa penjualan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('fmcg'),status:'Aktif'},
-    {id:'r12',name:'Merchandising (MD)',desc:'Halaman Aktivitas: pilih toko, check-in, kerjakan pekerjaan (cek stok, price promo, facing display, market share, support task), lalu check-out. Tanpa penjualan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('fmcg'),status:'Aktif'},
+    {id:'r11',name:'Promotor FMCG',desc:'Halaman Aktivitas: pilih toko, check-in, kerjakan pekerjaan (cek stok, price promo, facing display, display share, support task), lalu check-out. Tanpa penjualan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('fmcg'),status:'Aktif'},
+    {id:'r12',name:'Merchandising (MD)',desc:'Halaman Aktivitas: pilih toko, check-in, kerjakan pekerjaan (cek stok, price promo, facing display, display share, support task), lalu check-out. Tanpa penjualan',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('fmcg'),status:'Aktif'},
     {id:'r13',name:'Mobile Promotor',desc:'Seperti promotor, berpindah toko dan event',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('spg'),status:'Aktif'},
     {id:'r14',name:'Promotor Bantuan',desc:'Non SIM dan non client. Bisa pindah client dan cabang, akses terbatas',scope:'Diri sendiri',platform:'Mobile',appr:'1 tingkat',perm:genPerm('bantuan'),status:'Aktif'},
     {id:'r17',name:'Admin Klien',desc:'Admin satu client: kelola user, role, master data, dan aturan client sendiri',scope:'Client sendiri',platform:'Web',appr:'Tanpa approval',perm:genPerm('admin'),status:'Aktif'},
@@ -3165,20 +3165,20 @@ Object.assign(ENT,{
     inUse:r=>{ const n=live('katprod').filter(k=>k.brand===r.name).length; return n?`Brand ini dipakai ${n} kategori produk. Pindahkan kategorinya dulu, atau nonaktifkan brand.`:''; },
     onRename:(o,n)=>MD.katprod.forEach(k=>{ if(k.brand===o) k.brand=n; })},
   kompetitor:{label:'Kompetitor',plural:'Daftar brand kompetitor',prefix:'k',store:()=>MD.kompetitor,title:r=>r.name,search:r=>r.name,unique:'name',blank:()=>({client:'cl1'}),
-    fields:[{k:'name',label:'Nama brand kompetitor',req:true},{k:'client',label:'Client',type:'select',req:true,opts:clientOpts,hint:'Client yang dibandingkan di market share'}],
-    cols:[nameCol(),{label:'Client',render:r=>cName(r.client),hide:true},{label:'Dipakai di market share',render:r=>SHARE_REP.filter(x=>x.brand===r.name).length+' toko',align:'r',hide:true},{label:'Status',render:r=>stPill(r.status)}],
-    inUse:r=>{ const n=SHARE_REP.filter(x=>x.brand===r.name).length; return n?`Kompetitor ini dipakai di market share ${n} toko. Nonaktifkan kompetitor jika tidak dibandingkan lagi.`:''; }},
+    fields:[{k:'name',label:'Nama brand kompetitor',req:true},{k:'client',label:'Client',type:'select',req:true,opts:clientOpts,hint:'Client yang dibandingkan di display share'}],
+    cols:[nameCol(),{label:'Client',render:r=>cName(r.client),hide:true},{label:'Dipakai di display share',render:r=>SHARE_REP.filter(x=>x.brand===r.name).length+' toko',align:'r',hide:true},{label:'Status',render:r=>stPill(r.status)}],
+    inUse:r=>{ const n=SHARE_REP.filter(x=>x.brand===r.name).length; return n?`Kompetitor ini dipakai di display share ${n} toko. Nonaktifkan kompetitor jika tidak dibandingkan lagi.`:''; }},
   katg:{src:'katprod',label:'Kategori produk',lower:'kategori produk',plural:'Kategori produk General',prefix:'kp',store:()=>MD.katprod,title:r=>r.name,search:r=>r.name+(r.parent||''),filter:(r,q)=>r.cakupan==='General'&&katPass(r,q),blank:()=>({cakupan:'General',brand:'',share:'Ya'}),
-    fields:[KAT_LVL,KAT_PARENT,{k:'name',label:'Nama',req:true,hint:'Kategori General berlaku untuk semua client'},{k:'share',label:'Dipakai untuk market share',type:'select',opts:['Ya','Tidak'],hint:'Client bisa membuat kategori sendiri untuk market share (MOM 8)'}],
+    fields:[KAT_LVL,KAT_PARENT,{k:'name',label:'Nama',req:true,hint:'Kategori General berlaku untuk semua client'},{k:'share',label:'Dipakai untuk display share',type:'select',opts:['Ya','Tidak'],hint:'Client bisa membuat kategori sendiri untuk display share (MOM 8)'}],
     extra:()=>katPrevBox(),afterOpen:()=>katLvlSync(true),afterSave:r=>{ delete r.lvl; },afterCreate:r=>{ delete r.lvl; },
-    cols:[nameCol(r=>r.parent?'Di bawah '+r.parent:''),{label:'Level',render:r=>tag('Level '+katLevel(r),katLevel(r)===1?'accent':'neutral')},{label:'Market share',render:r=>r.share==='Tidak'?'<span class="muted">Tidak</span>':tag('Ya','success'),hide:true},{label:'Status',render:r=>stPill(r.status)}],
+    cols:[nameCol(r=>r.parent?'Di bawah '+r.parent:''),{label:'Level',render:r=>tag('Level '+katLevel(r),katLevel(r)===1?'accent':'neutral')},{label:'Display share',render:r=>r.share==='Tidak'?'<span class="muted">Tidak</span>':tag('Ya','success'),hide:true},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>katInUse(r)},
   katc:{src:'katprod',label:'Kategori produk',lower:'kategori produk',plural:'Kategori produk Client',prefix:'kp',store:()=>MD.katprod,title:r=>r.name,search:r=>r.name+r.brand+(r.parent||''),filter:(r,q)=>r.cakupan==='Client'&&(!q.cl||brandClient(r.brand)===q.cl)&&katPass(r,q),blank:()=>({cakupan:'Client',share:'Ya'}),
     fields:[{k:'client',label:'Client',type:'ro',fmt:(v,r)=>clientName(v||brandClient(r.brand)),hint:'Mengikuti client yang dipilih di filter'},
       {k:'brand',label:'Brand',type:'select',req:true,opts:()=>katcBrandOpts(katcState().cl),onchange:"katcSync('brand')",hint:'Brand milik client yang dipilih'},
-      KAT_LVL,KAT_PARENT,{k:'name',label:'Nama',req:true},{k:'share',label:'Dipakai untuk market share',type:'select',opts:['Ya','Tidak'],hint:'Client bisa membuat kategori sendiri untuk market share (MOM 8)'}],
+      KAT_LVL,KAT_PARENT,{k:'name',label:'Nama',req:true},{k:'share',label:'Dipakai untuk display share',type:'select',opts:['Ya','Tidak'],hint:'Client bisa membuat kategori sendiri untuk display share (MOM 8)'}],
     extra:()=>katPrevBox(),afterOpen:()=>katLvlSync(true),afterSave:r=>{ delete r.lvl; },afterCreate:r=>{ delete r.lvl; },
-    cols:[nameCol(r=>r.parent?'Di bawah '+r.parent:''),{label:'Brand',k:'brand'},{label:'Level',render:r=>tag('Level '+katLevel(r),katLevel(r)===1?'accent':'neutral'),hide:true},{label:'Market share',render:r=>r.share==='Tidak'?'<span class="muted">Tidak</span>':tag('Ya','success'),hide:true},{label:'Status',render:r=>stPill(r.status)}],
+    cols:[nameCol(r=>r.parent?'Di bawah '+r.parent:''),{label:'Brand',k:'brand'},{label:'Level',render:r=>tag('Level '+katLevel(r),katLevel(r)===1?'accent':'neutral'),hide:true},{label:'Display share',render:r=>r.share==='Tidak'?'<span class="muted">Tidak</span>':tag('Ya','success'),hide:true},{label:'Status',render:r=>stPill(r.status)}],
     inUse:r=>katInUse(r)},
   statprod:{label:'Status produk',plural:'Daftar status produk',prefix:'sp',store:()=>MD.statprod,title:r=>r.name,code:r=>r.code,search:r=>r.name+r.code,unique:'code',blank:()=>({}),
     fields:[{k:'name',label:'Nama status',req:true},{k:'code',label:'Kode',req:true}],
@@ -3216,7 +3216,7 @@ Object.assign(ENT,{
   grform:{label:'Formula grading',plural:'Formula grading',prefix:'gf',store:()=>MD.grform,title:r=>cName(r.client)+' · '+roleName(r.role),search:r=>cName(r.client)+roleName(r.role),blank:()=>({client:'cl1',role:'r3',jual:35,absen:20,quiz:10,sku:15,share:10,kunj:10}),
     fields:[{k:'client',label:'Klien',type:'select',req:true,opts:clientOpts},{k:'role',label:'Role',type:'select',req:true,opts:()=>live('role').filter(r=>r.id!=='r1').map(r=>[r.id,r.name]),hint:'Primary key formula: klien dan role',validate:(v,vals)=>MD.grform.some(x=>!x.del&&x.id!==FORM.id&&x.client===vals.client&&x.role===v)?'Formula klien dan role ini sudah ada':''},
       ...[['jual','Penjualan'],['absen','Absensi'],['quiz','Quiz'],['sku','SKU display']].map(([k,label])=>({k,label:label+' (%)',type:'number',req:true})),
-      {k:'share',label:'Market share (%)',type:'number',req:true},{k:'kunj',label:'Kepatuhan kunjungan (%)',type:'number',req:true,hint:'Total bobot harus 100%. Survey tidak masuk grading.',validate:(v,x)=>x.jual+x.absen+x.quiz+x.sku+x.share+v!==100?'Total bobot harus 100%':''}],
+      {k:'share',label:'Display share (%)',type:'number',req:true},{k:'kunj',label:'Kepatuhan kunjungan (%)',type:'number',req:true,hint:'Total bobot harus 100%. Survey tidak masuk grading.',validate:(v,x)=>x.jual+x.absen+x.quiz+x.sku+x.share+v!==100?'Total bobot harus 100%':''}],
     cols:[{label:'Klien',render:r=>cName(r.client),prim:true},{label:'Role',render:r=>roleName(r.role)},{label:'Penjualan',render:r=>r.jual+'%',align:'r'},{label:'Absensi',render:r=>r.absen+'%',align:'r',hide:true},{label:'Quiz',render:r=>r.quiz+'%',align:'r',hide:true},{label:'SKU',render:r=>r.sku+'%',align:'r',hide:true},{label:'Share',render:r=>r.share+'%',align:'r',hide:true},{label:'Kunjungan',render:r=>(r.kunj??0)+'%',align:'r',hide:true},{label:'Status',render:r=>stPill(r.status)}]}
 });
 const lc=E=>E.lower||E.label.toLowerCase();
@@ -3373,7 +3373,7 @@ function simImport(){
 /* ---------- pages ---------- */
 function pageClient(q){ return {title:'Client',html:`${crudList('client',q,{sels:simcoFilter(q.sg||'')})}<div style="margin-top:12px">${callout('<b>MOM 9 Nov.</b> Modul Sales retail dan Sales automation tidak lagi diatur di sini, tapi per role di <a href="#/iam" style="color:var(--accent-text);font-weight:600">IAM</a>. Cabang client diatur di menu <a href="#/cabang-client" style="color:var(--accent-text);font-weight:600">Cabang client</a>.')}</div>`}; }
 function pageCabang(q){ return {title:'Cabang client',html:`${crudList('cabang',q)}`}; }
-const pageKompetitor=q=>({title:'Kompetitor',html:`${crudList('kompetitor',q)}<div style="margin-top:12px">${callout('Kompetitor adalah master data terpisah, tidak digabung dengan Brand (MOM 9 Nov bagian 1). Dipakai sebagai pembanding di market share.')}</div>`});
+const pageKompetitor=q=>({title:'Kompetitor',html:`${crudList('kompetitor',q)}<div style="margin-top:12px">${callout('Kompetitor adalah master data terpisah, tidak digabung dengan Brand (MOM 9 Nov bagian 1). Dipakai sebagai pembanding di display share.')}</div>`});
 /* ---------- Mapping outlet ke client (MOM 9 Nov bagian 3) ---------- */
 function pageMapOutlet(q){
   const cls=live('client').filter(c=>c.status==='Aktif'), cl=cls.find(c=>c.id===q.cl)||cls[0], qq=(q.q||'').toLowerCase();
@@ -3647,7 +3647,7 @@ function jpHariIni(){ const rows=[];
 
 /* ---------- Aktivitas lapangan FMCG & MD ---------- */
 const FM_LOG_STATIC=[['26 Okt','Lestari Putri','Electronic City Kemang','Cek stok','Selesai','30 SKU · 2 barang tidak tersedia · 1 di luar planned product'],['26 Okt','Lestari Putri','Electronic City Kemang','Price promo','Selesai','Sabun Cair Segar 500 ml: Rp29.900 → Rp24.900 (16,7%); Teh Melati Botol 350 ml: Rp6.500 → Rp5.500 (15,4%)'],['26 Okt','Rangga Saputra','Best Denki Senayan City','Facing display','Draft','Rak Utama 86, Boot 84, Gudang –'],['26 Okt','Rangga Saputra','Best Denki Senayan City','Support task','Selesai','Bersihkan freezer · foto before dan after'],['25 Okt','Lestari Putri','Electronic City Kemang','Support task','Selesai','Rapikan etalase · foto before dan after']].map(([tgl,who,toko,jenis,status,isi],i)=>({_id:'f'+i,tgl,who,toko,jenis,status,isi}));
-const FM_JENIS_LIST=['Cek stok','Price promo','Facing display','Market share','Support task'];
+const FM_JENIS_LIST=['Cek stok','Price promo','Facing display','Display share','Support task'];
 const fmLogRows=()=>[...shRead('fmLog',[]).map(r=>({...r,_id:r.id})),...FM_LOG_STATIC];
 const BPO=[['Gita Puspita','Promotor Bantuan','Best Denki Senayan City',18,20,'Rp14,2 jt'],['Eko Prabowo','Promotor Bantuan','Electronic City Kemang',16,20,'Rp9,8 jt']].map(([n,j,t,h,k,p])=>({_id:n,n,j,t,h,k,p}));
 function aktLog(q){
@@ -4098,7 +4098,7 @@ const pageBrand=q=>q.tab==='kompetitor'?pageKompetitor(q):({title:'Brand',html:`
 const kpTab=t=>setQ({tab:t,q:'',st:'',cl:'',br:'',lv:'',ms:''});
 const kpFilters=(tab,q,cl)=>{ const scope=live('katprod').filter(k=>tab==='client'?k.cakupan==='Client'&&brandClient(k.brand)===cl:k.cakupan==='General'), maxLv=Math.max(1,...scope.map(katLevel)), brs=tab==='client'?live('brand').filter(b=>b.client===cl).map(b=>[b.name,b.name]):[];
   const f=(lbl,opts,val,key)=>sel(opts,val||'',`setQ({${key}:this.value})`,{label:lbl,cls:'sm'});
-  return `${tab==='client'?f('Brand',[['','Semua brand'],...brs],q.br,'br'):''}${f('Level',[['','Semua level'],...Array.from({length:maxLv},(_,i)=>[String(i+1),'Level '+(i+1)])],q.lv,'lv')}${f('Market share',[['','Semua'],['Ya','Ya'],['Tidak','Tidak']],q.ms,'ms')}`; };
+  return `${tab==='client'?f('Brand',[['','Semua brand'],...brs],q.br,'br'):''}${f('Level',[['','Semua level'],...Array.from({length:maxLv},(_,i)=>[String(i+1),'Level '+(i+1)])],q.lv,'lv')}${f('Display share',[['','Semua'],['Ya','Ya'],['Tidak','Tidak']],q.ms,'ms')}`; };
 const pageKatProd=q=>{ const tab=q.tab==='client'?'client':'general', cls=clientOpts(), cl=q.cl||(cls[0]||[''])[0], gen=live('katprod').filter(k=>k.cakupan==='General').length, cli=live('katprod').filter(k=>k.cakupan==='Client').length;
   const tabs=`<div style="margin-bottom:4px">${utabs([['general','General',gen],['client','Client',cli]],tab,'kpTab')}</div>`;
   const first=katcBrandOpts(cl)[0], fb=Array.isArray(first)?'':first;
@@ -4163,7 +4163,7 @@ function mitraQDel(id){
 }
 function mitraQOff(id){ const L=JSON.parse(JSON.stringify(shRead('mitraQ',MITRAQ_DEFAULT))); L.find(x=>x.id===id).status='Nonaktif'; shSet('mitraQ',L); closeLayer(); render(false); toast('Pertanyaan dinonaktifkan'); }
 
-/* ---------- Laporan SKU display & market share ---------- */
+/* ---------- Laporan SKU display & display share ---------- */
 const SKU_REP=[['26 Okt','Electronic City Kemang','rina','tv50',2,'Rak utama','Baik'],['26 Okt','Electronic City Kemang','rina','tv43',3,'End gondola','Baik'],['26 Okt','Electronic City Kemang','rina','kl2p',1,'Rak utama','Rusak'],['26 Okt','Best Denki Senayan City','sinta','mc85',2,'Rak utama','Baik'],['26 Okt','Best Denki Senayan City','sinta','ac1',0,'Gudang','Kosong'],['25 Okt','Electronic Solution Puri','putri','tv50',4,'Rak utama','Baik'],['25 Okt','Best Denki Alam Sutera','fajar','ap30',2,'End gondola','Rusak']].map(([tgl,toko,u,id,q,place,cond],i)=>({_id:'s'+i,tgl,toko,u,id,q,place,cond}));
 function pageSkuDisplay(q){
   const f=q.f||'', rows=SKU_REP.filter(r=>!f||r.cond===f), c=k=>SKU_REP.filter(r=>r.cond===k).length;
@@ -4176,8 +4176,8 @@ function skuPanel(id){ const r=SKU_REP.find(x=>x._id===id), p=PRODUCTS.find(x=>x
 const SHARE_REP=[['Electronic City Kemang','TV','ARUNIKA',[['rina',18,'Check-out'],['sinta',20,'Check-out']]],['Electronic City Kemang','TV','Samsung',[['rina',22,'Check-out'],['sinta',24,'Check-out']]],['Electronic City Kemang','TV','LG',[['rina',15,'Check-out'],['sinta',11,'Draft']]],['Best Denki Senayan City','TV','ARUNIKA',[['sinta',12,'Check-out']]],['Best Denki Senayan City','TV','Polytron',[['sinta',9,'Draft']]]].map(([toko,cat,brand,inp],i)=>{ const ok=inp.filter(x=>x[2]==='Check-out'); return {_id:'m'+i,toko,cat,brand,inp,ok:ok.length,avg:ok.length?ok.reduce((s,x)=>s+x[1],0)/ok.length:null}; });
 function pageMarketShare(){
   const rows=SHARE_REP.filter(r=>r.ok), draft=SHARE_REP.reduce((s,r)=>s+r.inp.filter(x=>x[2]==='Draft').length,0);
-  return {title:'Laporan market share',html:`
-  ${card('Market share harian',dataTable('mrp',{rows,rowClick:r=>`sharePanel('${r._id}')`,cols:[{label:'Toko',render:r=>`<span class="fg" style="font-weight:500">${r.toko}</span><span class="xs muted" style="display:block">${r.cat}</span>`,prim:true},{label:'Brand',k:'brand'},{label:'Penginput',render:r=>r.ok,align:'r',hide:true},{label:'Rata-rata qty',render:r=>`<span class="tabular">${String(r.avg).replace('.',',')}</span>`,align:'r'}]}),{acts:btn('Unduh laporan',{v:'outline',size:'sm',icon:'down',on:"toast('Laporan market share diunduh','Data yang sudah check-out.')"})})}
+  return {title:'Laporan display share',html:`
+  ${card('Display share harian',dataTable('mrp',{rows,rowClick:r=>`sharePanel('${r._id}')`,cols:[{label:'Toko',render:r=>`<span class="fg" style="font-weight:500">${r.toko}</span><span class="xs muted" style="display:block">${r.cat}</span>`,prim:true},{label:'Brand',k:'brand'},{label:'Penginput',render:r=>r.ok,align:'r',hide:true},{label:'Rata-rata qty',render:r=>`<span class="tabular">${String(r.avg).replace('.',',')}</span>`,align:'r'}]}),{acts:btn('Unduh laporan',{v:'outline',size:'sm',icon:'down',on:"toast('Laporan display share diunduh','Data yang sudah check-out.')"})})}
   <div style="margin-top:12px">${callout(draft+' input masih draft dan tidak dihitung.')}</div>`};
 }
 function sharePanel(id){ const r=SHARE_REP.find(x=>x._id===id);
@@ -4564,12 +4564,12 @@ function pagePengaturan(){
 /* ---------- Konfigurasi aplikasi: aktivitas per role, form penjualan, target quantity ----------
    Semua isi diatur admin lewat CRUD dan dibaca aplikasi mobile lewat data bersama (syncApp).
    Yang tetap di kode hanya kemampuan aplikasi: modul aktivitas yang bisa dirender, tipe field form, dan metrik target. */
-const AKT_MOD=[['jual','Catat penjualan'],['sku','SKU display'],['share','Market share'],['stok','Stock opname'],['posm','Campaign, POSM & planogram']];
+const AKT_MOD=[['jual','Catat penjualan'],['sku','SKU display'],['share','Display share'],['stok','Stock opname'],['posm','Campaign, POSM & planogram']];
 const FTYPE=[['text','Teks'],['number','Angka'],['money','Rupiah'],['date','Tanggal'],['select','Dropdown'],['photo','Foto'],['tel','Telepon'],['calc','Hitung (rumus)']];
 const FSRC=[['','–'],['katprod','Master Kategori produk'],['statprod','Master Status produk'],['produk','Master Produk'],['manual','Opsi manual']];
 const FPERAN=[['','–'],['kategori','Kategori transaksi'],['produk','Nama produk transaksi'],['harga','Harga satuan transaksi'],['qty','Jumlah unit'],['pembeli','Nama pembeli'],['diskon','Diskon produk (per unit)'],['diskontrx','Diskon transaksi'],['noinv','No. invoice toko'],['fotoinv','Foto invoice']];
 const METRIK=[['qty','Quantity (unit)'],['nominal','Nominal (Rp)'],['akuisisi','Akuisisi pelanggan baru']];
-const SKU_METODE=[['qr','Scan QR'],['manual','Input manual']];
+const SKU_METODE=[['qr','Foto planogram'],['manual','Input manual']];
 const lbl=(L,k)=>(L.find(x=>x[0]===k)||[k,k])[1];
 const MO_BULAN=['Oktober 2026','November 2026','Desember 2026'];
 const TGT_F={5:.75,6:.75,7:.775,8:.775,9:.8,10:1};
@@ -4609,7 +4609,7 @@ Object.assign(ENT,{
       {k:'skuFoto',label:'SKU display: minimal foto per produk',type:'number',req:true,validate:v=>v<0||v>10?'Isi 0 sampai 10':''},
       {k:'skuMetode',label:'SKU display: cara menambah produk',type:'multi',req:true,opts:SKU_METODE},
       {k:'skuMulti',label:'SKU display: boleh lebih dari satu display',type:'select',opts:['Ya','Tidak']},
-      {k:'shareDraft',label:'Market share: boleh simpan sementara',type:'select',opts:['Ya','Tidak']},
+      {k:'shareDraft',label:'Display share: boleh simpan sementara',type:'select',opts:['Ya','Tidak']},
       {k:'metrik',label:'Target: metrik yang ditampilkan',type:'multi',req:true,opts:METRIK},
       {k:'dasar',label:'Target: dasar pencapaian',type:'select',req:true,opts:METRIK,validate:(v,vals)=>(vals.metrik||[]).includes(v)?'':'Dasar pencapaian harus termasuk metrik yang ditampilkan'}],
     validateExtra:v=>(v.akt||[]).some(k=>(v.gated||[]).includes(k))?'Modul yang sudah di Aktivitas saya tidak perlu dipilih lagi sebagai menu terpisah':'',
@@ -4693,8 +4693,8 @@ function syncApp(){
 
 /* ---------- Hasil kerja sales ---------- */
 /* Usulan: tab ini tidak ada di BRD/URD. Ia mengumpulkan input mobile per sales supaya admin tidak membuka sembilan laporan satu per satu.
-   Pekerjaan = tugas wajib per peran: tugas kunjungan FMCG/MD (BR-043), SKU display harian (BR-102), market share, stok bawaan dan tanda terima canvasing (FR-STOCK-006), kunjungan terjadwal, dan lead yang di-assign.
-   Data aktivitas di mockup baru ada sejak 25 Okt (SKU display, tugas FMCG), stok bawaan, market share, dan kunjungan sejak 26 Okt. */
+   Pekerjaan = tugas wajib per peran: tugas kunjungan FMCG/MD (BR-043), SKU display harian (BR-102), display share, stok bawaan dan tanda terima canvasing (FR-STOCK-006), kunjungan terjadwal, dan lead yang di-assign.
+   Data aktivitas di mockup baru ada sejak 25 Okt (SKU display, tugas FMCG), stok bawaan, display share, dan kunjungan sejak 26 Okt. */
 const HK_TODAY='2026-10-26', HK_FM_FROM='2026-10-25';
 const HK_ROLES=[['','Semua peran'],['spg','SPG / Promotor'],['canvas','Canvasing FMCG & Elektronik'],['order','Taking Order'],['fmcg','Promotor FMCG & MD'],['leads','REA & CBD']];
 const HK_RETUR=[{u:'budi',toko:'Toko Makmur Abadi',p:'rc18',q:2,kondisi:'Layak jual'},{u:'budi',toko:'Toko Berkah Elektronik',p:'kp16',q:1,kondisi:'Tidak layak jual'},{u:'kevin',toko:'Toko Jaya Abadi Kembangan',p:'bl11',q:3,kondisi:'Layak jual'}];
@@ -4732,9 +4732,9 @@ function hkData(u,r){
   if(k==='leads') x.leads.forEach(l=>add(labIso(l.date),'Lead '+l.name,l.status==='Deal'||l.status==='Belum Tertarik'?'done':l.status==='Prospect'?'draft':'todo'));
   else hkDays(r).forEach(iso=>{
     if(cuti&&iso===HK_TODAY) return;
-    if(k==='fmcg'&&iso>=HK_FM_FROM) ['Cek stok','Price promo','Facing display','Market share'].forEach(j=>{ const a=x.fm.find(z=>z.jenis===j&&labIso(z.tgl)===iso); add(iso,j,a?fmSt(a.status):'todo'); });
+    if(k==='fmcg'&&iso>=HK_FM_FROM) ['Cek stok','Price promo','Facing display','Display share'].forEach(j=>{ const a=x.fm.find(z=>z.jenis===j&&labIso(z.tgl)===iso); add(iso,j,a?fmSt(a.status):'todo'); });
     if(k==='spg'&&iso>=HK_FM_FROM) add(iso,'SKU display',x.sku.some(s=>labIso(s.tgl)===iso)?'done':'todo');
-    if(k==='spg'&&iso===HK_TODAY) add(iso,'Market share',x.share.some(s=>s.st!=='Draft')?'done':x.share.length?'draft':'todo');
+    if(k==='spg'&&iso===HK_TODAY) add(iso,'Display share',x.share.some(s=>s.st!=='Draft')?'done':x.share.length?'draft':'todo');
     if(k==='canvas'&&iso===HK_TODAY){ add(iso,'Stok bawaan',x.cv?'done':'todo'); add(iso,'Tanda terima',x.cv&&x.cv.tt==='Ada'?'done':'todo'); }
     if((k==='spg'||k==='canvas'||k==='order')&&iso===HK_TODAY) x.visits.forEach(v=>add(iso,'Kunjungan '+v.place,v.status==='Selesai'?'done':v.status==='Berjalan'?'draft':'todo'));
   });
@@ -4777,7 +4777,7 @@ function hkView(q){
       ${sel([['','Semua toko'],...tokoOpts.map(t=>[t.id,t.name])],q.tk||'',"setQ({tk:this.value})",{label:'Filter toko',cls:'sm'})}
       <form style="flex:1;min-width:180px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari sales</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari nama sales"></label></form>
       ${dirty?btn('Hapus filter',{v:'ghost',size:'sm',on:"setQ({cl:'',cb:'',tk:'',r:'',q:'',f:'',from:'',to:'',per:''})"}):''}</div>
-    <p class="xs muted" style="margin-top:12px">Menampilkan <b class="fg">${hkLabel(q)}</b>: ${all.length} sales, ${T} pekerjaan (${D_} selesai). Data aktivitas di mockup baru ada sejak 25 Okt 2026 (SKU display, tugas FMCG dan MD), stok bawaan, market share, dan kunjungan sejak 26 Okt. <b>Usulan</b>: tab ini belum ada di BRD atau URD.</p>`);
+    <p class="xs muted" style="margin-top:12px">Menampilkan <b class="fg">${hkLabel(q)}</b>: ${all.length} sales, ${T} pekerjaan (${D_} selesai). Data aktivitas di mockup baru ada sejak 25 Okt 2026 (SKU display, tugas FMCG dan MD), stok bawaan, display share, dan kunjungan sejak 26 Okt. <b>Usulan</b>: tab ini belum ada di BRD atau URD.</p>`);
   return {html:`
   <div style="margin-bottom:16px">${filt}</div>
   <div class="stats">
@@ -4812,7 +4812,7 @@ function hkPanel(u){
   if(k==='spg'){
     s+=hkTrx(x,'Catat penjualan');
     s+=hkSec('SKU display',x.sku.length,['/sku-display','Laporan SKU display'],hkTbl([...hkDc(x,a=>esc(a.tgl)),['Toko',a=>esc(a.toko)],['Produk',a=>esc(PRODUCTS.find(p=>p.id===a.id).name)],['Qty',a=>a.q,'r'],['Penempatan',a=>esc(a.place)],['Kondisi',a=>tag(a.cond,a.cond==='Baik'?'success':a.cond==='Rusak'?'danger':'warning')]],x.sku));
-    s+=hkSec('Market share',x.share.length,['/market-share','Laporan market share'],hkTbl([['Toko',a=>esc(a.toko)],['Kategori',a=>esc(a.cat)],['Brand',a=>esc(a.brand)],['Qty',a=>a.qty,'r'],['Status',a=>spill(a.st==='Draft'?'Draft':'Selesai',a.st==='Draft'?'warning':'success')]],x.share));
+    s+=hkSec('Display share',x.share.length,['/market-share','Laporan display share'],hkTbl([['Toko',a=>esc(a.toko)],['Kategori',a=>esc(a.cat)],['Brand',a=>esc(a.brand)],['Qty',a=>a.qty,'r'],['Status',a=>spill(a.st==='Draft'?'Draft':'Selesai',a.st==='Draft'?'warning':'success')]],x.share));
   } else if(k==='canvas'){
     s+=hkTrx(x,'Jual dari toko');
     s+=hkSec('Stok bawaan',x.cv?1:0,['/canvassing','Canvassing'],x.cv?`<div class="kv"><div><dt>Dibawa</dt><dd>${rp(x.cv.bawa)}</dd></div><div><dt>Retur</dt><dd>${rp(x.cv.retur)}</dd></div><div><dt>Terjual</dt><dd>${rp(x.cv.jual)}</dd></div><div><dt>Tanda terima</dt><dd>${tag(x.cv.tt,x.cv.tt==='Ada'?'success':'warning')}</dd></div></div>`:'');
@@ -4820,7 +4820,7 @@ function hkPanel(u){
   } else if(k==='order'){
     s+=hkSec('Buat pesanan dan daftar pesanan',x.orders.length,['/pemesanan','Pemesanan'],hkTbl([...hkDc(x,o=>esc(o.date)),['No. PO',o=>`<span class="mono">${esc(o.id)}</span>`],['Toko',o=>esc(tokoName(o.toko))],['Produk',o=>esc(ordText(o))],['Total',o=>`<b class="fg tabular">${rp(ordTotal(o))}</b>`,'r'],['Status',o=>spill(o.st,ORD_TONE[o.st]||'neutral')]],x.orders));
   } else if(k==='fmcg'){
-    ['Cek stok','Price promo','Facing display','Market share','Support task'].forEach(j=>{ s+=hkFm(x,j); });
+    ['Cek stok','Price promo','Facing display','Display share','Support task'].forEach(j=>{ s+=hkFm(x,j); });
   } else {
     s+=hkSec('Hasil leads',x.leads.length,['/leads','Leads pinjaman'],hkTbl([['Nasabah',l=>esc(l.name)],['Produk',l=>esc(l.prod)],['Pengajuan',l=>`<span class="tabular">${jt(l.amount)}</span>`,'r'],['Status',l=>tag(l.status,l.status==='Deal'?'success':l.status==='Prospect'?'accent':l.status==='Baru'?'info':'neutral')],['Goal',l=>l.goal?`<b class="fg tabular">${jt(l.goal)}</b>`:'<span class="muted">–</span>','r']],x.leads));
   }

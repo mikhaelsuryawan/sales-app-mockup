@@ -786,8 +786,8 @@ SCR['enroll-done'] = () => { S.enrolled[S.user]=true; return {note:'Wajah refere
 
 /* ---------- Home ---------- */
 const MENUS = {
-  spg:[['Catat penjualan','bag',"act(()=>startSale())",1,'jual'],['Riwayat penjualan','file',"tab('penjualan')"],['SKU display','grid',"go('sku')",0,'sku'],['Market share','pie',"go('share')",0,'share'],['Stock opname','box',"go('fm-stok')",0,'stok'],['Campaign & POSM','image',"go('posm')",0,'posm'],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
-  mobile:[['Catat penjualan','bag',"act(()=>startSale())",1,'jual'],['Riwayat penjualan','file',"tab('penjualan')"],['SKU display','grid',"go('sku')",0,'sku'],['Market share','pie',"go('share')",0,'share'],['Stock opname','box',"go('fm-stok')",0,'stok'],['Campaign & POSM','image',"go('posm')",0,'posm'],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  spg:[['Catat penjualan','bag',"act(()=>startSale())",1,'jual'],['Riwayat penjualan','file',"tab('penjualan')"],['SKU display','grid',"go('sku')",0,'sku'],['Display share','pie',"go('share')",0,'share'],['Stock opname','box',"go('fm-stok')",0,'stok'],['Campaign & POSM','image',"go('posm')",0,'posm'],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  mobile:[['Catat penjualan','bag',"act(()=>startSale())",1,'jual'],['Riwayat penjualan','file',"tab('penjualan')"],['SKU display','grid',"go('sku')",0,'sku'],['Display share','pie',"go('share')",0,'share'],['Stock opname','box',"go('fm-stok')",0,'stok'],['Campaign & POSM','image',"go('posm')",0,'posm'],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   canvas:[['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   order:[['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
   leads:[['Leads','users',"act(()=>tab('leads'))",1],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
@@ -1158,7 +1158,7 @@ const visitById = id => (S.visits[vk()]||[]).find(v=>v.id===id);
 const VISIT_NOW = {in:'10:02',out:'10:41'};
 const isFieldVisit = () => ['canvas','order'].includes(role());
 const visitOpen = () => (S.visits[vk()]||[]).find(v=>v.cin&&!v.cout);
-const FM_TASKS=[['stok','Cek stok','box','fm-stok'],['promo','Price promo','tag','fm-promo'],['facing','Facing display','grid','fm-facing'],['share','Market share','pie','share']];
+const FM_TASKS=[['stok','Cek stok','box','fm-stok'],['promo','Price promo','tag','fm-promo'],['facing','Facing display','grid','fm-facing'],['share','Display share','pie','share']];
 const fmPending = v => FM_TASKS.filter(t=>!(v.done||{})[t[0]]);
 const ST_TONE={'Belum Selesai':'red','Draft':'amber','Selesai':'green'};
 const stChip = st => chip(st,ST_TONE[st]);
@@ -1218,10 +1218,10 @@ function fmLogDetail(k){
   if(k==='stok'){ const L=fmSkus(), na=L.filter(x=>fmRow(x.id).na).length; return `${L.length} SKU · ${na} barang tidak tersedia · ${S.fm.extra.length} di luar planned product`; }
   if(k==='promo') return promoCek().map(x=>{ const v=+(S.fm.promo||{})[x.id]; return x.name+': '+rp(x.b)+' → '+(v?rp(v)+' ('+fmPromoPct(x.b,v).replace('Diskon ','')+')':'belum diisi'); }).join('; ');
   if(k==='facing') return facingList().map(x=>x.name+' '+((S.facing||{})[x.id]||'–')).join(', ');
-  if(k==='share') return 'Input market share tersimpan';
+  if(k==='share') return 'Input display share tersimpan';
   return S.fm.tasks.map(t=>t.t+(t.done?' (selesai)':t.draft?' (draft)':'')).join('; ');
 }
-const FM_JENIS={stok:'Cek stok',promo:'Price promo',facing:'Facing display',share:'Market share',support:'Support task'};
+const FM_JENIS={stok:'Cek stok',promo:'Price promo',facing:'Facing display',share:'Display share',support:'Support task'};
 function fmLogPush(k,status){
   const v=visitOpen(); if(!v||role()!=='fmcg'||!FM_JENIS[k]) return;
   const L=shRead('fmLog',[]), id=S.user+':'+v.id+':'+k, e={id,tgl:'26 Okt',who:U().name,toko:v.place,jenis:FM_JENIS[k],status,isi:fmLogDetail(k)}, i=L.findIndex(x=>x.id===id);
@@ -1535,9 +1535,25 @@ function pendingTokoSheet(id){
   <button class="btn ghost" style="margin-top:14px" onclick="approveToko('${id}')">Demo: simulasikan admin menyetujui</button>`);
 }
 function approveToko(id){ const t=tokoById(id); t.status='Aktif'; t.isNew=true; closeSheet(); render(false,true); toast(t.name+' disetujui admin, kategori '+t.cat); }
-SCR['toko-baru'] = p => {
-  const cat=p.cat||'Retail', ph=p.ph||0;
-  return {note:'<span class="tagx">Usulan</span><b>Usulkan toko baru</b> dari lapangan untuk mendukung target akuisisi (BRD 2.9.5). Toko tetap master data di Web (BRD 2.8): usulan diverifikasi admin, admin menetapkan kategori (yang menentukan harga, BRD 2.13), lalu toko aktif dan muncul di daftar sales.',
+/* MOM 18 Nov: provinsi, kota/kabupaten, kecamatan, dan kelurahan di form usulan toko.
+     Data wilayah contoh sama dengan master Toko di dashboard (WIL). */
+  const WIL_M={'DKI Jakarta':{'Jakarta Selatan':{'Mampang Prapatan':['Bangka','Kuningan Barat'],'Pasar Minggu':['Pasar Minggu','Pejaten Timur','Jati Padang'],'Jagakarsa':['Jagakarsa','Lenteng Agung'],'Cilandak':['Cilandak Barat','Cilandak Timur','Gandaria Selatan'],'Kebayoran Baru':['Cipete Utara','Senayan']},'Jakarta Pusat':{'Tanah Abang':['Gelora','Bendungan Hilir'],'Menteng':['Menteng','Gondangdia']},'Jakarta Barat':{'Kembangan':['Kembangan Utara','Kembangan Selatan'],'Kebon Jeruk':['Kebon Jeruk','Duri Kepa']}},'Banten':{'Kota Tangerang Selatan':{'Ciputat':['Ciputat','Cipayung'],'Pondok Aren':['Pondok Karya','Jurang Mangu Barat'],'Serpong Utara':['Pakualam','Pondok Jagung'],'Serpong':['Rawa Mekar Jaya','Lengkong Gudang']},'Kota Tangerang':{'Ciledug':['Sudimara Barat','Tajur']}},'Jawa Barat':{'Kota Bandung':{'Sumur Bandung':['Braga','Kebon Pisang']},'Kota Bekasi':{'Bekasi Selatan':['Marga Jaya','Pekayon Jaya']},'Kota Depok':{'Beji':['Kemiri Muka','Beji'],'Cinere':['Cinere','Gandul']}}};
+  const wilProv=()=>Object.keys(WIL_M);
+  const wilKota=pr=>Object.keys(WIL_M[pr]||{});
+  const wilKec=(pr,ko)=>Object.keys((WIL_M[pr]||{})[ko]||{});
+  const wilKel=(pr,ko,ke)=>(((WIL_M[pr]||{})[ko]||{})[ke]||[]);
+  /* Pilihan di tingkat atas mengosongkan tingkat di bawahnya supaya tidak tertinggal nilai yang tidak cocok. */
+  function wilSet(level,v){
+    const p=cur().p;
+    if(level==='prov'){ p.prov=v; p.kota=''; p.kec=''; p.kel=''; }
+    else if(level==='kota'){ p.kota=v; p.kec=''; p.kel=''; }
+    else if(level==='kec'){ p.kec=v; p.kel=''; }
+    else p.kel=v;
+    render(false,true);
+  }
+  SCR['toko-baru'] = p => { const cat=p.cat||'Retail', ph=p.ph||0;
+    const wsel=(label,opts,v,level,dis)=>`<label class="field grow" style="margin:0"><span>${label}</span><select class="input" ${dis?'disabled':''} onchange="wilSet('${level}',this.value)"><option value="">${dis?'Pilih tingkat di atas dulu':'Pilih '+label.toLowerCase()}</option>${opts.map(o=>`<option ${o===v?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`;
+    return {note:'<span class="tagx">Usulan</span><b>Usulkan toko baru</b> dari lapangan untuk mendukung target akuisisi (BRD 2.9.5). Toko tetap master data di Web (BRD 2.8): usulan diverifikasi admin, admin menetapkan kategori (yang menentukan harga, BRD 2.13), lalu toko aktif dan muncul di daftar sales. MOM 18 Nov: alamat kini memuat provinsi, kota/kabupaten, kecamatan, dan kelurahan.',
   html:`${appbar('Usulkan toko baru')}<main class="content">
     <div class="banner blue" style="margin-bottom:14px">${I('alert',18)}<span>${role()==='canvas'?'Toko baru langsung aktif dan masuk daftar kunjunganmu. Admin melihatnya di Toko Sementara dan menetapkan kategori final.':'Toko baru diverifikasi admin dulu. Setelah disetujui, toko masuk ke daftarmu dan harga mengikuti kategori yang ditetapkan admin.'}</span></div>
     <div class="card" style="padding:0;overflow:hidden"><div class="map" style="height:150px">${mapSvg('WFA',true,true)}</div>
@@ -1545,6 +1561,8 @@ SCR['toko-baru'] = p => {
     <div style="height:14px"></div>
     <label class="field"><span>Nama toko *</span><input class="input" id="tn" placeholder="contoh: Toko Sumber Makmur"></label>
     <div class="row" style="gap:10px"><label class="field grow"><span>Nama pemilik</span><input class="input" id="to" placeholder="Nama"></label><label class="field grow"><span>No. HP *</span><input class="input" id="tp" inputmode="tel" placeholder="08xx"></label></div>
+    <div class="row" style="gap:10px;margin-bottom:12px">${wsel('Provinsi',wilProv(),p.prov||'','prov',false)}${wsel('Kota/Kabupaten',wilKota(p.prov),p.kota||'','kota',!p.prov)}</div>
+    <div class="row" style="gap:10px;margin-bottom:12px">${wsel('Kecamatan',wilKec(p.prov,p.kota),p.kec||'','kec',!p.kota)}${wsel('Kelurahan',wilKel(p.prov,p.kota,p.kec),p.kel||'','kel',!p.kec)}</div>
     <label class="field"><span>Alamat</span><input class="input" id="ta" value="Jl. Moh. Kahfi I No. 21, Jagakarsa"></label>
     <div class="field"><span>Perkiraan kategori</span><div class="opts">${['Retail','Semi grosir','Grosir'].map(x=>`<button class="opt ${cat===x?'on':''}" onclick="setP({cat:'${x}'})">${x}</button>`).join('')}</div><div class="hint">Kategori final ditetapkan admin.</div></div>
     <div class="field"><span>Foto toko * (tampak depan)</span><div class="thumbs">${Array.from({length:ph}).map(()=>`<div class="thumb">${I('image',22)}</div>`).join('')}<button class="thumb add" onclick="setP({ph:${ph+1}})" aria-label="Tambah foto">${I('camera',22)}</button></div></div>
@@ -1554,11 +1572,14 @@ SCR['toko-baru'] = p => {
 function submitToko(){
   const p=cur().p, name=val('tn'), phone=val('tp');
   if(!name||!phone||!p.ph){ $('#terr').innerHTML='<div class="err">Isi nama toko, nomor HP, dan minimal 1 foto toko.</div>'; return; }
-  const direct=role()==='canvas', t={id:'n'+Date.now(),name,addr:val('ta')||'Jagakarsa',owner:val('to'),phone,cat:p.cat||'Retail',status:direct?'Aktif':'Menunggu verifikasi',role:role()};
+  /* MOM 18 Nov: wilayah lengkap wajib supaya admin tidak perlu menebak saat verifikasi. */
+  if(!p.prov||!p.kota||!p.kec||!p.kel){ $('#terr').innerHTML='<div class="err">Pilih provinsi, kota/kabupaten, kecamatan, dan kelurahan.</div>'; return; }
+  const wil={prov:p.prov,kota:p.kota,kec:p.kec,kel:p.kel};
+  const direct=role()==='canvas', t={id:'n'+Date.now(),name,addr:val('ta')||'Jagakarsa',wil,owner:val('to'),phone,cat:p.cat||'Retail',status:direct?'Aktif':'Menunggu verifikasi',role:role()};
   if(direct) t.isNew=true;
   S.newToko.push(t);
   if(direct){ /* Usulan: canvasser tidak perlu persetujuan admin. Toko masuk Toko Sementara di dashboard. */
-    shSet('tokoBaruSales',[...shRead('tokoBaruSales',[]),{id:t.id,name,addr:t.addr,cat:t.cat,u:fmUk()}]);
+    shSet('tokoBaruSales',[...shRead('tokoBaruSales',[]),{id:t.id,name,addr:t.addr,wil,cat:t.cat,u:fmUk()}]);
     S.visits[vk()].push({id:'nv'+Date.now(),place:name,time:'Sekarang',tasks:['Penjualan'],status:'Belum',photos:{},own:true,unplanned:true});
     shSet('visitExc',[...shRead('visitExc',[]),{id:'ex'+Date.now(),u:fmUk(),place:name,type:'Unplanned',untuk:'',alasan:'Toko baru dari canvasser',tgl:'26 Okt'}]); }
   replace('toko-terkirim',{name,direct});
@@ -2020,13 +2041,23 @@ function fmSubmit(){
   if(miss){ toast(miss+' item belum terisi','alert'); return; }
   fmUseBump(); fmMark('stok'); S.fm.stokDone=true; fmSkus().forEach(x=>fmRow(x.id).saved=true); back(); toast('Stock opname terkirim');
 }
-SCR['fm-stok'] = () => {
-  const list=fmSkus(), done=list.filter(x=>fmFull(x.id)).length;
-  return {note:'Stock opname (MOM 10.2). Barang sudah dipetakan per outlet. Kotak stok default kosong. Tidak ada tombol simpan per item; submit wajib terisi semua. Tanpa foto, stok diisi manual. Tiap item punya centang Barang tidak tersedia, yang menggantikan isian stok. Sales bisa menambah SKU, ditandai di luar planned product, dan hanya SKU tambahan sendiri itu yang bisa dihapus; barang dari admin tidak bisa dihapus.',
+/* MOM 18 Nov: search produk dan dropdown kategori stock opname (display, gudang, atau keduanya). */
+const STOK_KAT=[['all','Display dan gudang'],['d','Display saja'],['g','Gudang saja']];
+SCR['fm-stok'] = p => {
+  const q=(p.q||'').toLowerCase().trim(), kat=p.kat||'all';
+  const all=fmSkus(), list=q?all.filter(x=>(x.name+' '+x.sku).toLowerCase().includes(q)):all;
+  const done=all.filter(x=>fmFull(x.id)).length;
+  const showD=kat!=='g', showG=kat!=='d';
+  return {note:'Stock opname (MOM 10.2, revisi MOM 18 Nov). Barang sudah dipetakan per outlet. Kotak stok default kosong. Tidak ada tombol simpan per item; submit wajib terisi semua. Tanpa foto, stok diisi manual. Tiap item punya centang Barang tidak tersedia, yang menggantikan isian stok. Sales bisa menambah SKU, ditandai di luar planned product, dan hanya SKU tambahan sendiri itu yang bisa dihapus; barang dari admin tidak bisa dihapus. Kotak cari menyaring daftar produk, dan dropdown kategori memilih stok mana yang dicatat.',
   html:`${appbar(isSpg()?'Stock opname':'Cek stok')}<main class="content">
-    <div class="row between" style="margin:0 2px 12px"><b id="fmCount">${done} dari ${list.length} terisi</b>${stChip(S.fm.stokDone?'Selesai':(S.fm.draft||{}).stok?'Draft':'Belum Selesai')}</div>
+    <div class="row between" style="margin:0 2px 12px"><b id="fmCount">${done} dari ${all.length} terisi</b>${stChip(S.fm.stokDone?'Selesai':(S.fm.draft||{}).stok?'Draft':'Belum Selesai')}</div>
+    <div class="card" style="margin-bottom:12px">
+      <label class="field" style="margin:0 0 10px;position:relative"><span>Cari produk</span><span style="position:absolute;left:12px;top:34px;color:var(--muted)">${I('search',20)}</span><input class="input" style="padding-left:44px" placeholder="Cari nama produk atau SKU" value="${esc(p.q||'')}" oninput="cur().p.q=this.value;clearTimeout(window._fq);window._fq=setTimeout(()=>render(false,true),250)"></label>
+      <label class="field" style="margin:0"><span>Kategori stock opname</span><select class="input" onchange="setP({kat:this.value})">${STOK_KAT.map(([v,t])=>`<option value="${v}" ${kat===v?'selected':''}>${t}</option>`).join('')}</select></label>
+    </div>
+    ${!list.length?`<div class="empty">Tidak ada produk yang cocok dengan "${esc(p.q||'')}".</div>`:''}
     ${list.map(x=>{const v=fmRow(x.id), dis=v.na?'disabled':'';return `<div class="card" style="margin-bottom:10px"><div class="row between"><div class="grow"><b>${esc(x.name)}</b><div class="small muted">${esc(x.sku)}</div></div>${x.off?chip('Di luar planned','amber'):''}</div>
-      <div class="row" style="gap:8px;margin-top:10px"><label class="field grow" style="margin:0"><span>Display</span><input class="input num" inputmode="numeric" ${dis} value="${v.d}" oninput="fmSet('${x.id}','d',this.value)"></label><label class="field grow" style="margin:0"><span>Gudang</span><input class="input num" inputmode="numeric" ${dis} value="${v.g}" oninput="fmSet('${x.id}','g',this.value)"></label></div>
+      <div class="row" style="gap:8px;margin-top:10px">${showD?`<label class="field grow" style="margin:0"><span>Display</span><input class="input num" inputmode="numeric" ${dis} value="${v.d}" oninput="fmSet('${x.id}','d',this.value)"></label>`:''}${showG?`<label class="field grow" style="margin:0"><span>Gudang</span><input class="input num" inputmode="numeric" ${dis} value="${v.g}" oninput="fmSet('${x.id}','g',this.value)"></label>`:''}</div>
       <div class="row" style="gap:8px;margin-top:8px"><label class="field grow" style="margin:0"><span>Satuan</span><select class="input" ${dis} onchange="fmSet('${x.id}','u',this.value)">${fmUnits(x.id).map(u=>`<option value="${u.id}" ${fmUnit(x.id).id===u.id?'selected':''}>${esc(u.name)}</option>`).join('')}</select></label><label class="field grow" style="margin:0"><span>Stok kompetitor</span><input class="input num" inputmode="numeric" ${dis} value="${v.k}" oninput="fmSet('${x.id}','k',this.value)"></label></div>
       <div class="small muted" id="fmPcs_${x.id}" style="margin-top:6px">${fmPcsText(x.id)}</div>
       <button class="row" style="gap:10px;margin-top:12px;background:none;border:0;padding:0;text-align:left;font:inherit;color:inherit" onclick="fmNa('${x.id}')" role="checkbox" aria-checked="${!!v.na}"><span class="check ${v.na?'on':''}">${v.na?I('check',14,3):''}</span><span>Barang tidak tersedia</span></button>
@@ -2290,7 +2321,7 @@ SCR.aktivitas = () => {
     : `<div class="list" style="margin-bottom:14px">${storeRow(L[0])}</div><p class="hint" style="margin:-6px 0 14px">Kamu ditugaskan di 1 toko. Check-in, kerjakan aktivitas, lalu check-out.</p>${L[0].status==='Belum'&&!L[0].cin?`<button class="btn sm ghost" style="margin:-4px 0 14px" onclick="act(()=>startTutup('${L[0].id}'))">${I('lock',16)} Toko tutup</button>`:''}`;
   // MOM 12 Nov 2026: daftar toko langsung di halaman, menggantikan popup Pilih toko
   const others = multi ? visitList(L,true) : '';
-  return {tab:'aktivitas', note:'<b>MOM 12 Nov:</b> jika ditugaskan di lebih dari satu toko, daftar toko tampil langsung di halaman tanpa popup, masing-masing dengan Check-in, Check-out, Toko tutup, atau Lihat. Toko tutup wajib 1 foto dan tidak dihitung terlewat. Halaman Aktivitas Promotor FMCG dan MD untuk pilih toko, check-in, dan check-out. Menu tugas ada di Beranda: pilih toko (jika ditugaskan di lebih dari satu), check-in, kerjakan tugas, lalu check-out. Judul halaman: Aktivitas Saya jika hanya 1 toko, Aktivitas Toko jika lebih dari 1 toko. Menu pekerjaan (Cek stok, Price promo, Facing display, Market share, Support task) ada di halaman ini untuk Promotor FMCG dan MD, bukan di Beranda. Lupa check-out: muncul informasi saat check-in di toko berikutnya, lalu toko sebelumnya ditutup otomatis.',
+  return {tab:'aktivitas', note:'<b>MOM 12 Nov:</b> jika ditugaskan di lebih dari satu toko, daftar toko tampil langsung di halaman tanpa popup, masing-masing dengan Check-in, Check-out, Toko tutup, atau Lihat. Toko tutup wajib 1 foto dan tidak dihitung terlewat. Halaman Aktivitas Promotor FMCG dan MD untuk pilih toko, check-in, dan check-out. Menu tugas ada di Beranda: pilih toko (jika ditugaskan di lebih dari satu), check-in, kerjakan tugas, lalu check-out. Judul halaman: Aktivitas Saya jika hanya 1 toko, Aktivitas Toko jika lebih dari 1 toko. Menu pekerjaan (Cek stok, Price promo, Facing display, Display share, Support task) ada di halaman ini untuk Promotor FMCG dan MD, bukan di Beranda. Lupa check-out: muncul informasi saat check-in di toko berikutnya, lalu toko sebelumnya ditutup otomatis.',
   html:`${appbar(fmAktLabel(),{backBtn:false})}<main class="content">
     ${head}
     ${others}${mdTasks(o)}</main>`};
@@ -2364,7 +2395,7 @@ const skuStatus = () => S.dispDone?'Selesai':S.dispDraft?'Draft':'Belum Selesai'
 const AKT_MOD={
   jual:{t:'Catat penjualan',ic:'bag',go:"go('spg-jual')",sub:()=>spgTrx().length?spgTrx().length+' transaksi sejak check-in':'Foto invoice atau input manual',st:()=>chip(spgTrx().length+' trx',spgTrx().length?'green':'')},
   sku:{t:'SKU display',ic:'grid',go:"go('spg-sku')",sub:()=>S.disp.length?S.disp.length+' display · '+S.disp.reduce((s,d)=>s+d.items.length,0)+' produk':'Tambah display, pilih kategori, lalu produk',st:()=>stChip(skuStatus())},
-  share:{t:'Market share',ic:'pie',go:"go('share')",sub:()=>'Pilih brand, kategori, dan sub kategori',st:()=>stChip(S.shareState==='kirim'?'Selesai':S.shareState==='draft'?'Draft':'Belum Selesai')},
+  share:{t:'Display share',ic:'pie',go:"go('share')",sub:()=>'Pilih brand, kategori, dan sub kategori',st:()=>stChip(S.shareState==='kirim'?'Selesai':S.shareState==='draft'?'Draft':'Belum Selesai')},
   stok:{t:'Stock opname',ic:'box',go:"go('fm-stok')",sub:()=>'Stok display, gudang, dan kompetitor',st:()=>stChip(S.fm.stokDone?'Selesai':(S.fm.draft||{}).stok?'Draft':'Belum Selesai')},
   posm:{t:'Campaign, POSM & planogram',ic:'image',go:"go('posm')",sub:()=>'Foto dinilai AI',st:()=>''}
 };
@@ -2521,8 +2552,8 @@ function dispDelSheet(i){ const d=S.disp[i];
   <button class="btn danger" onclick="S.disp.splice(${i},1);closeSheet();render(false,true);toast('Display dihapus')">Hapus display</button><button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Batal</button>`); }
 SCR['spg-sku'] = () => {
   const L=S.disp, cats=katOpts(), sc=skuCfg(), canAdd=sc.multi||!L.length;
-  const btns=i=>[sc.metode.includes('qr')?`<button class="btn sec sm grow" onclick="act(()=>go('scan',{mode:'spgsku',d:${i}}))">${I('barcode',18)} Scan QR</button>`:'',sc.metode.includes('manual')?`<button class="btn ghost sm grow" onclick="act(()=>go('spg-sku-item',{d:${i},ph:0}))">${I('edit',18)} Input manual</button>`:''].join('');
-  return {note:`SKU display (MOM 7). Diatur di dashboard per role: cara menambah produk (${sc.metode.map(m=>m==='qr'?'Scan QR':'Input manual').join(', ')}), minimal ${sc.foto} foto per produk, dan ${sc.multi?'boleh':'tidak boleh'} lebih dari satu display. Kategori dari master Kategori produk.`,
+  const btns=i=>[sc.metode.includes('qr')?`<button class="btn sec sm grow" onclick="act(()=>go('scan',{mode:'spgsku',d:${i}}))">${I('camera',18)} Foto planogram</button>`:'',sc.metode.includes('manual')?`<button class="btn ghost sm grow" onclick="act(()=>go('spg-sku-item',{d:${i},ph:0}))">${I('edit',18)} Input manual</button>`:''].join('');
+  return {note:`SKU display (MOM 7). Diatur di dashboard per role: cara menambah produk (${sc.metode.map(m=>m==='qr'?'Foto planogram':'Input manual').join(', ')}), minimal ${sc.foto} foto per produk, dan ${sc.multi?'boleh':'tidak boleh'} lebih dari satu display. Kategori dari master Kategori produk.`,
   html:`${appbar('SKU display')}<main class="content">
     <div class="row between" style="margin:0 2px 12px"><b>Hari ini · 26 Okt 2026</b>${stChip(skuStatus())}</div>
     ${!L.length?`<div class="card" style="text-align:center;padding:24px 18px"><div class="ico-tile tan" style="margin:0 auto 12px;width:52px;height:52px">${I('grid',24)}</div><b>Belum ada display</b><p class="small muted" style="margin:6px 0 16px;line-height:1.5">Tambah display, pilih kategorinya, lalu masukkan produk yang dipajang.</p>
@@ -2568,7 +2599,7 @@ function spgScanItem(d){
   replace('spg-sku-item',{d,ph:0,qr:1,name:pr.name,sku:pr.sku});
 }
 
-/* ---------- SKU display & Market share (Mobile Promotor, FMCG) ---------- */
+/* ---------- SKU display & Display share (Mobile Promotor, FMCG) ---------- */
 SCR.sku = p => {
   const t=p.t||'t1', data=S.sku[t], toko=TOKO.spg.find(x=>x.id===t);
   const addBtns=`<button class="btn" onclick="act(()=>go('scan',{mode:'sku',t:'${t}'}))">${I('barcode',20)} Scan QR / barcode</button>
@@ -2615,8 +2646,8 @@ SCR.share = () => {
   const PAL=['#123F75','#F09A66','#8FB8D8','#5B6B7D','#C9A27A'], colors=Object.fromEntries([[b,'#0AA5EE'],...compBrands().map((x,i)=>[x,PAL[i%PAL.length]])]), st=S.shareState;
   const levels=[]; for(let d=0;d<20;d++){ const kids=katKids(b,path.slice(0,d),true); if(!kids.length) break; levels.push({d,kids,v:path[d]||''}); if(!path[d]) break; }
   const sel=(label,opts,v,on,all)=>`<label class="field" style="margin:0;min-width:0"><span>${label}</span><select class="input" onchange="${on}">${all?`<option value="">${all}</option>`:''}${opts.map(o=>`<option ${o===v?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`;
-  return {note:'Market share diinput harian per toko (MOM 8). Brand, kategori, sub kategori, produk klien, dan brand kompetitor diambil dari Master data dashboard (hanya kategori yang ditandai untuk market share). Filter di atas berupa dropdown: pilih brand klien dulu, lalu kategori dalam brand itu. Kategori punya sub kategori tanpa batas level; dropdown berikutnya muncul selama masih ada sub kategori. Data klien sesuai sistem, data kompetitor diinput manual. Harga opsional. Draft tidak masuk laporan; hanya data yang sudah check-out yang ditarik ke report.',
-  html:`${appbar('Market share')}<main class="content">
+  return {note:'Display share diinput harian per toko (MOM 8). Brand, kategori, sub kategori, produk klien, dan brand kompetitor diambil dari Master data dashboard (hanya kategori yang ditandai untuk display share). Filter di atas berupa dropdown: pilih brand klien dulu, lalu kategori dalam brand itu. Kategori punya sub kategori tanpa batas level; dropdown berikutnya muncul selama masih ada sub kategori. Data klien sesuai sistem, data kompetitor diinput manual. Harga opsional. Draft tidak masuk laporan; hanya data yang sudah check-out yang ditarik ke report.',
+  html:`${appbar('Display share')}<main class="content">
     <div class="card" style="margin-bottom:14px"><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
       ${sel('Brand',B,b,'shareBrand(this.value)')}
       ${levels.map(l=>sel(l.d?'Sub kategori'+(l.d>1?' '+l.d:''):'Kategori',l.kids,l.v,`sharePath(${l.d},this.value)`,l.d?'Semua sub kategori':'Semua kategori')).join('')}
@@ -2630,7 +2661,7 @@ SCR.share = () => {
     <div class="sec-title">Produk kompetitor <a onclick="shareAddSheet()">+ Tambah</a></div>
     <div class="list">${comp.map(c=>`<div class="li"><div class="grow"><div class="t">${esc(c.nama)}</div><div class="s">${esc(c.brand)} · ${esc(katLabel(c.path))}${c.harga?' · '+rp(c.harga):''}</div></div><div class="stepper"><button onclick="act(()=>{S.shareComp[${c.i}].qty=Math.max(0,S.shareComp[${c.i}].qty-1);render(false,true)})" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${c.qty}</span><button onclick="act(()=>{S.shareComp[${c.i}].qty++;render(false,true)})" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>`).join('')||`<div class="empty">Belum ada produk kompetitor. Tambah dari tombol di atas.</div>`}</div>
     <p class="hint" style="margin-top:12px">Draft tidak masuk laporan. Data masuk laporan setelah kamu check-out dari toko.</p>
-  </main><footer class="actions">${canDraft?`<button class="btn ghost" style="width:auto" onclick="act(()=>{S.shareState='draft';fmDraftSave('share',1);render(false,true)})">Simpan sementara</button>`:''}<button class="btn" onclick="act(()=>{S.shareState='kirim';fmMark('share');back();toast('Market share tersimpan')})">Simpan</button></footer>`};
+  </main><footer class="actions">${canDraft?`<button class="btn ghost" style="width:auto" onclick="act(()=>{S.shareState='draft';fmDraftSave('share',1);render(false,true)})">Simpan sementara</button>`:''}<button class="btn" onclick="act(()=>{S.shareState='kirim';fmMark('share');back();toast('Display share tersimpan')})">Simpan</button></footer>`};
 };
 function shareAddSheet(){
   const key=S.sharePath.join('/');

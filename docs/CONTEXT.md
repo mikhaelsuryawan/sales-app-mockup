@@ -157,6 +157,16 @@ Keputusan 2 Nov 2026 (lengkap di `../docs/00-sources/OPEN-QUESTIONS.md` dan `../
 
 Catatan: klien sudah mengesahkan MOM pertama. MOM hasil review di meeting berikutnya akan menjadi sumber baru dan bisa mengubah keputusan di atas.
 
+Keputusan 18 Nov 2026 (dari MOM gabungan Notes 1 + Notes 2, `MOM_SIM_Group_Sales_App_18Nov2026.docx` di folder induk):
+
+- **Temperature level leads memakai skala**, bukan dua pilihan cold/hot. Notes 1 menyebut cold/hot, Notes 2 menyebut 1 sampai 5; yang dipakai skala.
+- **Order ID muncul setelah tahap prospect dan sifatnya opsional, lalu menjadi wajib saat tahap deal.** Ini menyatukan Notes 1 (Order ID menyusul setelah deal) dan Notes 2 (field sudah muncul saat prospect).
+- **Catatan Notes 2 yang terpotong di bagian loading dan unloading dilewati dulu**, menunggu catatan utuh dari pencatat sebelum alur canvasing dikerjakan.
+
+Sudah dikerjakan di mockup (18 Nov 2026): penggantian nama market share menjadi display share di mobile dan dashboard, teks tombol Scan QR menjadi Foto planogram pada SKU display SPG beserta label metodenya di dashboard, kotak cari produk dan dropdown kategori pada stock opname, serta provinsi, kota/kabupaten, kecamatan, dan kelurahan pada form usulan toko mobile.
+
+Belum dikerjakan, menunggu giliran: News & Info, import insentif, Permanent Journey Plan, catatan penjualan kompetitor, cetak struk, data overdue dan laporan bawahan untuk SPV, seluruh alur loading dan unloading canvasing beserta approval dan deposit, Source of Order, Order ID, status Booked, menu artikel, dan OCR KTP.
+
 ## 7. Catatan teknis
 
 - Tiap mockup satu file HTML mandiri (CSS dan JS inline, logo base64). Tidak ada build step.
