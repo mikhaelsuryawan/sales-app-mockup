@@ -1512,14 +1512,14 @@ function invDoc(w=200,h=260,scan=false){
     <rect x="18" y="206" width="162" height="1.5" fill="#D5DEE6"/><rect x="108" y="216" width="72" height="10" rx="3" fill="#0A6FE0" opacity=".85"/><rect x="18" y="234" width="50" height="6" rx="3" fill="#C6D2DC"/>
     ${scan?'<rect x="6" y="6" width="188" height="3" fill="#FF5A5F"><animate attributeName="y" values="8;248;8" dur="1.6s" repeatCount="indefinite"/></rect>':''}</svg>`;
 }
-function docCam({title,hint,phase,onShoot,onManual='manualInvoiceSheet()',onGallery="toast('Memilih dari galeri…','image')",art=null,scanHint='Membaca invoice (OCR)…',scanBottom='Mengenali no. invoice, tanggal, barang, qty, dan harga…',aria='Ambil foto invoice'}){
+function docCam({title,hint,phase,onShoot,onManual='manualInvoiceSheet()',onGallery="toast('Memilih dari galeri…','image')",hideSide=false,art=null,scanHint='Membaca invoice (OCR)…',scanBottom='Mengenali no. invoice, tanggal, barang, qty, dan harga…',aria='Ambil foto invoice'}){
   const scan=phase==='scan';
   return `<div class="cam"><div class="topbar"><button class="ib" onclick="back()" aria-label="Kembali">${I('left',24,2)}</button><h1>${title}</h1></div>
     ${scan?'':`<div class="hint-top">${hint}</div>`}
     <div style="position:relative;width:260px;height:336px;display:grid;place-items:center">
       <div style="position:absolute;inset:0;border-radius:18px;border:2px solid ${scan?'#21CFF7':'rgba(255,255,255,.9)'};box-shadow:0 0 0 2000px rgba(0,0,0,.35)"></div>
       <div style="transform:rotate(${phase==='ready'?'0':'-1.5'}deg)">${art||invDoc(220,286,scan)}</div></div>
-    <div class="bottom">${scan?`<div role="status" style="display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;opacity:.9"><span class="ocr-spin" aria-hidden="true"></span><span>${scanBottom}</span></div>`:`<button class="b-ghost" style="color:#fff;font-size:13px;font-weight:600;width:80px" onclick="${onManual}">Input manual</button><button class="shutter" onclick="${onShoot}" aria-label="${aria}"><i></i></button><button class="b-ghost" style="color:#fff;font-size:13px;font-weight:600;width:80px" onclick="${onGallery}">Galeri</button>`}</div></div>`;
+    <div class="bottom">${scan?`<div role="status" style="display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;opacity:.9"><span class="ocr-spin" aria-hidden="true"></span><span>${scanBottom}</span></div>`:`${hideSide?'<span style="width:80px"></span>':`<button class="b-ghost" style="color:#fff;font-size:13px;font-weight:600;width:80px" onclick="${onManual}">Input manual</button>`}<button class="shutter" onclick="${onShoot}" aria-label="${aria}"><i></i></button>${hideSide?'<span style="width:80px"></span>':`<button class="b-ghost" style="color:#fff;font-size:13px;font-weight:600;width:80px" onclick="${onGallery}">Galeri</button>`}`}</div></div>`;
 }
 SCR['jual-invoice'] = p => {
   const ph=p.phase||'ready';
@@ -1771,63 +1771,60 @@ const ST_APR = {'Menunggu approval':'amber','Disetujui':'green','Ditolak':'red'}
 function ldAdd(id,q=1,by='manual'){ const x=S.ld.items.find(a=>a.id===id); if(x) x.q+=q; else S.ld.items.push({id,q,by}); }
 function ldSet(id,d){ const L=S.ld.items, x=L.find(a=>a.id===id); if(!x) return; x.q=Math.max(0,x.q+d); if(!x.q) L.splice(L.indexOf(x),1); render(false,true); }
 function prodSheet(mode){
-  sheet(`<h3 style="font-size:18px;font-weight:800">Cari produk</h3><p class="muted small" style="margin:4px 0 12px">Ketik nama produk atau kode produk.</p>
+  sheet(`<h3 style="font-size:18px;font-weight:800">Input manual</h3><p class="muted small" style="margin:4px 0 12px">Cari nama produk atau kode produk, lalu tekan + untuk memasukkan ke daftar.</p>
   <div style="position:relative"><span style="position:absolute;left:14px;top:14px;color:var(--muted)">${I('search',20)}</span><input class="input" id="ls_q" style="padding-left:44px" placeholder="contoh: blender atau AR-BL11" autocomplete="off" oninput="prodFilter('${mode}')"></div>
   <div id="ls_list" class="list" style="margin-top:12px;max-height:44vh;overflow:auto"></div>`);
   prodFilter(mode);
 }
 function prodFilter(mode){
-  const q=val('ls_q').toLowerCase(), L=(mode==='rt'?rtCat():CANVAS_PRODUCTS).filter(p=>!q||(p.name+' '+p.sku).toLowerCase().includes(q));
+  const q=val('ls_q').toLowerCase(), L=(mode==='rt'?rtCat():mode==='ul'?CANVAS_PRODUCTS.filter(x=>S.bawa[x.id]>0):CANVAS_PRODUCTS).filter(p=>!q||(p.name+' '+p.sku).toLowerCase().includes(q));
   $('#ls_list').innerHTML=L.map(p=>`<button class="li" onclick="prodPick('${mode}','${p.id}')"><div class="grow"><div class="t">${esc(p.name)}</div><div class="s">${p.sku} · ${rp(p.price)}</div></div>${I('plus',20,2.2)}</button>`).join('')||'<div class="empty">Produk tidak ditemukan.</div>';
 }
 function prodPick(mode,id){
   if(mode==='rt'){ rtAdd(id); closeSheet(); render(false,true); toast(prodById(id).name+' masuk daftar retur','plus'); }
   else if(mode==='ld'){ ldAdd(id,1,'manual'); closeSheet(); render(false,true); toast(cvById(id).name+' masuk daftar','plus'); }
-  else { closeSheet(); toast('Produk ini tidak ada di loading hari ini','alert'); }
+  else { ulAddOne(id,'Manual'); closeSheet(); render(false,true); toast(cvById(id).name+' ditambahkan, sisa '+S.ul.sisa[id],'plus'); }
 }
 /* kamera nota/invoice (OCR) */
 SCR['ld-cam'] = p => {
-  const ul=p.kind==='ul', ph=p.phase||'ready', name=ul?'invoice':'nota';
-  if(ph==='fail') return {note:'<b>OCR gagal.</b> Foto buram atau terpotong. Foto ulang, atau pakai scan barcode. Ubah dari panel: Hasil baca invoice (OCR).',
-    html:`<div class="result" style="padding-top:var(--sb)">${bigRing('#C93C33','x')}<h2>${ul?'Invoice':'Nota'} tidak terbaca</h2><p>Foto buram atau ada bagian yang terpotong. Pastikan seluruh ${name} masuk bingkai dan cahaya cukup.</p></div>
-    <footer class="actions stack"><button class="btn" onclick="setP({phase:'ready'})">${I('camera',20)} Foto ulang</button><button class="btn ghost" onclick="back()">Kembali</button></footer>`};
-  return {dark:true,note:ul?'<b>Unloading, langkah awal:</b> foto invoice sisa barang. OCR membaca jumlah sisa tiap produk, lalu daftar produk dan penjualan terisi.':'<b>Loading, langkah awal:</b> foto nota pengambilan barang. Setelah OCR berhasil, daftar produk dan ringkasan muncul.',
-    html:docCam({title:'Foto '+name,hint:'Masukkan seluruh '+name+' ke dalam bingkai',phase:ph,onShoot:`ldShoot('${p.kind}')`,onManual:ul?'back()':"back();prodSheet('ld')",scanHint:'Membaca…',scanBottom:ul?'Mengenali produk dan jumlah sisa…':'Mengenali no. nota, produk, dan quantity…',aria:'Ambil foto '+name})};
+  const ul=p.kind==='ul', ph=p.phase||'ready';
+  if(ph==='fail') return {note:'<b>OCR gagal.</b> Foto buram atau terpotong. Scan ulang, atau pakai scan barcode dan input manual. Ubah dari panel: Hasil baca invoice (OCR).',
+    html:`<div class="result" style="padding-top:var(--sb)">${bigRing('#C93C33','x')}<h2>Nota tidak terbaca</h2><p>Foto buram atau ada bagian yang terpotong. Pastikan seluruh nota masuk bingkai dan cahaya cukup.</p></div>
+    <footer class="actions stack"><button class="btn" onclick="setP({phase:'ready'})">${I('camera',20)} Scan ulang</button><button class="btn ghost" onclick="back()">Kembali</button></footer>`};
+  return {dark:true,note:ul?'<b>Scan nota (unloading):</b> hasil scan langsung mengisi jumlah sisa tiap produk di daftar. Tidak ada pilihan dari galeri.':'<b>Scan nota (loading):</b> hasil scan langsung masuk daftar produk beserta quantity. Tidak ada pilihan dari galeri.',
+    html:docCam({title:'Scan nota',hint:'Masukkan seluruh nota ke dalam bingkai',phase:ph,onShoot:`ldShoot('${p.kind}')`,hideSide:true,scanHint:'Membaca…',scanBottom:ul?'Mengenali produk dan jumlah sisa…':'Mengenali produk dan quantity…',aria:'Ambil foto nota'})};
 };
 function ldShoot(kind){
   setP({phase:'scan'});
   setTimeout(()=>{ if(cur().name!=='ld-cam') return; if(S.demo.ocr==='bad'){ setP({phase:'fail'}); return; }
-    if(kind==='ul'){ const E=ulExpected(); S.ul.started=true; S.ul.src='Foto invoice'; S.ul.sisa={}; S.ul.tag={}; E.forEach(r=>{ S.ul.sisa[r.id]=r.exp; S.ul.tag[r.id]='OCR'; }); const w=E.find(r=>r.id==='bl11'&&r.exp>0)||E.find(r=>r.exp>0); if(w) S.ul.sisa[w.id]=w.exp-1; back(); toast('Invoice terbaca, jumlah sisa terisi','check'); return; }
+    if(kind==='ul'){ const E=ulExpected(); S.ul.sisa={}; S.ul.tag={}; E.forEach(r=>{ S.ul.sisa[r.id]=r.exp; S.ul.tag[r.id]='OCR'; }); const w=E.find(r=>r.id==='bl11'&&r.exp>0)||E.find(r=>r.exp>0); if(w) S.ul.sisa[w.id]=w.exp-1; back(); toast('Invoice terbaca, jumlah sisa terisi','check'); return; }
     S.ld.nota={no:LD_NOTA.no,date:LD_NOTA.date}; S.ld.items=[...LD_NOTA.lines.map(([id,q])=>({id,q,by:'ocr'})),...S.ld.items.filter(x=>x.by!=='ocr')];
     back(); toast('Nota terbaca, '+LD_NOTA.lines.length+' produk masuk daftar','check'); },1900);
 }
 function scanDone(p){
-  if(p.mode==='loading'){ const pr=CANVAS_PRODUCTS[S.ld.scanN++%CANVAS_PRODUCTS.length]; ldAdd(pr.id,1,'scan'); back(); toast(pr.name+' ditambahkan','barcode'); return; }
-  const ids=Object.keys(S.bawa).filter(k=>S.bawa[k]>0), id=ids[S.ul.scanN++%ids.length]; ulStart('Scan barcode'); S.ul.tag[id]='Scan'; back(); toast(cvById(id).name+' terscan','barcode');
+  if(p.mode==='loading'){ const pr=CANVAS_PRODUCTS[S.ld.scanN++%CANVAS_PRODUCTS.length]; ldAdd(pr.id,1,'scan'); back(); toast(pr.name+' ditambahkan, jumlah '+S.ld.items.find(x=>x.id===pr.id).q,'barcode'); return; }
+  const ids=Object.keys(S.bawa).filter(k=>S.bawa[k]>0&&cvById(k)), id=ids[S.ul.scanN++%ids.length]; ulAddOne(id,'Scan'); back(); toast(cvById(id).name+' terscan, sisa '+S.ul.sisa[id],'barcode');
 }
+function ulAddOne(id,tag){ const u=S.ul, ld=S.bawa[id]||0; u.sisa[id]=Math.min(ld,(u.sisa[id]||0)+1); if(!u.tag[id]) u.tag[id]=tag; }
 function ulExpected(){ return Object.keys(S.bawa).filter(id=>S.bawa[id]>0&&cvById(id)).map(id=>{ const sold=S.canvasSales.filter(x=>!x.d).reduce((a,x)=>a+x.items.filter(i=>i.id===id).reduce((b,i)=>b+i.q,0),0); return {id,sold,exp:Math.max(0,S.bawa[id]-sold)}; }); }
-function ulStart(src){ const u=S.ul; if(!u.started){ u.started=true; u.src=src; ulExpected().forEach(r=>{ u.sisa[r.id]=r.exp; }); } }
-function ulRows(){ const u=S.ul; return ulExpected().map(r=>{ const p=cvById(r.id), ld=S.bawa[r.id], act=u.sisa[r.id]!==undefined?u.sisa[r.id]:r.exp, diff=r.exp-act; return {...r,p,ld,act,diff,terjual:ld-act}; }); }
+function ulRows(){ const u=S.ul; return ulExpected().map(r=>{ const p=cvById(r.id), ld=S.bawa[r.id], act=u.sisa[r.id]||0, diff=r.exp-act; return {...r,p,ld,act,diff,terjual:ld-act}; }); }
 function ulSum(){ const rows=ulRows(), total=rows.reduce((a,r)=>a+r.terjual*r.p.price,0), cash=S.ul.cash===null?total:Math.min(S.ul.cash,total*10), sel=rows.filter(r=>r.diff!==0); return {rows,total,cash,non:Math.max(0,total-cash),sel,kurang:sel.filter(r=>r.diff>0)}; }
 function ulStep(id,d){ const r=ulRows().find(x=>x.id===id); S.ul.sisa[id]=Math.max(0,Math.min(r.ld,r.act+d)); render(false,true); }
 function ulCash(v){ const n=parseInt(String(v).replace(/\D/g,''))||0; S.ul.cash=n; const t=ulSum(); const e=$('#ul_non'); if(e) e.textContent=rp(t.non); const w=$('#ul_warn'); if(w) w.hidden=n<=t.total; }
+const addCard = (kind,mode) => `<div class="card"><b style="font-size:15px">Tambah produk</b><p class="small muted" style="margin:4px 0 12px;line-height:1.5">Pilih salah satu cara, boleh dipakai bergantian.</p>
+  <button class="btn" onclick="go('ld-cam',{kind:'${kind}'})">${I('camera',20)} Scan nota</button>
+  <div class="row" style="gap:8px;margin-top:8px"><button class="btn sec sm grow" onclick="go('scan',{mode:'${mode}'})">${I('barcode',18)} Scan barcode</button><button class="btn ghost sm grow" onclick="prodSheet('${kind}')">${I('plus',18)} Input manual</button></div></div>`;
 SCR.loading = p => {
   if(!S.ld) S.ld=ldBlank();
   const d=S.ld, L=d.items, v=ldVal(), over=v>canvasLimit(), mine=S.loads.filter(x=>x.u===S.user);
-  const seg=`<div class="segtabs">${[['nota','Foto nota'],['barcode','Scan barcode']].map(t=>`<button class="${d.tab===t[0]?'on':''}" onclick="S.ld.tab='${t[0]}';render(false,true)">${t[1]}</button>`).join('')}</div>`;
-  const cap = d.tab==='nota'
-    ? (d.nota?`<div class="card"><div class="row"><div class="ico-tile green">${I('check',20,2.2)}</div><div class="grow"><div class="t">Nota terbaca</div><div class="s">${d.nota.no} · ${d.nota.date}</div></div><button class="btn sm ghost" style="width:auto" onclick="go('ld-cam',{kind:'ld'})">Foto ulang</button></div></div>`
-      :`<div class="card" style="text-align:center;padding:26px 18px"><div class="ico-tile" style="margin:0 auto 12px">${I('upload',24,2)}</div><b style="font-size:16px">Upload foto nota</b><p class="small muted" style="margin:6px 0 16px;line-height:1.5">Foto nota pengambilan barang dari gudang. Daftar produk dan ringkasan terisi otomatis dari hasil baca nota.</p>
-        <button class="btn" onclick="go('ld-cam',{kind:'ld'})">${I('camera',20)} Foto nota</button><button class="btn ghost" style="margin-top:8px" onclick="go('ld-cam',{kind:'ld'})">${I('image',18)} Pilih dari galeri</button></div>`)
-    : `<div class="card" style="text-align:center;padding:22px 18px"><div class="ico-tile" style="margin:0 auto 12px">${I('barcode',24,2)}</div><b style="font-size:16px">Scan barcode produk</b><p class="small muted" style="margin:6px 0 14px;line-height:1.5">Scan kemasan satu per satu. Produk yang sama menambah jumlahnya.</p><button class="btn" onclick="go('scan',{mode:'loading'})">${I('barcode',20)} Scan barcode</button></div>`;
   const list = L.length ? `<div class="stat3" style="margin-top:14px"><div><small>Produk</small><b>${L.length}</b></div><div><small>Unit</small><b>${L.reduce((a,x)=>a+x.q,0)}</b></div><div><small>Nilai</small><b>${rpShort(v)}</b></div></div>
     ${over?`<div class="banner amber" style="margin-top:12px">${I('alert',18)}<span>Nilai loading melebihi limit harian <b>${rp(canvasLimit())}</b>. Tetap bisa dikirim, Team Leader yang memutuskan.</span></div>`:''}
     <div class="sec-title">Daftar produk</div>
-    <div class="list">${L.map(x=>{const pr=cvById(x.id);return `<div class="li"><div class="grow"><div class="t">${esc(pr.name)}</div><div class="s">${pr.sku} · ${rp(pr.price)} ${x.by==='ocr'?chip('Dari nota','blue'):x.by==='scan'?chip('Scan','tan'):chip('Manual','')}</div></div><div class="stepper"><button onclick="ldSet('${x.id}',-1)" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${x.q}</span><button onclick="ldSet('${x.id}',1)" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>`}).join('')}</div>
-    <div class="row" style="gap:8px;margin-top:12px"><button class="btn sec sm grow" onclick="prodSheet('ld')">${I('search',18)} Cari produk</button><button class="btn sec sm grow" onclick="go('scan',{mode:'loading'})">${I('barcode',18)} Scan barcode</button></div>`:'';
+    <div class="list">${L.map(x=>{const pr=cvById(x.id);return `<div class="li"><div class="grow"><div class="t">${esc(pr.name)}</div><div class="s">${pr.sku} · ${rp(pr.price)} ${x.by==='ocr'?chip('Scan nota','blue'):x.by==='scan'?chip('Scan barcode','tan'):chip('Manual','')}</div></div><div class="stepper"><button onclick="ldSet('${x.id}',-1)" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${x.q}</span><button onclick="ldSet('${x.id}',1)" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div>`}).join('')}</div>`
+    : `<div class="card" style="margin-top:14px"><div class="empty" style="padding:16px">Belum ada produk. Scan nota, scan barcode, atau input manual.</div></div>`;
   const hist = mine.length?`<div class="sec-title">Loading hari ini</div><div class="list">${mine.map(x=>`<div class="li"><div class="ico-tile">${I('box',18)}</div><div class="grow"><div class="t">${x.id}</div><div class="s">${x.time} · ${x.items.length} produk · ${rpShort(x.val)}</div></div>${chip(x.status,ST_APR[x.status])}</div>`).join('')}</div>`:'';
-  return {note:'<b>Loading Barang (update menu 18 Nov).</b> Tab Foto nota awalnya hanya upload foto nota; daftar produk dan ringkasan baru muncul setelah nota terbaca. Produk tambahan lewat cari nama/kode atau scan barcode. Loading dikirim ke Team Leader untuk approval.',
-  html:`${appbar('Loading barang')}<main class="content">${seg}${cap}${list}${hist}</main>${L.length?`<footer class="actions"><div class="grow"><div class="small muted">${L.reduce((a,x)=>a+x.q,0)} unit</div><b class="num" style="font-size:17px">${rp(v)}</b></div><button class="btn" style="width:auto" onclick="ldKirim()">Kirim loading</button></footer>`:''}`};
+  return {note:'<b>Loading Barang.</b> Tiga cara menambah produk: scan nota (hasil langsung masuk daftar beserta quantity, tanpa pilihan galeri), scan barcode (quantity 1, produk yang sama menambah 1), dan input manual (cari nama atau kode produk, tekan + untuk masuk daftar). Loading dikirim ke Team Leader untuk approval.',
+  html:`${appbar('Loading barang')}<main class="content">${addCard('ld','loading')}${list}${hist}</main>${L.length?`<footer class="actions"><div class="grow"><div class="small muted">${L.reduce((a,x)=>a+x.q,0)} unit</div><b class="num" style="font-size:17px">${rp(v)}</b></div><button class="btn" style="width:auto" onclick="ldKirim()">Kirim loading</button></footer>`:''}`};
 };
 function ldKirim(){
   const d=S.ld; if(!d.items.length) return;
@@ -1842,22 +1839,20 @@ SCR['ld-sukses'] = p => ({note:p.kind+' terkirim ke Team Leader. Team Leader men
   <footer class="actions"><button class="btn" onclick="back()">Selesai</button></footer>`});
 SCR.unloading = p => {
   if(!S.ul) S.ul=ulBlank();
-  const u=S.ul, mine=S.unloads.filter(x=>x.u===S.user);
-  const start=`<div class="card" style="text-align:center;padding:24px 18px"><div class="ico-tile" style="margin:0 auto 12px">${I('retur',24,2)}</div><b style="font-size:16px">Mulai unloading</b><p class="small muted" style="margin:6px 0 16px;line-height:1.5">Foto invoice sisa barang atau scan barcode produk. Daftar produk beserta jumlah loading muncul setelahnya.</p>
-    <button class="btn" onclick="go('ld-cam',{kind:'ul'})">${I('camera',20)} Foto invoice</button><button class="btn ghost" style="margin-top:8px" onclick="go('scan',{mode:'unloading'})">${I('barcode',18)} Scan barcode</button></div>`;
+  const u=S.ul, mine=S.unloads.filter(x=>x.u===S.user), started=Object.keys(u.sisa).length>0;
   const hist = mine.length?`<div class="sec-title">Unloading dikirim</div><div class="list">${mine.map(x=>`<div class="li"><div class="ico-tile">${I('retur',18)}</div><div class="grow"><div class="t">${x.id}</div><div class="s">${x.time} · ${rpShort(x.total)}${x.sel.length?' · ada selisih':''}</div></div>${chip(x.status,ST_APR[x.status])}</div>`).join('')}</div>`:'';
-  if(!u.started) return {note:'<b>Unloading Barang (update menu 18 Nov).</b> Langkah awal sama dengan loading: foto invoice atau scan barcode.',html:`${appbar('Unloading barang')}<main class="content">${start}${hist}</main>`};
+  if(!started) return {note:'<b>Unloading Barang.</b> Sama dengan loading: scan nota, scan barcode, atau input manual. Jumlah sisa tiap produk terisi dari hasil scan.',html:`${appbar('Unloading barang')}<main class="content">${addCard('ul','unloading')}<div class="card" style="margin-top:14px"><div class="empty" style="padding:16px">Belum ada produk. Scan nota, scan barcode, atau input manual.</div></div>${hist}</main>`};
   const t=ulSum();
   const selBlock = t.sel.length ? `<div class="sec-title">Selisih barang</div>
     <div class="banner amber">${I('alert',18)}<span>Jumlah sisa berbeda dari data sistem. ${t.kurang.length?'Barang yang kurang dibuatkan <b>Catat penjualan</b> otomatis, ditandai hasil selisih unloading.':''} Foto dokumen dan alasan wajib diisi.</span></div>
     <div class="list" style="margin-top:12px">${t.sel.map(r=>`<div class="li"><div class="grow"><div class="t">${esc(r.p.name)}</div><div class="s">${r.diff>0?'Kurang':'Lebih'} <b class="num">${Math.abs(r.diff)}</b> unit × ${rp(r.p.price)}</div></div><b class="num" style="color:${r.diff>0?'var(--red)':'var(--green)'}">${rp(Math.abs(r.diff)*r.p.price)}</b></div>`).join('')}</div>
     <div class="field" style="margin-top:14px"><span>Foto dokumen *</span><div class="thumbs">${u.doc?`<div class="thumb">${I('image',22)}</div>`:`<button class="thumb add" onclick="S.ul.doc=true;render(false,true);toast('Foto dokumen tersimpan','camera')" aria-label="Ambil foto dokumen">${I('camera',22)}</button>`}</div></div>
     <label class="field"><span>Alasan selisih *</span><textarea class="input" id="ul_reason" placeholder="contoh: Barang rusak, dibuang di toko" oninput="S.ul.reason=this.value">${esc(u.reason)}</textarea></label><div id="uerr"></div>` : '';
-  return {note:'<b>Unloading.</b> Jumlah sisa diisi per produk. Penjualan terakumulasi otomatis dari selisih jumlah loading dan sisa, dibagi Cash dan Non Cash. Kalau ada selisih, sistem membuatkan Catat penjualan bertanda selisih unloading dan sales wajib mengisi foto dokumen dan alasan.',
+  return {note:'<b>Unloading.</b> Daftar produk memakai jumlah loading. Scan nota mengisi sisa semua produk, scan barcode menambah sisa 1 per scan, input manual menambah sisa 1 per tekan +. Penjualan terakumulasi otomatis dan dibagi Cash dan Non Cash. Kalau ada selisih, sistem membuat Catat penjualan bertanda selisih unloading; foto dokumen dan alasan wajib.',
   html:`${appbar('Unloading barang')}<main class="content">
-    <div class="card"><div class="row"><div class="ico-tile green">${I('check',20,2.2)}</div><div class="grow"><div class="t">${u.src==='Foto invoice'?'Invoice terbaca':'Barcode terscan'}</div><div class="s">${rp(t.total)} terjual dari ${t.rows.reduce((a,r)=>a+r.ld,0)} unit loading</div></div><button class="btn sm ghost" style="width:auto" onclick="S.ul=ulBlank();render(false,true)">Ulangi</button></div></div>
-    <div class="sec-title">Produk</div>
-    <div class="list">${t.rows.map(r=>`<div class="li"><div class="grow"><div class="t">${esc(r.p.name)} ${u.tag[r.id]?chip(u.tag[r.id],u.tag[r.id]==='OCR'?'blue':'tan'):''}</div><div class="s">Loading ${r.ld} · tercatat terjual ${r.sold} · sisa sistem ${r.exp}</div>${r.diff!==0?`<div class="small" style="margin-top:4px;color:var(--red);font-weight:700">Selisih ${r.diff>0?'kurang':'lebih'} ${Math.abs(r.diff)} unit</div>`:''}</div>
+    ${addCard('ul','unloading')}
+    <div class="sec-title">Daftar produk <button class="lnk-del" onclick="S.ul=ulBlank();render(false,true)">Kosongkan</button></div>
+    <div class="list">${t.rows.map(r=>`<div class="li"><div class="grow"><div class="t">${esc(r.p.name)} ${u.tag[r.id]?chip(u.tag[r.id]==='OCR'?'Scan nota':u.tag[r.id]==='Scan'?'Scan barcode':'Manual',u.tag[r.id]==='OCR'?'blue':u.tag[r.id]==='Scan'?'tan':''):''}</div><div class="s">Loading ${r.ld} · tercatat terjual ${r.sold} · sisa sistem ${r.exp}</div>${r.diff!==0?`<div class="small" style="margin-top:4px;color:var(--red);font-weight:700">Selisih ${r.diff>0?'kurang':'lebih'} ${Math.abs(r.diff)} unit</div>`:''}</div>
       <div><div class="small muted" style="text-align:center">Sisa</div><div class="stepper"><button onclick="ulStep('${r.id}',-1)" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${r.act}</span><button onclick="ulStep('${r.id}',1)" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div></div>`).join('')}</div>
     <div class="sec-title">Penjualan</div>
     <div class="card"><div class="kv"><span>Total penjualan</span><span class="num" style="font-size:17px;color:var(--ink);font-weight:800">${rp(t.total)}</span></div>
@@ -1866,6 +1861,7 @@ SCR.unloading = p => {
       <div class="err" id="ul_warn" ${u.cash!==null&&u.cash>t.total?'':'hidden'} style="margin-top:8px">Cash melebihi total penjualan.</div>
       <p class="hint">Non Cash dihitung otomatis dari total dikurangi Cash.</p></div>
     ${selBlock}
+    ${hist}
   </main><footer class="actions"><button class="btn" onclick="ulSubmit()">Kirim unloading</button></footer>`};
 };
 function ulSubmit(){
@@ -1875,7 +1871,7 @@ function ulSubmit(){
   const id='UL-2610-0'+(10+S.unloads.length), cash=t.cash;
   t.kurang.forEach(r=>{ S.canvasSales.unshift({id:'CVS-2610-0'+(100+S.canvasSales.length),toko:'Selisih unloading',items:[{id:r.id,q:r.diff,price:r.p.price}],total:r.diff*r.p.price,time:'17:20',cust:'',status:'Terkirim',d:0,sel:id,vals:[['Sumber','Selisih unloading (otomatis)'],['Alasan',u.reason]]}); });
   t.rows.forEach(r=>{ S.stock[r.id].good=r.act; });
-  S.unloads.unshift({id,u:S.user,by:U().name,time:'17:20',src:u.src,rows:t.rows.map(r=>({id:r.id,ld:r.ld,exp:r.exp,act:r.act})),total:t.total,cash,non:t.total-cash,sel:t.sel.map(r=>({id:r.id,q:r.diff,harga:Math.abs(r.diff)*r.p.price})),reason:u.reason,doc:u.doc,status:'Menunggu approval'});
+  S.unloads.unshift({id,u:S.user,by:U().name,time:'17:20',src:[...new Set(Object.values(u.tag))].map(k=>k==='OCR'?'Scan nota':k==='Scan'?'Scan barcode':'Manual').join(', ')||'Manual',rows:t.rows.map(r=>({id:r.id,ld:r.ld,exp:r.exp,act:r.act})),total:t.total,cash,non:t.total-cash,sel:t.sel.map(r=>({id:r.id,q:r.diff,harga:Math.abs(r.diff)*r.p.price})),reason:u.reason,doc:u.doc,status:'Menunggu approval'});
   S.mutasi.unshift({t:'Unloading barang',d:t.rows.map(r=>cvById(r.id).name+' sisa '+r.act).join(', '),time:'17:20',sign:'-'});
   S.ul=null; S.stack=S.stack.filter(e=>e.name!=='unloading'); go('ld-sukses',{kind:'Unloading',id,sub:'penjualan '+rp(t.total)+(t.sel.length?', ada selisih':'')});
 }
