@@ -2216,6 +2216,24 @@ SCR.overdue = () => ({note:'Data keterlambatan pembayaran untuk tim collection (
   </main>`});
 
 /* ---------- Target ---------- */
+/* Target SPV: target dan realisasi tiap sales yang dipegang, serta tiap toko (data fiktif, dalam juta rupiah). */
+const SPV_TGT={
+  elek:{unit:'Sell-out tim Oktober',tot:[286,400],sales:[['spg.rina','Sales Promotor Elektronik',214,300],['bantuan.eko','Promotor Bantuan Elektronik',98,200],['sales.budi','Sales Canvassing',48.2,80],['md.rangga','Sales Merchandising (MD)',36,80],['sales.dimas','Sales Taking Order',110.5,150]],
+    toko:[['Electronic City Kemang','Rina Marlina',128,180],['Best Denki Senayan City','Eko Prabowo',86,120],['Toko Sinar Jaya Elektronik','Budi Santoso',21,30],['Toko Makmur Abadi','Budi Santoso',15,25],['Toko Mega Elektronik','Dimas Prasetyo',52,70],['CV Sumber Rejeki Elektronik','Dimas Prasetyo',35,50]]},
+  mf:{unit:'Goal pencairan tim Oktober',tot:[17,150],sales:[['rea.nina','REA / SPG Multi Finance',5,60],['cbd.tono','CBD / REA Multi Finance',12,90]],
+    toko:[['BPR Mitra Usaha Fatmawati','Nina Safitri',5,60],['Agen Sejahtera Fatmawati','Tono Hidayat',7,50],['Agen Berkah Cilandak','Tono Hidayat',5,40]]}
+};
+function spvTarget(){
+  const D=U().menu==='spvM'?SPV_TGT.mf:SPV_TGT.elek, f=n=>'Rp'+String(n).replace('.',',')+' jt';
+  const bar=(a,t)=>`<div class="bar ${a/t<.5?'tan':''}" style="margin:6px 0 0"><i style="width:${Math.min(100,Math.max(3,a/t*100))}%"></i></div>`;
+  const row=(ic,t,sub,a,tg)=>`<div class="li" style="display:block"><div class="row between"><div class="row" style="gap:10px;min-width:0"><div class="ico-tile">${I(ic,18)}</div><div style="min-width:0"><div class="t">${esc(t)}</div><div class="s">${esc(sub)}</div></div></div>${chip(Math.round(a/tg*100)+'%',a/tg>=.7?'green':a/tg>=.5?'blue':'amber')}</div>
+    <div class="row between small" style="margin-top:8px"><span class="muted">Realisasi</span><span class="num"><b>${f(a)}</b> / ${f(tg)}</span></div>${bar(a,tg)}</div>`;
+  return `<div class="card"><div class="small muted">${D.unit}</div><div class="big-num num">${f(D.tot[0])} <span class="muted" style="font-size:15px;font-weight:600">/ ${f(D.tot[1])}</span></div><div class="bar" style="margin:10px 0"><i style="width:${D.tot[0]/D.tot[1]*100}%"></i></div></div>
+  <div class="sec-title">Target per sales <span class="small muted num">${D.sales.length} orang</span></div>
+  <div class="list">${D.sales.map(([u,l,a,t])=>row('user',USERS[u].name,l,a,t)).join('')}</div>
+  <div class="sec-title">Target per toko <span class="small muted num">${D.toko.length} ${U().menu==='spvM'?'lokasi':'toko'}</span></div>
+  <div class="list">${D.toko.map(([n,s,a,t])=>row('store',n,'Sales: '+s,a,t)).join('')}</div>`;
+}
 SCR.target = () => {
   const r=role();
   let main;
@@ -2232,7 +2250,7 @@ SCR.target = () => {
     <div class="card"><b>Target hari ini</b><div class="kv" style="margin-top:6px"><span>Target harian (prorata)</span><span class="num">${td.prorata} unit</span></div><div class="kv"><span>Sisa kemarin (carry forward)</span><span class="num">${td.carry} unit</span></div><div class="kv"><span>Total target hari ini</span><span class="num">${td.total} unit</span></div>
     <div class="row between small" style="margin-top:8px"><span>Terjual hari ini</span><span class="num"><b>${qd}</b> / ${td.total} unit</span></div>${bar(qd,td.total)}
     <p class="hint">Target harian dihitung dari target unit bulanan dibagi ${HARI_KERJA()} hari kerja. Kekurangan hari sebelumnya ditambahkan ke hari berikutnya.</p></div>`:''}`; }
-  else if(r==='spv') main=`<div class="card"><div class="small muted">Sell-out tim Oktober</div><div class="big-num num">Rp286 jt <span class="muted" style="font-size:15px;font-weight:600">/ Rp400 jt</span></div><div class="bar" style="margin:10px 0"><i style="width:71%"></i></div></div>`;
+  else if(r==='spv') main=spvTarget();
   else { const isC=r==='canvas'; main=`<div class="card"><div class="small muted">Penjualan Oktober</div><div class="big-num num">${isC?'Rp48,2 jt':'Rp214 jt'} <span class="muted" style="font-size:15px;font-weight:600">/ ${isC?'Rp80 jt':'Rp300 jt'}</span></div><div class="bar" style="margin:10px 0"><i style="width:${isC?60:71}%"></i></div>
     <div class="kv"><span>Quantity</span><span>${isC?'131 / 220 unit':'58 / 80 unit'}</span></div><div class="kv"><span>Akuisisi pelanggan baru</span><span>${isC?'3 / 5 toko':'41 / 60'}</span></div></div>
     <div class="card"><b>Target hari ini</b><div class="kv" style="margin-top:6px"><span>Target harian (prorata)</span><span class="num">${isC?'Rp3,1 jt':'Rp11,3 jt'}</span></div><div class="kv"><span>Sisa kemarin (carry forward)</span><span class="num">${isC?'Rp400 rb':'Rp700 rb'}</span></div><div class="kv"><span>Total target hari ini</span><span class="num">${isC?'Rp3,5 jt':'Rp12 jt'}</span></div>
