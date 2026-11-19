@@ -245,3 +245,43 @@ Semua butir lampiran masuk ke satu fase atau tercatat tidak berlaku.
   - Ditambahkan di putaran penutup: hero ink di panel promo, tagihan, transaksi, insentif, dan absensi; daftar cek aturan insentif; KeyValue di usulan toko; total pesanan dan menu "Aksi lain" di pesanan; konfirmasi dan alasan wajib untuk usulan toko dan klaim; blocker bersama untuk hapus kunjungan, task, brief, dan pertanyaan mitra; nada toast default untuk hapus; StatCard di Insentif dan Sinkron; sparkline target di grafik harian; titik berdenyut di Live tracking; kartu risiko di hero; bar bawah diturunkan dari NAV; ukuran sentuh 44px di layar sentuh.
   - Deviasi yang diterima (dengan alasan): judul halaman 18px di header, bukan 24px di badan halaman, karena header memegang judul; tab periode Overview tetap di kartu Sell-out; tabel di ponsel menampilkan empat kolom pertama dan sisanya di panel; panel di URL (`?id=`, `?new=1`) tidak dibuat karena butuh registri per panel; objek `paths` tidak dibuat karena NAV sudah satu sumber jalur; baris insight dan rekomendasi tidak dibuat karena tidak ada fitur itu di Sales App; filter workspace belum menjangkau leads, absensi, dan klaim; halaman tabel tidak disimpan per entri riwayat; pilihan tampilan antar sesi tidak disimpan.
   - Pembaruan status per butir di keempat lampiran audit tidak ditulis ulang satu per satu. Sumber kebenaran status adalah laporan verifikasi ditambah daftar perbaikan penutup di atas.
+
+## Slice MOM 18 Nov: loading, unloading, dan approval barang bawaan canvasing
+
+Dikerjakan 19 Nov 2026 di `feature/cv-loading-unloading-approval`. Sumber: MOM gabungan
+Notes 1 + Notes 2 tanggal 18 Nov 2026 (`MOM_SIM_Group_Sales_App_18Nov2026.docx` di folder induk).
+
+Keadaan sebelum slice ini: istilah loading dan unloading tidak ada sama sekali di mockup
+(lima kemunculan kata "loading" semuanya spinner CSS dan pencarian GPS, bukan muat barang).
+Yang ada hanya layar `stok` (Stok bawaan) dengan tombol Muat, Retur, dan Sesuaikan, plus
+`stok-rekap` yang menghitung penjualan dari barang yang dibawa pulang. Tidak ada approval
+supervisor, tidak ada deposit ganti rugi, tidak ada serah terima uang.
+
+### Lingkup slice ini
+
+1. Loading sebagai aktivitas resmi, bukan sekadar tombol Muat. Sales mengajukan barang
+   bawaan lewat tiga mekanisme sesuai MOM: foto nota, input manual, dan scan barcode per
+   produk. Pengajuan masuk status Menunggu approval.
+2. Penghalang jalan. Sales tidak bisa check-in ke toko sebelum pengajuan loading disetujui
+   supervisor. Ini bunyi MOM "barang tidak bisa dibawa sebelum approve".
+3. Approval supervisor. Role SPV melihat pengajuan, lalu menyetujui atau menolak dengan
+   alasan wajib. Tolak berarti perkara ditutup dan sales harus mengajukan baru, sesuai
+   Notes 2 "kalau reject case closed".
+4. Unloading sebagai aktivitas di akhir hari, juga lewat approval supervisor.
+5. Rekonsiliasi unloading. Barang dibawa harus habis terurai menjadi terjual, retur, dan
+   dikembalikan. Selisih yang tidak terurai memunculkan deposit ganti rugi.
+6. Serah terima uang setelah unloading, dengan dua kartu yang diminta MOM: uang dipegang
+   dari penjualan dan uang aset dari barang yang dibawa.
+
+### Di luar lingkup slice ini (menunggu giliran)
+
+- Tipe pembayaran cash dan non-cash beserta wajib unggah bukti. Menyentuh alur input
+  penjualan yang terpisah, jadi dipisah supaya slice ini tidak melebar.
+- Catatan Notes 2 yang terpotong di bagian loading dan unloading. Keputusan pengguna
+  19 Nov 2026: dilewati dulu sampai catatan utuh diterima dari pencatat.
+
+### Catatan untuk sesi berikutnya
+
+Repo saudara `../docs` tidak ter-clone di mesin ini, jadi urutan baca `docs/INDEX.md`
+pada AGENTS.md tidak bisa diikuti. MOM dari pengguna dipakai sebagai acuan spesifikasi.
+Perlu `docs/scripts/workspace-setup.sh` kalau requirement kanonis dibutuhkan.
