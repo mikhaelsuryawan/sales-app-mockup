@@ -1472,7 +1472,7 @@ SCR.penjualan = p => {
     ${tk.length?`<div class="sec-title">Ringkasan per toko</div><div class="list">${tk.map(k=>`<div class="li"><div class="ico-tile ${k.sel?'amber':''}">${I('store',20)}</div><div class="grow"><div class="t">${esc(k.t)}</div><div class="s">${k.n} transaksi · ${k.u} unit${k.sel?' · termasuk selisih unloading':''}</div></div><b class="num">${rpShort(k.tot)}</b></div>`).join('')}</div>`:''}
     ${list.length?groups.map(g=>`<div class="sec-title">${dayLabel(g)}<span class="small muted num">${rpShort(list.filter(x=>(x.d||0)===g).reduce((s,x)=>s+x.total,0))}</span></div><div class="list">${list.filter(x=>(x.d||0)===g).map(row).join('')}</div>`).join('')
       :`<div class="card" style="margin-top:14px"><div class="empty" style="padding:20px">Belum ada penjualan di periode ini.</div></div>`}
-  </main><footer class="actions"><button class="btn ${isLocked()?'locked':''}" onclick="act(()=>startSale())">${I(isLocked()?'lock':'plus',20)} ${r==='canvas'?'Jual dari stok bawaan':'Catat penjualan'}</button></footer>`};
+  </main>`};
 };
 SCR['jual-detail'] = p => {
   const list=salesList(), x=list.find(s=>s.id===p.id);
