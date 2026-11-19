@@ -1824,7 +1824,7 @@ SCR.loading = p => {
     : `<div class="card" style="margin-top:14px"><div class="empty" style="padding:16px">Belum ada produk. Scan nota, scan barcode, atau input manual.</div></div>`;
   const hist = mine.length?`<div class="sec-title">Loading hari ini</div><div class="list">${mine.map(x=>`<div class="li"><div class="ico-tile">${I('box',18)}</div><div class="grow"><div class="t">${x.id}</div><div class="s">${x.time} · ${x.items.length} produk · ${rpShort(x.val)}</div></div>${chip(x.status,ST_APR[x.status])}</div>`).join('')}</div>`:'';
   return {note:'<b>Loading Barang.</b> Tiga cara menambah produk: scan nota (hasil langsung masuk daftar beserta quantity, tanpa pilihan galeri), scan barcode (quantity 1, produk yang sama menambah 1), dan input manual (cari nama atau kode produk, tekan + untuk masuk daftar). Loading dikirim ke Team Leader untuk approval.',
-  html:`${appbar('Loading barang')}<main class="content">${addCard('ld','loading')}${list}${hist}</main>${L.length?`<footer class="actions"><div class="grow"><div class="small muted">${L.reduce((a,x)=>a+x.q,0)} unit</div><b class="num" style="font-size:17px">${rp(v)}</b></div><button class="btn" style="width:auto" onclick="ldKirim()">Kirim loading</button></footer>`:''}`};
+  html:`${appbar('Loading barang')}<main class="content">${addCard('ld','loading')}${list}${hist}</main>${L.length?`<footer class="actions"><div class="grow"><div class="small muted">${L.reduce((a,x)=>a+x.q,0)} unit</div><b class="num" style="font-size:17px">${rp(v)}</b></div><button class="btn" style="width:auto" onclick="ldKirim()">Submit</button></footer>`:''}`};
 };
 function ldKirim(){
   const d=S.ld; if(!d.items.length) return;
@@ -1852,8 +1852,9 @@ SCR.unloading = p => {
   html:`${appbar('Unloading barang')}<main class="content">
     ${addCard('ul','unloading')}
     <div class="sec-title">Daftar produk <button class="lnk-del" onclick="S.ul=ulBlank();render(false,true)">Kosongkan</button></div>
-    <div class="list">${t.rows.map(r=>`<div class="li"><div class="grow"><div class="t">${esc(r.p.name)} ${u.tag[r.id]?chip(u.tag[r.id]==='OCR'?'Scan nota':u.tag[r.id]==='Scan'?'Scan barcode':'Manual',u.tag[r.id]==='OCR'?'blue':u.tag[r.id]==='Scan'?'tan':''):''}</div><div class="s">Loading ${r.ld} · tercatat terjual ${r.sold} · sisa sistem ${r.exp}</div>${r.diff!==0?`<div class="small" style="margin-top:4px;color:var(--red);font-weight:700">Selisih ${r.diff>0?'kurang':'lebih'} ${Math.abs(r.diff)} unit</div>`:''}</div>
-      <div><div class="small muted" style="text-align:center">Sisa</div><div class="stepper"><button onclick="ulStep('${r.id}',-1)" aria-label="Kurangi">${I('minus',18,2.2)}</button><span class="num">${r.act}</span><button onclick="ulStep('${r.id}',1)" aria-label="Tambah">${I('plus',18,2.2)}</button></div></div></div>`).join('')}</div>
+    ${t.rows.map(r=>`<div class="card" style="margin-bottom:10px;${r.diff!==0?'box-shadow:inset 0 0 0 1.5px var(--red)':''}"><div class="row between"><div class="grow"><b>${esc(r.p.name)}</b><div class="small muted">${r.p.sku}</div></div>${u.tag[r.id]?chip(u.tag[r.id]==='OCR'?'Scan nota':u.tag[r.id]==='Scan'?'Scan barcode':'Manual',u.tag[r.id]==='OCR'?'blue':u.tag[r.id]==='Scan'?'tan':''):''}</div>
+      <div class="stat3" style="margin-top:10px"><div style="background:var(--blue-50)"><small>Loading</small><b class="num" style="font-size:22px;color:var(--blue-700)">${r.ld}</b></div><div style="background:var(--green-50)"><small>Terjual</small><b class="num" style="font-size:22px;color:var(--green)">${r.terjual}</b></div><div style="background:var(--amber-50,#FFF4E5)"><small>Sisa</small><div class="stepper" style="margin-top:2px;justify-content:center"><button onclick="ulStep('${r.id}',-1)" aria-label="Kurangi">${I('minus',16,2.2)}</button><span class="num" style="font-size:18px;font-weight:800;min-width:26px;text-align:center">${r.act}</span><button onclick="ulStep('${r.id}',1)" aria-label="Tambah">${I('plus',16,2.2)}</button></div></div></div>
+      <div class="small muted" style="margin-top:8px">Sisa sistem ${r.exp}${r.diff!==0?` · <b style="color:var(--red)">selisih ${r.diff>0?'kurang':'lebih'} ${Math.abs(r.diff)} unit</b>`:''}</div></div>`).join('')}
     <div class="sec-title">Penjualan</div>
     <div class="card"><div class="kv"><span>Total penjualan</span><span class="num" style="font-size:17px;color:var(--ink);font-weight:800">${rp(t.total)}</span></div>
       <label class="field" style="margin:12px 0 0"><span>Cash</span><input class="input" data-num inputmode="numeric" value="${numStr(t.cash)}" oninput="ulCash(this.value)"></label>
@@ -1862,7 +1863,7 @@ SCR.unloading = p => {
       <p class="hint">Non Cash dihitung otomatis dari total dikurangi Cash.</p></div>
     ${selBlock}
     ${hist}
-  </main><footer class="actions"><button class="btn" onclick="ulSubmit()">Kirim unloading</button></footer>`};
+  </main><footer class="actions"><button class="btn" onclick="ulSubmit()">Submit</button></footer>`};
 };
 function ulSubmit(){
   const u=S.ul, t=ulSum();
