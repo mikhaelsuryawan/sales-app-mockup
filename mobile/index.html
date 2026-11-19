@@ -872,7 +872,7 @@ SCR.home = () => {
   // MOM 12 Nov 2026: menu webview SIM SIAP untuk semua role
   menus=[...menus,['SIM SIAP','globe',"go('sim-siap')"]];
   let extra='', top='';
-  if(r==='spv') extra = spvDash();
+  if(r==='spv') top = spvDash();
   else { const fd=fieldDash().split('<!--SPLIT-->'); top=fd[0]; extra=fd[1]||''; }
   return {dark:true, tab:'home', note: (locked&&!att().out ? '<b>Beranda sebelum absen.</b> Semua menu bisa dibuka untuk dilihat, tapi menu bergembok (catat/ubah data) baru bisa dipakai setelah absen masuk.' : 'Beranda. Ringkasan absen, menu sesuai role, dan pencapaian hari ini.')+(r==='spv'?'':' <b>MOM 12 Nov:</b> grafik Capaian hari ini menunjukkan pekerjaan (kunjungan dan tugas aktivitas, atau leads untuk REA dan CBD) dan task dari Team Leader. Angkanya mengikuti data yang kamu kerjakan di aplikasi.')+' Menu <b>SIM SIAP</b> membuka portal SIM SIAP di dalam aplikasi (MOM 12 Nov).',
   html:`<main class="content flush">
