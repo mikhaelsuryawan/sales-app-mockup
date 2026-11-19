@@ -620,7 +620,7 @@ function freshState(){
     canvasArea:{'sales.budi':['c1','c2','c3','c4']}, cabang:'Fatmawati', sharePrice:{}, vform:{}, skuFoto:{},
     sku:{t1:null,t2:null}, disp:[], dispDone:false, dispDraft:false, sf:null, 
     fm:{stok:{},extra:[],stokDone:false,foto:{},facing:0,tasks:[]}, posm:{}, mitraLog:{}, cbdDone:false, notifOn:{in:true,out:true}, sound:'Bawaan',
-    bawa:{rc18:8,bl11:6,st3:9,kp16:5,ds72:2}, kembali:{}, muatInv:[], receipt:false,
+    bawa:{rc18:8,bl11:6,st3:9,kp16:5,ds72:2}, kembali:{}, muatInv:[], receipt:false, unload:{terjual:0,retur:0,kembali:0,uang:''},
     shareClient:{tv50:6,tv43:12}, shareComp:[{cb:'ARUNIKA',brand:'Samsung',path:'TV/Smart TV',nama:'Samsung Crystal 55"',qty:14,harga:0},{cb:'ARUNIKA',brand:'LG',path:'TV/Smart TV/Google TV',nama:'LG UHD 50"',qty:10,harga:0},{cb:'ARUNIKA',brand:'Samsung',path:'Kulkas/2 Pintu/Inverter',nama:'Samsung 2 Pintu 300 L',qty:5,harga:0}], shareBrand:'ARUNIKA', sharePath:['TV'], shareState:null,
     quizDone:false, quizScore:null, surveyDone:false,
     myRequests:[], newToko:[],
@@ -823,14 +823,14 @@ SCR['enroll-done'] = () => { S.enrolled[S.user]=true; return {note:'Wajah refere
 const MENUS = {
   spg:[['Catat penjualan','bag',"act(()=>startSale())",1,'jual'],['Riwayat penjualan','file',"tab('penjualan')"],['SKU display','grid',"go('sku')",0,'sku'],['Display share','pie',"go('share')",0,'share'],['Stock opname','box',"go('fm-stok')",0,'stok'],['Campaign & POSM','image',"go('posm')",0,'posm'],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   mobile:[['Catat penjualan','bag',"act(()=>startSale())",1,'jual'],['Riwayat penjualan','file',"tab('penjualan')"],['SKU display','grid',"go('sku')",0,'sku'],['Display share','pie',"go('share')",0,'share'],['Stock opname','box',"go('fm-stok')",0,'stok'],['Campaign & POSM','image',"go('posm')",0,'posm'],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
-  canvas:[['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  canvas:[['Loading barang','box',"go('cv-loading')",1],['Unloading barang','retur',"go('cv-unloading')"],['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   order:[['Kunjungan','route',"tab('kunjungan')"],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
   leads:[['Leads','users',"act(()=>tab('leads'))",1],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   fmcg:[['Buat jadwal','route',"act(()=>go('kunjungan-form'))",1],['Kunjungan','route',"tab('kunjungan')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
   cbd:[['Leads','users',"act(()=>tab('leads'))",1],['Mitra saya','user',"act(()=>go('mitra'))",1],['Task Team Leader','check',"act(()=>go('cbd-task'))",1],['Target','target',"go('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   arco:[['Assign leads','users',"go('assign')"],['Semua leads','file',"go('leads-all')"],['Tim saya','user',"tab('tim')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   bantuan:[['Catat penjualan','bag',"act(()=>startSale())",1],['Riwayat penjualan','file',"tab('penjualan')"],['Kunjungan','route',"tab('kunjungan')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
-  spv:[['Approval','check',"go('approval')"],['Assign canvasser','route',"go('assign-canvas')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tugaskan tim','route',"act(()=>go('kunjungan-form',{spv:1}))",1],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Kunjungan','calendar',"tab('kunjungan')"],['Quiz','quiz',"go('quiz')"]]
+  spv:[['Approval','check',"go('approval')"],['Approval barang bawaan','box',"go('cv-approval')"],['Assign canvasser','route',"go('assign-canvas')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tugaskan tim','route',"act(()=>go('kunjungan-form',{spv:1}))",1],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Kunjungan','calendar',"tab('kunjungan')"],['Quiz','quiz',"go('quiz')"]]
 };
 /* Super Admin: semua menu mobile dari semua role, tanpa duplikat nama. */
 MENUS.super=(()=>{ const seen=new Set(), out=[]; Object.values(MENUS).forEach(l=>l.forEach(m=>{ if(!seen.has(m[0])){ seen.add(m[0]); out.push(m); } })); return out; })();
@@ -1266,6 +1266,18 @@ function fmGate(fn){ act(()=>{ if(role()==='fmcg'&&!visitOpen()){ sheet(`<h3 sty
     <button class="btn" onclick="closeSheet();visitEntry()">Pilih toko</button><button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Nanti</button>`); return; } fn(); }); }
 function closeVisit(v,time,dur){ v.cout=time; v.dur=dur; v.status='Selesai'; v.auto=true; v.pOut=v.pOut||0; }
 function startCheckin(id){
+  /* MOM 18 Nov: sales canvasing tidak bisa jalan sebelum pengajuan loading disetujui
+     supervisor. Penghalang ini kenyamanan di layar; backend tetap yang memutuskan. */
+  if(ldBlokir()){
+    const x=ldLast('loading');
+    const pesan = !x ? 'Kamu belum mengajukan loading barang hari ini. Ajukan dulu, lalu tunggu supervisor menyetujui.'
+      : x.status==='Menunggu approval' ? 'Pengajuan loading kamu masih menunggu persetujuan supervisor. Barang belum boleh dibawa.'
+      : 'Pengajuan loading kamu ditolak'+(x.alasan?' dengan alasan: '+esc(x.alasan):'')+'. Buat pengajuan baru untuk lanjut.';
+    sheet(`<h3 style="font-size:18px;font-weight:800">Loading belum disetujui</h3><p class="muted small" style="margin:6px 0 16px;line-height:1.5">${pesan}</p>
+    <button class="btn" onclick="closeSheet();go('cv-loading')">Buka loading barang</button>
+    <button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Mengerti</button>`);
+    return;
+  }
   const open=visitOpen();
   if(open&&open.id!==id){
     const out=role()==='fmcg'?`fmOut('${open.id}')`:`go('kunjungan-foto',{id:'${open.id}',mode:'out',remote:true})`;
@@ -2205,6 +2217,131 @@ function taskNext(i){ const L=skuTasks().map(x=>({...x})), x=L[i]; x.st=TASK_FLO
 
 /* ---------- Canvassing ---------- */
 const stockValue = () => CANVAS_PRODUCTS.reduce((s,p)=>s+S.stock[p.id].good*p.price,0);
+
+/* ---------- Loading & unloading canvasing (MOM 18 Nov) ----------
+   Loading: sales mengajukan barang bawaan dari gudang, supervisor menyetujui dulu.
+   Sebelum disetujui, sales tidak bisa check-in ke toko mana pun.
+   Unloading: pengembalian di akhir hari, juga lewat approval, dan jumlahnya harus
+   terurai habis menjadi terjual, retur, dan dikembalikan. Selisih memunculkan deposit.
+   Data pengajuan disimpan di state bersama supaya dashboard dan role SPV ikut melihat. */
+const LD_MEKANISME=[['nota','Foto nota'],['manual','Input manual'],['barcode','Scan barcode']];
+const ldList=()=>shRead('loadReq',[]);
+const ldSave=l=>shSet('loadReq',l);
+const ldMine=jenis=>ldList().filter(x=>x.u===fmUk()&&x.jenis===jenis);
+/* Pengajuan yang menentukan keadaan sekarang adalah yang terakhir diajukan. */
+const ldLast=jenis=>{const l=ldMine(jenis);return l.length?l[l.length-1]:null;};
+const ldApproved=jenis=>{const x=ldLast(jenis);return !!x&&x.status==='Disetujui';};
+/* Penghalang check-in: hanya untuk role canvasing, dan hanya kalau loading belum disetujui. */
+const ldBlokir=()=>role()==='canvas'&&!ldApproved('loading');
+function ldAjukan(jenis,items,mek){
+  const l=ldList();
+  const total=items.reduce((s,i)=>s+i.q*(prodById(i.id)?prodById(i.id).price:0),0);
+  l.push({id:'ld'+Date.now(),u:fmUk(),jenis,mek,items,total,status:'Menunggu approval',
+    tgl:S.demo&&S.demo.jam?S.demo.jam:'Hari ini',alasan:''});
+  ldSave(l);
+}
+function ldPutus(id,setuju,alasan){
+  const l=ldList(), x=l.find(y=>y.id===id);
+  if(!x) return;
+  x.status=setuju?'Disetujui':'Ditolak';
+  x.alasan=alasan||'';
+  ldSave(l);
+}
+/* Rekonsiliasi unloading: barang dibawa harus habis terurai.
+   Sisa yang tidak terurai menjadi dasar deposit ganti rugi. */
+const ldBawa=()=>CANVAS_PRODUCTS.reduce((s,p)=>s+(S.bawa[p.id]||0),0);
+function ldRekon(){
+  const u=S.unload||{};
+  const bawa=ldBawa();
+  const terjual=+u.terjual||0, retur=+u.retur||0, kembali=+u.kembali||0;
+  const sisa=bawa-terjual-retur-kembali;
+  const nilai=CANVAS_PRODUCTS.length?Math.round(stockValue()/Math.max(1,bawa)):0;
+  return {bawa,terjual,retur,kembali,sisa,habis:sisa===0,deposit:sisa>0?sisa*nilai:0};
+}
+/* Layar loading: pengajuan barang bawaan dengan tiga mekanisme (MOM 18 Nov). */
+SCR['cv-loading'] = p => {
+  const mek=p.mek||'manual', x=ldLast('loading'), items=S.ldDraft||(S.ldDraft=CANVAS_PRODUCTS.map(q=>({id:q.id,q:0})));
+  const totUnit=items.reduce((s,i)=>s+i.q,0);
+  const totNilai=items.reduce((s,i)=>s+i.q*prodById(i.id).price,0);
+  const over=totNilai>canvasLimit();
+  const menunggu=!!x&&x.status==='Menunggu approval';
+  return {note:'Loading barang (MOM 18 Nov): sales mengajukan barang yang dibawa dari gudang lewat foto nota, input manual, atau scan barcode. Supervisor menyetujui dulu; sebelum disetujui, check-in ke toko diblokir. Pengajuan yang ditolak berarti perkara ditutup, sales membuat pengajuan baru.',
+  html:`${appbar('Loading barang')}<main class="content">
+    ${x?`<div class="card" style="margin-bottom:12px"><div class="row between"><div class="grow"><b>Pengajuan terakhir</b><div class="small muted">${esc(x.tgl)} · ${x.items.reduce((s,i)=>s+i.q,0)} unit · ${rp(x.total)}</div></div>${chip(x.status,x.status==='Disetujui'?'green':x.status==='Ditolak'?'red':'amber')}</div>${x.alasan?`<div class="small" style="margin-top:8px;color:var(--red)">Alasan: ${esc(x.alasan)}</div>`:''}</div>`:''}
+    ${menunggu?`<div class="banner amber" style="margin-bottom:12px">${I('alert',18)}<span>Menunggu persetujuan supervisor. Barang belum boleh dibawa dan check-in masih diblokir.</span></div>`:''}
+    ${ldApproved('loading')?`<div class="banner green" style="margin-bottom:12px">${I('check',18)}<span>Loading disetujui. Kamu sudah bisa check-in ke toko.</span></div>`:''}
+    <div class="field"><span>Cara menambah barang</span><div class="opts">${LD_MEKANISME.map(([v,t])=>`<button class="opt ${mek===v?'on':''}" onclick="setP({mek:'${v}'})">${t}</button>`).join('')}</div>
+      <div class="hint">${mek==='nota'?'Foto nota gudang dibaca OCR, daftar barang terisi otomatis lalu bisa dikoreksi.':mek==='barcode'?'Scan barcode tiap produk; jumlah bertambah satu per scan.':'Isi jumlah tiap produk secara manual.'}</div></div>
+    ${mek==='nota'?`<div class="thumbs" style="margin-bottom:12px">${photoSlot('Foto nota gudang',0,"act(()=>ldOcrNota())")}</div>`:''}
+    ${mek==='barcode'?`<button class="btn sec" style="margin-bottom:12px" onclick="act(()=>ldScan())">${I('barcode',18)} Scan barcode produk</button>`:''}
+    <div class="list">${items.map((i,ix)=>`<div class="li"><div class="grow"><div class="t">${esc(prodById(i.id).name)}</div><div class="s num">${rp(prodById(i.id).price)}</div></div><div class="stepper"><button onclick="ldQty(${ix},-1)" aria-label="Kurangi ${esc(prodById(i.id).name)}">${I('minus',18,2.2)}</button><span class="num">${i.q}</span><button onclick="ldQty(${ix},1)" aria-label="Tambah ${esc(prodById(i.id).name)}">${I('plus',18,2.2)}</button></div></div>`).join('')}</div>
+    <div class="card" style="margin-top:12px"><div class="kv"><span>Total unit</span><span class="num">${totUnit}</span></div><div class="kv"><span>Nilai barang</span><span class="num">${rp(totNilai)}</span></div><div class="kv"><span>Limit per hari</span><span class="num">${rp(canvasLimit())}</span></div></div>
+    ${over?`<div class="banner red" style="margin-top:12px">${I('alert',18)}<span>Nilai barang melebihi limit per hari. Kurangi jumlah dulu.</span></div>`:''}
+    <div id="lderr"></div>
+  </main><footer class="actions"><button class="btn" ${over||menunggu?'disabled':''} onclick="ldSubmit('${mek}')">${menunggu?'Menunggu supervisor':'Ajukan ke supervisor'}</button></footer>`}; };
+function ldQty(ix,d){ const it=S.ldDraft[ix]; it.q=Math.max(0,it.q+d); render(false,true); }
+function ldOcrNota(){ S.ldDraft=CANVAS_PRODUCTS.map((q,i)=>({id:q.id,q:[4,2,3,0,1][i]||0})); render(false,true); toast('Nota terbaca, daftar barang terisi','camera'); }
+function ldScan(){ const it=S.ldDraft[Math.floor(Math.random()*S.ldDraft.length)]; it.q++; render(false,true); toast(prodById(it.id).name+' ditambah dari scan','barcode'); }
+function ldSubmit(mek){
+  const items=(S.ldDraft||[]).filter(i=>i.q>0);
+  if(!items.length){ $('#lderr').innerHTML='<div class="err">Isi jumlah minimal satu produk sebelum mengajukan.</div>'; return; }
+  act(()=>{ ldAjukan('loading',items,mek); S.ldDraft=null; render(false,true); toast('Pengajuan loading dikirim ke supervisor'); });
+}
+
+/* Layar unloading: pengembalian akhir hari, rekonsiliasi, lalu serah terima uang. */
+SCR['cv-unloading'] = () => {
+  const r=ldRekon(), x=ldLast('unloading');
+  const menunggu=!!x&&x.status==='Menunggu approval';
+  const fld=(k,label,hint)=>`<label class="field"><span>${label}</span><input class="input num" inputmode="numeric" value="${(S.unload||{})[k]||0}" oninput="ldUnSet('${k}',this.value)"><div class="hint">${hint}</div></label>`;
+  return {note:'Unloading barang (MOM 18 Nov): pengembalian barang di akhir hari lewat persetujuan supervisor. Jumlah yang dibawa harus habis terurai menjadi terjual, retur, dan dikembalikan. Sisa yang tidak terurai memunculkan deposit ganti rugi. Setelah itu ada serah terima uang: uang dipegang dari penjualan dan uang aset dari barang yang dibawa.',
+  html:`${appbar('Unloading barang')}<main class="content">
+    ${x?`<div class="card" style="margin-bottom:12px"><div class="row between"><div class="grow"><b>Pengajuan unloading</b><div class="small muted">${esc(x.tgl)}</div></div>${chip(x.status,x.status==='Disetujui'?'green':x.status==='Ditolak'?'red':'amber')}</div>${x.alasan?`<div class="small" style="margin-top:8px;color:var(--red)">Alasan: ${esc(x.alasan)}</div>`:''}</div>`:''}
+    <div class="card" style="margin-bottom:12px"><div class="kv"><span>Barang dibawa</span><span class="num">${r.bawa} unit</span></div></div>
+    ${fld('terjual','Terjual','Unit yang laku ke toko.')}
+    ${fld('retur','Retur','Barang terjual yang dikembalikan customer.')}
+    ${fld('kembali','Dikembalikan ke gudang','Sisa yang dibawa pulang.')}
+    <div class="card" style="margin-top:4px"><div class="kv"><span>Belum terurai</span><span class="num" style="color:${r.habis?'var(--green)':'var(--red)'}">${r.sisa} unit</span></div></div>
+    ${r.sisa<0?`<div class="banner red" style="margin-top:12px">${I('alert',18)}<span>Jumlahnya melebihi barang yang dibawa. Periksa lagi isiannya.</span></div>`:''}
+    ${r.sisa>0?`<div class="banner red" style="margin-top:12px">${I('alert',18)}<span>Ada ${r.sisa} unit yang tidak terurai. Sales wajib deposit ganti rugi sebesar <b>${rp(r.deposit)}</b>.</span></div>`:''}
+    ${r.habis?`<div class="banner green" style="margin-top:12px">${I('check',18)}<span>Barang habis terurai. Lanjut ke serah terima uang.</span></div>`:''}
+    <div class="sec-title">Serah terima uang</div>
+    <label class="field"><span>Uang yang dipegang sekarang</span><input class="input num" inputmode="numeric" placeholder="0" value="${(S.unload||{}).uang||''}" oninput="ldUnSet('uang',this.value)"><div class="hint">Nominal uang tunai yang diserahkan ke kantor.</div></label>
+    <div class="stat3" style="grid-template-columns:1fr 1fr"><div style="background:var(--green-50)"><small>Uang dipegang dari penjualan</small><b class="num" style="color:var(--green)">${rp((+(S.unload||{}).uang)||0)}</b></div><div style="background:var(--blue-50)"><small>Uang aset dari barang dibawa</small><b class="num">${rp(stockValue())}</b></div></div>
+    <div id="unerr"></div>
+  </main><footer class="actions"><button class="btn" ${menunggu?'disabled':''} onclick="ldUnSubmit()">${menunggu?'Menunggu supervisor':'Ajukan unloading'}</button></footer>`}; };
+function ldUnSet(k,v){ S.unload=S.unload||{}; S.unload[k]=k==='uang'?v.replace(/\D/g,''):Math.max(0,parseInt(v)||0); render(false,true); }
+function ldUnSubmit(){
+  const r=ldRekon();
+  if(!r.habis){ $('#unerr').innerHTML='<div class="err">Barang harus habis terurai menjadi terjual, retur, dan dikembalikan sebelum unloading diajukan.</div>'; return; }
+  if(!((S.unload||{}).uang)){ $('#unerr').innerHTML='<div class="err">Isi nominal uang yang diserahkan.</div>'; return; }
+  act(()=>{ ldAjukan('unloading',CANVAS_PRODUCTS.map(p=>({id:p.id,q:S.bawa[p.id]||0})).filter(i=>i.q>0),'manual'); render(false,true); toast('Pengajuan unloading dikirim ke supervisor'); });
+}
+
+/* Layar supervisor: memutuskan pengajuan loading dan unloading bawahan. */
+SCR['cv-approval'] = () => {
+  const l=ldList().filter(x=>x.status==='Menunggu approval');
+  const riwayat=ldList().filter(x=>x.status!=='Menunggu approval').slice(-6).reverse();
+  const kartu=x=>`<div class="card" style="margin-bottom:10px"><div class="row between"><div class="grow"><b>${x.jenis==='loading'?'Loading':'Unloading'} · ${esc(x.u)}</b><div class="small muted">${esc(x.tgl)} · ${x.items.reduce((s,i)=>s+i.q,0)} unit · ${rp(x.total)} · ${esc((LD_MEKANISME.find(m=>m[0]===x.mek)||['','manual'])[1])}</div></div>${chip(x.status,x.status==='Disetujui'?'green':x.status==='Ditolak'?'red':'amber')}</div>
+    <div class="list" style="margin-top:8px">${x.items.map(i=>`<div class="li"><div class="grow"><div class="t">${esc(prodById(i.id)?prodById(i.id).name:i.id)}</div></div><b class="num">${i.q}</b></div>`).join('')}</div>
+    ${x.status==='Menunggu approval'?`<div class="row" style="gap:8px;margin-top:10px"><button class="btn sec sm grow" onclick="ldSetuju('${x.id}')">${I('check',18)} Setujui</button><button class="btn ghost sm grow" onclick="ldTolakSheet('${x.id}')">${I('alert',18)} Tolak</button></div>`:x.alasan?`<div class="small" style="margin-top:8px;color:var(--red)">Alasan: ${esc(x.alasan)}</div>`:''}</div>`;
+  return {note:'Approval barang bawaan (MOM 18 Nov). Supervisor menyetujui atau menolak pengajuan loading dan unloading. Menolak wajib memakai alasan, dan pengajuan yang ditolak berarti perkara ditutup: sales harus membuat pengajuan baru.',
+  html:`${appbar('Approval barang bawaan')}<main class="content">
+    ${l.length?`<div class="sec-title">Menunggu keputusan</div>${l.map(kartu).join('')}`:`<div class="empty"><b>Tidak ada pengajuan</b><div class="small muted" style="margin-top:4px">Pengajuan loading dan unloading dari sales muncul di sini.</div></div>`}
+    ${riwayat.length?`<div class="sec-title">Sudah diputuskan</div>${riwayat.map(kartu).join('')}`:''}
+  </main>`}; };
+function ldSetuju(id){ act(()=>{ ldPutus(id,true,''); render(false,true); toast('Pengajuan disetujui'); }); }
+function ldTolakSheet(id){
+  sheet(`<h3 style="font-size:18px;font-weight:800">Tolak pengajuan</h3><p class="muted small" style="margin:6px 0 12px;line-height:1.5">Pengajuan yang ditolak ditutup. Sales harus membuat pengajuan baru untuk bisa jalan.</p>
+  <label class="field"><span>Alasan penolakan *</span><input class="input" id="ldalasan" placeholder="contoh: jumlah melebihi kebutuhan rute"></label>
+  <button class="btn" onclick="ldTolak('${id}')">Tolak pengajuan</button>
+  <button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Batal</button>`);
+}
+function ldTolak(id){
+  const a=val('ldalasan');
+  if(!a){ toast('Isi alasan penolakan dulu','alert'); return; }
+  act(()=>{ ldPutus(id,false,a); closeSheet(); render(false,true); toast('Pengajuan ditolak'); });
+}
+
 SCR['stok-invoice'] = p => {
   const L=S.muatInv, tot=L.reduce((s,l)=>s+l.q*l.price,0), over=stockValue()+tot>canvasLimit();
   return {note:'Stok bawaan dari foto invoice (MOM 11.1). OCR membuat daftar produk; qty dan harga bisa diubah.',
