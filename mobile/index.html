@@ -893,6 +893,17 @@ SCR.home = () => {
     </div>
   </main>`};
 };
+/* Kartu Penjualan hari ini di Beranda: pie (donut) pencapaian dan tiga data: unit terjual, amount terjual, target. */
+function salesPie({pct,unit,amount,target,sub}){
+  const R=40, C=2*Math.PI*R, p=Math.max(0,Math.min(1,pct||0)), id='sp'+(++_gid);
+  return `<div class="card"><div class="row" style="gap:16px;align-items:center">
+    <div style="position:relative;width:112px;height:112px;flex:none" role="img" aria-label="Pencapaian ${Math.round(p*100)} persen"><svg viewBox="0 0 100 100" width="112" height="112" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#21CFF7"/><stop offset="1" stop-color="#3466FF"/></linearGradient></defs><circle cx="50" cy="50" r="${R}" fill="none" stroke="#EFA477" stroke-opacity=".45" stroke-width="16"/><circle cx="50" cy="50" r="${R}" fill="none" stroke="url(#${id})" stroke-width="16" stroke-dasharray="${(C*p).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 50 50)"/></svg><div style="position:absolute;inset:0;display:grid;place-items:center;text-align:center"><div><b class="num" style="font-size:22px">${Math.round(p*100)}%</b><div class="small muted" style="font-size:10.5px">tercapai</div></div></div></div>
+    <div class="grow" style="display:grid;gap:10px;min-width:0">
+      <div class="row" style="gap:8px"><i style="width:10px;height:10px;border-radius:3px;background:#3466FF;flex:none"></i><div><div class="small muted">Total unit terjual</div><b class="num">${unit}</b></div></div>
+      <div class="row" style="gap:8px"><i style="width:10px;height:10px;border-radius:3px;background:#12875F;flex:none"></i><div><div class="small muted">Total amount terjual</div><b class="num">${amount}</b></div></div>
+      <div class="row" style="gap:8px"><i style="width:10px;height:10px;border-radius:3px;background:#EFA477;flex:none"></i><div><div class="small muted">Total target</div><b class="num">${target}</b></div></div>
+    </div></div>${sub?`<div class="small muted" style="margin-top:10px">${sub}</div>`:''}</div>`;
+}
 function fieldDash(){
   const r=role();
   if(r==='fmcg') return `<div class="banner blue">${I('grid',18)}<span>Check-in di tab ${fmAktLabel()}, lalu kerjakan pekerjaan di halaman yang sama. Tanpa penjualan.</span></div>
@@ -916,16 +927,11 @@ function fieldDash(){
   if(isSpg()&&aktCfg().dasar==='qty'){ const q=list.reduce((s,x)=>s+x.items.reduce((a,i)=>a+i.q,0),0), o=visitOpen(), td=tgtDaily().total||1, need=aktCfg().checkin==='Ya';
     return `${o||!need?'':`<button class="banner amber" style="margin-top:12px;width:100%;text-align:left;font:inherit" onclick="go('spg-akt')">${I('pin',18)}<span>Belum check-in${byPenempatan()?' di '+esc(spgToko().name):''}. Buka <b>Aktivitas saya</b> untuk check-in.</span></button>`}
   <div class="sec-title">Penjualan hari ini <a onclick="tab('target')">Target</a></div>
-  <div class="card"><div class="row between"><div><div class="small muted">Terjual</div><div class="big-num num">${q} unit</div></div><div style="text-align:right"><div class="small muted">Target hari ini</div><b class="num">${td} unit</b></div></div>
-  <div class="bar" style="margin:12px 0 6px"><i style="width:${Math.min(100,Math.max(3,q/td*100))}%"></i></div>
-  <div class="small muted">${Math.round(q/td*100)}% tercapai · ${list.length} transaksi · ${rpShort(today)}</div></div>
+  ${salesPie({pct:q/td,unit:q+' unit',amount:rpShort(today),target:td+' unit',sub:list.length+' transaksi'})}
   <!--SPLIT-->${todayVisits()}`; }
   const target = r==='canvas'?3500000:12000000;
   return `<div class="sec-title">Penjualan hari ini <a onclick="tab('target')">Target</a></div>
-  <div class="card"><div class="row between"><div><div class="small muted">Terjual</div><div class="big-num num">${rpShort(today)}</div></div><div style="text-align:right"><div class="small muted">Target hari ini</div><b class="num">${rpShort(target)}</b></div></div>
-  <div class="bar" style="margin:12px 0 6px"><i style="width:${Math.min(100,today/target*100)}%"></i></div>
-  <div class="stat3" style="margin:6px 0"><div><small>Target hari ini</small><b>${rpShort(target)}</b></div><div><small>Sudah terjual</small><b style="color:var(--green)">${rpShort(today)}</b></div><div><small>Objektif</small><b>${list.reduce((s,x)=>s+x.items.reduce((a,i)=>a+i.q,0),0)}<span class="muted small">/${r==='canvas'?12:3} unit</span></b></div></div>
-  <div class="small muted">${Math.round(today/target*100)}% tercapai · ${list.length} transaksi${r==='canvas'&&membawaBarang()?` · Stok layak jual ${Object.values(S.stock).reduce((s,x)=>s+x.good,0)} unit`:''}</div></div>
+  ${salesPie({pct:today/target,unit:list.reduce((s,x)=>s+x.items.reduce((a,i)=>a+i.q,0),0)+' unit',amount:rpShort(today),target:rpShort(target),sub:list.length+' transaksi'+(r==='canvas'&&membawaBarang()?' · stok layak jual '+Object.values(S.stock).reduce((s,x)=>s+x.good,0)+' unit':'')})}
   <!--SPLIT-->${todayVisits()}`;
 }
 function todayVisits(){
