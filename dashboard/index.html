@@ -1781,7 +1781,7 @@ const SEC_HIDE=['Usulan SFA'];
 const SEC_ICON={'Ringkasan':'dash','Operasional lapangan':'finger','Penjualan':'chart','Kinerja & insentif':'award','Leads pinjaman':'users','Program & konten':'tag','Usulan SFA':'bulb','Client management':'building','Toko':'store','Master data':'grid','Master data user':'shield','Pengaturan aplikasi':'sliders','Sistem':'settings'};
 const NAV_DEFAULT=[
   ['Ringkasan',[['/','Overview','dash']]],
-  ['Operasional lapangan',[['/absensi','Absensi','finger'],['/kunjungan','Kunjungan','route'],['/approval','Approval','checks','approval'],['/aktivitas','Aktivitas lapangan','route'],['/support-task','Support task','checks'],['/kepatuhan-kunjungan','Kepatuhan kunjungan','checks']]],
+  ['Operasional lapangan',[['/absensi','Absensi','finger'],['/kunjungan','Kunjungan','route'],['/approval','Approval','checks','approval'],['/aktivitas','Aktivitas lapangan','route'],['/submission','Submission by role','file'],['/support-task','Support task','checks'],['/kepatuhan-kunjungan','Kepatuhan kunjungan','checks']]],
   ['Penjualan',[['/data-penjualan','Data penjualan','file'],['/penjualan','Laporan penjualan','chart'],['/pemesanan','Pemesanan','checks'],['/sell-in','Sell-in dealer','wallet'],['/canvassing','Canvassing','pkg'],['/sku-display','Laporan SKU display','grid'],['/market-share','Laporan display share','chart']]],
   ['Kinerja & insentif',[['/target','Target & sell-in','target'],['/insentif','Insentif','wallet'],['/grading','Grading','award']]],
   ['Leads pinjaman',[['/leads','Leads pinjaman','users','leads'],['/overdue','Overdue','alert','overdue'],['/mitra','Mitra','users']]],
@@ -1926,7 +1926,7 @@ function drawMore(){
 function moreGo(p,label){ const r=[{to:p,label},...recentNav().filter(x=>x.to!==p)].slice(0,4); store.set('salesapp.dashboard.recent',JSON.stringify(r)); closeLayer(); }
 
 /* Kepala halaman: satu kalimat tujuan layar. Papan langsung menampilkan waktu pembaruan. */
-const PAGE_DESC={'/penjualan':'Pantau penjualan per klien, cabang, toko, dan sales, lalu telusuri sampai transaksi.','/absensi':'Lihat kehadiran sales hari ini, jam masuk, mode kerja, dan hasil pencocokan wajah.','/kunjungan':'Pantau kunjungan sales ke toko: jadwal, durasi, dan hasilnya.','/approval':'Putuskan pengajuan dari lapangan: absen terlambat, cuti, hapus penjualan, batal pesanan, dan promo.','/target':'Atur target per sales, toko, dan bulan, lalu bandingkan dengan pencapaian.','/promo':'Kelola promo yang berjalan dan promo yang menunggu approval.','/insentif':'Hitung insentif sales per bulan dan cocokkan dengan data klien.','/grading':'Lihat skor grading sales dari penjualan, absensi, quiz, SKU, dan display share.','/leads':'Kelola leads pinjaman: assign ke manager atau sales, tindak lanjut, lalu kirim ke SIM.','/overdue':'Pantau leads yang melewati batas tindak lanjut.','/company-sim':'Kelola data company SIMGROUP yang menjadi induk klien.','/sektor':'Kelola sektor bisnis yang dipakai klien dan produk.','/client':'Kelola klien SaaS beserta sektor dan statusnya.','/kategori-toko':'Kelola kategori toko untuk pelaporan.','/toko':'Kelola toko yang dikunjungi sales, termasuk usulan toko baru dari lapangan.','/iam':'Atur hak akses tiap role: modul, aksi, dan menu di aplikasi mobile.','/produk':'Kelola produk dan harga, pemetaan produk ke toko, serta produk dari sales.','/penugasan':'Atur penugasan dan jadwal sales per toko.','/pemesanan':'Pantau pesanan dealer dari dibuat sampai lunas.','/sell-in':'Bandingkan sell-in dealer dengan target dan sell-out.','/user-sales':'Kelola sales lapangan yang tersinkron dari SIM.','/user-admin':'Kelola pengguna dashboard dan role-nya.','/parameter':'Atur parameter yang dipakai aplikasi dan perhitungan.','/aktivitas':'Lihat hasil kerja per sales dan log aktivitas toko.','/canvassing':'Pantau canvassing: barang dibawa, terjual, dan limit.','/posm':'Kelola campaign, POSM, dan planogram untuk toko.','/region':'Kelola region dan cabang.','/brand':'Kelola brand klien.','/kategori-produk':'Kelola kategori produk berjenjang.','/kompetitor':'Kelola kompetitor yang dipantau.','/cabang-client':'Kelola cabang tiap klien.','/mapping-outlet':'Petakan outlet ke klien dan cabang.','/data-penjualan':'Telusuri semua transaksi penjualan dari aplikasi dan dashboard.','/penagihan':'Pantau piutang dan penagihan menurut umur.','/klaim-biaya':'Putuskan klaim biaya sales berdasarkan bukti dan limit.','/kepatuhan-kunjungan':'Ukur kepatuhan kunjungan sales terhadap jadwal.','/pengumuman':'Kirim pengumuman ke sales menurut role dan klien.','/sinkron':'Cek status sinkron perangkat sales dan data dari SIM.','/satuan':'Kelola satuan produk.','/konversi':'Atur konversi satuan untuk semua produk (General) atau per produk.','/sidebar-menu':'Atur susunan menu sidebar: nama, urutan, level, halaman, dan role yang melihatnya.','/konfigurasi-aktivitas':'Atur aktivitas yang tampil di aplikasi tiap role.','/form-penjualan':'Susun field form catat penjualan di aplikasi.','/status-produk':'Kelola status produk.','/event':'Kelola event dan jadwalnya.','/mitra':'Kelola mitra dan pertanyaan monitoringnya.','/sku-display':'Lihat laporan SKU display per toko.','/market-share':'Lihat laporan display share per toko dan kategori.','/quiz':'Susun dan kelola quiz untuk sales.','/survey':'Susun dan kelola survey untuk sales.','/pengaturan':'Atur preferensi dashboard dan data demo.'};
+const PAGE_DESC={'/penjualan':'Pantau penjualan per klien, cabang, toko, dan sales, lalu telusuri sampai transaksi.','/absensi':'Lihat kehadiran sales hari ini, jam masuk, mode kerja, dan hasil pencocokan wajah.','/kunjungan':'Pantau kunjungan sales ke toko: jadwal, durasi, dan hasilnya.','/approval':'Putuskan pengajuan dari lapangan: absen terlambat, cuti, hapus penjualan, batal pesanan, dan promo.','/target':'Atur target per sales, toko, dan bulan, lalu bandingkan dengan pencapaian.','/promo':'Kelola promo yang berjalan dan promo yang menunggu approval.','/insentif':'Hitung insentif sales per bulan dan cocokkan dengan data klien.','/grading':'Lihat skor grading sales dari penjualan, absensi, quiz, SKU, dan display share.','/leads':'Kelola leads pinjaman: assign ke manager atau sales, tindak lanjut, lalu kirim ke SIM.','/overdue':'Pantau leads yang melewati batas tindak lanjut.','/company-sim':'Kelola data company SIMGROUP yang menjadi induk klien.','/sektor':'Kelola sektor bisnis yang dipakai klien dan produk.','/client':'Kelola klien SaaS beserta sektor dan statusnya.','/kategori-toko':'Kelola kategori toko untuk pelaporan.','/toko':'Kelola toko yang dikunjungi sales, termasuk usulan toko baru dari lapangan.','/iam':'Atur hak akses tiap role: modul, aksi, dan menu di aplikasi mobile.','/produk':'Kelola produk dan harga, pemetaan produk ke toko, serta produk dari sales.','/penugasan':'Atur penugasan dan jadwal sales per toko.','/pemesanan':'Pantau pesanan dealer dari dibuat sampai lunas.','/sell-in':'Bandingkan sell-in dealer dengan target dan sell-out.','/user-sales':'Kelola sales lapangan yang tersinkron dari SIM.','/user-admin':'Kelola pengguna dashboard dan role-nya.','/parameter':'Atur parameter yang dipakai aplikasi dan perhitungan.','/aktivitas':'Lihat hasil kerja per sales dan log aktivitas toko.','/submission':'Lihat setiap kiriman aktivitas dari aplikasi per role, lalu buka isiannya.','/canvassing':'Pantau canvassing: barang dibawa, terjual, dan limit.','/posm':'Kelola campaign, POSM, dan planogram untuk toko.','/region':'Kelola region dan cabang.','/brand':'Kelola brand klien.','/kategori-produk':'Kelola kategori produk berjenjang.','/kompetitor':'Kelola kompetitor yang dipantau.','/cabang-client':'Kelola cabang tiap klien.','/mapping-outlet':'Petakan outlet ke klien dan cabang.','/data-penjualan':'Telusuri semua transaksi penjualan dari aplikasi dan dashboard.','/penagihan':'Pantau piutang dan penagihan menurut umur.','/klaim-biaya':'Putuskan klaim biaya sales berdasarkan bukti dan limit.','/kepatuhan-kunjungan':'Ukur kepatuhan kunjungan sales terhadap jadwal.','/pengumuman':'Kirim pengumuman ke sales menurut role dan klien.','/sinkron':'Cek status sinkron perangkat sales dan data dari SIM.','/satuan':'Kelola satuan produk.','/konversi':'Atur konversi satuan untuk semua produk (General) atau per produk.','/sidebar-menu':'Atur susunan menu sidebar: nama, urutan, level, halaman, dan role yang melihatnya.','/konfigurasi-aktivitas':'Atur aktivitas yang tampil di aplikasi tiap role.','/form-penjualan':'Susun field form catat penjualan di aplikasi.','/status-produk':'Kelola status produk.','/event':'Kelola event dan jadwalnya.','/mitra':'Kelola mitra dan pertanyaan monitoringnya.','/sku-display':'Lihat laporan SKU display per toko.','/market-share':'Lihat laporan display share per toko dan kategori.','/quiz':'Susun dan kelola quiz untuk sales.','/survey':'Susun dan kelola survey untuk sales.','/pengaturan':'Atur preferensi dashboard dan data demo.'};
 const LIVE_PAGES=['/absensi','/sinkron','/kunjungan'];
 const timeLabel=()=>{ const d=new Date(nowMs()+7*36e5); return String(d.getUTCHours()).padStart(2,'0')+'.'+String(d.getUTCMinutes()).padStart(2,'0'); };
 const SCOPE_LABEL={q:'pencarian',f:'filter',u:'sales',st:'status',cat:'kategori',cl:'klien',cb:'cabang',tk:'toko',r:'peran'}, SCOPE_SKIP=['tab','per','p','preset','from','to','new'];
@@ -4928,7 +4928,189 @@ function pageAktivitas(q){
   return {title:'Aktivitas lapangan',html:`<div style="margin-bottom:14px">${pills([['sales','Aktivitas Sales'],['log','Log aktivitas toko']],tab,'aktTab')}</div>`+v.html};
 }
 
-const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi,'/kunjungan':pageKunjungan,'/approval':pageApproval,'/target':pageTarget,'/promo':pagePromo,'/insentif':pageInsentif,'/grading':pageGrading,'/leads':pageLeads,'/overdue':pageOverdue,'/company-sim':pageSimco,'/sektor':pageSektor,'/client':pageClient,'/kategori-toko':pageKategori,'/toko':pageToko,'/iam':pageIAM,'/produk':pageProduk,'/penugasan':pagePenugasan,'/pemesanan':pagePemesanan,'/sell-in':pageSellin,'/user-sales':pagePengguna,'/job':pageJob,'/user-admin':pageAdmin,'/parameter':pageParameter,'/aktivitas':pageAktivitas,'/support-task':pageSupportTask,'/canvassing':pageCanvassing,'/posm':pagePosm,'/region':pageRegion,'/brand':pageBrand,'/kategori-produk':pageKatProd,'/kompetitor':pageKompetitor,'/cabang-client':pageCabang,'/mapping-outlet':pageMapOutlet,'/data-penjualan':pageDataJual,'/penagihan':pagePenagihan,'/klaim-biaya':pageKlaim,'/kepatuhan-kunjungan':pageKepatuhan,'/pengumuman':pagePengumuman,'/sinkron':pageSinkron,'/satuan':pageSatuan,'/konversi':pageKonversi,'/sidebar-menu':pageSidebarMenu,'/konfigurasi-aktivitas':pageAktCfg,'/form-penjualan':pageFormJual,'/status-produk':pageStatProd,'/event':pageEvent,'/mitra':pageMitra,'/sku-display':pageSkuDisplay,'/market-share':pageMarketShare,'/quiz':q=>pageKonten(q,'Quiz'),'/survey':q=>pageKonten(q,'Survey'),'/pengaturan':pagePengaturan};
+/* ---------- Submission by role ----------
+   Usulan: tiap kiriman dari aplikasi mobile (submit atau simpan sementara) tampil sebagai satu baris, dikelompokkan per role,
+   dan bisa dibuka sampai isiannya. Bedanya dengan Aktivitas Sales: di sana satu baris satu sales, di sini satu baris satu kiriman.
+   Pengelompokan role mengikuti update menu mobile 18 Nov 2026 (Promotor FMCG dan Bantuan memakai alur Promotor, MD memakai alur Canvassing).
+   Mockup memakai data contoh 20 sampai 26 Okt 2026, dibangkitkan tetap (seed); kiriman hari ini berhenti di jam aplikasi 09.41.
+   Isian dari mobile belum dikirim ke halaman ini. */
+const SUB_ROLES=[['promotor','Promotor'],['canvas','Canvassing & MD'],['order','Taking Order'],['leads','REA & CBD']];
+const SUB_AKT={checkin:['Check-in','pin'],checkout:['Check-out','check'],jual:['Catat penjualan','wallet'],sku:['SKU display','grid'],share:['Display share','chart'],
+  stok:['Stock opname','pkg'],posm:['Campaign & POSM','image'],promo:['Price promo','tag'],support:['Support task','checks'],
+  loading:['Loading barang','up'],unloading:['Unloading barang','down'],retur:['Catat retur','refresh'],usulan:['Usulan toko','store'],pesanan:['Buat pesanan','file'],
+  leads:['Update leads','users'],nasabah:['Kunjungan nasabah','route'],mitra:['Monitoring mitra','chat'],tltask:['Task Team Leader','checks']};
+const SUB_BY_ROLE={promotor:['checkin','jual','sku','share','stok','posm','promo','support','checkout'],canvas:['loading','checkin','jual','retur','usulan','checkout','unloading'],order:['checkin','pesanan','retur','usulan','checkout'],leads:['leads','nasabah','mitra','tltask']};
+const SUB_TONE={'Selesai':'success','Terkirim':'success','Disetujui':'success','Dikirim':'success','Draft':'warning','Menunggu approval':'info','Menunggu verifikasi':'info','Dibuat':'info','Ditolak':'danger'};
+const SUB_ST=[['','Semua status'],['done','Selesai'],['draft','Draft'],['wait','Menunggu'],['tolak','Ditolak']];
+const SUB_LINK={checkin:['/kunjungan','Kunjungan'],checkout:['/kunjungan','Kunjungan'],jual:['/data-penjualan','Data penjualan'],sku:['/sku-display','Laporan SKU display'],share:['/market-share','Laporan display share'],posm:['/posm','Campaign & POSM'],support:['/support-task','Support task'],loading:['/canvassing','Canvassing'],unloading:['/canvassing','Canvassing'],retur:['/canvassing','Canvassing'],usulan:['/toko','Toko'],pesanan:['/pemesanan','Pemesanan'],leads:['/leads','Leads pinjaman'],nasabah:['/kepatuhan-kunjungan','Kepatuhan kunjungan'],mitra:['/mitra','Mitra']};
+const SUB_FMP={f1:29900,f2:4000,f3:6500,f4:2000,f5:11900};
+const subKind=u=>{ const j=(byU(u)||{}).job||''; return j.startsWith('Canvasing')||j.startsWith('Merchandising')?'canvas':j==='Taking Order'?'order':LEADS_USERS.some(x=>x.u===u)?'leads':'promotor'; };
+const subP=id=>ALL_PROD().find(p=>p.id===id)||{id,name:id,sku:'–',price:0,cat:'–'};
+const subPrice=id=>subP(id).price||SUB_FMP[id]||0;
+const subTotal=items=>items.reduce((s,i)=>s+i.q*Math.max(0,subPrice(i.p)-(i.disc||0)),0);
+const subLbl=a=>(SUB_AKT[a]||[a])[0];
+const subGrp=s=>s==='Draft'?'draft':/^(Menunggu|Dibuat)/.test(s)?'wait':s==='Ditolak'?'tolak':'done';
+const subDur=m=>Math.floor(m/60)+' j '+String(m%60).padStart(2,'0')+' m';
+let SUB_CACHE=null;
+const subRows=()=>SUB_CACHE||(SUB_CACHE=subGen());
+function subGen(){
+  let s=20261026; const R=()=>(s=(s*48271)%2147483647)/2147483647, pick=a=>a[Math.floor(R()*a.length)], int=(a,b)=>a+Math.floor(R()*(b-a+1));
+  const take=(a,n)=>{ const c=[...a], o=[]; while(c.length&&o.length<n) o.push(c.splice(Math.floor(R()*c.length),1)[0]); return o; };
+  const hm=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'), gps=()=>'-6.2'+int(100,999)+', 106.8'+int(100,999);
+  const NOW_M=9*60+41, out=[], seq={};
+  const PEMBELI=['Andi Wijaya','Siti Rahma','Bayu Pratama','Dewi Lestari','Rizal Hakim','Maria Ulfa','Hendra Gunawan','Nur Aini'];
+  const NASABAH=['Toko Kelontong Bu Sri','Warung Pak Darto','Bengkel Jaya Motor','Laundry Rapi','Konveksi Berkah'];
+  const KOMP={TV:[['Samsung','Crystal UHD 50"'],['LG','UHD 43"'],['Polytron','Smart TV 32"']],Kulkas:[['Sharp','Kulkas 2 Pintu 300 L'],['LG','Kulkas Inverter 250 L']],FMCG:[['Merek lain','Sabun Cair 450 ml'],['Merek lain','Teh Botol 350 ml'],['Merek lain','Kopi Sachet Gula Aren']]};
+  const TASKS=['Pasang wobbler promo akhir tahun','Foto area kasir','Cek tanggal kedaluwarsa','Rapikan rak end gondola','Bagikan brosur promo'];
+  const BRIEF=['Planogram rak utama','POSM wobbler promo akhir tahun','Campaign: penempatan barang promo'];
+  const ALASAN_RETUR=['Kemasan penyok','Tidak laku 30 hari','Salah kirim dari gudang','Rusak saat pengiriman'];
+  const USUL=[['Toko Sumber Makmur','Pak Hasan','Retail','Jl. Raya Lenteng Agung 41'],['Toko Rejeki Baru','Bu Lina','Semi grosir','Jl. Cilandak KKO 12'],['Toko Elektro Jaya','Pak Agus','Retail','Jl. Ciputat Raya 88']];
+  ['20','21','22','23','24','26'].forEach(dd=>{ const d=+dd, iso=isoOf(10,d), today=d===26;
+    hkUsers().forEach(me=>{
+      if(R()<0.08) return; // hari off atau cuti
+      const u=me.u, k=subKind(u), fm=me.job==='Promotor FMCG', md=me.job.startsWith('Merchandising'), stockRole=me.job==='Canvasing FMCG'||md;
+      let tks=tokoOfU(u); if(!tks.length) tks=TOKO.filter(t=>!t.del&&t.name===me.toko);
+      const tkNames=tks.length?tks.map(t=>t.name):[me.toko||'–'];
+      let t=int(8*60+40,9*60+5);
+      const add=(akt,toko,st,sum,det,step=[20,55])=>{ if(today&&t>NOW_M) return null; const key='SB-'+dd+'10'; seq[key]=(seq[key]||0)+1;
+        const ref=k==='leads'?null:tokoRef(toko,u), sc=k==='leads'?hkScope(u):null;
+        const r={id:key+'-'+String(seq[key]).padStart(4,'0'),iso,jam:hm(t),u,kind:k,akt,toko,cl:ref?ref.client:(sc.cl[0]||'cl2'),cb:ref?ref.cabang:me.cabang,st,sum,det};
+        out.push(r); t+=int(step[0],step[1]); return r; };
+      const drf=()=>R()<(today?0.5:0.1)?'Draft':'Selesai'; // draft = simpan sementara; di hari lalu berarti lupa dikirim
+      const cin=toko=>add('checkin',toko,'Selesai','Dalam radius · '+int(6,60)+' m dari toko',{jarak:int(6,60),gps:gps()},[8,20]);
+      const cout=(toko,t0)=>add('checkout',toko,'Selesai','Durasi '+subDur(Math.max(10,t-t0)),{jarak:int(4,40),gps:gps(),dur:subDur(Math.max(10,t-t0))},[15,40]);
+      if(k==='promotor'){
+        const toko=tkNames[0], cl=tokoRef(toko,u).client, pool=fm?FM_PROD.map(p=>p.id):PRODUCTS.filter(p=>p.brand===(cl==='cl4'?'NHA':'ARUNIKA')).map(p=>p.id), t0=t;
+        cin(toko);
+        for(let i=int(1,3);i>0;i--){ const items=take(pool,int(1,2)).map(p=>({p,q:int(1,fm?6:2),disc:R()<0.3?(fm?500:int(1,3)*50000):0})), inv=R()<0.7;
+          add('jual',toko,'Terkirim',items.map(x=>subP(x.p).name+(x.q>1?' ×'+x.q:'')).join(', ')+' · '+rp(subTotal(items)),{items,src:inv?'Foto invoice':'Input manual',inv:inv?'INV/'+int(1000,9999):'',pembeli:pick(PEMBELI),telp:'0812-'+int(1000,9999)+'-'+int(1000,9999)},[25,70]); }
+        const sk=take(pool,int(2,4)).map(p=>({p,q:int(1,4),foto:2,kond:R()<0.12?'Rusak':R()<0.1?'Kosong':'Baik'})), cat=fm?'FMCG':subP(pool[0]).cat;
+        add('sku',toko,drf(),sk.length+' produk · '+(sk.some(x=>x.kond==='Rusak')?'ada yang rusak':sk.some(x=>x.kond==='Kosong')?'ada yang kosong':'kondisi baik'),{disp:[{nama:'Display 1',kat:cat,items:sk}]});
+        const kl=take(pool,2).map(p=>({p,q:int(4,20)})), kp=take(KOMP[cat]||KOMP.TV,2).map(([b,n])=>({b,n,q:int(3,24),h:R()<0.6?int(15,60)*(fm?500:100000):0})), qk=kl.reduce((a,x)=>a+x.q,0), qc=kp.reduce((a,x)=>a+x.q,0);
+        add('share',toko,drf(),cat+' · share klien '+Math.round(qk/(qk+qc)*100)+'%',{kat:cat,kl,kp});
+        const st=take(pool,int(3,5)).map(p=>({p,disp:int(0,12),gud:int(0,30),sat:R()<0.3?'Dus':'Pcs',na:R()<0.1}));
+        add('stok',toko,drf(),st.length+' SKU'+(st.some(x=>x.na)?' · '+st.filter(x=>x.na).length+' tidak tersedia':' · semua tersedia'),{rows:st});
+        if(R()<0.6){ const ai=int(62,92), adj=R()<0.4?int(-5,6):0, br=pick(BRIEF); add('posm',toko,'Selesai',br+' · nilai '+(ai+adj),{brief:br,ai,fin:ai+adj,alasan:adj>0?'Susunan sudah sesuai, foto terhalang troli':adj<0?'Label harga promo belum terpasang':''}); }
+        const pr=take(pool,2).map(p=>{ const b=subPrice(p), r_=fm?100:1000; return {p,b,v:Math.round(b*(1-int(5,20)/100)/r_)*r_}; });
+        add('promo',toko,drf(),pr.length+' produk · diskon '+pr.map(x=>Math.round((1-x.v/x.b)*100)+'%').join(', '),{rows:pr});
+        if(R()<0.5){ const tk=pick(TASKS); add('support',toko,'Selesai',tk,{task:tk,sumber:R()<0.3?'Buatan sendiri':'Client',cat:'Sudah dikerjakan, foto terlampir'}); }
+        cout(toko,t0);
+      } else if(k==='canvas'){
+        const pool=md?FM_PROD.map(p=>p.id):PRODUCTS.filter(p=>p.brand==='KIRANA').map(p=>p.id), gd='Gudang '+me.cabang;
+        let load=null; const sold={};
+        if(stockRole){ const items=take(pool,int(3,4)).map(p=>({p,q:int(6,18)})), rj=!today&&R()<0.07, sa=rj||(u==='budi'&&dd==='22')?'Ditolak':'Disetujui';
+          add('loading',gd,sa,items.length+' produk · '+items.reduce((a,x)=>a+x.q,0)+' unit',{metode:pick(['Scan nota','Scan barcode','Input manual']),items,appr:'Sari Wulandari',alasan:sa==='Ditolak'?'Jumlah tidak sesuai nota gudang':''},[20,40]);
+          if(sa==='Ditolak') return; load=items; }
+        take(tkNames,Math.min(tkNames.length,int(2,3))).forEach(toko=>{ const t0=t; cin(toko);
+          if(R()<0.85){ const items=take(load?load.map(x=>x.p):pool,int(1,2)).map(p=>({p,q:int(1,4),disc:0})); items.forEach(i=>{ sold[i.p]=(sold[i.p]||0)+i.q; });
+            add('jual',toko,'Terkirim',items.map(x=>subP(x.p).name+(x.q>1?' ×'+x.q:'')).join(', ')+' · '+rp(subTotal(items)),{items,src:'Input manual',inv:'',pembeli:'',telp:''},[10,25]); }
+          if(stockRole&&R()<0.3){ const it=take(pool,1).map(p=>({p,q:int(1,3),kond:R()<0.5?'Layak jual':'Tidak layak jual'})), al=pick(ALASAN_RETUR); add('retur',toko,'Selesai',subP(it[0].p).name+' ×'+it[0].q+' · '+it[0].kond,{items:it,alasan:al},[8,15]); }
+          cout(toko,t0); });
+        if(R()<0.25){ const [n,o,c,a]=pick(USUL); add('usulan',n,today?'Menunggu verifikasi':pick(['Diverifikasi','Menunggu verifikasi']),n+' · '+c,{nama:n,pemilik:o,kat:c,alamat:a}); }
+        if(load){ const items=load.map(x=>{ const j=Math.min(x.q,sold[x.p]||0); return {p:x.p,load:x.q,jual:j,sisa:x.q-j}; }), val=items.reduce((a,x)=>a+x.jual*subPrice(x.p),0), cash=Math.round(val*0.6/1000)*1000;
+          add('unloading',gd,d===24&&R()<0.6?'Menunggu approval':'Disetujui',items.reduce((a,x)=>a+x.jual,0)+' terjual · '+items.reduce((a,x)=>a+x.sisa,0)+' sisa',{items,cash,noncash:val-cash,appr:'Sari Wulandari'}); }
+      } else if(k==='order'){
+        const pool=PRODUCTS.filter(p=>p.brand==='ARUNIKA'||p.brand==='KIRANA').map(p=>p.id);
+        take(tkNames,Math.min(tkNames.length,int(2,3))).forEach(toko=>{ const t0=t; cin(toko);
+          if(R()<0.8){ const items=take(pool,int(1,3)).map(p=>({p,q:int(2,10),disc:0})); add('pesanan',toko,today?'Dibuat':pick(['Dibuat','Dikirim','Dikirim']),items.length+' produk · '+rp(subTotal(items)),{no:'PO-'+dd+'10-'+int(100,999),items,kirim:(d+2)+' Okt'}); }
+          if(R()<0.2){ const it=take(pool,1).map(p=>({p,q:int(1,2),kond:'Tidak layak jual'})); add('retur',toko,'Selesai',subP(it[0].p).name+' ×'+it[0].q+' · '+it[0].kond,{items:it,alasan:pick(ALASAN_RETUR)},[8,15]); }
+          cout(toko,t0); });
+        if(R()<0.2){ const [n,o,c,a]=pick(USUL); add('usulan',n,today?'Menunggu verifikasi':pick(['Diverifikasi','Menunggu verifikasi']),n+' · '+c,{nama:n,pemilik:o,kat:c,alamat:a}); }
+      } else {
+        const cbd=me.job.startsWith('CBD');
+        for(let i=int(2,3);i>0;i--){ const nb=pick(NASABAH), tr=pick([['Baru','Prospect'],['Prospect','Prospect'],['Prospect','Deal'],['Baru','Belum Tertarik']]);
+          add('leads',me.toko,'Selesai',nb+' · '+tr[0]+' → '+tr[1],{nasabah:nb,produk:pick(['Kredit Modal Kerja','Kredit Multiguna','Dana Tunai']),dari:tr[0],ke:tr[1],temp:int(1,5),order:tr[1]==='Deal'?'ORD-'+int(10000,99999):'',catatan:pick(['Minta simulasi angsuran','Dokumen usaha lengkap','Pertimbangkan dulu dengan keluarga','Butuh dana sebelum akhir bulan'])},[30,60]); }
+        if(!cbd){ const nb=pick(NASABAH); add('nasabah',nb,'Selesai',nb+' · kunjungan ditandai selesai',{nasabah:nb,hasil:pick(['Nasabah setuju lanjut pengajuan','Nasabah minta dihubungi minggu depan','Dokumen dikumpulkan sebagian'])}); }
+        else { const mt=pick(['Agen Sejahtera Fatmawati','Agen Berkah Cilandak']);
+          add('mitra',mt,'Selesai',mt+' · 3 pertanyaan dijawab',{mitra:mt,qa:[['Berapa nasabah baru minggu ini?',String(int(1,6))],['Ada kendala pencairan?',pick(['Tidak ada','Satu nasabah menunggu dokumen'])],['Stok brosur cukup?',pick(['Cukup','Perlu tambahan'])]]});
+          if(R()<0.4) add('tltask',me.toko,'Selesai','Pertanyaan Team Leader dijawab',{tanya:pick(['Laporkan nasabah prospek terbesar minggu ini','Foto kegiatan sosialisasi di pasar']),jawab:pick(['Warung Pak Darto, rencana Rp25 jt','Sudah sosialisasi di Pasar Minggu, foto terlampir'])}); }
+      }
+    });
+  });
+  return out.sort((a,b)=>(b.iso+b.jam).localeCompare(a.iso+a.jam));
+}
+const subQ=q=>(q.per||q.from||q.to)?q:{...q,per:'w'};
+function subTab(k){ setQ({role:k==='promotor'?'':k,akt:'',st:'',u:'',tk:'',q:''}); }
+function subAkt(k){ setQ({akt:k}); }
+function subPer(k){ setQ({per:k,from:'',to:''}); }
+function subDate(f,t){ setQ({from:f,to:t,per:''}); }
+function pageSubmission(q){
+  q=subQ(q); const role=SUB_ROLES.some(r=>r[0]===q.role)?q.role:'promotor', r=repRange(q), qq=(q.q||'').toLowerCase();
+  const inR=subRows().filter(x=>x.iso>=r.from&&x.iso<=r.to&&(ST.ws==='all'||x.cl===ST.ws));
+  const inRole=inR.filter(x=>x.kind===role);
+  const base=inRole.filter(x=>(!q.cl||x.cl===q.cl)&&(!q.cb||x.cb===q.cb)&&(!q.tk||x.toko===q.tk)&&(!q.u||x.u===q.u)&&(!qq||(x.id+' '+x.toko+' '+byU(x.u).name+' '+x.sum).toLowerCase().includes(qq)));
+  const scope=base.filter(x=>!q.akt||x.akt===q.akt), rows=scope.filter(x=>!q.st||subGrp(x.st)===q.st).map(x=>({...x,_id:x.id}));
+  const users=hkUsers().filter(s=>subKind(s.u)===role), lapor=new Set(scope.map(x=>x.u)).size;
+  const nDone=scope.filter(x=>subGrp(x.st)==='done').length, nDraft=scope.filter(x=>subGrp(x.st)==='draft').length, nWait=scope.filter(x=>subGrp(x.st)==='wait').length;
+  const tokoOpts=[...new Set(inRole.map(x=>x.toko))].sort();
+  const dirty=q.cl||q.cb||q.tk||q.u||q.q||q.akt||q.st||q.from||q.to||(q.per&&q.per!=='w');
+  const stTog=k=>`setQ({st:'${q.st===k?'':k}'})`;
+  const filt=card('Filter',`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">${pills(REP_PRESETS.map(p=>[p[0],p[1]]),(REP_PRESETS.find(x=>x[2][0]===r.from&&x[2][1]===r.to)||[''])[0],'subPer')}${rangePicker({id:'sub',from:r.from,to:r.to,min:LD_START,max:LD_END,on:'subDate',presets:REP_PRESETS})}</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      ${sel([['','Semua sales'],...users.map(s=>[s.u,s.name])],q.u||'',"setQ({u:this.value})",{label:'Filter sales',cls:'sm'})}
+      ${sel([['','Semua klien'],...live('client').filter(c=>c.status==='Aktif').map(c=>[c.id,c.name])],q.cl||'',"setQ({cl:this.value,tk:''})",{label:'Filter klien',cls:'sm'})}
+      ${sel([['','Semua cabang'],...CABANG.slice(1)],q.cb||'',"setQ({cb:this.value,tk:''})",{label:'Filter cabang',cls:'sm'})}
+      ${role==='leads'?'':sel([['','Semua toko'],...tokoOpts.map(t=>[t,t])],q.tk||'',"setQ({tk:this.value})",{label:'Filter toko',cls:'sm'})}
+      ${sel(SUB_ST,q.st||'',"setQ({st:this.value})",{label:'Filter status',cls:'sm'})}
+      <form style="flex:1;min-width:180px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari submission</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari no., sales, toko, atau isi"></label></form>
+      ${dirty?btn('Hapus filter',{v:'ghost',size:'sm',on:"setQ({cl:'',cb:'',tk:'',u:'',q:'',akt:'',st:'',from:'',to:'',per:''})"}):''}</div>
+    <p class="xs muted" style="margin-top:12px">Menampilkan <b class="fg">${repLabel(q)}</b>. Data contoh 20 sampai 26 Okt 2026; kiriman dari aplikasi mobile belum masuk ke halaman ini. <b>Usulan</b>: menu ini belum ada di BRD atau URD.</p>`);
+  const aktPills=pills([['','Semua aktivitas',base.length],...SUB_BY_ROLE[role].map(a=>[a,subLbl(a),base.filter(x=>x.akt===a).length])],q.akt||'','subAkt');
+  return {title:'Submission by role',html:`
+  <div style="margin-bottom:14px">${pills(SUB_ROLES.map(([k,l])=>[k,l,inR.filter(x=>x.kind===k).length]),role,'subTab')}</div>
+  <div style="margin-bottom:16px">${filt}</div>
+  <div class="stats">
+    ${statCard({label:'Total submission',value:num(scope.length),hint:lapor+' dari '+users.length+' sales mengirim',icon:'file',tone:'ink'})}
+    ${statCard({label:'Selesai',value:num(nDone),hint:q.st==='done'?'Filter aktif · klik untuk hapus':'Terkirim, disetujui, atau selesai',icon:'check',tone:'success',on:stTog('done'),active:q.st==='done'})}
+    ${statCard({label:'Draft',value:num(nDraft),hint:q.st==='draft'?'Filter aktif · klik untuk hapus':'Disimpan sementara, belum dikirim',icon:'edit',tone:nDraft?'warning':'neutral',on:stTog('draft'),active:q.st==='draft'})}
+    ${statCard({label:'Menunggu',value:num(nWait),hint:q.st==='wait'?'Filter aktif · klik untuk hapus':'Approval, verifikasi, atau pesanan baru',icon:'clock',tone:nWait?'info':'neutral',on:stTog('wait'),active:q.st==='wait'})}
+  </div>
+  <div style="margin-bottom:12px;overflow-x:auto" class="no-scrollbar">${aktPills}</div>
+  ${card('Daftar submission',dataTable('sub_'+role,{rows,rowClick:x=>`subPanel('${x.id}')`,empty:'Tidak ada submission dengan filter ini.',emptyDesc:'Ubah periode atau hapus filter untuk melihat kiriman lain.',cols:[
+      {label:'Aktivitas',render:x=>`<span style="display:flex;gap:10px;align-items:center">${iconTile(SUB_AKT[x.akt][1],{tone:'soft',size:'sm'})}<span><span class="fg" style="font-weight:500">${subLbl(x.akt)}</span><span class="mono xs muted" style="display:block">${x.id}</span></span></span>`,prim:true},
+      {label:'Sales',render:x=>`<span style="display:flex;gap:8px;align-items:center">${av(byU(x.u).name)}<span class="fg">${esc(byU(x.u).name)}</span></span>`},
+      {label:role==='leads'?'Lokasi':'Toko',render:x=>`<span class="fg">${esc(x.toko)}</span><span class="xs muted" style="display:block">${esc(clientName(x.cl))}</span>`,hide:true},
+      {label:'Waktu',render:x=>`<span class="tabular">${fmtIso(x.iso)}</span><span class="xs muted tabular" style="display:block">${x.jam} WIB</span>`},
+      {label:'Ringkasan',render:x=>`<span class="xs">${esc(x.sum)}</span>`,hide:true},
+      {label:'Status',render:x=>spill(x.st,SUB_TONE[x.st]||'neutral')}]}),
+    {count:rows.length,acts:btn('Unduh',{v:'outline',size:'sm',icon:'down',on:`toast('Data submission diunduh','${esc(SUB_ROLES.find(x=>x[0]===role)[1])}, ${esc(repLabel(q))}, sesuai filter yang aktif.')`})})}`};
+}
+const subSec=(t,body)=>`<div style="margin-top:18px"><b class="fg sm" style="display:block;margin-bottom:8px">${t}</b>${body}</div>`;
+const subFoto=(n,cap)=>`<div style="display:flex;gap:8px;flex-wrap:wrap">${Array.from({length:n},(_,i)=>`<button type="button" class="tile" style="width:96px;height:72px;display:grid;place-items:center;color:var(--muted);padding:0" aria-label="Lihat ${esc(cap)} ${i+1}" onclick="toast('Foto ${i+1} dibuka','Foto di mockup ini hanya contoh.')">${I('image',20)}</button>`).join('')}</div>`;
+const subPN=id=>esc(subP(id).name);
+function subDetail(x){
+  const d=x.det, a=x.akt;
+  if(a==='checkin'||a==='checkout') return subSec('Lokasi',keyValue([['Jarak dari toko',d.jarak+' m · dalam radius 100 m'],['Titik GPS',`<span class="mono">${d.gps}</span>`],a==='checkout'&&['Durasi kunjungan',d.dur]]))+subSec('Foto '+(a==='checkin'?'check-in':'check-out')+' ber-watermark',subFoto(1,'foto'));
+  if(a==='jual'||a==='pesanan'){ const tot=subTotal(d.items);
+    const info=a==='jual'?keyValue([['Cara input',d.src],['No. invoice toko',d.inv?`<span class="mono">${esc(d.inv)}</span>`:''],['Nama pembeli',esc(d.pembeli)],['Telepon pembeli',esc(d.telp)]]):keyValue([['No. PO',`<span class="mono">${esc(d.no)}</span>`],['Tanggal kirim',esc(d.kirim)+' 2026']]);
+    return subSec(a==='jual'?'Transaksi':'Pesanan',info)+subSec('Produk',hkTbl([['Produk',i=>`${subPN(i.p)}<span class="xs muted tabular" style="display:block">${i.q} × ${rp(subPrice(i.p))}</span>`],['Diskon/unit',i=>i.disc?`<span class="tabular">${rp(i.disc)}</span>`:'<span class="muted">–</span>','r'],['Subtotal',i=>`<b class="fg tabular">${rp(i.q*(subPrice(i.p)-(i.disc||0)))}</b>`,'r']],d.items)+`<div style="display:flex;justify-content:space-between;margin-top:10px"><span class="sm muted">Total</span><b class="fg tabular">${rp(tot)}</b></div>`)+(a==='jual'&&d.src==='Foto invoice'?subSec('Foto invoice dan produk',subFoto(2,'foto')):''); }
+  if(a==='sku') return d.disp.map(ds=>subSec(esc(ds.nama)+' · '+esc(ds.kat),hkTbl([['Produk',i=>`${subPN(i.p)}<span class="xs muted" style="display:block">${i.foto} foto</span>`],['Qty',i=>i.q,'r'],['Kondisi',i=>tag(i.kond,i.kond==='Baik'?'success':i.kond==='Rusak'?'danger':'warning')]],ds.items))).join('')+subSec('Foto display',subFoto(2,'foto'));
+  if(a==='share'){ const qk=d.kl.reduce((s,i)=>s+i.q,0), qc=d.kp.reduce((s,i)=>s+i.q,0);
+    return subSec('Ringkasan',keyValue([['Kategori',esc(d.kat)],['Unit klien',num(qk)],['Unit kompetitor',num(qc)],['Share klien',Math.round(qk/(qk+qc)*100)+'%']]))+subSec('Produk klien',hkTbl([['Produk',i=>subPN(i.p)],['Qty',i=>i.q,'r']],d.kl))+subSec('Produk kompetitor',hkTbl([['Produk',i=>`${esc(i.n)}<span class="xs muted" style="display:block">${esc(i.b)}</span>`],['Qty',i=>i.q,'r'],['Harga',i=>i.h?`<span class="tabular">${rp(i.h)}</span>`:'<span class="muted">–</span>','r']],d.kp)); }
+  if(a==='stok'){ const dash='<span class="muted">–</span>';
+    return subSec('Hasil hitung',hkTbl([['Produk',i=>subPN(i.p)],['Display',i=>i.na?dash:`<span class="tabular">${i.disp} ${i.sat}</span>`,'r'],['Gudang',i=>i.na?dash:`<span class="tabular">${i.gud} ${i.sat}</span>`,'r'],['Pcs',i=>i.na?tag('Kosong','warning'):`<b class="fg tabular">${num((i.disp+i.gud)*(i.sat==='Dus'?12:1))}</b>`,'r']],d.rows))+`<p class="xs muted" style="margin-top:8px">Pcs adalah total display dan gudang, dengan konversi contoh 1 Dus = 12 Pcs. Kosong berarti barang tidak tersedia di toko.</p>`; }
+  if(a==='posm') return subSec('Penilaian',keyValue([['Brief',esc(d.brief)],['Nilai AI',d.ai],['Nilai akhir',`<b class="fg">${d.fin}</b>`],['Alasan penyesuaian',esc(d.alasan)]]))+subSec('Foto brief',subFoto(2,'foto'));
+  if(a==='promo') return subSec('Harga promo',hkTbl([['Produk',i=>subPN(i.p)],['Sebelum',i=>`<span class="tabular">${rp(i.b)}</span>`,'r'],['Promo',i=>`<b class="fg tabular">${rp(i.v)}</b><span class="xs muted" style="display:block">diskon ${Math.round((1-i.v/i.b)*100)}%</span>`,'r']],d.rows))+subSec('Foto price tag',subFoto(1,'foto'));
+  if(a==='support') return subSec('Task',keyValue([['Task',esc(d.task)],['Sumber',esc(d.sumber)],['Catatan',esc(d.cat)]]))+subSec('Foto bukti',subFoto(1,'foto'));
+  if(a==='loading') return subSec('Pengajuan',keyValue([['Cara tambah produk',esc(d.metode)],['Approver',esc(d.appr)],x.st==='Ditolak'&&['Alasan ditolak',esc(d.alasan)]]))+subSec('Barang dibawa',hkTbl([['Produk',i=>subPN(i.p)],['Jumlah',i=>i.q,'r']],d.items));
+  if(a==='unloading') return subSec('Rekonsiliasi',hkTbl([['Produk',i=>subPN(i.p)],['Loading',i=>i.load,'r'],['Terjual',i=>i.jual,'r'],['Sisa',i=>`<b class="fg tabular">${i.sisa}</b>`,'r']],d.items))+subSec('Penjualan',keyValue([['Cash',rp(d.cash)],['Non cash',rp(d.noncash)],['Approver',esc(d.appr)]]));
+  if(a==='retur') return subSec('Retur',keyValue([['Alasan',esc(d.alasan)]]))+subSec('Produk',hkTbl([['Produk',i=>subPN(i.p)],['Jumlah',i=>i.q,'r'],['Kondisi',i=>tag(i.kond,i.kond==='Layak jual'?'success':'warning')]],d.items))+subSec('Foto barang',subFoto(1,'foto'));
+  if(a==='usulan') return subSec('Data toko',keyValue([['Nama toko',esc(d.nama)],['Pemilik',esc(d.pemilik)],['Kategori',esc(d.kat)],['Alamat',esc(d.alamat)]]))+subSec('Foto toko',subFoto(1,'foto'));
+  if(a==='leads') return subSec('Perubahan leads',keyValue([['Nasabah',esc(d.nasabah)],['Produk',esc(d.produk)],['Status',esc(d.dari)+' → '+esc(d.ke)],['Temperature',d.temp+' dari 5'],['Order ID',d.order?`<span class="mono">${d.order}</span>`:''],['Catatan',esc(d.catatan)]]));
+  if(a==='nasabah') return subSec('Kunjungan',keyValue([['Nasabah',esc(d.nasabah)],['Hasil',esc(d.hasil)]]));
+  if(a==='mitra') return subSec('Jawaban monitoring',hkTbl([['Pertanyaan',r=>esc(r[0])],['Jawaban',r=>`<span class="fg">${esc(r[1])}</span>`]],d.qa));
+  if(a==='tltask') return subSec('Task Team Leader',keyValue([['Pertanyaan',esc(d.tanya)],['Jawaban',esc(d.jawab)]]));
+  return '';
+}
+function subPanel(id){
+  const x=subRows().find(r=>r.id===id); if(!x){ toast('Submission tidak ditemukan','Muat ulang halaman lalu coba lagi.','danger'); return; }
+  const me=byU(x.u), lk=SUB_LINK[x.akt];
+  const head=keyValue([['No. submission',`<span class="mono">${x.id}</span>`],['Sales',esc(me.name)+' · '+esc(me.job)],['Client',esc(clientName(x.cl))],['Cabang',esc(x.cb)],[x.kind==='leads'||x.akt==='loading'||x.akt==='unloading'?'Lokasi':'Toko',esc(x.toko)],['Waktu kirim',fmtIso(x.iso)+' 2026 · '+x.jam+' WIB'],['Status',spill(x.st,SUB_TONE[x.st]||'neutral')]]);
+  const foot=btn('Semua kiriman '+esc(me.name.split(' ')[0]),{v:'outline',on:`closeLayer();setQ({u:'${x.u}',akt:'',st:'',q:''})`})+(lk?btn('Buka '+lk[1],{v:'outline',on:`closeLayer();go('${lk[0]}')`}):'')+btn('Tutup',{v:'accent',on:'closeLayer()'});
+  openPanel(subLbl(x.akt),head+subDetail(x),foot,{sub:esc(me.name)+' · '+fmtIso(x.iso)+' '+x.jam});
+}
+
+const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi,'/kunjungan':pageKunjungan,'/approval':pageApproval,'/target':pageTarget,'/promo':pagePromo,'/insentif':pageInsentif,'/grading':pageGrading,'/leads':pageLeads,'/overdue':pageOverdue,'/company-sim':pageSimco,'/sektor':pageSektor,'/client':pageClient,'/kategori-toko':pageKategori,'/toko':pageToko,'/iam':pageIAM,'/produk':pageProduk,'/penugasan':pagePenugasan,'/pemesanan':pagePemesanan,'/sell-in':pageSellin,'/user-sales':pagePengguna,'/job':pageJob,'/user-admin':pageAdmin,'/parameter':pageParameter,'/aktivitas':pageAktivitas,'/submission':pageSubmission,'/support-task':pageSupportTask,'/canvassing':pageCanvassing,'/posm':pagePosm,'/region':pageRegion,'/brand':pageBrand,'/kategori-produk':pageKatProd,'/kompetitor':pageKompetitor,'/cabang-client':pageCabang,'/mapping-outlet':pageMapOutlet,'/data-penjualan':pageDataJual,'/penagihan':pagePenagihan,'/klaim-biaya':pageKlaim,'/kepatuhan-kunjungan':pageKepatuhan,'/pengumuman':pagePengumuman,'/sinkron':pageSinkron,'/satuan':pageSatuan,'/konversi':pageKonversi,'/sidebar-menu':pageSidebarMenu,'/konfigurasi-aktivitas':pageAktCfg,'/form-penjualan':pageFormJual,'/status-produk':pageStatProd,'/event':pageEvent,'/mitra':pageMitra,'/sku-display':pageSkuDisplay,'/market-share':pageMarketShare,'/quiz':q=>pageKonten(q,'Quiz'),'/survey':q=>pageKonten(q,'Survey'),'/pengaturan':pagePengaturan};
 /* ---------- Dropdown dengan pencarian dan pagination ----------
    Semua <select> otomatis diganti tombol + panel. Select asli tetap ada (tersembunyi), jadi value, onchange, dan id tetap bekerja. */
 (function(){
@@ -5001,7 +5183,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
 /* ---------- Penyimpanan data dashboard (D6) ----------
    Perubahan di dashboard disimpan sebagai snapshot berversi. Data bersama dengan mobile tetap di salesapp.shared.v1.
    Naikkan DASH_VER bila bentuk data contoh berubah, supaya snapshot lama dibuang dan data contoh baru dipakai. */
-const DASH_VER=25;
+const DASH_VER=26;
 const PARAM={};
 const dashData=()=>({D,MD,TOKO,TRX,INFO,POSM,AR,KLAIM,ATT,REK_ADJ,PARAM});
 function restoreInto(t,src){
