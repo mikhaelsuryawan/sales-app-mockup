@@ -1705,7 +1705,7 @@ function meter(score){ const n=36, f=Math.round(score/100*n), col=score>=85?'var
    TABLE
    ===================================================================== */
 function tbSig(){ return location.hash.split('?')[1]||''; }
-function dataTable(key,{cols,rows,rowClick,select,acts,empty='Belum ada data',emptyDesc='Data muncul di sini setelah dicatat dari aplikasi atau dashboard.',perOpts=[12,24,48,96],sort:dsort=null,rowCls=null}){
+function dataTable(key,{cols,rows,rowClick,select,acts,empty='Belum ada data',emptyDesc='Data muncul di sini setelah dicatat dari aplikasi atau dashboard.',perOpts=[12,24,48,96],sort:dsort=null,rowCls=null,colFilters=true}){
   const t=ST.tb[key]||(ST.tb[key]={page:1,per:12,sort:dsort?{i:dsort.i,dir:dsort.dir}:null});
   const sig=tbSig(); if(t.sig!==undefined&&t.sig!==sig){ t.page=1; t.shown=6; t.f={}; t.qs=''; t.open=false; } t.sig=sig;
   const phone=isPhone(); if(!t.shown) t.shown=6;
@@ -1714,7 +1714,7 @@ function dataTable(key,{cols,rows,rowClick,select,acts,empty='Belum ada data',em
   const T=rows.map(r=>cols.map(c=>cellText(c,r))), fl=t.f||(t.f={}), qs=t.qs||'';
   const act=Object.keys(fl).filter(i=>fl[i]&&fl[i].length), words=qs.toLowerCase().split(/\s+/).filter(Boolean);
   let data=rows.filter((r,ri)=>{ const tx=T[ri]; if(words.length){ const hay=tx.join(' ').toLowerCase(); if(!words.every(w=>hay.includes(w))) return false; } return act.every(i=>fl[i].includes(tx[i])); });
-  const bar=tbBar(key,t,cols,T,rows.length,data.length,act.length,qs,pg);
+  const bar=tbBar(key,t,cols,T,rows.length,data.length,act.length,qs,{...pg,noCols:!colFilters});
   if(t.sort&&cols[t.sort.i]){ const c=cols[t.sort.i], get=typeof c.sort==='function'?c.sort:r=>r[c.k];
     data=[...data].sort((a,b)=>{ const x=get(a), y=get(b); if(x==null||x==='') return 1; if(y==null||y==='') return -1; const d=(typeof x==='number'&&typeof y==='number')?x-y:String(x).localeCompare(String(y),'id',{numeric:true}); return d*t.sort.dir; }); }
   const pages=Math.max(1,Math.ceil(data.length/t.per)); if(t.page>pages) t.page=pages;
@@ -1738,7 +1738,7 @@ const isNumCol=(T,i)=>{ const v=T.map(x=>x[i]).filter(x=>x!=='–'); return v.le
 const cellText=(c,r)=>{ try{ return plainTx(c.render?c.render(r):r[c.k])||'–'; }catch(e){ return '–'; } };
 function tbBar(key,t,cols,T,total,shown,nCol,qs,pg){
   const nAct=nCol+(pg.clear?1:0), dirty=nAct>0||!!qs;
-  const fields=cols.map((c,i)=>{ if(!c.label||isNumCol(T,i)) return ''; const vals=[...new Set(T.map(x=>x[i]))]; if(!vals.length||(vals.length===1&&vals[0]==='–')) return '';
+  const fields=pg.noCols?'':cols.map((c,i)=>{ if(!c.label||isNumCol(T,i)) return ''; const vals=[...new Set(T.map(x=>x[i]))]; if(!vals.length||(vals.length===1&&vals[0]==='–')) return '';
     vals.sort((a,b)=>a==='–'?1:b==='–'?-1:a.localeCompare(b,'id',{numeric:true})); const cur=(t.f&&t.f[i])||[];
     return `<label class="field"><span>${c.label}</span><span class="sel" style="display:flex"><select multiple data-col="${i}" data-ph="Semua" style="width:100%" aria-label="Filter ${esc(c.label)}">${vals.slice(0,500).map(v=>`<option value="${esc(v)}" ${cur.includes(v)?'selected':''}>${esc(v)}</option>`).join('')}</select>${I('chev',16)}</span></label>`; }).join('');
   const page=pg.top||pg.selects?`<div class="tbp-page">${pg.top?`<div class="frow">${pg.top}</div>`:''}${pg.selects?`<div class="frow">${pg.selects}</div>`:''}</div>`:'';
@@ -5045,20 +5045,17 @@ function pageSubmission(q){
   const tokoOpts=[...new Set(inRole.map(x=>x.toko))].sort();
   const dirty=q.cl||q.cb||q.tk||q.u||q.q||q.akt||q.st||q.from||q.to||(q.per&&q.per!=='w');
   const stTog=k=>`setQ({st:'${q.st===k?'':k}'})`;
-  const filt=card('Filter',`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">${pills(REP_PRESETS.map(p=>[p[0],p[1]]),(REP_PRESETS.find(x=>x[2][0]===r.from&&x[2][1]===r.to)||[''])[0],'subPer')}${rangePicker({id:'sub',from:r.from,to:r.to,min:LD_START,max:LD_END,on:'subDate',presets:REP_PRESETS})}</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-      ${sel([['','Semua sales'],...users.map(s=>[s.u,s.name])],q.u||'',"setQ({u:this.value})",{label:'Filter sales',cls:'sm'})}
+  filterCard({top:`${pills(REP_PRESETS.map(p=>[p[0],p[1]]),(REP_PRESETS.find(x=>x[2][0]===r.from&&x[2][1]===r.to)||[''])[0],'subPer')}${rangePicker({id:'sub',from:r.from,to:r.to,min:LD_START,max:LD_END,on:'subDate',presets:REP_PRESETS})}`,
+    selects:`${sel([['','Semua sales'],...users.map(s=>[s.u,s.name])],q.u||'',"setQ({u:this.value})",{label:'Filter sales',cls:'sm'})}
       ${sel([['','Semua klien'],...live('client').filter(c=>c.status==='Aktif').map(c=>[c.id,c.name])],q.cl||'',"setQ({cl:this.value,tk:''})",{label:'Filter klien',cls:'sm'})}
       ${sel([['','Semua cabang'],...CABANG.slice(1)],q.cb||'',"setQ({cb:this.value,tk:''})",{label:'Filter cabang',cls:'sm'})}
       ${role==='leads'?'':sel([['','Semua toko'],...tokoOpts.map(t=>[t,t])],q.tk||'',"setQ({tk:this.value})",{label:'Filter toko',cls:'sm'})}
-      ${sel(SUB_ST,q.st||'',"setQ({st:this.value})",{label:'Filter status',cls:'sm'})}
-      <form style="flex:1;min-width:180px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari submission</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari no., sales, toko, atau isi"></label></form>
-      ${dirty?btn('Hapus filter',{v:'ghost',size:'sm',on:"setQ({cl:'',cb:'',tk:'',u:'',q:'',akt:'',st:'',from:'',to:'',per:''})"}):''}</div>
-    <p class="xs muted" style="margin-top:12px">Menampilkan <b class="fg">${repLabel(q)}</b>. Data contoh 20 sampai 26 Okt 2026; kiriman dari aplikasi mobile belum masuk ke halaman ini. <b>Usulan</b>: menu ini belum ada di BRD atau URD.</p>`);
+      ${sel(SUB_ST,q.st||'',"setQ({st:this.value})",{label:'Filter status',cls:'sm'})}`,
+    clear:dirty?"setQ({cl:'',cb:'',tk:'',u:'',q:'',akt:'',st:'',from:'',to:'',per:''})":'',
+    summary:`Menampilkan <b class="fg">${repLabel(q)}</b>. Data contoh 20 sampai 26 Okt 2026; kiriman dari aplikasi mobile belum masuk ke halaman ini. <b>Usulan</b>: menu ini belum ada di BRD atau URD.`});
   const aktPills=pills([['','Semua aktivitas',base.length],...SUB_BY_ROLE[role].map(a=>[a,subLbl(a),base.filter(x=>x.akt===a).length])],q.akt||'','subAkt');
   return {title:'Submission by role',html:`
   <div style="margin-bottom:14px">${pills(SUB_ROLES.map(([k,l])=>[k,l,inR.filter(x=>x.kind===k).length]),role,'subTab')}</div>
-  <div style="margin-bottom:16px">${filt}</div>
   <div class="stats">
     ${statCard({label:'Total submission',value:num(scope.length),hint:lapor+' dari '+users.length+' sales mengirim',icon:'file',tone:'ink'})}
     ${statCard({label:'Selesai',value:num(nDone),hint:q.st==='done'?'Filter aktif · klik untuk hapus':'Terkirim, disetujui, atau selesai',icon:'check',tone:'success',on:stTog('done'),active:q.st==='done'})}
@@ -5066,7 +5063,7 @@ function pageSubmission(q){
     ${statCard({label:'Menunggu',value:num(nWait),hint:q.st==='wait'?'Filter aktif · klik untuk hapus':'Approval, verifikasi, atau pesanan baru',icon:'clock',tone:nWait?'info':'neutral',on:stTog('wait'),active:q.st==='wait'})}
   </div>
   <div style="margin-bottom:12px;overflow-x:auto" class="no-scrollbar">${aktPills}</div>
-  ${card('Daftar submission',dataTable('sub_'+role,{rows,rowClick:x=>`subPanel('${x.id}')`,empty:'Tidak ada submission dengan filter ini.',emptyDesc:'Ubah periode atau hapus filter untuk melihat kiriman lain.',cols:[
+  ${card('Daftar submission',dataTable('sub_'+role,{rows,rowClick:x=>`subPanel('${x.id}')`,colFilters:false,empty:'Tidak ada submission dengan filter ini.',emptyDesc:'Ubah periode atau hapus filter untuk melihat kiriman lain.',cols:[
       {label:'Aktivitas',render:x=>`<span style="display:flex;gap:10px;align-items:center">${iconTile(SUB_AKT[x.akt][1],{tone:'soft',size:'sm'})}<span><span class="fg" style="font-weight:500">${subLbl(x.akt)}</span><span class="mono xs muted" style="display:block">${x.id}</span></span></span>`,prim:true},
       {label:'Sales',render:x=>`<span style="display:flex;gap:8px;align-items:center">${av(byU(x.u).name)}<span class="fg">${esc(byU(x.u).name)}</span></span>`},
       {label:role==='leads'?'Lokasi':'Toko',render:x=>`<span class="fg">${esc(x.toko)}</span><span class="xs muted" style="display:block">${esc(clientName(x.cl))}</span>`,hide:true},
