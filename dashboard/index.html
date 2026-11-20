@@ -4863,24 +4863,21 @@ function hkView(q){
   const tokoOpts=live('toko').filter(t=>t.status==='Aktif'&&(!q.cl||t.client===q.cl)&&(!q.cb||t.cabang===q.cb));
   const dirty=q.cl||q.cb||q.tk||role||q.q||q.from||q.to||(q.per&&q.per!=='d');
   const stat=(l,v,sub,on,act)=>`<button class="stat ${act?'on':''}" onclick="${on}"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></button>`;
-  const filt=card('Filter',`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">${pills(REP_PRESETS.map(p=>[p[0],p[1]]),(REP_PRESETS.find(x=>x[2][0]===r.from&&x[2][1]===r.to)||[''])[0],'hkPer')}${rangePicker({id:'hk',from:r.from,to:r.to,min:LD_START,max:LD_END,on:'hkDate',presets:REP_PRESETS})}</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-      ${sel(HK_ROLES,role,"setQ({r:this.value})",{label:'Filter peran',cls:'sm'})}
+  filterCard({top:`${pills(REP_PRESETS.map(p=>[p[0],p[1]]),(REP_PRESETS.find(x=>x[2][0]===r.from&&x[2][1]===r.to)||[''])[0],'hkPer')}${rangePicker({id:'hk',from:r.from,to:r.to,min:LD_START,max:LD_END,on:'hkDate',presets:REP_PRESETS})}`,
+    selects:`${sel(HK_ROLES,role,"setQ({r:this.value})",{label:'Filter peran',cls:'sm'})}
       ${sel([['','Semua klien'],...clients.map(c=>[c.id,c.name])],q.cl||'',"setQ({cl:this.value,tk:''})",{label:'Filter klien',cls:'sm'})}
       ${sel([['','Semua cabang'],...CABANG.slice(1)],q.cb||'',"setQ({cb:this.value,tk:''})",{label:'Filter cabang',cls:'sm'})}
-      ${sel([['','Semua toko'],...tokoOpts.map(t=>[t.id,t.name])],q.tk||'',"setQ({tk:this.value})",{label:'Filter toko',cls:'sm'})}
-      <form style="flex:1;min-width:180px" onsubmit="event.preventDefault();setQ({q:this.q.value})"><label class="inp h40"><span class="sr-only">Cari sales</span>${I('search',16)}<input name="q" value="${esc(q.q||'')}" placeholder="Cari nama sales"></label></form>
-      ${dirty?btn('Hapus filter',{v:'ghost',size:'sm',on:"setQ({cl:'',cb:'',tk:'',r:'',q:'',f:'',from:'',to:'',per:''})"}):''}</div>
-    <p class="xs muted" style="margin-top:12px">Menampilkan <b class="fg">${hkLabel(q)}</b>: ${all.length} sales, ${T} pekerjaan (${D_} selesai). Data aktivitas di mockup baru ada sejak 25 Okt 2026 (SKU display, tugas FMCG dan MD), stok bawaan, display share, dan kunjungan sejak 26 Okt. <b>Usulan</b>: tab ini belum ada di BRD atau URD.</p>`);
+      ${sel([['','Semua toko'],...tokoOpts.map(t=>[t.id,t.name])],q.tk||'',"setQ({tk:this.value})",{label:'Filter toko',cls:'sm'})}`,
+    clear:dirty?"setQ({cl:'',cb:'',tk:'',r:'',q:'',f:'',from:'',to:'',per:''})":'',
+    summary:`Menampilkan <b class="fg">${hkLabel(q)}</b>: ${all.length} sales, ${T} pekerjaan (${D_} selesai). Data aktivitas di mockup baru ada sejak 25 Okt 2026 (SKU display, tugas FMCG dan MD), stok bawaan, display share, dan kunjungan sejak 26 Okt. <b>Usulan</b>: tab ini belum ada di BRD atau URD.`});
   return {html:`
-  <div style="margin-bottom:16px">${filt}</div>
   <div class="stats">
     ${stat('Sales melapor',lapor+' dari '+all.length,f==='lapor'?'Filter aktif · klik untuk hapus':'Klik untuk lihat yang sudah input',`setQ({f:'${f==='lapor'?'':'lapor'}'})`,f==='lapor')}
     ${stat('Total pekerjaan',T,(T-D_)+' belum selesai · '+D_+' selesai',`setQ({f:'${f==='belum'?'':'belum'}'})`,f==='belum')}
     ${stat('Pekerjaan selesai',T?Math.round(D_/T*100)+'%':'–',D_+' dari '+T+' · buka log aktivitas',"setQ({tab:'log'})")}
     ${stat('Perlu tindak lanjut',nflag+' sales',f==='flag'?'Filter aktif · klik untuk hapus':'SKU rusak, retur, draft, usulan',`setQ({f:'${f==='flag'?'':'flag'}'})`,f==='flag')}
   </div>
-  ${card('Aktivitas Sales',dataTable('hk',{rows,rowClick:x=>`hkPanel('${x.u}')`,empty:'Tidak ada sales dengan filter ini.',cols:[
+  ${card('Aktivitas Sales',dataTable('hk',{rows,rowClick:x=>`hkPanel('${x.u}')`,colFilters:false,empty:'Tidak ada sales dengan filter ini.',cols:[
       {label:'Sales',render:x=>`<span style="display:flex;gap:10px;align-items:center">${av(x.me.name)}<span><span class="fg" style="font-weight:500">${esc(x.me.name)}</span><span class="xs muted" style="display:block">${esc(x.me.job)}</span></span></span>`,prim:true},
       {label:'Klien',render:x=>esc(x.sc.cl.map(clientName).join(', ')),hide:true},
       {label:'Cabang',render:x=>esc(x.sc.cb.join(', ')),hide:true},
