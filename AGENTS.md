@@ -52,7 +52,8 @@ Mockup HTML Sales App SIMGROUP untuk demo ke klien, bukan kode produk. Dua mocku
 - Deploy: Vercel dari branch `main`. Jangan deploy atau publikasi tanpa konfirmasi pengguna.
 
 ## Peta
-- `index.html`: pemilih Mobile atau Dashboard. `assets/`: logo.
+- `index.html`: pemilih Mobile atau Dashboard. `assets/`: logo dan gambar pratinjau login.
+- `login/index.html`: halaman masuk. Ketiga halaman lain memuat guard pendek di `<head>` yang mengarahkan ke `/login/` bila belum masuk.
 - `mobile/index.html`: satu file, tampil sebagai frame iPhone di desktop dan layar penuh di HP.
 - `dashboard/index.html`: satu file, tema terang dan gelap.
 - Tautan antar mockup memakai jalur relatif (`../dashboard/`, `../mobile/`).

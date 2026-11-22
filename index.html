@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
+<script>/* Gerbang akses mockup: belum masuk, arahkan ke /login/. Hanya penghalang ringan, bukan keamanan. */(function(){try{var k='mockupGate.auth';if(localStorage.getItem(k)==='ok'||sessionStorage.getItem(k)==='ok')return;}catch(e){return;}location.replace('/login/?next='+encodeURIComponent(location.pathname+location.search+location.hash));})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SIM Group Sales App</title>
 <meta name="description" content="Pilih mockup Sales App SIMGROUP: aplikasi mobile atau dashboard web.">
@@ -43,7 +44,11 @@ ul{margin:4px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
 li{font-size:12px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
 .go{margin-top:auto;padding-top:8px;font-weight:700;font-size:14px;color:var(--blue-700)}
 @media (prefers-color-scheme:dark){.tag,.go{color:#8FB0FF}}
-footer{margin-top:22px;color:#fff;opacity:.85;font-size:12px}
+footer{margin-top:22px;color:#fff;font-size:12px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+footer span{opacity:.85}
+.out{font:700 12.5px "Plus Jakarta Sans",system-ui,sans-serif;color:#fff;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);border-radius:10px;padding:8px 14px;min-height:36px;cursor:pointer}
+.out:hover{background:rgba(255,255,255,.26)}
+.out:focus-visible{outline:3px solid var(--tan);outline-offset:2px}
 @media (max-width:640px){.grid{grid-template-columns:1fr}a.card{padding:20px}}
 @media (prefers-reduced-motion:reduce){a.card{transition:none}}
 </style>
@@ -72,7 +77,8 @@ footer{margin-top:22px;color:#fff;opacity:.85;font-size:12px}
       <span class="go">Buka dashboard →</span>
     </a>
   </div>
-  <footer>Semua data di mockup ini fiktif dan tidak tersimpan setelah halaman dimuat ulang.</footer>
+  <footer><span>Semua data di mockup ini fiktif dan tidak tersimpan setelah halaman dimuat ulang.</span><button type="button" class="out" id="keluar">Keluar dari mockup</button></footer>
+<script>document.getElementById('keluar').addEventListener('click',function(){try{localStorage.removeItem('mockupGate.auth');sessionStorage.removeItem('mockupGate.auth');}catch(e){}location.replace('/login/');});</script>
 </main>
 </body>
 </html>

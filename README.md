@@ -4,9 +4,18 @@ Mockup HTML Sales App SIMGROUP dalam satu deploy. Halaman awal memilih **Mobile*
 
 | Jalur | Isi |
 |---|---|
+| `/login/` | Halaman masuk sebelum membuka mockup |
 | `/` | Pemilih Mobile atau Dashboard |
 | `/mobile/` | Aplikasi sales lapangan (frame iPhone di desktop) |
 | `/dashboard/` | Dashboard web, tema terang dan gelap |
+
+## Akses
+
+Setiap halaman mengarahkan ke `/login/` bila belum masuk. Kredensial dibagikan tim proyek dan tercantum di FSD (repo `docs`), tidak ditulis di repo ini karena repo bersifat publik. Kode hanya menyimpan hash SHA-256 dari `username:password`.
+
+Ini penghalang ringan agar tautan tidak dibuka sembarang orang, bukan pengamanan: pemeriksaan terjadi di browser. Sesi disimpan di key `mockupGate.auth` (localStorage bila "Ingat saya" dicentang, sessionStorage bila tidak). Tombol **Keluar dari mockup** di halaman pemilih menghapusnya. Reset data demo di dashboard tidak ikut menghapus sesi ini.
+
+Mengganti kredensial: hitung `printf 'user:password' | shasum -a 256`, lalu ganti nilai `HASH` di `login/index.html`.
 
 ## Menjalankan lokal
 
