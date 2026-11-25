@@ -566,6 +566,26 @@ const TEAM = [
   {u:'sales.dimas',status:'Cuti',time:'–',mode:'–',tone:'blue',sales:'–'},
   {u:'rea.nina',status:'Belum absen',time:'–',mode:'WFO',tone:'red',sales:'–'}
 ];
+/* Info perangkat absensi (feedback AMO baris 3: "mencatat device info, misalnya jenis hp
+   samsung/iphone"). Perangkat per pengguna dibuat tetap supaya demo bisa dibandingkan. */
+const DEVICES = {
+  'spg.rina':    {hp:'Samsung Galaxy A54 5G', os:'Android 14', app:'1.0.0'},
+  'fmcg.tari':   {hp:'Xiaomi Redmi Note 13', os:'Android 14', app:'1.0.0'},
+  'sales.budi':  {hp:'iPhone 13', os:'iOS 18.1', app:'1.0.0'},
+  'sales.dimas': {hp:'OPPO A78', os:'Android 13', app:'1.0.0'},
+  'cbd.tono':    {hp:'Samsung Galaxy S23', os:'Android 15', app:'1.0.0'},
+  'rea.nina':    {hp:'iPhone SE 2022', os:'iOS 17.5', app:'1.0.0'},
+  'md.rangga':   {hp:'realme 11 Pro', os:'Android 14', app:'1.0.0'},
+  'bantuan.eko': {hp:'vivo Y27', os:'Android 13', app:'1.0.0'},
+  'bantuan.citra':{hp:'Infinix Hot 40', os:'Android 13', app:'1.0.0'},
+  'spv.sari':    {hp:'iPhone 14 Pro', os:'iOS 18.2', app:'1.0.0'},
+  'spv.hendra':  {hp:'Samsung Galaxy A35', os:'Android 14', app:'1.0.0'},
+  'spv.lia':     {hp:'iPhone 12', os:'iOS 17.6', app:'1.0.0'}
+};
+const DEV_FALLBACK = {hp:'Samsung Galaxy A14', os:'Android 13', app:'1.0.0'};
+const dev = () => DEVICES[S.user] || DEV_FALLBACK;
+const devText = () => dev().hp + ' · ' + dev().os;
+
 const MONTHS_BACK = [
   {d:'Sab, 24 Okt',st:'Hadir',in:'07:51',out:'17:08',tone:'green'},
   {d:'Jum, 23 Okt',st:'Terlambat · disetujui',in:'08:14',out:'17:20',tone:'amber'},
@@ -658,7 +678,7 @@ function freshState0(){
     bawa:{rc18:8,bl11:6,st3:9,kp16:5,ds72:2}, kembali:{}, muatInv:[], receipt:false, unload:{terjual:0,retur:0,kembali:0,uang:''},
     shareClient:{tv50:6,tv43:12}, shareComp:[{cb:'ARUNIKA',brand:'Samsung',path:'TV/Smart TV',nama:'Samsung Crystal 55"',qty:14,harga:0},{cb:'ARUNIKA',brand:'LG',path:'TV/Smart TV/Google TV',nama:'LG UHD 50"',qty:10,harga:0},{cb:'ARUNIKA',brand:'Samsung',path:'Kulkas/2 Pintu/Inverter',nama:'Samsung 2 Pintu 300 L',qty:5,harga:0}], shareBrand:'ARUNIKA', sharePath:['TV'], shareState:null,
     quizDone:false, quizScore:null, surveyDone:false,
-    myRequests:[], newToko:seedToko(),
+    myRequests:[], newToko:seedToko(), logAkun:{},
     cart:null, ord:null
   };
 }
@@ -846,6 +866,7 @@ function doLogin(){
 }
 function loginAs(u){
   S.user=u; S.demo.mode=null; fmSyncVisits();
+  logAdd('Login','Berhasil','key','');
   if(!S.enrolled[u]) reset('enroll-intro'); else reset('home');
   renderPanel();
 }
@@ -1106,7 +1127,7 @@ SCR.absensi = () => {
     </div>
     <div class="sec-title">Riwayat Oktober 2026</div>
     <div class="list">
-      ${a.in?`<div class="li"><div class="grow"><div class="t">Sen, 26 Okt</div><div class="s num">Masuk ${a.in.time} · Pulang ${a.out?a.out.time:'--:--'} · ${a.in.mode}</div></div>${chip(a.in.late?'Terlambat · menunggu':'Hadir',a.in.late?'amber':'green')}</div>`:''}
+      ${a.in?`<div class="li"><div class="grow"><div class="t">Sen, 26 Okt</div><div class="s num">Masuk ${a.in.time} · Pulang ${a.out?a.out.time:'--:--'} · ${a.in.mode}</div><div class="s">${I('phone',12)} ${esc(a.in.dev||devText())}</div></div>${chip(a.in.late?'Terlambat · menunggu':'Hadir',a.in.late?'amber':'green')}</div>`:''}
       ${MONTHS_BACK.map(d=>`<div class="li"><div class="grow"><div class="t">${d.d}</div><div class="s num">Masuk ${d.in} · Pulang ${d.out}</div></div>${chip(d.st,d.tone)}</div>`).join('')}
     </div>
   </main>`};
@@ -1184,8 +1205,8 @@ SCR['absen-telat'] = p => { const early=p.kind==='early';
 };
 function finishAbsen(m,lateReason){
   const a=att();
-  if(m==='in') a.in={time:clock(),mode:mode(),place:mode()==='WFO'?U().place:'Jl. Kemang Raya No. 10',late:!!lateReason};
-  else { a.out={time:outTime(),early:!!lateReason}; const v=visitOpen(); if(v){ closeVisit(v,a.out.time,'Otomatis'); setTimeout(()=>toast('Check-out otomatis dari '+v.place,'pin'),400); } }
+  if(m==='in') a.in={time:clock(),mode:mode(),place:mode()==='WFO'?U().place:'Jl. Kemang Raya No. 10',late:!!lateReason,dev:devText()};
+  else { a.out={time:outTime(),early:!!lateReason,dev:devText()}; const v=visitOpen(); if(v){ closeVisit(v,a.out.time,'Otomatis'); setTimeout(()=>toast('Check-out otomatis dari '+v.place,'pin'),400); } }
   S.stack=S.stack.filter(e=>!e.name.startsWith('absen-'));
   go('absen-sukses',{mode:m});
 }
@@ -1200,6 +1221,7 @@ SCR['absen-sukses'] = p => {
       <div class="kv"><span>Mode</span><span>${a.in.mode}</span></div>
       <div class="kv"><span>Lokasi</span><span>${a.in.place}</span></div>
       <div class="kv"><span>Face match</span><span style="color:var(--green)">Cocok 96%</span></div>
+      <div class="kv"><span>Perangkat</span><span>${esc((isIn?a.in.dev:a.out.dev)||devText())}</span></div>
     </div>${isIn?'':daySummary()}</div></main>
   <footer class="actions"><button class="btn" onclick="reset('home')">Ke beranda</button></footer>`};
 };
@@ -3681,24 +3703,57 @@ SCR.akun = () => {
       <button class="li" onclick="go('wajah')"><div class="ico-tile">${I('face',20)}</div><div class="grow"><div class="t">Wajah referensi</div><div class="s">Direkam 26 Okt 2026</div></div>${I('right',20)}</button>
       <button class="li" onclick="go('notif-absen')"><div class="ico-tile">${I('bell',20)}</div><div class="grow"><div class="t">Notifikasi absen</div><div class="s">Pengingat dan suara</div></div>${I('right',20)}</button>
       <button class="li" onclick="go('password')"><div class="ico-tile">${I('key',20)}</div><div class="grow"><div class="t">Ganti password</div></div>${I('right',20)}</button>
+      <button class="li" onclick="go('log-aktivitas')"><div class="ico-tile">${I('file',20)}</div><div class="grow"><div class="t">Log aktivitas</div><div class="s">Login, logout, dan ubah password</div></div>${I('right',20)}</button>
       <button class="li" onclick="tab('absensi')"><div class="ico-tile">${I('calendar',20)}</div><div class="grow"><div class="t">Riwayat absensi</div></div>${I('right',20)}</button>
       <button class="li" onclick="sheet('<h3 style=&quot;font-size:18px;font-weight:800&quot;>Keluar dari aplikasi?</h3><p class=&quot;small muted&quot; style=&quot;margin:6px 0 16px&quot;>Kamu perlu login lagi dengan username dan password.</p><button class=&quot;btn danger&quot; onclick=&quot;closeSheet();logout()&quot;>Keluar</button>')"><div class="ico-tile red">${I('logout',20)}</div><div class="grow"><div class="t" style="color:var(--red)">Keluar</div></div></button>
     </div>
     <p class="hint" style="text-align:center;margin-top:18px">SIM Sales App v1.0.0</p>
   </main>`};
 };
-function logout(){ const u=S.user; S.user=null; reset('login',{u}); renderPanel(); }
+function logout(){ const u=S.user; logAdd('Logout','Keluar dari aplikasi','logout',''); S.user=null; reset('login',{u}); renderPanel(); }
 SCR.wajah = () => ({note:'Wajah referensi tersimpan. Penggantian wajah butuh persetujuan HR agar tidak disalahgunakan.',
   html:`${appbar('Wajah referensi')}<main class="content" style="text-align:center">
   <div style="width:200px;height:250px;margin:16px auto;border-radius:100px;overflow:hidden;background:#3A5566"><svg viewBox="0 0 250 320" width="200" height="250"><rect width="250" height="320" fill="#3A5566"/><ellipse cx="125" cy="140" rx="54" ry="66" fill="#D9B79B"/><path d="M30 330c6-62 44-96 95-96s89 34 95 96z" fill="#0B4D70"/><path d="M71 120c4-44 30-62 54-62s52 18 54 62c-10-22-28-30-54-30s-44 8-54 30z" fill="#3B2A20"/></svg></div>
   <b>Direkam 26 Okt 2026, 07:46</b><p class="small muted" style="margin-top:6px;line-height:1.5">Dipakai untuk mencocokkan selfie setiap absen.</p>
   <button class="btn ghost" style="margin-top:22px" onclick="toast('Permintaan rekam ulang dikirim ke HR')">Minta rekam ulang</button></main>`});
-SCR.password = () => ({note:'Ganti password. Perubahan disinkronkan ke akun SIM.',
+/* Log aktivitas akun (feedback AMO baris 4: "pencatatan log bisa dilakukan, untuk ubah
+   password hanya bisa dilakukan di SIM SIAP / BPR"). Login dan logout dicatat di sini;
+   baris ubah password selalu menunjuk SIM SIAP sebagai tempat perubahannya. */
+const LOG_LAMA = [
+  {ev:'Login',      tgl:'Sen, 26 Okt 2026', jam:'07:44', ket:'Berhasil',               ic:'key',    tone:''},
+  {ev:'Logout',     tgl:'Sab, 24 Okt 2026', jam:'17:12', ket:'Keluar dari aplikasi',   ic:'logout', tone:''},
+  {ev:'Login',      tgl:'Sab, 24 Okt 2026', jam:'07:48', ket:'Berhasil',               ic:'key',    tone:''},
+  {ev:'Login gagal',tgl:'Sab, 24 Okt 2026', jam:'07:46', ket:'Password salah',         ic:'alert',  tone:'red'},
+  {ev:'Ubah password', tgl:'Jum, 23 Okt 2026', jam:'19:20', ket:'Diubah lewat SIM SIAP', ic:'key',  tone:'tan'}
+];
+/* Log disimpan per pengguna; akun lain tidak boleh melihat jejak akun ini. */
+function logAdd(ev,ket,ic,tone){
+  if(!S.user) return;
+  const k=S.user, L=S.logAkun[k]||[];
+  S.logAkun[k]=[{ev,tgl:'Sen, 26 Okt 2026',jam:clock(),ket,ic:ic||'key',tone:tone||''},...L];
+}
+SCR['log-aktivitas'] = () => {
+  const baris=[...((S.logAkun||{})[S.user]||[]), ...LOG_LAMA];
+  return {note:'Log aktivitas akun (feedback AMO): pencatatan login, logout, dan percobaan gagal. Ubah password tidak dilakukan di aplikasi ini melainkan di SIM SIAP / BPR, jadi di log hanya tercatat sebagai kejadian. Perangkat yang dipakai ikut dicatat supaya ketahuan kalau akun dipakai di HP lain.',
+  html:`${appbar('Log aktivitas')}<main class="content">
+    <div class="card"><div class="kv"><span>Perangkat sekarang</span><span>${esc(dev().hp)}</span></div>
+      <div class="kv"><span>Sistem operasi</span><span>${esc(dev().os)}</span></div>
+      <div class="kv"><span>Versi aplikasi</span><span class="num">${esc(dev().app)}</span></div>
+      <p class="hint">${I('refresh',13,2)} Info perangkat ikut terkirim setiap absen.</p></div>
+    <div class="sec-title">Riwayat aktivitas</div>
+    <div class="list">${baris.map(l=>`<div class="li"><div class="ico-tile ${l.tone}">${I(l.ic,20)}</div><div class="grow"><div class="t">${esc(l.ev)}</div><div class="s">${esc(l.tgl)} · <span class="num">${esc(l.jam)}</span> · ${esc(l.ket)}</div><div class="s">${esc(devText())}</div></div></div>`).join('')}</div>
+    <p class="hint" style="margin-top:12px">Log disimpan 90 hari dan bisa dilihat admin di dashboard.</p>
+  </main>`};
+};
+SCR.password = () => ({note:'<b>Feedback AMO:</b> ubah password hanya bisa dilakukan di SIM SIAP / BPR, bukan di aplikasi ini. Layar ini mengarahkan ke portal SIM SIAP dan kejadiannya tercatat di Log aktivitas.',
   html:`${appbar('Ganti password')}<main class="content">
-  <label class="field"><span>Password lama</span><input class="input" type="password"></label>
-  <label class="field"><span>Password baru</span><input class="input" type="password"><div class="hint">Minimal 8 karakter, kombinasi huruf dan angka.</div></label>
-  <label class="field"><span>Ulangi password baru</span><input class="input" type="password"></label>
-  </main><footer class="actions"><button class="btn" onclick="back();toast('Password diperbarui')">Simpan password</button></footer>`});
+  <div class="card" style="text-align:center;padding:22px 16px"><div class="ico-tile" style="margin:0 auto 10px">${I('key',22)}</div>
+    <b style="font-size:16px">Password diubah di SIM SIAP</b>
+    <p class="small muted" style="margin-top:8px;line-height:1.5">Akun kamu dikelola sistem kepegawaian SIM (BPR). Supaya satu password berlaku untuk semua aplikasi, penggantian dilakukan di portal SIM SIAP.</p></div>
+  <div class="card"><div class="kv"><span>Username</span><span>${esc(S.user)}</span></div><div class="kv"><span>Terakhir diubah</span><span>23 Okt 2026</span></div>
+    <p class="hint">${I('refresh',13,2)} Perubahan di SIM SIAP langsung berlaku di aplikasi ini.</p></div>
+  <p class="hint" style="margin-top:12px">Lupa password saat belum masuk? Pakai tautan Lupa password di halaman login.</p>
+  </main><footer class="actions"><button class="btn" onclick="go('sim-siap',{pg:'profil'})">${I('globe',20)} Buka SIM SIAP</button></footer>`});
 
 /* =========================================================
    RENDER

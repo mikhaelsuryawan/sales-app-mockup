@@ -335,3 +335,29 @@ Dijalankan sendiri, bukan klaim: tanpa error konsol pada 8 role; tanpa overflow 
 375, 768, dan 1440 px (dicek lewat CDP, skrip di `cache/scratch/cek_overflow.py`); alur approval
 diuji sampai tuntas termasuk tolak tanpa alasan (ditolak) dan tolak dengan alasan (kunjungan hilang
 dari daftar sales).
+
+## Slice: info perangkat absensi dan log aktivitas akun
+
+Menjawab feedback AMO baris 3 dan 4.
+
+**Yang dikerjakan**
+
+- Info perangkat (`DEVICES`, `dev()`, `devText()`): tipe HP, OS, dan versi aplikasi per
+  pengguna. Dicatat saat absen masuk dan pulang (`a.in.dev`, `a.out.dev`), tampil di layar
+  sukses absen dan di riwayat absensi. Perangkat dibuat tetap per akun supaya demo bisa
+  dibandingkan antar role.
+- Layar `log-aktivitas` (menu baru di Akun): login, logout, percobaan gagal, dan ubah
+  password. Login dan logout dicatat betulan lewat `logAdd()` di `loginAs()` dan `logout()`.
+- Log disimpan **per pengguna** (`S.logAkun[username]`), bukan satu daftar bersama; akun lain
+  tidak bisa melihat jejak akun ini.
+- Layar `password` tidak lagi berisi form ganti password. AMO menyatakan ubah password hanya
+  bisa di SIM SIAP / BPR, jadi layar ini mengarahkan ke portal SIM SIAP dan menjelaskan
+  alasannya. Form lama menjanjikan hal yang tidak akan ada di produksi.
+
+**Bukti**
+
+- Perangkat tersimpan di `att().in.dev` dan tampil di layar sukses absen serta riwayat.
+- Log terpisah per akun diuji: `sales.budi` (iPhone 13) dan `spg.rina` (Galaxy A54) tidak
+  saling melihat jejak.
+- Layar `password` tidak lagi punya field "Password lama"; tombolnya membuka SIM SIAP.
+- Tanpa overflow horizontal di 375/768/1440 px, 0 error konsol.
