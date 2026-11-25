@@ -3067,8 +3067,8 @@ function dispDelSheet(i){ const d=S.disp[i];
   <button class="btn danger" onclick="S.disp.splice(${i},1);closeSheet();render(false,true);toast('Display dihapus')">Hapus display</button><button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Batal</button>`); }
 SCR['spg-sku'] = () => {
   const L=S.disp, cats=katOpts(), sc=skuCfg(), canAdd=sc.multi||!L.length;
-  const btns=i=>[sc.metode.includes('manual')?`<button class="btn ghost sm grow" onclick="act(()=>go('spg-sku-item',{d:${i},ph:0}))">${I('plus',18)} Tambah produk</button>`:''].join('');
-  return {note:`SKU display (MOM 7). Diatur di dashboard per role: cara menambah produk (Tambah produk), minimal ${sc.foto} foto per produk, dan ${sc.multi?'boleh':'tidak boleh'} lebih dari satu display. Kategori dipilih di form Tambah produk, dari master Kategori produk.`,
+  const btns=i=>[sc.metode.includes('qr')?`<button class="btn ghost sm grow" onclick="act(()=>go('scan',{mode:'spgsku',d:${i}}))">${I('barcode',18)} Scan QR</button>`:'',sc.metode.includes('manual')?`<button class="btn ghost sm grow" onclick="act(()=>go('spg-sku-item',{d:${i},ph:0}))">${I('plus',18)} Tambah produk</button>`:''].join('');
+  return {note:`SKU display (MOM 7). Diatur di dashboard per role: cara menambah produk (Scan QR dan Tambah produk), minimal ${sc.foto} foto per produk, dan ${sc.multi?'boleh':'tidak boleh'} lebih dari satu display. Kategori dipilih di form Tambah produk, dari master Kategori produk.`,
   html:`${appbar('SKU display')}<main class="content">
     <div class="row between" style="margin:0 2px 12px"><b>Hari ini · 26 Okt 2026</b>${stChip(skuStatus())}</div>
     ${!L.length?`<div class="card" style="text-align:center;padding:24px 18px"><div class="ico-tile tan" style="margin:0 auto 12px;width:52px;height:52px">${I('grid',24)}</div><b>Belum ada display</b><p class="small muted" style="margin:6px 0 16px;line-height:1.5">Tambah display, pilih kategorinya, lalu masukkan produk yang dipajang.</p>
@@ -3087,12 +3087,25 @@ SCR['spg-sku-item'] = p => {
   html:`${appbar(edit?'Ubah produk':p.qr?'Hasil scan QR':'Tambah produk')}<main class="content">
     <p class="small muted" style="margin:0 2px 12px">${esc(d.name)}</p>
     ${p.qr?`<div class="banner blue" style="margin-bottom:14px">${I('barcode',18)}<span>Nama produk terisi otomatis dari scan QR${p.sku?' ('+esc(p.sku)+')':''}.${min?' Ambil minimal '+min+' foto produk.':''}</span></div>`:''}
-    <label class="field"><span>Kategori *</span><select class="input" id="si_c" onchange="cur().p.cat=this.value;cur().p.name=val('si_n')"><option value="">Pilih kategori</option>${katOpts().map(([cv,cl])=>`<option value="${esc(cv)}" ${p.cat===cv?'selected':''}>${esc(cl)}</option>`).join('')}</select></label>
+    <div class="field"><span>Kategori *</span><input type="hidden" id="si_c" value="${esc(p.cat||'')}"><button type="button" class="input" style="display:flex;align-items:center;gap:8px;text-align:left" onclick="skuCatSheet()" aria-haspopup="dialog"><span class="grow" style="${p.cat?'':'color:var(--muted)'}">${p.cat?esc((katOpts().find(([cv])=>cv===p.cat)||[,katName(p.cat)])[1]):'Pilih kategori'}</span><span style="color:var(--muted);display:flex">${I('down',20)}</span></button></div>
     <label class="field"><span>Nama produk *</span><input class="input" id="si_n" value="${esc(p.name||'')}" placeholder="Merek dan tipe produk"></label>
     <div class="field"><span>Foto produk${min?' * (minimal '+min+')':' (opsional)'}</span><div class="thumbs">${Array.from({length:ph}).map(()=>`<div class="thumb">${I('image',22)}</div>`).join('')}<button class="thumb add" onclick="setP({name:val('si_n'),cat:val('si_c'),ph:${ph+1}});toast('Foto produk tersimpan','camera')" aria-label="Ambil foto produk">${I('camera',22)}</button></div>${min?`<div class="hint">${ph<min?'Masih perlu '+(min-ph)+' foto.':ph+' foto siap.'}</div>`:''}</div>
     <div id="sierr"></div>
   </main><footer class="actions">${edit?`<button class="btn danger" style="width:auto" onclick="skuItemDelSheet()" aria-label="Hapus produk">${I('trash',18)}</button>`:''}<button class="btn" onclick="skuItemSave()">Simpan produk</button></footer>`};
 };
+function skuCatSheet(){
+  cur().p.name=val('si_n');
+  sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Pilih kategori</h3>
+  <div style="position:relative"><span style="position:absolute;left:14px;top:14px;z-index:1;pointer-events:none;display:flex;color:var(--muted)">${I('search',20)}</span><input class="input" id="kc_q" style="padding-left:44px" placeholder="Cari kategori" autocomplete="off" oninput="skuCatFilter()"></div>
+  <div style="margin-top:12px;height:min(48vh,420px);overflow:auto"><div id="kc_list" class="list"></div></div>`);
+  skuCatFilter();
+}
+function skuCatFilter(){
+  const q=val('kc_q').toLowerCase(), sel=cur().p.cat, K=katOpts();
+  const L=K.map((k,i)=>[k,i]).filter(([[,cl]])=>!q||cl.toLowerCase().includes(q));
+  $('#kc_list').innerHTML=L.map(([[cv,cl],i])=>`<button class="li" onclick="skuCatPick(${i})"><div class="grow"><div class="t">${esc(cl)}</div></div>${cv===sel?`<span style="color:var(--blue-600);display:flex">${I('check',20,2.2)}</span>`:''}</button>`).join('')||'<div class="empty">Kategori tidak ditemukan.</div>';
+}
+function skuCatPick(i){ const k=katOpts()[i]; if(!k) return; closeSheet(); setP({cat:k[0],name:val('si_n')}); }
 function skuItemSave(){
   const p=cur().p, n=val('si_n').trim(), cat=val('si_c'), min=skuCfg().foto;
   if(!cat||!n||(p.ph||0)<min){ $('#sierr').innerHTML=`<div class="err">${!cat?'Pilih kategori.':!n?'Isi nama produk.':'Ambil minimal '+min+' foto produk.'}</div>`; return; }
