@@ -154,6 +154,12 @@ button.li:hover{background:rgba(255,255,255,.5)}
 .field>span{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
 .input{width:100%;height:48px;border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 0 0 1px var(--sep);border-radius:14px;padding:0 14px;background:rgba(255,255,255,.65);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);font-size:15px}
 textarea.input{height:auto;min-height:88px;padding:12px 14px;resize:none;line-height:1.45}
+select.input{display:none}
+.sel-btn{display:flex;align-items:center;gap:8px;text-align:left}
+.sel-btn .sel-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sel-btn .sel-t.ph{color:var(--muted)}
+.sel-btn svg{flex:none;color:var(--muted)}
+.sel-btn:disabled{opacity:.55;cursor:not-allowed}
 select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' stroke='%235F7690' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:40px}
 .input:focus{outline:none;background-color:rgba(255,255,255,.9);box-shadow:inset 0 0 0 1.5px var(--blue),0 0 0 4px var(--blue-100)}
 .hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.45}
@@ -708,8 +714,36 @@ function toast(msg,icon='check'){
   const t=$('#toast'); t.innerHTML=`<div>${I(icon,18,2.2)}<span>${msg}</span></div>`;
   clearTimeout(toast._t); toast._t=setTimeout(()=>t.innerHTML='',2400);
 }
-function sheet(html){ $('#sheetBody').innerHTML='<div class="grab"></div>'+html; $('#sheet').classList.add('on'); }
-function closeSheet(){ $('#sheet').classList.remove('on'); }
+function sheet(html){ selRestore=null; $('#sheetBody').innerHTML='<div class="grab"></div>'+html; $('#sheet').classList.add('on'); }
+function closeSheet(){ if(selRestore){ const f=selRestore; selRestore=null; f(); return; } $('#sheet').classList.remove('on'); }
+
+/* Semua <select class="input"> tampil sebagai tombol yang membuka bottom sheet berisi cari dan daftar opsi.
+   <select> asli tetap di DOM (tersembunyi) supaya val() dan onchange tetap jalan. */
+let selRestore=null, selCur=null;
+function selSync(s){ const b=s.nextElementSibling, o=s.options[s.selectedIndex]; if(!b?.classList.contains('sel-btn')) return;
+  b.disabled=s.disabled;
+  b.innerHTML=`<span class="sel-t${!o||(o.value===''&&/^Pilih/.test(o.text))?' ph':''}">${esc(o?o.text:'Pilih')}</span>${I('down',20)}`; }
+function selEnhance(root){ root.querySelectorAll('select.input:not([data-sb])').forEach(s=>{
+  s.dataset.sb=1; const b=document.createElement('button'); b.type='button'; b.className='input sel-btn'; b.style.cssText=s.style.cssText;
+  b.setAttribute('aria-haspopup','dialog'); b.onclick=()=>selPick(s); s.after(b); selSync(s); }); }
+const selOpts = s => [...s.options].filter(o=>!o.disabled&&!(o.value===''&&/^Pilih/.test(o.text)));
+function selPick(s){
+  const body=$('#sheetBody'), kept=body.contains(s)?[...body.childNodes]:null;
+  const lab=(s.closest('.field')?.querySelector(':scope>span')?.firstChild?.textContent||'').replace(/\s*\*\s*$/,'').trim();
+  const n=selOpts(s).length;
+  sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">${lab?'Pilih '+esc(lab.toLowerCase()):'Pilih opsi'}</h3>
+  <div style="position:relative"><span style="position:absolute;left:14px;top:14px;z-index:1;pointer-events:none;display:flex;color:var(--muted)">${I('search',20)}</span><input class="input" id="sb_q" style="padding-left:44px" placeholder="Cari${lab?' '+esc(lab.toLowerCase()):''}" autocomplete="off" oninput="selFilter()"></div>
+  <div style="margin-top:12px;${n>6?'height:min(48vh,420px)':'max-height:48vh'};overflow:auto"><div id="sb_list" class="list"></div></div>`);
+  selCur=s; selRestore=()=>{ if(kept) body.replaceChildren(...kept); else $('#sheet').classList.remove('on'); };
+  selFilter();
+}
+function selFilter(){
+  const s=selCur, q=val('sb_q').toLowerCase();
+  const L=selOpts(s).filter(o=>!q||o.text.toLowerCase().includes(q));
+  $('#sb_list').innerHTML=L.map(o=>`<button class="li" onclick="selChoose(${o.index})"><div class="grow"><div class="t">${esc(o.text)}</div></div>${o.index===s.selectedIndex?`<span style="color:var(--blue-600);display:flex">${I('check',20,2.2)}</span>`:''}</button>`).join('')||'<div class="empty">Tidak ditemukan.</div>';
+}
+function selChoose(i){ const s=selCur; closeSheet(); selCur=null; s.selectedIndex=i; selSync(s); s.dispatchEvent(new Event('change',{bubbles:true})); }
+new MutationObserver(()=>{ selEnhance($('#view')); selEnhance($('#sheetBody')); }).observe(document.body,{childList:true,subtree:true});
 function lockSheet(){
   const out = !!att().out;
   sheet(`<div style="text-align:center;padding:4px 6px 0">
@@ -1678,7 +1712,7 @@ SCR['jual-produk'] = p => {
   return {note:(r==='canvas'?'Langkah 2: jumlah dibatasi stok layak jual yang dibawa. Harga mengikuti toko dan cabang (MOM 6.2).':'Langkah 2: pilih produk dan jumlah. Harga mengikuti toko dan cabang (MOM 6.2). Promo dihitung otomatis; kalau ada promo yang <b>tidak bisa digabung</b>, sales memilih salah satu sesuai pilihan pelanggan (BRD 7.1.8–7.1.9). Coba tambah VISTARA 50".')+'',
   html:`${appbar('Pilih produk')}<main class="content">
     <p class="small muted" style="margin:0 2px 10px">${r==='canvas'?'Toko dari check-in':'Langkah 2 dari 3'} · ${esc(S.cart.toko)} · harga dan diskon otomatis, hanya jumlah yang bisa diubah</p>
-    <div class="row" style="gap:8px;margin-bottom:12px"><div style="position:relative;flex:1"><span style="position:absolute;left:14px;top:14px;color:var(--muted)">${I('search',20)}</span><input class="input" style="padding-left:44px" placeholder="Cari produk atau SKU" value="${esc(p.q||'')}" oninput="cur().p.q=this.value;clearTimeout(window._qs);window._qs=setTimeout(()=>{render(false,true);const i=document.querySelector('.content input');i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)"></div></div>
+    <div class="row" style="gap:8px;margin-bottom:12px"><div style="position:relative;flex:1"><span style="position:absolute;left:14px;top:14px;z-index:1;pointer-events:none;display:flex;color:var(--muted)">${I('search',20)}</span><input class="input" style="padding-left:44px" placeholder="Cari produk atau SKU" value="${esc(p.q||'')}" oninput="cur().p.q=this.value;clearTimeout(window._qs);window._qs=setTimeout(()=>{render(false,true);const i=document.querySelector('.content input');i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)"></div></div>
     <div class="list">${list.filter(x=>!q||(x.name+x.sku).toLowerCase().includes(q)).map(x=>{const n=S.cart.items[x.id]||0; const pr=r==='spg'?PROMOS.filter(pp=>pp.products.includes(x.id)):[]; const st=r==='canvas'&&membawaBarang()?S.stock[x.id].good:null; const solo=pr.length>1&&pr.some(z=>z.solo); const pick=S.cart.pick?.[x.id]||pr[0]?.id;
       const promoHtml = solo&&n
         ? `<div class="small muted" style="margin-top:6px">Promo tidak bisa digabung, pilih sesuai pilihan pelanggan:</div><div class="opts" style="margin-top:6px">${pr.map(pp=>`<button class="opt ${pick===pp.id?'on':''}" style="padding:5px 10px;font-size:12px" onclick="pickPromo('${x.id}','${pp.id}')">${pp.name}</button>`).join('')}</div>`
@@ -1779,7 +1813,7 @@ function ldAdd(id,q=1,by='manual'){ const x=S.ld.items.find(a=>a.id===id); if(x)
 function ldSet(id,d){ const L=S.ld.items, x=L.find(a=>a.id===id); if(!x) return; x.q=Math.max(0,x.q+d); if(!x.q) L.splice(L.indexOf(x),1); render(false,true); }
 function prodSheet(mode){
   sheet(`<h3 style="font-size:18px;font-weight:800">Input manual</h3><p class="muted small" style="margin:4px 0 12px">Cari nama produk atau kode produk, lalu tekan + untuk memasukkan ke daftar.</p>
-  <div style="position:relative"><span style="position:absolute;left:14px;top:14px;color:var(--muted)">${I('search',20)}</span><input class="input" id="ls_q" style="padding-left:44px" placeholder="contoh: blender atau AR-BL11" autocomplete="off" oninput="prodFilter('${mode}')"></div>
+  <div style="position:relative"><span style="position:absolute;left:14px;top:14px;z-index:1;pointer-events:none;display:flex;color:var(--muted)">${I('search',20)}</span><input class="input" id="ls_q" style="padding-left:44px" placeholder="contoh: blender atau AR-BL11" autocomplete="off" oninput="prodFilter('${mode}')"></div>
   <div id="ls_list" class="list" style="margin-top:12px;max-height:44vh;overflow:auto"></div>`);
   prodFilter(mode);
 }
@@ -2311,7 +2345,7 @@ SCR['fm-stok'] = p => {
   html:`${appbar('Stock opname')}<main class="content">
     <div class="row between" style="margin:0 2px 12px"><b id="fmCount">${done} dari ${all.length} terisi</b>${stChip(S.fm.stokDone?'Selesai':(S.fm.draft||{}).stok?'Draft':'Belum Selesai')}</div>
     <div class="card" style="margin-bottom:12px">
-      <label class="field" style="margin:0 0 10px;position:relative"><span>Cari produk</span><span style="position:absolute;left:12px;top:34px;color:var(--muted)">${I('search',20)}</span><input class="input" style="padding-left:44px" placeholder="Cari nama produk atau SKU" value="${esc(p.q||'')}" oninput="cur().p.q=this.value;clearTimeout(window._fq);window._fq=setTimeout(()=>render(false,true),250)"></label>
+      <label class="field" style="margin:0 0 10px;position:relative"><span>Cari produk</span><span style="position:absolute;left:12px;top:34px;z-index:1;pointer-events:none;display:flex;color:var(--muted)">${I('search',20)}</span><input class="input" style="padding-left:44px" placeholder="Cari nama produk atau SKU" value="${esc(p.q||'')}" oninput="cur().p.q=this.value;clearTimeout(window._fq);window._fq=setTimeout(()=>render(false,true),250)"></label>
       <label class="field" style="margin:0"><span>Kategori stock opname</span><select class="input" onchange="setP({kat:this.value})">${STOK_KAT.map(([v,t])=>`<option value="${v}" ${kat===v?'selected':''}>${t}</option>`).join('')}</select></label>
     </div>
     ${!list.length?`<div class="empty">Tidak ada produk yang cocok dengan "${esc(p.q||'')}".</div>`:''}
@@ -3087,25 +3121,12 @@ SCR['spg-sku-item'] = p => {
   html:`${appbar(edit?'Ubah produk':p.qr?'Hasil scan QR':'Tambah produk')}<main class="content">
     <p class="small muted" style="margin:0 2px 12px">${esc(d.name)}</p>
     ${p.qr?`<div class="banner blue" style="margin-bottom:14px">${I('barcode',18)}<span>Nama produk terisi otomatis dari scan QR${p.sku?' ('+esc(p.sku)+')':''}.${min?' Ambil minimal '+min+' foto produk.':''}</span></div>`:''}
-    <div class="field"><span>Kategori *</span><input type="hidden" id="si_c" value="${esc(p.cat||'')}"><button type="button" class="input" style="display:flex;align-items:center;gap:8px;text-align:left" onclick="skuCatSheet()" aria-haspopup="dialog"><span class="grow" style="${p.cat?'':'color:var(--muted)'}">${p.cat?esc((katOpts().find(([cv])=>cv===p.cat)||[,katName(p.cat)])[1]):'Pilih kategori'}</span><span style="color:var(--muted);display:flex">${I('down',20)}</span></button></div>
+    <label class="field"><span>Kategori *</span><select class="input" id="si_c" onchange="cur().p.cat=this.value;cur().p.name=val('si_n')"><option value="">Pilih kategori</option>${katOpts().map(([cv,cl])=>`<option value="${esc(cv)}" ${p.cat===cv?'selected':''}>${esc(cl)}</option>`).join('')}</select></label>
     <label class="field"><span>Nama produk *</span><input class="input" id="si_n" value="${esc(p.name||'')}" placeholder="Merek dan tipe produk"></label>
     <div class="field"><span>Foto produk${min?' * (minimal '+min+')':' (opsional)'}</span><div class="thumbs">${Array.from({length:ph}).map(()=>`<div class="thumb">${I('image',22)}</div>`).join('')}<button class="thumb add" onclick="setP({name:val('si_n'),cat:val('si_c'),ph:${ph+1}});toast('Foto produk tersimpan','camera')" aria-label="Ambil foto produk">${I('camera',22)}</button></div>${min?`<div class="hint">${ph<min?'Masih perlu '+(min-ph)+' foto.':ph+' foto siap.'}</div>`:''}</div>
     <div id="sierr"></div>
   </main><footer class="actions">${edit?`<button class="btn danger" style="width:auto" onclick="skuItemDelSheet()" aria-label="Hapus produk">${I('trash',18)}</button>`:''}<button class="btn" onclick="skuItemSave()">Simpan produk</button></footer>`};
 };
-function skuCatSheet(){
-  cur().p.name=val('si_n');
-  sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Pilih kategori</h3>
-  <div style="position:relative"><span style="position:absolute;left:14px;top:14px;z-index:1;pointer-events:none;display:flex;color:var(--muted)">${I('search',20)}</span><input class="input" id="kc_q" style="padding-left:44px" placeholder="Cari kategori" autocomplete="off" oninput="skuCatFilter()"></div>
-  <div style="margin-top:12px;height:min(48vh,420px);overflow:auto"><div id="kc_list" class="list"></div></div>`);
-  skuCatFilter();
-}
-function skuCatFilter(){
-  const q=val('kc_q').toLowerCase(), sel=cur().p.cat, K=katOpts();
-  const L=K.map((k,i)=>[k,i]).filter(([[,cl]])=>!q||cl.toLowerCase().includes(q));
-  $('#kc_list').innerHTML=L.map(([[cv,cl],i])=>`<button class="li" onclick="skuCatPick(${i})"><div class="grow"><div class="t">${esc(cl)}</div></div>${cv===sel?`<span style="color:var(--blue-600);display:flex">${I('check',20,2.2)}</span>`:''}</button>`).join('')||'<div class="empty">Kategori tidak ditemukan.</div>';
-}
-function skuCatPick(i){ const k=katOpts()[i]; if(!k) return; closeSheet(); setP({cat:k[0],name:val('si_n')}); }
 function skuItemSave(){
   const p=cur().p, n=val('si_n').trim(), cat=val('si_c'), min=skuCfg().foto;
   if(!cat||!n||(p.ph||0)<min){ $('#sierr').innerHTML=`<div class="err">${!cat?'Pilih kategori.':!n?'Isi nama produk.':'Ambil minimal '+min+' foto produk.'}</div>`; return; }
