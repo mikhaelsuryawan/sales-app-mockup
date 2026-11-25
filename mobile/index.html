@@ -513,7 +513,7 @@ const USERS = {
   'ffor.yoga': {name:'Yoga Permana', init:'YP', role:'spv', roleLabel:'FFOR (SPV 2)', nip:'SIM-18-00144', client:'Arunika Elektronik', unit:'Region Jakarta', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
   'arco.maya': {name:'Maya Anggraini', init:'MA', role:'spv', menu:'arco', roleLabel:'Arco (Leader SPG)', nip:'ARCO-0012', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
   'cbd.tono':  {name:'Tono Hidayat', init:'TH', role:'leads', menu:'cbd', vkey:'cbd', roleLabel:'CBD / Mediator', nip:'SIM-23-00871', client:'BPR Mitra Usaha', unit:'Kantor Cabang Cilandak', place:'Area Fatmawati', sched:'WFA', main:{key:'leads',label:'Leads',icon:'users'}},
-  'rea.nina':  {name:'Nina Safitri', init:'NS', role:'leads', roleLabel:'REA / SPG Multi Finance', nip:'SIM-24-01322', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'leads',label:'Leads',icon:'users'}},
+  'rea.nina':  {name:'Nina Safitri', init:'NS', role:'leads', menu:'rea', vkey:'rea', roleLabel:'REA / SPG Multi Finance', nip:'SIM-24-01322', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'leads',label:'Leads',icon:'users'}},
   'fmcg.tari': {name:'Lestari Putri', init:'LP', role:'spg', roleLabel:'Promotor FMCG', nip:'SIM-24-01355', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
   'md.rangga': {name:'Rangga Saputra', init:'RS', role:'canvas', vkey:'canvasMD', roleLabel:'Merchandising (MD)', nip:'SIM-23-01102', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
   'mobile.fikri':{name:'Fikri Ramadhan', init:'FR', role:'spg', menu:'mobile', roleLabel:'Mobile Promotor', nip:'SIM-24-01377', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Beberapa toko dan event', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
@@ -525,7 +525,7 @@ const USERS = {
   'spv.lia':{name:'Lia Kartika', init:'LK', role:'spv', menu:'spvM', roleLabel:'Team Leader Multi Finance (SPV 1)', nip:'CLT-TL-0251', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}}
 };
 /* Daftar "Login sebagai" di panel demo (update menu 18 Nov 2026). Urutan sesuai daftar role dari klien. */
-const PANEL_USERS=[['spg.rina','Sales Promotor Elektronik'],['fmcg.tari','Sales Promotor FMCG'],['sales.budi','Sales Canvassing'],['sales.dimas','Sales Taking Order'],['cbd.tono','CBD / REA Multi Finance'],['md.rangga','Sales Merchandising (MD)'],['bantuan.eko','Promotor Bantuan Elektronik'],['bantuan.citra','Promotor Bantuan FMCG'],['spv.sari','SPV 1 (Team Leader Elektronik)'],['spv.hendra','SPV 1 (Team Leader FMCG)'],['spv.lia','SPV 1 (Team Leader Multi Finance)']];
+const PANEL_USERS=[['spg.rina','Sales Promotor Elektronik'],['fmcg.tari','Sales Promotor FMCG'],['sales.budi','Sales Canvassing'],['sales.dimas','Sales Taking Order'],['cbd.tono','CBD / Mediator'],['rea.nina','REA / SPG Multi Finance'],['md.rangga','Sales Merchandising (MD)'],['bantuan.eko','Promotor Bantuan Elektronik'],['bantuan.citra','Promotor Bantuan FMCG'],['spv.sari','SPV 1 (Team Leader Elektronik)'],['spv.hendra','SPV 1 (Team Leader FMCG)'],['spv.lia','SPV 1 (Team Leader Multi Finance)']];
 const panelLabel=k=>(PANEL_USERS.find(x=>x[0]===k)||[])[1]||USERS[k].roleLabel;
 const PRODUCTS = [
   {id:'tv50',name:'VISTARA 4K Google TV 50"',sku:'AR-TV50G',cat:'TV',price:6499000},
@@ -668,6 +668,7 @@ function freshState0(){
       order:[{id:'v1',place:'Toko Mega Elektronik',time:'10:00',tasks:['Ambil pesanan'],status:'Selesai',photos:{0:1},cin:'10:04',cout:'10:30',dur:'26 mnt'},{id:'v2',place:'CV Sumber Rejeki Elektronik',time:'13:30',tasks:['Ambil pesanan','Penagihan'],status:'Belum',photos:{}},{id:'v3',place:'Toko Abadi Jaya',time:'15:30',tasks:['Ambil pesanan'],status:'Belum',photos:{}}],
       cbd:[{id:'v1',place:'Agen Sejahtera Fatmawati',mid:'mt1',time:'10:00',tasks:['Monitoring mitra'],status:'Belum',photos:{}},{id:'v2',place:'Agen Berkah Cilandak',mid:'mt2',time:'14:00',tasks:['Monitoring mitra'],status:'Belum',photos:{}}],
       leads:[{id:'v1',place:'Ahmad Fauzi (nasabah)',time:'10:00',tasks:['Survey usaha'],status:'Belum',photos:{}},{id:'v2',place:'Yuliana Putri (nasabah)',time:'14:00',tasks:['Verifikasi dokumen'],status:'Belum',photos:{}}],
+      rea:[{id:'v1',place:'Ahmad Fauzi (nasabah)',time:'10:00',tasks:['Verifikasi dokumen'],status:'Belum',photos:{}},{id:'v2',place:'Lina Kusuma (nasabah)',time:'13:30',tasks:['Tanda tangan akad'],status:'Belum',photos:{}}],
       fmcg:[{id:'v1',place:'Electronic City Kemang',time:'09:00',tasks:['Semua aktivitas toko'],status:'Belum',photos:{}},{id:'v2',place:'Best Denki Senayan City',time:'13:00',tasks:['Semua aktivitas toko'],status:'Belum',photos:{}}],
       spv:[{id:'v1',place:'Electronic City Kemang',time:'11:00',tasks:['Supervisi SPG'],status:'Belum',photos:{}}]
     },
@@ -931,7 +932,8 @@ const MENUS = {
   order:[['Usulkan toko','plus',"go('toko-list')"],['Daftar pesanan','file',"go('pesanan')"],['Kunjungan','route',"go('kunjungan')"],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
   leads:[['Leads','users',"act(()=>tab('leads'))",1],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   fmcg:[['Buat jadwal','route',"act(()=>go('kunjungan-form'))",1],['Kunjungan','route',"go('kunjungan')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
-  cbd:[['Leads','users',"act(()=>tab('leads'))",1],['Mitra saya','user',"act(()=>go('mitra'))",1],['Task Team Leader','check',"act(()=>go('cbd-task'))",1],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  cbd:[['Leads','users',"act(()=>tab('leads'))",1],['Mitra saya','user',"act(()=>go('mitra'))",1],['Rekrut mitra','plus',"act(()=>go('rekrut-mitra'))",1],['Jualan direct / mitra','bag',"act(()=>go('jualan-mf'))",1],['Task Team Leader','check',"act(()=>go('cbd-task'))",1],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  rea:[['Leads','users',"act(()=>tab('leads'))",1],['Jualan direct','bag',"act(()=>go('jualan-mf',{tipe:'Direct'}))",1],['Jualan mitra','users',"act(()=>go('jualan-mf',{tipe:'Mitra'}))",1],['Activity (canvasing)','route',"act(()=>go('rea-canvas'))",1],['Rekrut mitra','plus',"act(()=>go('rekrut-mitra'))",1],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   arco:[['Assign leads','users',"go('assign')"],['Semua leads','file',"go('leads-all')"],['Tim saya','user',"tab('tim')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   spv:[['Approve Loading Barang','box',"go('approve-loading')"],['Approve Unloading Barang','retur',"go('approve-unloading')"],['Approval','check',"go('approval')"],['Assign canvasser','route',"go('assign-canvas')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tugaskan tim','route',"act(()=>go('kunjungan-form',{spv:1}))",1],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Kunjungan','calendar',"go('kunjungan')"],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   spvM:[['Approval','check',"go('approval')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]]
@@ -2806,6 +2808,86 @@ function saveNewLead(){
 const MITRA=[{id:'mt1',name:'Agen Sejahtera Fatmawati',area:'Fatmawati',phone:'0812-7000-2201',leads:6},{id:'mt2',name:'Agen Berkah Cilandak',area:'Cilandak',phone:'0812-7000-2202',leads:3}];
 SCR.mitra = () => ({note:'Mitra adalah agent di luar SIM. Datanya dari client, hanya berupa data, dan melekat pada CBD (MOM 12.2).',
   html:`${appbar('Mitra saya')}<main class="content"><div class="list">${MITRA.map(m=>`<button class="li" onclick="go('mitra-detail',{id:'${m.id}'})"><div class="ico-tile">${I('users',20)}</div><div class="grow"><div class="t">${m.name}</div><div class="s">${m.area} · ${m.leads} leads</div></div>${S.mitraLog[m.id]?chip('Dipantau','green'):chip('Belum','amber')}</button>`).join('')}</div></main>`});
+/* Rekrut mitra, jualan direct/mitra, dan activity canvasing REA.
+   Feedback AMO baris 28: rincian pekerjaan CBD dan REA berbeda, jadi menunya dipisah.
+   CBD: monitoring mitra, lead dihubungi, rekrut mitra, jualan direct/mitra.
+   REA: jualan direct, jualan mitra, activity (canvasing), rekrut mitra. */
+const REKRUT_STATUS=['Pendekatan','Berkas','Verifikasi','Aktif'];
+const rekrutList = () => shRead('mitraRekrut',[
+  {id:'rk1',nama:'Toko Sumber Rezeki',pic:'Pak Hadi',area:'Cilandak',st:'Berkas',u:'cbd.tono',tgl:'24 Okt'},
+  {id:'rk2',nama:'Warung Bu Tini',pic:'Bu Tini',area:'Fatmawati',st:'Pendekatan',u:'rea.nina',tgl:'25 Okt'}
+]);
+SCR['rekrut-mitra'] = p => {
+  const L=rekrutList().filter(x=>x.u===S.user), st=p.st||'Pendekatan';
+  return {note:'Rekrut mitra: calon agen di luar SIM yang diajak bergabung. Dipakai CBD dan REA. Status berjalan dari pendekatan sampai mitra aktif; mitra yang aktif muncul di daftar Mitra.',
+  html:`${appbar('Rekrut mitra')}<main class="content">
+    <div class="sec-title">Calon mitra saya <span class="small muted num">${L.length}</span></div>
+    ${L.length?`<div class="list">${L.map(x=>`<div class="li"><div class="ico-tile">${I('users',20)}</div><div class="grow"><div class="t">${esc(x.nama)}</div><div class="s">${esc(x.pic)} · ${esc(x.area)} · ${esc(x.tgl)}</div></div>${chip(x.st,x.st==='Aktif'?'green':x.st==='Verifikasi'?'blue':'amber')}</div>`).join('')}</div>`
+      :`<div class="empty"><div class="ico-tile">${I('users',24)}</div>Belum ada calon mitra. Tambahkan dari kunjungan lapangan.</div>`}
+    <div class="sec-title" style="margin-top:18px">Tambah calon mitra</div>
+    <label class="field"><span>Nama usaha</span><input class="input" id="rk_n" placeholder="Contoh: Toko Sumber Rezeki" maxlength="60"></label>
+    <label class="field"><span>Nama PIC</span><input class="input" id="rk_p" placeholder="Contoh: Pak Hadi" maxlength="40"></label>
+    <label class="field"><span>Area</span><input class="input" id="rk_a" placeholder="Contoh: Cilandak" maxlength="40"></label>
+    <div class="field"><span>Status awal</span><div class="opts">${REKRUT_STATUS.map(x=>`<button class="opt ${st===x?'on':''}" onclick="setP({st:'${x}'})">${x}</button>`).join('')}</div></div>
+    <div id="rkerr"></div>
+  </main><footer class="actions"><button class="btn" onclick="rekrutSave()">Simpan calon mitra</button></footer>`};
+};
+function rekrutSave(){
+  const n=val('rk_n').trim(), pic=val('rk_p').trim(), a=val('rk_a').trim(), st=cur().p.st||'Pendekatan';
+  if(!n||!pic||!a){ $('#rkerr').innerHTML='<div class="err">Nama usaha, PIC, dan area wajib diisi.</div>'; return; }
+  shSet('mitraRekrut',[...rekrutList(),{id:'rk'+Date.now(),nama:n,pic,area:a,st,u:S.user,tgl:'26 Okt'}]);
+  back(); toast(n+' ditambahkan sebagai calon mitra','check');
+}
+/* Jualan multi finance: direct (nasabah langsung) atau lewat mitra. */
+const jualMfList = () => shRead('jualMf',[]);
+SCR['jualan-mf'] = p => {
+  const tipe=p.tipe||'Direct', L=jualMfList().filter(x=>x.u===S.user);
+  const total=L.reduce((s,x)=>s+x.nilai,0);
+  return {note:'Pencatatan jualan produk multi finance. Direct berarti nasabah didapat sendiri; Mitra berarti lewat agen. Pemisahan ini dipakai untuk menghitung kontribusi mitra terhadap pencairan.',
+  html:`${appbar('Jualan '+(role()==='leads'&&vk()==='cbd'?'direct / mitra':tipe.toLowerCase()))}<main class="content">
+    <div class="card"><div class="small muted">Pencairan tercatat bulan ini</div><div class="big-num num">${rp(total)}</div>
+      <div class="small muted" style="margin-top:4px">${L.length} transaksi · direct ${L.filter(x=>x.tipe==='Direct').length} · mitra ${L.filter(x=>x.tipe==='Mitra').length}</div></div>
+    ${L.length?`<div class="sec-title">Riwayat</div><div class="list">${L.map(x=>`<div class="li"><div class="ico-tile ${x.tipe==='Mitra'?'tan':''}">${I(x.tipe==='Mitra'?'users':'bag',20)}</div><div class="grow"><div class="t">${esc(x.nasabah)}</div><div class="s">${esc(x.produk)} · ${esc(x.tgl)}${x.mitra?' · '+esc(x.mitra):''}</div></div><b class="num">${rp(x.nilai)}</b></div>`).join('')}</div>`:''}
+    <div class="sec-title" style="margin-top:18px">Catat jualan</div>
+    <div class="field"><span>Tipe</span><div class="opts">${['Direct','Mitra'].map(x=>`<button class="opt ${tipe===x?'on':''}" onclick="setP({tipe:'${x}'})">${x}</button>`).join('')}</div></div>
+    <label class="field"><span>Nama nasabah</span><input class="input" id="jm_n" placeholder="Contoh: Bapak Suryadi" maxlength="60"></label>
+    <label class="field"><span>Produk</span><select class="input" id="jm_p"><option>Kredit Modal Kerja</option><option>Kredit Multiguna</option><option>Kredit Kendaraan</option></select></label>
+    <label class="field"><span>Nilai pencairan</span><input class="input num" id="jm_v" type="number" inputmode="numeric" placeholder="15000000"></label>
+    ${tipe==='Mitra'?`<label class="field"><span>Mitra</span><select class="input" id="jm_m">${MITRA.map(m=>`<option>${esc(m.name)}</option>`).join('')}</select></label>`:''}
+    <div id="jmerr"></div>
+  </main><footer class="actions"><button class="btn" onclick="jualMfSave()">Simpan jualan</button></footer>`};
+};
+function jualMfSave(){
+  const p=cur().p, tipe=p.tipe||'Direct', n=val('jm_n').trim(), prod=val('jm_p'), v=+val('jm_v')||0;
+  if(!n||v<=0){ $('#jmerr').innerHTML='<div class="err">Nama nasabah dan nilai pencairan wajib diisi.</div>'; return; }
+  const row={id:'jm'+Date.now(),u:S.user,tipe,nasabah:n,produk:prod,nilai:v,tgl:'26 Okt'};
+  if(tipe==='Mitra') row.mitra=val('jm_m');
+  shSet('jualMf',[...jualMfList(),row]);
+  back(); toast('Jualan '+tipe.toLowerCase()+' tercatat','check');
+}
+/* Activity canvasing REA: kegiatan mencari nasabah di lapangan, tanpa toko. */
+const REA_AKT=['Sebar brosur','Open table','Door to door','Follow up nasabah lama'];
+const reaAktList = () => shRead('reaAkt',[]);
+SCR['rea-canvas'] = p => {
+  const L=reaAktList().filter(x=>x.u===S.user), jenis=p.jenis||REA_AKT[0];
+  return {note:'Activity canvasing REA: kegiatan mencari nasabah di lapangan. REA bekerja in house, jadi kegiatannya dicatat sebagai aktivitas, bukan kunjungan toko.',
+  html:`${appbar('Activity canvasing')}<main class="content">
+    ${L.length?`<div class="sec-title">Kegiatan hari ini <span class="small muted num">${L.length}</span></div><div class="list">${L.map(x=>`<div class="li"><div class="ico-tile green">${I('check',20)}</div><div class="grow"><div class="t">${esc(x.jenis)}</div><div class="s">${esc(x.lokasi)} · ${esc(x.jam)} · ${x.leads} leads baru</div></div></div>`).join('')}</div>`
+      :`<div class="empty"><div class="ico-tile">${I('route',24)}</div>Belum ada kegiatan hari ini.</div>`}
+    <div class="sec-title" style="margin-top:18px">Catat kegiatan</div>
+    <div class="field"><span>Jenis kegiatan</span><div class="opts">${REA_AKT.map(x=>`<button class="opt ${jenis===x?'on':''}" onclick="setP({jenis:'${x}'})">${x}</button>`).join('')}</div></div>
+    <label class="field"><span>Lokasi</span><input class="input" id="ra_l" placeholder="Contoh: Pasar Mede, Fatmawati" maxlength="60"></label>
+    <label class="field"><span>Leads baru didapat</span><input class="input num" id="ra_n" type="number" inputmode="numeric" placeholder="0"></label>
+    <label class="field"><span>Catatan (opsional)</span><textarea class="input" id="ra_c" placeholder="Misalnya: respons bagus, 2 minta dihubungi besok"></textarea></label>
+    <div id="raerr"></div>
+  </main><footer class="actions"><button class="btn" onclick="reaAktSave()">Simpan kegiatan</button></footer>`};
+};
+function reaAktSave(){
+  const jenis=cur().p.jenis||REA_AKT[0], lok=val('ra_l').trim(), n=+val('ra_n')||0;
+  if(!lok){ $('#raerr').innerHTML='<div class="err">Lokasi wajib diisi.</div>'; return; }
+  shSet('reaAkt',[...reaAktList(),{id:'ra'+Date.now(),u:S.user,jenis,lokasi:lok,leads:n,jam:clock(),catatan:val('ra_c').trim()}]);
+  back(); toast('Kegiatan '+jenis.toLowerCase()+' tercatat','check');
+}
 const MITRAQ_DEFAULT=[{id:'mq1',q:'Bagaimana kondisi usaha atau kegiatan mitra bulan ini?'},{id:'mq2',q:'Kendala apa yang dihadapi mitra dalam mencari nasabah?'},{id:'mq3',q:'Dukungan apa yang dibutuhkan mitra dari tim bulan depan?'}];
 const mitraQ = () => shRead('mitraQ',MITRAQ_DEFAULT).filter(x=>!x.del&&x.status!=='Nonaktif');
 const mitraAns = id => (shRead('mitraAns',{})[id]||{}).a||{};
@@ -3605,8 +3687,17 @@ function capItems(){
   const qItem={c:'task',label:'Quiz & survey',done:qd,total:qf.length,sub:'tugas Team Leader',go:"go('quiz')"};
   if(r==='leads'){
     const mine=S.leads.filter(l=>l.owner===S.user);
+    const rk=rekrutList().filter(x=>x.u===S.user), jm=jualMfList().filter(x=>x.u===S.user);
     if(vk()==='cbd'){ out.push({c:'visit',label:'Monitoring mitra',done:v.filter(x=>x.status==='Selesai').length,total:v.length,sub:'mitra dikunjungi',go:"act(()=>go('mitra'))"}); }
     out.push({c:'job',label:'Leads dihubungi',done:mine.filter(l=>l.status!=='Baru').length,total:mine.length,sub:'leads kamu',go:"tab('leads')"});
+    if(vk()==='rea'){ const ra=reaAktList().filter(x=>x.u===S.user);
+      out.push({c:'job',label:'Jualan direct',done:jm.filter(x=>x.tipe==='Direct').length,total:Math.max(3,jm.filter(x=>x.tipe==='Direct').length),sub:'nasabah langsung',go:"act(()=>go('jualan-mf',{tipe:'Direct'}))"});
+      out.push({c:'job',label:'Jualan mitra',done:jm.filter(x=>x.tipe==='Mitra').length,total:Math.max(2,jm.filter(x=>x.tipe==='Mitra').length),sub:'lewat agen',go:"act(()=>go('jualan-mf',{tipe:'Mitra'}))"});
+      out.push({c:'visit',label:'Activity canvasing',done:ra.length,total:Math.max(2,ra.length),sub:'kegiatan lapangan',go:"act(()=>go('rea-canvas'))"});
+    } else {
+      out.push({c:'job',label:'Jualan direct / mitra',done:jm.length,total:Math.max(3,jm.length),sub:'pencairan tercatat',go:"act(()=>go('jualan-mf'))"});
+    }
+    out.push({c:'task',label:'Rekrut mitra',done:rk.filter(x=>x.st==='Aktif').length,total:Math.max(2,rk.length),sub:'calon mitra',go:"act(()=>go('rekrut-mitra'))"});
     if(vk()==='cbd'){ const t=cbdTasks(); out.push({c:'task',label:'Task Team Leader',done:t.filter(x=>x.st==='Terjawab').length,total:t.length,sub:'pertanyaan TL',go:"act(()=>go('cbd-task'))"}); }
     else out.push(qItem);
     return out;

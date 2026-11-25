@@ -361,3 +361,44 @@ Menjawab feedback AMO baris 3 dan 4.
   saling melihat jejak.
 - Layar `password` tidak lagi punya field "Password lama"; tombolnya membuka SIM SIAP.
 - Tanpa overflow horizontal di 375/768/1440 px, 0 error konsol.
+
+## Slice: pisah peran CBD dan REA
+
+Menjawab feedback AMO baris 28 ("rincian pekerjaan CBD dan REA berbeda").
+
+**Yang dikerjakan**
+
+- `rea.nina` jadi akun demo penuh: `menu:'rea'`, `vkey:'rea'`, perangkat sendiri, dan daftar
+  kunjungan `visits.rea` (janji temu nasabah, bukan kunjungan toko). Sebelumnya akun ini ada
+  di `USERS` tapi tidak pernah bisa dibuka dari panel demo.
+- Panel demo memisah **CBD / Mediator** dan **REA / SPG Multi Finance** (sebelumnya satu
+  tombol "CBD / REA Multi Finance").
+- `MENUS.cbd`: Leads, Mitra saya, Rekrut mitra, Jualan direct / mitra, Task Team Leader.
+- `MENUS.rea` (baru): Leads, Jualan direct, Jualan mitra, Activity (canvasing), Rekrut mitra.
+  REA tidak punya "Mitra saya" karena mitra melekat pada CBD (MOM 12.2).
+- Tiga layar baru: `rekrut-mitra` (calon mitra + status pendekatan→aktif), `jualan-mf`
+  (pencairan direct atau lewat mitra), `rea-canvas` (kegiatan canvasing REA).
+- Grafik Capaian (`capItems`) dipisah: CBD menampilkan Monitoring mitra dan Task TL,
+  REA menampilkan Jualan direct, Jualan mitra, dan Activity canvasing.
+
+**Keputusan**
+
+- Data baru disimpan lewat `shRead`/`shSet` dan **difilter per pengguna**, supaya CBD dan REA
+  tidak saling melihat calon mitra atau jualan milik orang lain.
+- `roleLabel` CBD dan REA **tidak diubah** karena `noCheckin()` dan dashboard
+  (`LEADS_USERS`, baris ~1210) bergantung pada teksnya. Label panel demo disamakan dengan
+  `roleLabel` supaya tidak ada dua nama untuk satu role.
+
+**Bukti**
+
+- 12 akun × 8 layar: 0 error konsol, tidak ada layar kosong.
+- Tanpa overflow horizontal di 375/768/1440 px untuk ketiga layar baru dan beranda CBD/REA.
+- Validasi form diuji: simpan kosong ditolak, simpan terisi masuk ke daftar.
+- Regresi Slice 1 diuji ulang setelah perubahan: peta 3 pin, kontrol urutan, tombol hapus
+  tetap hilang, approval `Perlu approval` → `Belum` setelah disetujui.
+
+**Catatan untuk sesi berikutnya**
+
+- Dashboard belum punya tampilan untuk `rekrut-mitra`, `jualan-mf`, dan `rea-canvas`.
+  Datanya sudah masuk `shSet` jadi tinggal dibaca kalau mau ditampilkan ke admin.
+- Log aktivitas belum tampil di dashboard (disebut "bisa dilihat admin" di hint layar).
