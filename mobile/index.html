@@ -645,7 +645,11 @@ function freshState0(){
     bawa:{rc18:8,bl11:6,st3:9,kp16:5,ds72:2}, kembali:{}, muatInv:[], receipt:false, unload:{terjual:0,retur:0,kembali:0,uang:''},
     shareClient:{tv50:6,tv43:12}, shareComp:[{cb:'ARUNIKA',brand:'Samsung',path:'TV/Smart TV',nama:'Samsung Crystal 55"',qty:14,harga:0},{cb:'ARUNIKA',brand:'LG',path:'TV/Smart TV/Google TV',nama:'LG UHD 50"',qty:10,harga:0},{cb:'ARUNIKA',brand:'Samsung',path:'Kulkas/2 Pintu/Inverter',nama:'Samsung 2 Pintu 300 L',qty:5,harga:0}], shareBrand:'ARUNIKA', sharePath:['TV'], shareState:null,
     quizDone:false, quizScore:null, surveyDone:false,
-    myRequests:[], newToko:[],
+    myRequests:[], newToko:[
+      {id:'n103',u:'sales.dimas',role:'order',name:'Warung Maju Bersama',owner:'Pak Joko',phone:'081200000103',addr:'Jl. Kebon Jeruk Raya No. 3',wil:{prov:'DKI Jakarta',kota:'Jakarta Barat',kec:'Kebon Jeruk',kel:'Duri Kepa'},cat:'Retail',ph:1,status:'Ditolak',alasan:'Toko sudah terdaftar di master Toko',tgl:'18 Okt'},
+      {id:'n102',u:'sales.dimas',role:'order',name:'Toko Sinar Abadi',owner:'Bu Lina',phone:'081200000102',addr:'Jl. Pejaten Barat No. 8',wil:{prov:'DKI Jakarta',kota:'Jakarta Selatan',kec:'Pasar Minggu',kel:'Pejaten Timur'},cat:'Semi grosir',ph:2,status:'Aktif',tgl:'21 Okt'},
+      {id:'n101',u:'sales.dimas',role:'order',name:'Toko Berkah Jaya',owner:'Pak Anton',phone:'081200000101',addr:'Jl. Raya Lenteng Agung No. 12',wil:{prov:'DKI Jakarta',kota:'Jakarta Selatan',kec:'Jagakarsa',kel:'Lenteng Agung'},cat:'Retail',ph:1,status:'Menunggu Approval',tgl:'25 Okt'},
+      {id:'n104',u:'sales.budi',role:'canvas',name:'Toko Rezeki Makmur',owner:'Bu Sari',phone:'081200000104',addr:'Jl. Ciputat Raya No. 21',wil:{prov:'Banten',kota:'Kota Tangerang Selatan',kec:'Ciputat',kel:'Ciputat'},cat:'Retail',ph:1,status:'Aktif',isNew:true,tgl:'20 Okt'}],
     cart:null, ord:null
   };
 }
@@ -874,8 +878,8 @@ SCR['enroll-done'] = () => { S.enrolled[S.user]=true; return {note:'Wajah refere
 const MENUS = {
   spg:[['Riwayat penjualan','file',"tab('penjualan')"],['Kunjungan','route',"go('kunjungan')"],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   mobile:[['Catat penjualan','bag',"act(()=>startSale())",1,'jual'],['Riwayat penjualan','file',"tab('penjualan')"],['SKU display','grid',"go('sku')",0,'sku'],['Display share','pie',"go('share')",0,'share'],['Stock opname','box',"go('fm-stok')",0,'stok'],['Campaign & POSM','image',"go('posm')",0,'posm'],['Kunjungan','route',"go('kunjungan')"],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
-  canvas:[['Loading Barang','box',"act(()=>go('loading'))",1],['Unloading Barang','retur',"act(()=>go('unloading'))",1],['Riwayat penjualan','file',"go('penjualan')"],['Kunjungan','route',"go('kunjungan')"],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
-  order:[['Daftar pesanan','file',"go('pesanan')"],['Kunjungan','route',"go('kunjungan')"],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
+  canvas:[['Usulkan toko','plus',"go('toko-list')"],['Loading Barang','box',"act(()=>go('loading'))",1],['Unloading Barang','retur',"act(()=>go('unloading'))",1],['Riwayat penjualan','file',"go('penjualan')"],['Kunjungan','route',"go('kunjungan')"],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  order:[['Usulkan toko','plus',"go('toko-list')"],['Daftar pesanan','file',"go('pesanan')"],['Kunjungan','route',"go('kunjungan')"],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
   leads:[['Leads','users',"act(()=>tab('leads'))",1],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   fmcg:[['Buat jadwal','route',"act(()=>go('kunjungan-form'))",1],['Kunjungan','route',"go('kunjungan')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
   cbd:[['Leads','users',"act(()=>tab('leads'))",1],['Mitra saya','user',"act(()=>go('mitra'))",1],['Task Team Leader','check',"act(()=>go('cbd-task'))",1],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
@@ -1531,9 +1535,9 @@ function delSaleSheet(id){
 }
 function tokoPicker(r,pickFn){
   const active=[...(TOKO[vk()]||TOKO[r]),...(r==='spg'&&isMobilePromo()?getExtraToko():[]),...S.newToko.filter(t=>t.role===r&&t.status==='Aktif')];
-  const pend=S.newToko.filter(t=>t.role===r&&t.status!=='Aktif');
+  const pend=S.newToko.filter(t=>t.role===r&&t.status==='Menunggu Approval');
   return `<div class="list">${active.map(t=>`<button class="li" onclick="${pickFn}('${t.id}')"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t">${esc(t.name)}${t.isNew?' '+chip('Baru','green'):''}</div><div class="s">${esc(t.addr)} · ${t.cat}</div></div>${I('right',20)}</button>`).join('')}</div>
-  ${pend.length?`<div class="sec-title">Menunggu verifikasi</div><div class="list">${pend.map(t=>`<button class="li" onclick="pendingTokoSheet('${t.id}')"><div class="ico-tile amber">${I('clock',20)}</div><div class="grow"><div class="t">${esc(t.name)}</div><div class="s">${esc(t.addr)}</div></div>${chip('Diverifikasi admin','amber')}</button>`).join('')}</div>`:''}
+  ${pend.length?`<div class="sec-title">Menunggu Approval</div><div class="list">${pend.map(t=>`<button class="li" onclick="pendingTokoSheet('${t.id}')"><div class="ico-tile amber">${I('clock',20)}</div><div class="grow"><div class="t">${esc(t.name)}</div><div class="s">${esc(t.addr)}</div></div>${chip('Menunggu Approval','amber')}</button>`).join('')}</div>`:''}
   ${r==='spg'&&isMobilePromo()?`<p class="hint" style="margin-top:12px">Mobile Promotor berpindah ke beberapa toko dan bisa berjualan di event tertentu (MOM 1, 11.2). Event muncul selama masa acara.</p>`:r==='spg'?`<p class="hint" style="margin-top:12px">Hanya toko yang ditugaskan ke kamu. Untuk berjualan di toko lain, minta supervisor menugaskanmu ke toko tersebut.</p>`
   :`<button class="btn ghost" style="margin-top:14px" onclick="act(()=>go('toko-baru'))">${I('plus',20)} Usulkan toko baru</button><p class="hint" style="text-align:center">Toko belum terdaftar? Usulkan ke admin untuk diverifikasi.</p>`}`;
 }
@@ -1658,23 +1662,25 @@ function approveToko(id){ const t=tokoById(id); t.status='Aktif'; t.isNew=true; 
     else p.kel=v;
     render(false,true);
   }
-  SCR['toko-baru'] = p => { const cat=p.cat||'Retail', ph=p.ph||0;
+  SCR['toko-baru'] = p => { const edit=p.id?tokoById(p.id):null;
+    if(edit&&p.tn==null) Object.assign(p,{tn:edit.name,to:edit.owner||'',tp:edit.phone||'',ta:edit.addr,cat:edit.cat,ph:edit.ph||1,...edit.wil});
+    const cat=p.cat||'Retail', ph=p.ph||0, v=k=>`value="${esc(p[k]??'')}" oninput="cur().p.${k}=this.value"`;
     const wsel=(label,opts,v,level,dis)=>`<label class="field grow" style="margin:0"><span>${label}</span><select class="input" ${dis?'disabled':''} onchange="wilSet('${level}',this.value)"><option value="">${dis?'Pilih tingkat di atas dulu':'Pilih '+label.toLowerCase()}</option>${opts.map(o=>`<option ${o===v?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`;
     return {note:'<span class="tagx">Usulan</span><b>Usulkan toko baru</b> dari lapangan untuk mendukung target akuisisi (BRD 2.9.5). Toko tetap master data di Web (BRD 2.8): usulan diverifikasi admin, admin menetapkan kategori (yang menentukan harga, BRD 2.13), lalu toko aktif dan muncul di daftar sales. MOM 18 Nov: alamat kini memuat provinsi, kota/kabupaten, kecamatan, dan kelurahan.',
-  html:`${appbar('Usulkan toko baru')}<main class="content">
+  html:`${appbar(edit?'Ubah usulan toko':'Usulkan toko baru')}<main class="content">
     <div class="banner blue" style="margin-bottom:14px">${I('alert',18)}<span>${role()==='canvas'?'Toko baru langsung aktif dan masuk daftar kunjunganmu. Admin melihatnya di Toko Sementara dan menetapkan kategori final.':'Toko baru diverifikasi admin dulu. Setelah disetujui, toko masuk ke daftarmu dan harga mengikuti kategori yang ditetapkan admin.'}</span></div>
     <div class="card" style="padding:0;overflow:hidden"><div class="map" style="height:150px">${mapSvg('WFA',true,true)}</div>
       <div class="row" style="padding:12px 16px"><div class="grow small"><b>Lokasi terdeteksi</b><div class="muted">Jl. Moh. Kahfi I No. 21, Jagakarsa</div></div><button class="btn sec sm" onclick="toast('Lokasi diperbarui','pin')">${I('refresh',16)} Perbarui</button></div></div>
     <div style="height:14px"></div>
-    <label class="field"><span>Nama toko *</span><input class="input" id="tn" placeholder="contoh: Toko Sumber Makmur"></label>
-    <div class="row" style="gap:10px"><label class="field grow"><span>Nama pemilik</span><input class="input" id="to" placeholder="Nama"></label><label class="field grow"><span>No. HP *</span><input class="input" id="tp" inputmode="tel" placeholder="08xx"></label></div>
+    <label class="field"><span>Nama toko *</span><input class="input" id="tn" ${v('tn')} placeholder="contoh: Toko Sumber Makmur"></label>
+    <div class="row" style="gap:10px"><label class="field grow"><span>Nama pemilik</span><input class="input" id="to" ${v('to')} placeholder="Nama"></label><label class="field grow"><span>No. HP *</span><input class="input" id="tp" ${v('tp')} inputmode="tel" placeholder="08xx"></label></div>
     <div class="row" style="gap:10px;margin-bottom:12px">${wsel('Provinsi',wilProv(),p.prov||'','prov',false)}${wsel('Kota/Kabupaten',wilKota(p.prov),p.kota||'','kota',!p.prov)}</div>
     <div class="row" style="gap:10px;margin-bottom:12px">${wsel('Kecamatan',wilKec(p.prov,p.kota),p.kec||'','kec',!p.kota)}${wsel('Kelurahan',wilKel(p.prov,p.kota,p.kec),p.kel||'','kel',!p.kec)}</div>
-    <label class="field"><span>Alamat</span><input class="input" id="ta" value="Jl. Moh. Kahfi I No. 21, Jagakarsa"></label>
+    <label class="field"><span>Alamat</span><input class="input" id="ta" value="${esc(p.ta??'Jl. Moh. Kahfi I No. 21, Jagakarsa')}" oninput="cur().p.ta=this.value"></label>
     <div class="field"><span>Perkiraan kategori</span><div class="opts">${['Retail','Semi grosir','Grosir'].map(x=>`<button class="opt ${cat===x?'on':''}" onclick="setP({cat:'${x}'})">${x}</button>`).join('')}</div><div class="hint">Kategori final ditetapkan admin.</div></div>
     <div class="field"><span>Foto toko * (tampak depan)</span><div class="thumbs">${Array.from({length:ph}).map(()=>`<div class="thumb">${I('image',22)}</div>`).join('')}<button class="thumb add" onclick="setP({ph:${ph+1}})" aria-label="Tambah foto">${I('camera',22)}</button></div></div>
     <div id="terr"></div>
-  </main><footer class="actions"><button class="btn" onclick="submitToko()">${role()==='canvas'?'Simpan toko':'Kirim usulan'}</button></footer>`};
+  </main><footer class="actions"><button class="btn" onclick="act(()=>submitToko())">${edit?'Simpan perubahan':role()==='canvas'?'Simpan toko':'Kirim usulan'}</button></footer>`};
 };
 function submitToko(){
   const p=cur().p, name=val('tn'), phone=val('tp');
@@ -1682,7 +1688,9 @@ function submitToko(){
   /* MOM 18 Nov: wilayah lengkap wajib supaya admin tidak perlu menebak saat verifikasi. */
   if(!p.prov||!p.kota||!p.kec||!p.kel){ $('#terr').innerHTML='<div class="err">Pilih provinsi, kota/kabupaten, kecamatan, dan kelurahan.</div>'; return; }
   const wil={prov:p.prov,kota:p.kota,kec:p.kec,kel:p.kel};
-  const direct=role()==='canvas', t={id:'n'+Date.now(),name,addr:val('ta')||'Jagakarsa',wil,owner:val('to'),phone,cat:p.cat||'Retail',status:direct?'Aktif':'Menunggu verifikasi',role:role()};
+  const data={name,addr:val('ta')||'Jagakarsa',wil,owner:val('to'),phone,cat:p.cat||'Retail',ph:p.ph};
+  if(p.id){ const e=tokoById(p.id); if(e.status!=='Menunggu Approval') return; Object.assign(e,data); back(); toast('Usulan '+name+' diperbarui'); return; }
+  const direct=role()==='canvas', t={id:'n'+Date.now(),u:S.user,tgl:'26 Okt',...data,status:direct?'Aktif':'Menunggu Approval',role:role()};
   if(direct) t.isNew=true;
   S.newToko.push(t);
   if(direct){ /* Usulan: canvasser tidak perlu persetujuan admin. Toko masuk Toko Sementara di dashboard. */
@@ -1691,6 +1699,22 @@ function submitToko(){
     shSet('visitExc',[...shRead('visitExc',[]),{id:'ex'+Date.now(),u:fmUk(),place:name,type:'Unplanned',untuk:'',alasan:'Toko baru dari canvasser',tgl:'26 Okt'}]); }
   replace('toko-terkirim',{name,direct});
 }
+const tokoStChip = st => chip(st,st==='Aktif'?'green':st==='Ditolak'?'red':'amber');
+SCR['toko-list'] = () => { const L=S.newToko.filter(t=>t.u===S.user).reverse();
+  return {note:'Daftar toko yang kamu usulkan beserta statusnya. Hanya usulan berstatus Menunggu Approval yang bisa diubah, status lain hanya bisa dilihat.',
+  html:`${appbar('Usulkan toko')}<main class="content">
+    ${L.length?`<div class="list">${L.map(t=>`<button class="li" onclick="go('${t.status==='Menunggu Approval'?'toko-baru':'toko-detail'}',{id:'${t.id}'})"><div class="ico-tile ${t.status==='Aktif'?'green':t.status==='Ditolak'?'tan':'amber'}">${I('pin',20)}</div><div class="grow"><div class="t">${esc(t.name)}</div><div class="s">${esc(t.addr)} · ${t.tgl}</div><div style="margin-top:6px">${tokoStChip(t.status)}</div></div>${I(t.status==='Menunggu Approval'?'edit':'right',18)}</button>`).join('')}</div>`
+    :`<div class="card"><div class="empty" style="padding:16px">Belum ada toko yang kamu usulkan.</div></div>`}
+  </main><footer class="actions"><button class="btn" onclick="act(()=>go('toko-baru'))">${I('plus',20)} Tambah Toko Baru</button></footer>`}; };
+SCR['toko-detail'] = p => { const t=tokoById(p.id), w=t.wil||{};
+  const kv=(k,v)=>`<div class="kv"><span>${k}</span><span>${esc(v||'–')}</span></div>`;
+  return {note:'Usulan yang sudah diproses hanya bisa dilihat.',
+  html:`${appbar('Detail toko')}<main class="content">
+    <div class="row between" style="margin:0 2px 12px"><b>${esc(t.name)}</b>${tokoStChip(t.status)}</div>
+    ${t.alasan?`<div class="banner red" style="margin-bottom:14px">${I('alert',18)}<span><b>Alasan ditolak.</b> ${esc(t.alasan)}</span></div>`:''}
+    <div class="card">${kv('Nama pemilik',t.owner)}${kv('No. HP',t.phone)}${kv('Alamat',t.addr)}${kv('Provinsi',w.prov)}${kv('Kota/Kabupaten',w.kota)}${kv('Kecamatan',w.kec)}${kv('Kelurahan',w.kel)}${kv('Kategori',t.cat)}${kv('Tanggal usul',t.tgl)}</div>
+    <div class="sec-title">Foto toko</div><div class="thumbs">${Array.from({length:t.ph||1}).map(()=>`<div class="thumb">${I('image',22)}</div>`).join('')}</div>
+  </main>`}; };
 SCR['toko-terkirim'] = p => ({note:p.direct?'Toko baru dari canvasser langsung aktif tanpa persetujuan admin. Toko masuk Toko Sementara di Web.':'Usulan toko masuk ke antrean verifikasi admin di Web. Sales dapat notifikasi saat disetujui atau ditolak.',
   html:`<div class="result" style="padding-top:var(--sb)">${bigRing('#009DC7',p.direct?'check':'send')}<h2>${p.direct?'Toko tersimpan':'Usulan toko terkirim'}</h2><p>${p.direct?`<b>${esc(p.name)}</b> sudah aktif dan masuk daftar kunjunganmu. Admin melihatnya di Toko Sementara.`:`<b>${esc(p.name)}</b> sedang diverifikasi admin. Kamu akan dapat notifikasi setelah disetujui, lalu toko muncul di daftar pilihan toko.`}</p></div>
   <footer class="actions"><button class="btn" onclick="back()">Selesai</button></footer>`});
@@ -2702,16 +2726,16 @@ function aktTasks(v){
   if(r==='canvas'&&!membawaBarang()) return [
     {ic:'bag',t:'Catat penjualan',sub:'Penjualan di toko, tanpa stok bawaan',go:'startSale()',lock:1,st:has?(S.canvasESales.some(x=>!x.d&&x.toko===v.place)?'Selesai':'Belum Selesai'):''},
     retur,
-    {ic:'plus',t:'Usulkan toko',sub:'Toko baru langsung aktif',go:"go('toko-baru')"},sup];
+    sup];
   if(r==='canvas') return [
     {ic:'bag',t:'Catat penjualan',sub:'Dari stok bawaan, harga dan diskon otomatis',go:'startSale()',lock:1,st:has?(S.canvasSales.some(x=>!x.d&&x.toko===v.place)?'Selesai':'Belum Selesai'):''},
     {ic:'box',t:'Stok bawaan',sub:'Stok awal, terjual, dan sisa',go:"go('stok')"},
     retur,
-    {ic:'plus',t:'Usulkan toko',sub:'Toko baru langsung aktif',go:"go('toko-baru')"},sup];
+    sup];
   if(r==='order') return [
     {ic:'order',t:'Buat pesanan',sub:'Pesanan dari toko yang dikunjungi',go:'startOrder()',lock:1,st:has?(S.orders.some(o=>o.toko===v.place&&o.date==='26 Okt 2026')?'Selesai':'Belum Selesai'):''},
     retur,
-    {ic:'plus',t:'Usulkan toko',sub:'Toko baru untuk diverifikasi',go:"go('toko-baru')"},sup];
+    sup];
   return [];
 }
 function aktPekerjaan(o){
