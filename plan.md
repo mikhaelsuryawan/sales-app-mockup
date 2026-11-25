@@ -285,3 +285,120 @@ supervisor, tidak ada deposit ganti rugi, tidak ada serah terima uang.
 Repo saudara `../docs` tidak ter-clone di mesin ini, jadi urutan baca `docs/INDEX.md`
 pada AGENTS.md tidak bisa diikuti. MOM dari pengguna dipakai sebagai acuan spesifikasi.
 Perlu `docs/scripts/workspace-setup.sh` kalau requirement kanonis dibutuhkan.
+
+## Slice: peta kunjungan, urutan daftar toko, dan approval kunjungan tambahan
+
+Dikerjakan 25 Nov 2026 di `feature/vis-peta-sort-approval`. Sumber: `Form Feedback FSD Sales Apps.xlsx`
+kolom Feedback AMO, baris 14, 15, dan 18.
+
+Keadaan sebelum slice ini: halaman Kunjungan hanya daftar teks. Jarak ke toko sudah dihitung
+(`jarakKm` haversine dengan `TOKO_COORD_M` dan `POS_DEMO`), tapi tidak ada peta sama sekali dan
+tidak ada kontrol urutan. Kunjungan yang ditambah sales langsung berstatus Belum sehingga bisa
+dikerjakan tanpa persetujuan siapa pun, dan tombol hapus kunjungan masih ada.
+
+### Yang dikerjakan
+
+1. Peta OpenStreetMap di halaman Kunjungan. AMO menolak Google Maps karena berbiaya. Ubin
+   dipasang sebagai `<img>` langsung dari `tile.openstreetmap.org`, tanpa Leaflet, supaya mockup
+   tetap satu file tanpa dependensi. Zoom dipilih otomatis agar semua toko dan posisi sales masuk
+   frame. Pin berwarna mengikuti status: hijau selesai, biru berjalan, tan toko tutup, abu belum.
+2. Urutan daftar toko: "Urutan rencana" (journey plan dari dashboard) atau "Terdekat dari saya"
+   (jarak dari posisi sales). Pilihan disimpan di `shSet('visitSort')`.
+3. Kunjungan tambahan berstatus Perlu approval. Aktivitas terkunci sampai Team Leader menyetujui.
+   Pengajuan masuk ke antrean `S.approvals` yang sudah ada, bukan mekanisme baru, supaya TL
+   memprosesnya di satu tempat bersama absen terlambat dan cuti. Tolak wajib beralasan.
+4. Tombol hapus kunjungan ditiadakan sesuai AMO. Pembatalan lewat Jadwal ulang atau alasan Terlewat,
+   supaya jejak kepatuhan tidak hilang.
+
+### Catatan teknis untuk sesi berikutnya
+
+- `act()` memblokir aksi saat `isLocked()` (belum absen masuk). SPV tidak absen lewat aplikasi ini,
+  jadi approval dipanggil langsung tanpa `act()`, mengikuti pola `ldSetuju`/`ldTolakSheet`.
+- Daftar kunjungan SPV (`vk()==='spv'`) berbeda dari daftar sales, jadi `visitById` tidak bisa
+  dipakai lintas role. Pengajuan approval menyimpan `vkey` dan `vid`.
+- `overflow:hidden` pada peta masih bisa di-scroll secara programatik sehingga pin bergeser dari
+  ubin; dipakai `overflow:clip` dengan `contain:paint`.
+- CBD/REA tidak menampilkan peta karena tujuannya nasabah tanpa koordinat. Ini disengaja: lebih
+  baik tidak ada peta daripada frame kosong.
+
+### Di luar lingkup slice ini (menunggu giliran)
+
+- Baris 3 (info perangkat di absensi) dan baris 4 (log aktivitas login): slice terpisah yang ringan.
+- Baris 28 (pisah beranda CBD dan REA): perlu dua akun demo terpisah, rincian pekerjaannya berbeda.
+- Baris 23 (target per toko untuk promotor): ditahan atas permintaan pengguna 25 Nov 2026 karena
+  bertentangan dengan MOM 9.1 yang justru menghapusnya dari tampilan promotor.
+- Membawa perubahan ini ke Flutter (`mobile/`): mockup dulu, Flutter menyusul.
+
+### Verifikasi
+
+Dijalankan sendiri, bukan klaim: tanpa error konsol pada 8 role; tanpa overflow horizontal di
+375, 768, dan 1440 px (dicek lewat CDP, skrip di `cache/scratch/cek_overflow.py`); alur approval
+diuji sampai tuntas termasuk tolak tanpa alasan (ditolak) dan tolak dengan alasan (kunjungan hilang
+dari daftar sales).
+
+## Slice: info perangkat absensi dan log aktivitas akun
+
+Menjawab feedback AMO baris 3 dan 4.
+
+**Yang dikerjakan**
+
+- Info perangkat (`DEVICES`, `dev()`, `devText()`): tipe HP, OS, dan versi aplikasi per
+  pengguna. Dicatat saat absen masuk dan pulang (`a.in.dev`, `a.out.dev`), tampil di layar
+  sukses absen dan di riwayat absensi. Perangkat dibuat tetap per akun supaya demo bisa
+  dibandingkan antar role.
+- Layar `log-aktivitas` (menu baru di Akun): login, logout, percobaan gagal, dan ubah
+  password. Login dan logout dicatat betulan lewat `logAdd()` di `loginAs()` dan `logout()`.
+- Log disimpan **per pengguna** (`S.logAkun[username]`), bukan satu daftar bersama; akun lain
+  tidak bisa melihat jejak akun ini.
+- Layar `password` tidak lagi berisi form ganti password. AMO menyatakan ubah password hanya
+  bisa di SIM SIAP / BPR, jadi layar ini mengarahkan ke portal SIM SIAP dan menjelaskan
+  alasannya. Form lama menjanjikan hal yang tidak akan ada di produksi.
+
+**Bukti**
+
+- Perangkat tersimpan di `att().in.dev` dan tampil di layar sukses absen serta riwayat.
+- Log terpisah per akun diuji: `sales.budi` (iPhone 13) dan `spg.rina` (Galaxy A54) tidak
+  saling melihat jejak.
+- Layar `password` tidak lagi punya field "Password lama"; tombolnya membuka SIM SIAP.
+- Tanpa overflow horizontal di 375/768/1440 px, 0 error konsol.
+
+## Slice: pisah peran CBD dan REA
+
+Menjawab feedback AMO baris 28 ("rincian pekerjaan CBD dan REA berbeda").
+
+**Yang dikerjakan**
+
+- `rea.nina` jadi akun demo penuh: `menu:'rea'`, `vkey:'rea'`, perangkat sendiri, dan daftar
+  kunjungan `visits.rea` (janji temu nasabah, bukan kunjungan toko). Sebelumnya akun ini ada
+  di `USERS` tapi tidak pernah bisa dibuka dari panel demo.
+- Panel demo memisah **CBD / Mediator** dan **REA / SPG Multi Finance** (sebelumnya satu
+  tombol "CBD / REA Multi Finance").
+- `MENUS.cbd`: Leads, Mitra saya, Rekrut mitra, Jualan direct / mitra, Task Team Leader.
+- `MENUS.rea` (baru): Leads, Jualan direct, Jualan mitra, Activity (canvasing), Rekrut mitra.
+  REA tidak punya "Mitra saya" karena mitra melekat pada CBD (MOM 12.2).
+- Tiga layar baru: `rekrut-mitra` (calon mitra + status pendekatan→aktif), `jualan-mf`
+  (pencairan direct atau lewat mitra), `rea-canvas` (kegiatan canvasing REA).
+- Grafik Capaian (`capItems`) dipisah: CBD menampilkan Monitoring mitra dan Task TL,
+  REA menampilkan Jualan direct, Jualan mitra, dan Activity canvasing.
+
+**Keputusan**
+
+- Data baru disimpan lewat `shRead`/`shSet` dan **difilter per pengguna**, supaya CBD dan REA
+  tidak saling melihat calon mitra atau jualan milik orang lain.
+- `roleLabel` CBD dan REA **tidak diubah** karena `noCheckin()` dan dashboard
+  (`LEADS_USERS`, baris ~1210) bergantung pada teksnya. Label panel demo disamakan dengan
+  `roleLabel` supaya tidak ada dua nama untuk satu role.
+
+**Bukti**
+
+- 12 akun × 8 layar: 0 error konsol, tidak ada layar kosong.
+- Tanpa overflow horizontal di 375/768/1440 px untuk ketiga layar baru dan beranda CBD/REA.
+- Validasi form diuji: simpan kosong ditolak, simpan terisi masuk ke daftar.
+- Regresi Slice 1 diuji ulang setelah perubahan: peta 3 pin, kontrol urutan, tombol hapus
+  tetap hilang, approval `Perlu approval` → `Belum` setelah disetujui.
+
+**Catatan untuk sesi berikutnya**
+
+- Dashboard belum punya tampilan untuk `rekrut-mitra`, `jualan-mf`, dan `rea-canvas`.
+  Datanya sudah masuk `shSet` jadi tinggal dibaca kalau mau ditampilkan ke admin.
+- Log aktivitas belum tampil di dashboard (disebut "bisa dilihat admin" di hint layar).
