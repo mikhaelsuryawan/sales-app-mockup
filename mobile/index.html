@@ -645,11 +645,7 @@ function freshState0(){
     bawa:{rc18:8,bl11:6,st3:9,kp16:5,ds72:2}, kembali:{}, muatInv:[], receipt:false, unload:{terjual:0,retur:0,kembali:0,uang:''},
     shareClient:{tv50:6,tv43:12}, shareComp:[{cb:'ARUNIKA',brand:'Samsung',path:'TV/Smart TV',nama:'Samsung Crystal 55"',qty:14,harga:0},{cb:'ARUNIKA',brand:'LG',path:'TV/Smart TV/Google TV',nama:'LG UHD 50"',qty:10,harga:0},{cb:'ARUNIKA',brand:'Samsung',path:'Kulkas/2 Pintu/Inverter',nama:'Samsung 2 Pintu 300 L',qty:5,harga:0}], shareBrand:'ARUNIKA', sharePath:['TV'], shareState:null,
     quizDone:false, quizScore:null, surveyDone:false,
-    myRequests:[], newToko:[
-      {id:'n103',u:'sales.dimas',role:'order',name:'Warung Maju Bersama',owner:'Pak Joko',phone:'081200000103',addr:'Jl. Kebon Jeruk Raya No. 3',wil:{prov:'DKI Jakarta',kota:'Jakarta Barat',kec:'Kebon Jeruk',kel:'Duri Kepa'},cat:'Retail',ph:1,status:'Ditolak',alasan:'Toko sudah terdaftar di master Toko',tgl:'18 Okt'},
-      {id:'n102',u:'sales.dimas',role:'order',name:'Toko Sinar Abadi',owner:'Bu Lina',phone:'081200000102',addr:'Jl. Pejaten Barat No. 8',wil:{prov:'DKI Jakarta',kota:'Jakarta Selatan',kec:'Pasar Minggu',kel:'Pejaten Timur'},cat:'Semi grosir',ph:2,status:'Aktif',tgl:'21 Okt'},
-      {id:'n101',u:'sales.dimas',role:'order',name:'Toko Berkah Jaya',owner:'Pak Anton',phone:'081200000101',addr:'Jl. Raya Lenteng Agung No. 12',wil:{prov:'DKI Jakarta',kota:'Jakarta Selatan',kec:'Jagakarsa',kel:'Lenteng Agung'},cat:'Retail',ph:1,status:'Menunggu Approval',tgl:'25 Okt'},
-      {id:'n104',u:'sales.budi',role:'canvas',name:'Toko Rezeki Makmur',owner:'Bu Sari',phone:'081200000104',addr:'Jl. Ciputat Raya No. 21',wil:{prov:'Banten',kota:'Kota Tangerang Selatan',kec:'Ciputat',kel:'Ciputat'},cat:'Retail',ph:1,status:'Aktif',isNew:true,tgl:'20 Okt'}],
+    myRequests:[], newToko:seedToko(),
     cart:null, ord:null
   };
 }
@@ -701,6 +697,25 @@ const PFOTO=()=>shRead('pfoto',PFOTO_DEFAULT);
 const PLAN_DEFAULT={'Minggu 1':[['Rak utama',4],['End gondola',2]],'Minggu 2':[['Rak utama',5],['End gondola',3]],'Minggu 3':[['Rak utama',5],['End gondola',4]],'Minggu 4':[['Rak utama',6],['End gondola',4]]};
 const isFmcgPromo = () => role()==='spg'&&/FMCG/.test(U()?.roleLabel||'');
 const isMobilePromo = () => U()?.roleLabel==='Mobile Promotor';
+/* Data contoh Usulkan toko: tiap akun yang punya menu ini mendapat satu usulan per status. */
+function seedToko(){
+  const W={jgk:['DKI Jakarta','Jakarta Selatan','Jagakarsa','Lenteng Agung'],psm:['DKI Jakarta','Jakarta Selatan','Pasar Minggu','Pejaten Timur'],kbj:['DKI Jakarta','Jakarta Barat','Kebon Jeruk','Duri Kepa'],cpt:['Banten','Kota Tangerang Selatan','Ciputat','Ciputat'],bks:['Jawa Barat','Kota Bekasi','Bekasi Selatan','Marga Jaya']};
+  /* [akun, role, nama, pemilik, alamat, wilayah, kategori, status, tanggal, alasan] — urut lama ke baru per akun */
+  return [
+    ['sales.dimas','order','Warung Maju Bersama','Pak Joko','Jl. Kebon Jeruk Raya No. 3','kbj','Retail','Ditolak','18 Okt','Toko sudah terdaftar di master Toko'],
+    ['sales.dimas','order','Toko Sinar Abadi','Bu Lina','Jl. Pejaten Barat No. 8','psm','Semi grosir','Aktif','21 Okt'],
+    ['sales.dimas','order','Toko Berkah Jaya','Pak Anton','Jl. Raya Lenteng Agung No. 12','jgk','Retail','Menunggu Approval','25 Okt'],
+    ['sales.budi','canvas','Toko Cahaya Baru','Pak Rudi','Jl. Marga Jaya No. 5','bks','Retail','Ditolak','17 Okt','Foto toko tidak jelas'],
+    ['sales.budi','canvas','Toko Rezeki Makmur','Bu Sari','Jl. Ciputat Raya No. 21','cpt','Retail','Aktif','20 Okt'],
+    ['sales.budi','canvas','Grosir Tiga Saudara','Pak Wawan','Jl. Pejaten Raya No. 17','psm','Grosir','Menunggu Approval','25 Okt'],
+    ['sales.kevin','canvas','Elektro Mandiri','Pak Dedi','Jl. Arjuna Selatan No. 9','kbj','Retail','Ditolak','16 Okt','Alamat tidak sesuai titik lokasi'],
+    ['sales.kevin','canvas','Sumber Elektronik','Bu Rina','Jl. Dewi Sartika No. 40','cpt','Semi grosir','Aktif','22 Okt'],
+    ['sales.kevin','canvas','Toko Listrik Sentosa','Pak Agus','Jl. Moh. Kahfi II No. 14','jgk','Retail','Menunggu Approval','24 Okt'],
+    ['super.admin','spv','Kios Harapan','Bu Tuti','Jl. Ahmad Yani No. 2','bks','Retail','Ditolak','19 Okt','Nomor HP pemilik tidak bisa dihubungi'],
+    ['super.admin','spv','Toko Anugerah','Pak Bayu','Jl. Raya Ragunan No. 30','psm','Grosir','Aktif','23 Okt'],
+    ['super.admin','spv','Toko Karya Indah','Bu Maya','Jl. Jagakarsa Raya No. 7','jgk','Semi grosir','Menunggu Approval','25 Okt'],
+  ].map(([u,role,name,owner,addr,w,cat,status,tgl,alasan],i)=>{ const [prov,kota,kec,kel]=W[w]; return {id:'n'+(101+i),u,role,name,owner,phone:'08120000'+(101+i),addr,wil:{prov,kota,kec,kel},cat,ph:1,status,tgl,alasan,isNew:status==='Aktif'}; });
+}
 const allToko = () => [...TOKO.spg,...TOKO.canvas,...TOKO.canvasE,...TOKO.order,...getExtraToko(),...S.newToko];
 const tokoById = id => allToko().find(t=>t.id===id);
 const tokoByName = n => allToko().find(t=>t.name===n);
