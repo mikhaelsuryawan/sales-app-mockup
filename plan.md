@@ -285,3 +285,53 @@ supervisor, tidak ada deposit ganti rugi, tidak ada serah terima uang.
 Repo saudara `../docs` tidak ter-clone di mesin ini, jadi urutan baca `docs/INDEX.md`
 pada AGENTS.md tidak bisa diikuti. MOM dari pengguna dipakai sebagai acuan spesifikasi.
 Perlu `docs/scripts/workspace-setup.sh` kalau requirement kanonis dibutuhkan.
+
+## Slice: peta kunjungan, urutan daftar toko, dan approval kunjungan tambahan
+
+Dikerjakan 25 Nov 2026 di `feature/vis-peta-sort-approval`. Sumber: `Form Feedback FSD Sales Apps.xlsx`
+kolom Feedback AMO, baris 14, 15, dan 18.
+
+Keadaan sebelum slice ini: halaman Kunjungan hanya daftar teks. Jarak ke toko sudah dihitung
+(`jarakKm` haversine dengan `TOKO_COORD_M` dan `POS_DEMO`), tapi tidak ada peta sama sekali dan
+tidak ada kontrol urutan. Kunjungan yang ditambah sales langsung berstatus Belum sehingga bisa
+dikerjakan tanpa persetujuan siapa pun, dan tombol hapus kunjungan masih ada.
+
+### Yang dikerjakan
+
+1. Peta OpenStreetMap di halaman Kunjungan. AMO menolak Google Maps karena berbiaya. Ubin
+   dipasang sebagai `<img>` langsung dari `tile.openstreetmap.org`, tanpa Leaflet, supaya mockup
+   tetap satu file tanpa dependensi. Zoom dipilih otomatis agar semua toko dan posisi sales masuk
+   frame. Pin berwarna mengikuti status: hijau selesai, biru berjalan, tan toko tutup, abu belum.
+2. Urutan daftar toko: "Urutan rencana" (journey plan dari dashboard) atau "Terdekat dari saya"
+   (jarak dari posisi sales). Pilihan disimpan di `shSet('visitSort')`.
+3. Kunjungan tambahan berstatus Perlu approval. Aktivitas terkunci sampai Team Leader menyetujui.
+   Pengajuan masuk ke antrean `S.approvals` yang sudah ada, bukan mekanisme baru, supaya TL
+   memprosesnya di satu tempat bersama absen terlambat dan cuti. Tolak wajib beralasan.
+4. Tombol hapus kunjungan ditiadakan sesuai AMO. Pembatalan lewat Jadwal ulang atau alasan Terlewat,
+   supaya jejak kepatuhan tidak hilang.
+
+### Catatan teknis untuk sesi berikutnya
+
+- `act()` memblokir aksi saat `isLocked()` (belum absen masuk). SPV tidak absen lewat aplikasi ini,
+  jadi approval dipanggil langsung tanpa `act()`, mengikuti pola `ldSetuju`/`ldTolakSheet`.
+- Daftar kunjungan SPV (`vk()==='spv'`) berbeda dari daftar sales, jadi `visitById` tidak bisa
+  dipakai lintas role. Pengajuan approval menyimpan `vkey` dan `vid`.
+- `overflow:hidden` pada peta masih bisa di-scroll secara programatik sehingga pin bergeser dari
+  ubin; dipakai `overflow:clip` dengan `contain:paint`.
+- CBD/REA tidak menampilkan peta karena tujuannya nasabah tanpa koordinat. Ini disengaja: lebih
+  baik tidak ada peta daripada frame kosong.
+
+### Di luar lingkup slice ini (menunggu giliran)
+
+- Baris 3 (info perangkat di absensi) dan baris 4 (log aktivitas login): slice terpisah yang ringan.
+- Baris 28 (pisah beranda CBD dan REA): perlu dua akun demo terpisah, rincian pekerjaannya berbeda.
+- Baris 23 (target per toko untuk promotor): ditahan atas permintaan pengguna 25 Nov 2026 karena
+  bertentangan dengan MOM 9.1 yang justru menghapusnya dari tampilan promotor.
+- Membawa perubahan ini ke Flutter (`mobile/`): mockup dulu, Flutter menyusul.
+
+### Verifikasi
+
+Dijalankan sendiri, bukan klaim: tanpa error konsol pada 8 role; tanpa overflow horizontal di
+375, 768, dan 1440 px (dicek lewat CDP, skrip di `cache/scratch/cek_overflow.py`); alur approval
+diuji sampai tuntas termasuk tolak tanpa alasan (ditolak) dan tolak dengan alasan (kunjungan hilang
+dari daftar sales).
