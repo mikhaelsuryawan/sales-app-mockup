@@ -700,6 +700,7 @@ function freshState0(){
     sku:{t1:null,t2:null}, disp:[], dispDone:false, dispDraft:false, sf:null, 
     fm:{stok:{},extra:[],stokDone:false,foto:{},facing:0,tasks:[]}, posm:{}, mitraLog:{}, cbdDone:false, notifOn:{in:true,out:true}, sound:'Bawaan',
     bawa:{rc18:8,bl11:6,st3:9,kp16:5,ds72:2}, kembali:{}, muatInv:[], receipt:false, unload:{terjual:0,retur:0,kembali:0,uang:''},
+    returs:[{u:'sales.budi',toko:'Toko Sinar Jaya Elektronik',time:'09:25',reason:'Kemasan penyok',items:[{id:'bl11',q:1,cond:'bad'},{id:'kp16',q:2,cond:'good'}]}],
     shareClient:{tv50:6,tv43:12}, shareComp:[{cb:'ARUNIKA',brand:'Samsung',path:'TV/Smart TV',nama:'Samsung Crystal 55"',qty:14,harga:0},{cb:'ARUNIKA',brand:'LG',path:'TV/Smart TV/Google TV',nama:'LG UHD 50"',qty:10,harga:0},{cb:'ARUNIKA',brand:'Samsung',path:'Kulkas/2 Pintu/Inverter',nama:'Samsung 2 Pintu 300 L',qty:5,harga:0}], shareBrand:'ARUNIKA', sharePath:['TV'], shareState:null,
     quizDone:false, quizScore:null, surveyDone:false,
     myRequests:[], newToko:seedToko(), logAkun:{},
@@ -2106,7 +2107,7 @@ function rtSave(){
   if((R.reason||'').trim().length<3){ $('#rterr').innerHTML='<div class="err">Isi alasan retur.</div>'; return; }
   if(role()==='canvas'&&membawaBarang()){ R.items.forEach(x=>{ if(!S.stock[x.id]) return; if(x.cond==='bad') S.stock[x.id].bad+=x.q; else S.stock[x.id].good+=x.q; });
     S.mutasi.unshift({t:'Retur dari toko',d:R.items.map(x=>prodById(x.id).name+' ×'+x.q+(x.cond==='bad'?' (tidak layak)':'')).join(', '),time:'13:10',sign:'+'}); }
-  (S.returs=S.returs||[]).unshift({toko:R.toko,items:R.items.map(x=>({...x})),reason:R.reason});
+  (S.returs=S.returs||[]).unshift({u:S.user,toko:R.toko,time:'13:10',items:R.items.map(x=>({...x})),reason:R.reason});
   aktMark('retur'); back(); toast('Retur '+R.items.length+' produk tersimpan');
 }
 /* ---------- Loading & Unloading Barang (update menu 18 Nov 2026) ----------
@@ -2187,24 +2188,31 @@ function ldKirim(){
 SCR['ld-sukses'] = p => ({note:p.kind+' terkirim ke Team Leader. Team Leader menyetujui atau menolak lewat menu Approve '+p.kind+' Barang.',
   html:`<div class="result" style="padding-top:var(--sb)">${bigRing('#12875F','check')}<h2>${p.kind} terkirim</h2><p>${p.id} (${p.sub}) menunggu approval Team Leader.</p></div>
   <footer class="actions"><button class="btn" onclick="back()">Selesai</button></footer>`});
+/* Barang retur dari toko yang belum diserahkan ke gudang. Wajib ikut di-unloading. */
+const ulRetur = () => (S.returs||[]).filter(r=>r.u===S.user&&!r.ul).flatMap(r=>r.items.map(i=>({...i,toko:r.toko,reason:r.reason,time:r.time})));
+function returList(L){ return `<div class="list">${L.map(r=>{ const pr=prodById(r.id); return `<div class="li" style="align-items:flex-start"><div class="ico-tile ${r.cond==='bad'?'red':'amber'}">${I('retur',18,2)}</div><div class="grow"><div class="t">${esc(pr.name)}</div><div class="s">${pr.sku} · ${esc(r.toko)}${r.reason?' · '+esc(r.reason):''}</div><div style="margin-top:6px">${chip(r.cond==='bad'?'Tidak layak jual':'Layak jual',r.cond==='bad'?'red':'green')}</div></div><b class="num">×${r.q}</b></div>`; }).join('')}</div>`; }
+function returBlock(){ const L=ulRetur(); if(!L.length) return ''; const n=L.reduce((a,r)=>a+r.q,0);
+  return `<div class="sec-title">Barang retur <span class="small muted num">${n} unit</span></div>
+  <div class="banner amber" style="margin-bottom:12px">${I('alert',18)}<span>Kamu membawa barang retur. Wajib di-unloading, ikut terkirim saat Submit.</span></div>${returList(L)}`; }
 SCR.unloading = p => {
   if(!S.ul) S.ul=ulBlank();
   const u=S.ul, mine=S.unloads.filter(x=>x.u===S.user), started=Object.keys(u.sisa).length>0;
   const hist = mine.length?`<div class="sec-title">Unloading dikirim</div><div class="list">${mine.map(x=>`<div class="li"><div class="ico-tile">${I('retur',18)}</div><div class="grow"><div class="t">${x.id}</div><div class="s">${x.time} · ${rpShort(x.total)}${x.sel.length?' · ada selisih':''}</div></div>${chip(x.status,ST_APR[x.status])}</div>`).join('')}</div>`:'';
-  if(!started) return {note:'<b>Unloading Barang.</b> Sama dengan loading: scan nota, scan barcode, atau input manual. Jumlah sisa tiap produk terisi dari hasil scan.',html:`${appbar('Unloading barang')}<main class="content">${addCard('ul','unloading')}<div class="card" style="margin-top:14px"><div class="empty" style="padding:16px">Belum ada produk. Scan nota, scan barcode, atau input manual.</div></div>${hist}</main>`};
+  if(!started) return {note:'<b>Unloading Barang.</b> Sama dengan loading: scan nota, scan barcode, atau input manual. Jumlah sisa tiap produk terisi dari hasil scan.',html:`${appbar('Unloading barang')}<main class="content">${addCard('ul','unloading')}<div class="card" style="margin-top:14px"><div class="empty" style="padding:16px">Belum ada produk. Scan nota, scan barcode, atau input manual.</div></div>${returBlock()}${hist}</main>`};
   const t=ulSum();
   const selBlock = t.sel.length ? `<div class="sec-title">Selisih barang</div>
     <div class="banner amber">${I('alert',18)}<span>Jumlah sisa berbeda dari data sistem. ${t.kurang.length?'Barang yang kurang dibuatkan <b>Catat penjualan</b> otomatis, ditandai hasil selisih unloading.':''} Foto dokumen dan alasan wajib diisi.</span></div>
     <div class="list" style="margin-top:12px">${t.sel.map(r=>`<div class="li"><div class="grow"><div class="t">${esc(r.p.name)}</div><div class="s">${r.diff>0?'Kurang':'Lebih'} <b class="num">${Math.abs(r.diff)}</b> unit × ${rp(r.p.price)}</div></div><b class="num" style="color:${r.diff>0?'var(--red)':'var(--green)'}">${rp(Math.abs(r.diff)*r.p.price)}</b></div>`).join('')}</div>
     <div class="field" style="margin-top:14px"><span>Foto dokumen *</span><div class="thumbs">${u.doc?`<div class="thumb">${I('image',22)}</div>`:`<button class="thumb add" onclick="S.ul.doc=true;render(false,true);toast('Foto dokumen tersimpan','camera')" aria-label="Ambil foto dokumen">${I('camera',22)}</button>`}</div></div>
     <label class="field"><span>Alasan selisih *</span><textarea class="input" id="ul_reason" placeholder="contoh: Barang rusak, dibuang di toko" oninput="S.ul.reason=this.value">${esc(u.reason)}</textarea></label><div id="uerr"></div>` : '';
-  return {note:'<b>Unloading.</b> Daftar produk memakai jumlah loading. Scan nota mengisi sisa semua produk, scan barcode menambah sisa 1 per scan, input manual menambah sisa 1 per tekan +. Penjualan terakumulasi otomatis dan dibagi Cash dan Non Cash. Kalau ada selisih, sistem membuat Catat penjualan bertanda selisih unloading; foto dokumen dan alasan wajib.',
+  return {note:'<b>Unloading.</b> Barang retur yang dibawa sales tampil di bagian Barang retur dan wajib ikut diserahkan. Daftar produk memakai jumlah loading. Scan nota mengisi sisa semua produk, scan barcode menambah sisa 1 per scan, input manual menambah sisa 1 per tekan +. Penjualan terakumulasi otomatis dan dibagi Cash dan Non Cash. Kalau ada selisih, sistem membuat Catat penjualan bertanda selisih unloading; foto dokumen dan alasan wajib.',
   html:`${appbar('Unloading barang')}<main class="content">
     ${addCard('ul','unloading')}
     <div class="sec-title">Daftar produk <button class="lnk-del" onclick="S.ul=ulBlank();render(false,true)">Kosongkan</button></div>
     ${t.rows.map(r=>`<div class="card" style="margin-bottom:10px;${r.diff!==0?'box-shadow:inset 0 0 0 1.5px var(--red)':''}"><div class="row between"><div class="grow"><b>${esc(r.p.name)}</b><div class="small muted">${r.p.sku}</div></div>${u.tag[r.id]?chip(u.tag[r.id]==='OCR'?'Scan nota':u.tag[r.id]==='Scan'?'Scan barcode':'Manual',u.tag[r.id]==='OCR'?'blue':u.tag[r.id]==='Scan'?'tan':''):''}</div>
       <div class="stat3" style="margin-top:10px"><div style="background:var(--blue-50)"><small>Loading</small><b class="num" style="font-size:22px;color:var(--blue-700)">${r.ld}</b></div><div style="background:var(--green-50)"><small>Terjual</small><b class="num" style="font-size:22px;color:var(--green)">${r.terjual}</b></div><div style="background:var(--amber-50,#FFF4E5)"><small>Sisa</small><div class="stepper" style="margin-top:2px;justify-content:center"><button onclick="ulStep('${r.id}',-1)" aria-label="Kurangi">${I('minus',16,2.2)}</button><span class="num" style="font-size:18px;font-weight:800;min-width:26px;text-align:center">${r.act}</span><button onclick="ulStep('${r.id}',1)" aria-label="Tambah">${I('plus',16,2.2)}</button></div></div></div>
       <div class="small muted" style="margin-top:8px">Sisa sistem ${r.exp}${r.diff!==0?` · <b style="color:var(--red)">selisih ${r.diff>0?'kurang':'lebih'} ${Math.abs(r.diff)} unit</b>`:''}</div></div>`).join('')}
+    ${returBlock()}
     <div class="sec-title">Penjualan</div>
     <div class="card"><div class="kv"><span>Total penjualan</span><span class="num" style="font-size:17px;color:var(--ink);font-weight:800">${rp(t.total)}</span></div>
       <label class="field" style="margin:12px 0 0"><span>Cash</span><input class="input" data-num inputmode="numeric" value="${numStr(t.cash)}" oninput="ulCash(this.value)"></label>
@@ -2222,9 +2230,12 @@ function ulSubmit(){
   const id='UL-2610-0'+(10+S.unloads.length), cash=t.cash;
   t.kurang.forEach(r=>{ S.canvasSales.unshift({id:'CVS-2610-0'+(100+S.canvasSales.length),toko:'Selisih unloading',items:[{id:r.id,q:r.diff,price:r.p.price}],total:r.diff*r.p.price,time:'17:20',cust:'',status:'Terkirim',d:0,sel:id,vals:[['Sumber','Selisih unloading (otomatis)'],['Alasan',u.reason]]}); });
   t.rows.forEach(r=>{ S.stock[r.id].good=r.act; });
-  S.unloads.unshift({id,u:S.user,by:U().name,time:'17:20',src:[...new Set(Object.values(u.tag))].map(k=>k==='OCR'?'Scan nota':k==='Scan'?'Scan barcode':'Manual').join(', ')||'Manual',rows:t.rows.map(r=>({id:r.id,ld:r.ld,exp:r.exp,act:r.act})),total:t.total,cash,non:t.total-cash,sel:t.sel.map(r=>({id:r.id,q:r.diff,harga:Math.abs(r.diff)*r.p.price})),reason:u.reason,doc:u.doc,status:'Menunggu approval'});
-  S.mutasi.unshift({t:'Unloading barang',d:t.rows.map(r=>cvById(r.id).name+' sisa '+r.act).join(', '),time:'17:20',sign:'-'});
-  S.ul=null; S.stack=S.stack.filter(e=>e.name!=='unloading'); go('ld-sukses',{kind:'Unloading',id,sub:'penjualan '+rp(t.total)+(t.sel.length?', ada selisih':'')});
+  const retur=ulRetur(), nRetur=retur.reduce((a,r)=>a+r.q,0);
+  retur.forEach(r=>{ const st=S.stock[r.id]; if(!st) return; if(r.cond==='bad') st.bad=Math.max(0,st.bad-r.q); else if(!t.rows.some(x=>x.id===r.id)) st.good=Math.max(0,st.good-r.q); });
+  (S.returs||[]).forEach(r=>{ if(r.u===S.user&&!r.ul) r.ul=id; });
+  S.unloads.unshift({id,u:S.user,by:U().name,time:'17:20',src:[...new Set(Object.values(u.tag))].map(k=>k==='OCR'?'Scan nota':k==='Scan'?'Scan barcode':'Manual').join(', ')||'Manual',rows:t.rows.map(r=>({id:r.id,ld:r.ld,exp:r.exp,act:r.act})),total:t.total,cash,non:t.total-cash,sel:t.sel.map(r=>({id:r.id,q:r.diff,harga:Math.abs(r.diff)*r.p.price})),reason:u.reason,doc:u.doc,retur,status:'Menunggu approval'});
+  S.mutasi.unshift({t:'Unloading barang',d:t.rows.map(r=>cvById(r.id).name+' sisa '+r.act).join(', ')+(nRetur?', retur '+nRetur+' unit':''),time:'17:20',sign:'-'});
+  S.ul=null; S.stack=S.stack.filter(e=>e.name!=='unloading'); go('ld-sukses',{kind:'Unloading',id,sub:'penjualan '+rp(t.total)+(nRetur?', retur '+nRetur+' unit':'')+(t.sel.length?', ada selisih':'')});
 }
 /* Approve loading dan unloading (Team Leader) */
 function apprList(kind){
@@ -2242,11 +2253,12 @@ SCR['approve-detail'] = p => {
        <div class="sec-title">Produk</div><div class="list">${x.items.map(i=>{const pr=cvById(i.id);return `<div class="li"><div class="grow"><div class="t">${esc(pr.name)}</div><div class="s">${pr.sku} · ${rp(pr.price)}</div></div><b class="num">×${i.q}</b></div>`}).join('')}</div>`
     : `<div class="card"><div class="kv"><span>Sales</span><span>${esc(x.by)}</span></div><div class="kv"><span>Waktu</span><span>${x.time}</span></div><div class="kv"><span>Sumber</span><span>${x.src}</span></div><div class="kv"><span>Total penjualan</span><span class="num">${rp(x.total)}</span></div><div class="kv"><span>Cash</span><span class="num">${rp(x.cash)}</span></div><div class="kv"><span>Non Cash</span><span class="num">${rp(x.non)}</span></div><div class="kv"><span>Status</span>${chip(x.status,ST_APR[x.status])}</div></div>
        <div class="sec-title">Produk</div><div class="list">${x.rows.map(r=>{const pr=cvById(r.id);return `<div class="li"><div class="grow"><div class="t">${esc(pr.name)}</div><div class="s">Loading ${r.ld} · sisa sistem ${r.exp} · sisa aktual ${r.act}</div></div></div>`}).join('')}</div>
+       ${x.retur?.length?`<div class="sec-title">Barang retur</div>${returList(x.retur)}`:''}
        ${x.sel.length?`<div class="sec-title">Selisih</div><div class="list">${x.sel.map(r=>`<div class="li"><div class="grow"><div class="t">${esc(cvById(r.id).name)}</div><div class="s">${r.q>0?'Kurang':'Lebih'} ${Math.abs(r.q)} unit</div></div><b class="num">${rp(r.harga)}</b></div>`).join('')}</div>
        <div class="card" style="margin-top:12px"><div class="kv"><span>Foto dokumen</span><span>${x.doc?'Terlampir':'–'}</span></div><div class="kv"><span>Alasan</span><span style="text-align:right;max-width:60%">${esc(x.reason)}</span></div></div>`:''}`;
   return {note:'Detail untuk approval Team Leader.',html:`${appbar(x.id)}<main class="content">${body}</main>${pend?`<footer class="actions"><button class="btn danger" style="width:auto" onclick="apprDo('${p.kind}','${x.id}',false)">Tolak</button><button class="btn" onclick="apprDo('${p.kind}','${x.id}',true)">${I('check',20,2.2)} Setujui</button></footer>`:''}`};
 };
-function apprDo(kind,id,ok){ const x=(kind==='ld'?S.loads:S.unloads).find(a=>a.id===id); x.status=ok?'Disetujui':'Ditolak'; back(); toast((kind==='ld'?'Loading ':'Unloading ')+id+(ok?' disetujui':' ditolak'),ok?'check':'x'); }
+function apprDo(kind,id,ok){ const x=(kind==='ld'?S.loads:S.unloads).find(a=>a.id===id); x.status=ok?'Disetujui':'Ditolak'; if(!ok&&kind==='ul') (S.returs||[]).forEach(r=>{ if(r.ul===id) delete r.ul; }); back(); toast((kind==='ld'?'Loading ':'Unloading ')+id+(ok?' disetujui':' ditolak'),ok?'check':'x'); }
 
 /* ---------- Stok bawaan (Canvasing) ---------- */
 /* Usulan (11 Nov 2026): sisa barang canvassing wajib kembali ke gudang dalam batas jam sejak check-out (bawaan 24 jam, diatur di dashboard).
@@ -2287,19 +2299,19 @@ SCR['stok-form'] = p => {
   return {note:{muat:'Input stok yang dibawa harus dari master produk, dibatasi limit nominal per hari (MOM 11.1).',retur:'Retur dari toko menambah stok bawaan dengan status layak / tidak layak jual (BRD 2.16.5, 2.16.12).',adjust:'Penyesuaian naik/turun wajib dengan alasan (BRD 2.16.6).'}[k],
   html:`${appbar(title)}<main class="content">
     ${k==='muat'?`<div class="banner blue" style="margin-bottom:14px">${I('target',18)}<span>Sisa limit hari ini: <b>${rp(Math.max(0,canvasLimit()-stockValue()))}</b>.</span></div>`:''}
-    ${k==='retur'?`<label class="field"><span>Dari toko</span><select class="input">${TOKO.canvas.map(t=>`<option>${t.name}</option>`).join('')}</select></label>`:''}
+    ${k==='retur'?`<label class="field"><span>Dari toko</span><select class="input" id="sa_t">${TOKO.canvas.map(t=>`<option>${t.name}</option>`).join('')}</select></label>`:''}
     <label class="field"><span>Produk</span><select class="input" id="sp">${CANVAS_PRODUCTS.map(x=>`<option value="${x.id}">${x.name} (${x.sku})</option>`).join('')}</select></label>
     ${k==='adjust'?`<div class="field"><span>Arah</span><div class="opts"><button class="opt ${p.dir!=='down'?'on':''}" onclick="setP({dir:'up'})">Tambah</button><button class="opt ${p.dir==='down'?'on':''}" onclick="setP({dir:'down'})">Kurangi</button></div></div>`:''}
     <label class="field"><span>Jumlah</span><input class="input" id="sq" type="number" min="1" value="1" inputmode="numeric"></label>
     ${k==='retur'?`<div class="field"><span>Kondisi barang</span><div class="opts"><button class="opt ${p.cond!=='bad'?'on':''}" onclick="setP({cond:'good'})">Layak jual</button><button class="opt ${p.cond==='bad'?'on':''}" onclick="setP({cond:'bad'})">Tidak layak jual</button></div></div>`:''}
-    ${k!=='muat'?`<label class="field"><span>Alasan</span><textarea class="input" placeholder="${k==='retur'?'contoh: Kemasan penyok':'contoh: Selisih hitung stok'}"></textarea></label>`:''}
+    ${k!=='muat'?`<label class="field"><span>Alasan</span><textarea class="input" id="sa_r" placeholder="${k==='retur'?'contoh: Kemasan penyok':'contoh: Selisih hitung stok'}"></textarea></label>`:''}
   </main><footer class="actions"><button class="btn" onclick="saveStock('${k}')">Simpan</button></footer>`};
 };
 function saveStock(k){
   const p=cur().p, id=val('sp'), q=Math.max(1,parseInt(val('sq'))||1), pr=prodById(id);
   if(k==='muat'&&stockValue()+q*pr.price>canvasLimit()){ toast('Melebihi limit nominal hari ini','alert'); return; }
   if(k==='muat'){ S.bawa[id]=(S.bawa[id]||0)+q; S.stock[id].good+=q; S.mutasi.unshift({t:'Muat stok',d:`${pr.name} ×${q}`,time:'13:10',sign:'+'}); }
-  if(k==='retur'){ if(p.cond==='bad') S.stock[id].bad+=q; else S.stock[id].good+=q; S.mutasi.unshift({t:'Retur dari toko',d:`${pr.name} ×${q} (${p.cond==='bad'?'tidak layak jual':'layak jual'})`,time:'13:10',sign:'+'}); aktMark('retur'); }
+  if(k==='retur'){ if(p.cond==='bad') S.stock[id].bad+=q; else S.stock[id].good+=q; S.mutasi.unshift({t:'Retur dari toko',d:`${pr.name} ×${q} (${p.cond==='bad'?'tidak layak jual':'layak jual'})`,time:'13:10',sign:'+'}); (S.returs=S.returs||[]).unshift({u:S.user,toko:val('sa_t'),time:'13:10',reason:val('sa_r'),items:[{id,q,cond:p.cond==='bad'?'bad':'good'}]}); aktMark('retur'); }
   if(k==='adjust'){ const d=p.dir==='down'?-q:q; S.stock[id].good=Math.max(0,S.stock[id].good+d); S.mutasi.unshift({t:'Penyesuaian',d:`${pr.name} ${d>0?'+':''}${d}`,time:'13:10',sign:d>0?'+':'-'}); }
   back(); toast('Stok diperbarui');
 }
@@ -3882,18 +3894,17 @@ function capItems(){
   if(r==='leads'){
     const mine=S.leads.filter(l=>l.owner===S.user);
     const rk=rekrutList().filter(x=>x.u===S.user), jm=jualMfList().filter(x=>x.u===S.user);
-    if(vk()==='cbd'){ out.push({c:'visit',label:'Monitoring mitra',done:v.filter(x=>x.status==='Selesai').length,total:v.length,sub:'mitra dikunjungi',go:"act(()=>go('mitra'))"}); }
-    out.push({c:'job',label:'Leads dihubungi',done:mine.filter(l=>l.status!=='Baru').length,total:mine.length,sub:'leads kamu',go:"tab('leads')"});
-    if(vk()==='rea'){ const ra=reaAktList().filter(x=>x.u===S.user);
-      out.push({c:'job',label:'Jualan direct',done:jm.filter(x=>x.tipe==='Direct').length,total:Math.max(3,jm.filter(x=>x.tipe==='Direct').length),sub:'nasabah langsung',go:"act(()=>go('jualan-mf',{tipe:'Direct'}))"});
-      out.push({c:'job',label:'Jualan mitra',done:jm.filter(x=>x.tipe==='Mitra').length,total:Math.max(2,jm.filter(x=>x.tipe==='Mitra').length),sub:'lewat agen',go:"act(()=>go('jualan-mf',{tipe:'Mitra'}))"});
-      out.push({c:'visit',label:'Activity canvasing',done:ra.length,total:Math.max(2,ra.length),sub:'kegiatan lapangan',go:"act(()=>go('rea-canvas'))"});
-    } else {
-      out.push({c:'job',label:'Jualan direct / mitra',done:jm.length,total:Math.max(3,jm.length),sub:'pencairan tercatat',go:"act(()=>go('jualan-mf'))"});
+    /* CBD kerja visit, REA in house. Isi dan urutan Rincian pekerjaan mengikuti daftar masing-masing. */
+    const jualan=(label,tipe,min,sub)=>{ const n=jm.filter(x=>!tipe||x.tipe===tipe).length; return {c:'job',label,done:n,total:Math.max(min,n),sub,go:tipe?`act(()=>go('jualan-mf',{tipe:'${tipe}'}))`:"act(()=>go('jualan-mf'))"}; };
+    const rekrut={c:'task',label:'Rekrut mitra',done:rk.filter(x=>x.st==='Aktif').length,total:Math.max(2,rk.length),sub:'calon mitra',go:"act(()=>go('rekrut-mitra'))"};
+    if(vk()==='cbd') out.push(
+      {c:'visit',label:'Monitoring mitra',done:v.filter(x=>x.status==='Selesai').length,total:v.length,sub:'mitra dikunjungi',go:"act(()=>go('mitra'))"},
+      {c:'job',label:'Leads dihubungi',done:mine.filter(l=>l.status!=='Baru').length,total:mine.length,sub:'leads kamu',go:"tab('leads')"},
+      rekrut, jualan('Jualan direct / mitra','',3,'pencairan tercatat'));
+    else { const ra=reaAktList().filter(x=>x.u===S.user);
+      out.push(jualan('Jualan direct','Direct',3,'nasabah langsung'), jualan('Jualan mitra','Mitra',2,'lewat agen'),
+        {c:'visit',label:'Activity (canvasing)',done:ra.length,total:Math.max(2,ra.length),sub:'kegiatan lapangan',go:"act(()=>go('rea-canvas'))"}, rekrut);
     }
-    out.push({c:'task',label:'Rekrut mitra',done:rk.filter(x=>x.st==='Aktif').length,total:Math.max(2,rk.length),sub:'calon mitra',go:"act(()=>go('rekrut-mitra'))"});
-    if(vk()==='cbd'){ const t=cbdTasks(); out.push({c:'task',label:'Task Team Leader',done:t.filter(x=>x.st==='Terjawab').length,total:t.length,sub:'pertanyaan TL',go:"act(()=>go('cbd-task'))"}); }
-    else out.push(qItem);
     return out;
   }
   const vGo=aktGo()||"tab('home')";
@@ -3922,7 +3933,9 @@ function capChart(){
 /* Pencapaian di Beranda (di atas Menu): pekerjaan hari ini, selesai, belum, dan persen. Sama dengan kolom di Aktivitas Sales dashboard. */
 function pcScope(){
   const u=U(), v=S.visits[vk()]||[], toko=isSpg()?spgToko().name:v.length>1?v.length+' toko · '+v[0].place:v.length?v[0].place:u.place;
-  return [['Cabang',(u.unit||'').replace(/^Cabang\s+/,'')||'–','pin'],['Client',(u.client||'–').split(' & ')[0],'store'],['Toko',toko||'–','store']];
+  const mf=role()==='leads', cbd=vk()==='cbd';
+  const lokasi=!mf?['Toko',toko||'–','store']:cbd?['Visit mitra',v.length+' mitra'+(v.length?' · '+v[0].place:''),'store']:['In house',u.place||'–','store'];
+  return [['Cabang',(u.unit||'').replace(/^Cabang\s+/,'')||'–','pin'],['Client',(u.client||'–').split(' & ')[0],'store'],lokasi];
 }
 function pcToggle(){ S.pcOpen=S.pcOpen===false; const b=document.querySelector('.pc'); if(!b) return; b.classList.toggle('open',S.pcOpen); const t=b.querySelector('.pc-more'); if(t) t.setAttribute('aria-expanded',S.pcOpen); }
 function pencapaian(){
