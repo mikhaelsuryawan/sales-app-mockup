@@ -1338,11 +1338,11 @@ const D={
     {id:'a7',type:'Promo baru',u:null,by:'Dewi Kartika (Admin)',detail:'Bundling AC + Air Purifier diskon 7% · 1–30 Nov',reason:'Program akhir tahun ARUNIKA',when:'26 Okt, 10:05'}
   ],
   leads:[
-    {id:'L-2610-031',name:'Ahmad Fauzi',prod:'Kredit Modal Kerja',amount:10e6,tenor:12,status:'Baru',owner:'nina',cab:'Fatmawati',date:'26 Okt',sync:''},
+    {id:'L-2610-031',jaminan:'BPKB Motor',name:'Ahmad Fauzi',prod:'Kredit Modal Kerja',amount:10e6,tenor:12,status:'Baru',owner:'nina',cab:'Fatmawati',date:'26 Okt',sync:''},
     {id:'L-2610-029',name:'Yuliana Putri',prod:'Kredit Multiguna',amount:25e6,tenor:24,status:'Baru',owner:'nina',cab:'Fatmawati',date:'26 Okt',sync:''},
-    {id:'L-2510-022',name:'Rudi Hartanto',prod:'Kredit Modal Kerja',amount:15e6,tenor:18,status:'Prospect',owner:'nina',cab:'Fatmawati',date:'25 Okt',sync:''},
+    {id:'L-2510-022',jaminan:'Sertifikat Rumah (SHM)',name:'Rudi Hartanto',prod:'Kredit Modal Kerja',amount:15e6,tenor:18,status:'Prospect',owner:'nina',cab:'Fatmawati',date:'25 Okt',sync:''},
     {id:'L-2410-017',name:'Lina Kusuma',prod:'Kredit Multiguna',amount:8e6,tenor:12,status:'Prospect',owner:'nina',cab:'Fatmawati',date:'24 Okt',sync:''},
-    {id:'L-2310-011',name:'Hendra Saputra',prod:'Kredit Modal Kerja',amount:10e6,tenor:12,status:'Deal',goal:5e6,owner:'nina',cab:'Fatmawati',date:'23 Okt',sync:'Terkirim'},
+    {id:'L-2310-011',jaminan:'BPKB Mobil',name:'Hendra Saputra',prod:'Kredit Modal Kerja',amount:10e6,tenor:12,status:'Deal',goal:5e6,owner:'nina',cab:'Fatmawati',date:'23 Okt',sync:'Terkirim'},
     {id:'L-2210-008',name:'Wawan Gunadi',prod:'Kredit Multiguna',amount:30e6,tenor:36,status:'Belum Tertarik',sub:'Rejected',owner:'nina',cab:'Fatmawati',date:'22 Okt',sync:''},
     {id:'L-2110-006',name:'Siti Aminah',prod:'Kredit Modal Kerja',amount:20e6,tenor:24,status:'Deal',goal:18e6,owner:'nina',cab:'Fatmawati',date:'21 Okt',sync:'Terkirim'},
     {id:'L-2010-004',name:'Bambang Irawan',prod:'Kredit Multiguna',amount:12e6,tenor:12,status:'Deal',goal:12e6,owner:'nina',cab:'Fatmawati',date:'20 Okt',sync:'Terkirim'},
@@ -2019,7 +2019,7 @@ function syncUserOff(){ try{ const m={}; MD.user.forEach(u=>{ if(u.off) m[u.id]=
 function syncTokoBaru(){ shRead('tokoBaruSales',[]).forEach(n=>{ if(TOKO.some(t=>t.id===n.id)) return; TOKO.push({id:n.id,name:n.name,cat:n.cat,cabang:'Jakarta Selatan',dealer:'–',sales:[n.u],addr:n.addr,client:'cl1',mapClients:['cl1'],sumber:'Input sales',status:'Takeout',radius:100,coord:'-6.2900, 106.8000'}); const us=MD.user.find(x=>x.id===n.u); if(us&&!(us.toko||[]).includes(n.id)) us.toko=[...(us.toko||[]),n.id]; }); }
 function render(scrollTop=true){
   navRebuild();
-  syncProducts(); refreshDerived(); syncApp(); syncTokoBaru(); syncUserOff(); syncUserBawa(); syncUserTambah(); syncPenugasanToko(); syncOwnVisits(); syncVisitReq();
+  syncProducts(); refreshDerived(); syncApp(); syncTokoBaru(); syncUserOff(); syncUserBawa(); syncUserTambah(); syncPenugasanToko(); syncOwnVisits(); syncVisitReq(); syncLeadBaru();
   const {path,q}=parse(); const app=$('#app');
   if(path==='/login'){ app.innerHTML=pageLogin(); lastPath=path; return; }
   if(!AUTHED){ ST.from=location.hash.slice(1)||'/'; location.replace('#/login'); return; }
@@ -2765,11 +2765,11 @@ function pageLeads(q){
   </div>
   ${card('Daftar leads',`${S.size?`<div class="bulk"><span style="flex:1">${S.size} leads dipilih</span>${btn('Assign '+S.size+' leads',{perm:'leads.assign',v:'accent',size:'sm',icon:'users',on:"assignModal('',[...ST.sel.lds])"})}</div>`:''}
     ${dataTable('lds',{rows,select:true,rowClick:r=>`leadPanel('${r.id}')`,empty:'Tidak ada leads dengan filter ini.',cols:[
-      {label:'Nasabah',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="mono muted" style="display:block">${r.id}</span>`,prim:true,sort:r=>r.name},{label:'Produk',k:'prod',hide:true},
+      {label:'Nasabah',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="mono muted" style="display:block">${r.id}</span>`,prim:true,sort:r=>r.name},{label:'Produk',k:'prod',hide:true},{label:'Jaminan',render:r=>esc(r.jaminan||'–'),sort:r=>r.jaminan||'',hide:true},
       {label:'Cabang',render:r=>leadCab(r),hide:true},{label:'Pengajuan',render:r=>rp(r.amount),align:'r',sort:r=>r.amount},{label:'Goal',render:r=>r.goal?`<b class="fg tabular">${rp(r.goal)}</b>`:'–',align:'r',hide:true},
       {label:'Ditangani',render:r=>r.owner?personChip(r.owner==='sari'?'Sari W. (manager)':byU(r.owner).name):tag('Belum di-assign','accent'),sort:r=>r.owner?(r.owner==='sari'?'Sari W.':byU(r.owner).name):''},
       {label:'Status',render:r=>spill(r.sub?r.status+' · '+r.sub:r.status,{Baru:'accent',Prospect:'warning',Deal:'success','Belum Tertarik':'muted'}[r.status])},{label:'SIM',render:r=>r.sync?tag('Terkirim','success'):'–',hide:true}]})}`,
-    {acts:`${btn('Template',{v:'outline',size:'sm',icon:'down',on:"toast('Template diunduh','template_leads_crm.xlsx. Kolom wajib: ID sumber, nama, nomor HP, produk, cabang.')"})}${btn('Assign leads',{v:'outline',size:'sm',icon:'users',on:"assignModal()"})}${btn('Import assign',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Assign leads')"})}${btn('Upload pengajuan',{v:'accent',size:'sm',icon:'up',on:"uploadModal('Data pengajuan')"})}`})}`};
+    {acts:`${btn('Buat leads',{perm:'leads.assign',v:'accent',size:'sm',icon:'plus',on:'leadForm()'})}${btn('Template',{v:'outline',size:'sm',icon:'down',on:"toast('Template diunduh','template_leads_crm.xlsx. Kolom wajib: ID sumber, nama, nomor HP, produk, cabang.')"})}${btn('Assign leads',{v:'outline',size:'sm',icon:'users',on:"assignModal()"})}${btn('Import assign',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Assign leads')"})}${btn('Upload pengajuan',{v:'accent',size:'sm',icon:'up',on:"uploadModal('Data pengajuan')"})}`})}`};
 }
 function leadPer(){ toast('Periode diubah','Data mockup tetap sama.'); }
 /* Filter Leads mengikuti Laporan penjualan: periode (preset dan rentang tanggal), klien, cabang, lalu dimensi khusus leads: produk dan ditangani. Tanggal leads = tanggal masuk. */
@@ -2817,9 +2817,26 @@ function assignSave(){
   const {u,sel:S}=ST.asg; if(!u||!S.size) return; const n=S.size, who=byU(u).name;
   act('leads/assign',{perm:'leads.assign',run:()=>{ D.leads.forEach(l=>{ if(S.has(l.id)) l.owner=u; }); ST.sel.lds?.clear(); },audit:`Meng-assign ${n} leads ke ${who}`,toast:[`${n} leads di-assign ke ${who.split(' ')[0]}`,'Penerima leads mendapat notifikasi di aplikasi.']});
 }
+/* Pilihan Jaminan leads (data contoh, menunggu daftar resmi dari klien). Isinya harus sama di mobile dan dashboard. */
+const JAMINAN=['BPKB Motor','BPKB Mobil','Sertifikat Rumah (SHM)','Sertifikat HGB','SK Karyawan','Deposito','Tanpa jaminan'];
+/* Leads yang dibuat sales di mobile masuk ke daftar leads dashboard. */
+function syncLeadBaru(){ try{ shRead('leadBaru',[]).forEach(n=>{ if(D.leads.some(l=>l.id===n.id)) return; D.leads.unshift({id:n.id,name:n.name,prod:n.prod,jaminan:n.jaminan,phone:n.phone,job:n.job,addr:n.addr,cab:n.cab,amount:0,tenor:12,status:'Baru',owner:n.u,date:'26 Okt',sync:''}); }); }catch(e){} }
+function leadForm(){ if(!can('leads.assign')) return noAccess();
+  openModal(`<h2 class="pt">Buat leads<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Leads baru belum di-assign. Pilih penerimanya lewat Assign leads.</p>
+  <div class="grid" style="gap:12px"><label class="field"><span>Nama nasabah <b class="req" aria-hidden="true">*</b></span><span class="inp"><input id="ld_n"></span></label>
+  <label class="field"><span>Nomor HP <b class="req" aria-hidden="true">*</b></span><span class="inp"><input id="ld_p" inputmode="tel"></span></label>
+  <label class="field"><span>Produk</span>${sel(['Kredit Modal Kerja','Kredit Multiguna','Dana Tunai'],'Kredit Modal Kerja','',{label:'Produk',id:'ld_d'})}</label>
+  <label class="field"><span>Jaminan</span>${sel([['','Pilih jaminan'],...JAMINAN],'','',{label:'Jaminan',id:'ld_g'})}</label>
+  <label class="field"><span>Cabang</span>${sel(['Fatmawati','Cilandak'],'Fatmawati','',{label:'Cabang',id:'ld_c'})}</label>
+  <label class="field"><span>Pekerjaan</span><span class="inp"><input id="ld_j"></span></label>
+  <label class="field"><span>Alamat</span><span class="inp"><input id="ld_a"></span></label></div>
+  <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan leads',{v:'accent',on:'leadSaveNew()'})}</div>`); }
+function leadSaveNew(){ const g=id=>(document.getElementById(id).value||'').replace(/['"<>`\\]/g,'').trim(), name=g('ld_n'), phone=g('ld_p');
+  if(!name||!phone){ toast('Periksa isian','Isi nama nasabah dan nomor HP.','danger'); return; }
+  act('leads/create',{perm:'leads.assign',run:()=>{ D.leads.unshift({id:newId('L'),name,phone,prod:g('ld_d'),jaminan:document.getElementById('ld_g').value,cab:g('ld_c'),job:g('ld_j'),addr:g('ld_a'),amount:0,tenor:12,status:'Baru',owner:null,date:'26 Okt',sync:''}); },audit:'Membuat leads '+name,toast:['Leads tersimpan',name]}); }
 function leadPanel(id){ const l=D.leads.find(x=>x.id===id); if(!l) return panelMissing('Leads');
   openPanel(l.name,`${panelHero({eyebrow:l.id,title:esc(l.name),sub:l.prod+' · '+l.cab,badge:spill(l.status,toneOf(l.status)),metrics:[['Pengajuan',rp(l.amount)],['Tenor',l.tenor+' bulan'],['Goal',l.goal?rp(l.goal):'Belum']]})}
-  <div class="tile" style="margin-bottom:12px"><div class="xs muted">Produk</div><b class="fg">${l.prod}</b></div>
+  <div class="grid g2" style="gap:12px;margin-bottom:12px"><div class="tile"><div class="xs muted">Produk</div><b class="fg">${l.prod}</b></div><div class="tile"><div class="xs muted">Jaminan</div><b class="fg">${esc(l.jaminan||'–')}</b></div></div>
   ${l.status==='Deal'?`<div class="tile" style="margin-bottom:12px"><div class="xs muted">Dokumen Deal</div><b class="fg">Bukti approve terunggah · Persetujuan pencairan ${l.owner==='nina'&&l.goal>10e6?'terunggah':'belum'} · Serah terima dana ${l.owner==='nina'&&l.goal>10e6?'terunggah':'belum'}</b></div>`:''}
   <div class="steps">${[['Upload backend',l.date+' 2026 · 06:00','done'],['Assign ke sales',l.owner?byU(l.owner).name:'Belum',l.owner?'done':'cur'],['Verifikasi (telepon / WA)',l.status==='Baru'?'Belum':'Selesai',l.status==='Baru'?(l.owner?'cur':'up'):'done'],['Hasil: '+(l.sub?l.status+' · '+l.sub:l.status),l.status==='Deal'?'Goal '+rp(l.goal):l.status==='Prospect'?'Follow up 29 Okt':l.sub==='Rejected'?'Tidak memenuhi syarat':'Belum',l.status==='Deal'||l.sub==='Rejected'?'done':l.status==='Prospect'?'cur':'up'],['Kirim ke SIM',l.sync?'Terkirim':'–',l.sync?'done':'up']].map(([t,s,k])=>`<div class="step"><span class="sd ${k}">${k==='done'?I('check',14,2.6):''}</span><div><b>${t}</b><small>${s}</small></div></div>`).join('')}</div>`,
   !l.owner?`${btn('Tutup',{v:'outline',on:'closeLayer()'})}${btn('Assign',{perm:'leads.assign',v:'accent',on:`closeLayer();assignModal('',['${id}'])`})}`:btn('Tutup',{v:'outline',on:'closeLayer()'}),{sub:l.id}); }
