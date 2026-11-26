@@ -182,17 +182,17 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .kv span:last-child{font-weight:600;text-align:right}
 .bar{height:8px;border-radius:99px;background:rgba(12,46,89,.08);overflow:hidden}
 /* Peta kunjungan (feedback AMO: OpenStreetMap, bukan Google Maps karena berbiaya). */
-.vmap{position:relative;height:190px;border-radius:18px;overflow:clip;margin-bottom:14px;contain:paint;
+.vmap{position:relative;height:230px;border-radius:18px;overflow:clip;margin-bottom:14px;contain:paint;
   background:linear-gradient(160deg,#dfeaf5,#eef4fa);border:1px solid rgba(12,46,89,.10)}
 .vmap .mgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(12,46,89,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(12,46,89,.07) 1px,transparent 1px);background-size:34px 34px}
 .vmap .mtile{position:absolute;width:256px;height:256px;max-width:none}
 .vmap .mpin{position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;padding:0;cursor:pointer;color:#0C2E59}
-.vmap .mdot{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;background:#0A92F2;box-shadow:0 2px 8px rgba(12,46,89,.35);border:2px solid #fff;font:700 12px/1 'Plus Jakarta Sans',sans-serif}
+.vmap .mdot{width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);margin-bottom:5px;display:grid;place-items:center;color:#fff;background:#0A92F2;box-shadow:0 2px 8px rgba(12,46,89,.35);border:2px solid #fff;font:700 12px/1 'Plus Jakarta Sans',sans-serif}
+.vmap .mdot b{transform:rotate(45deg);font:inherit}
 .vmap .mdot.green{background:#18A957}.vmap .mdot.tan{background:#EFA477}.vmap .mdot.grey{background:#8296AE}
+.vmap .mlabel{position:absolute;pointer-events:none;box-sizing:border-box;height:18px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-align:center;padding:0 6px;border-radius:6px;background:rgba(255,255,255,.94);box-shadow:0 1px 4px rgba(12,46,89,.25);color:#0C2E59;font:700 10px/18px 'Plus Jakarta Sans',sans-serif}
+.vmap .mlabel.me{background:#3466FF;color:#fff}
 .vmap .mme{position:absolute;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:#3466FF;border:3px solid #fff;box-shadow:0 0 0 5px rgba(52,102,255,.22)}
-.vmap .mlegend{position:absolute;left:10px;bottom:8px;right:10px;display:flex;gap:10px;flex-wrap:wrap;font-size:11px;font-weight:700;color:#0C2E59}
-.vmap .mlegend span{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.88);border-radius:99px;padding:3px 8px}
-.vmap .mlegend i{width:9px;height:9px;border-radius:50%;display:inline-block}
 .vmap .mattr{position:absolute;right:6px;top:6px;font-size:9px;color:#486B96;background:rgba(255,255,255,.82);border-radius:6px;padding:1px 5px}
 .bar i{display:block;height:100%;border-radius:99px;background:var(--grad);box-shadow:0 0 10px rgba(10,146,242,.5)}
 .bar.tan i{background:var(--grad-tan);box-shadow:0 0 10px rgba(240,154,102,.5)}
@@ -1047,11 +1047,25 @@ function visitCoord(place){ const m=shRead('tokoCoord',null); return (m&&m[place
 /* Warna pin mengikuti status kunjungan: hijau selesai, biru berjalan, tan toko tutup, abu belum. */
 function mapTone(v){ const open=v.cin&&!v.cout;
   return v.status==='Selesai'?'green':open?'':v.status==='Toko tutup'?'tan':'grey'; }
+/* Label nama di peta: pilih sisi yang tidak menimpa pin atau label lain (atas, bawah, kanan, kiri). */
+function mapLabels(P,W,H){
+  const used=P.map(p=>p.me?[p.x-12,p.y-12,24,24]:[p.x-15,p.y-35,30,35]);
+  used.push([W-100,0,100,22]); // atribusi OpenStreetMap
+  const area=(a,b)=>Math.max(0,Math.min(a[0]+a[2],b[0]+b[2])-Math.max(a[0],b[0]))*Math.max(0,Math.min(a[1]+a[3],b[1]+b[3])-Math.max(a[1],b[1]));
+  return P.map(p=>{
+    const w=Math.min(162,Math.round(p.t.length*5.8)+14), h=18, mid=p.y-(p.me?0:18);
+    const top=[p.x-w/2,p.y-(p.me?32:55),w,h], bottom=[p.x-w/2,p.y+(p.me?14:3),w,h], right=[p.x+17,mid-h/2,w,h], left=[p.x-17-w,mid-h/2,w,h];
+    const C=(p.me?[bottom,top,right,left]:[top,right,left,bottom]).map(c=>[Math.round(Math.max(2,Math.min(W-w-2,c[0]))),Math.round(Math.max(2,Math.min(H-h-2,c[1]))),w,h]);
+    const cost=c=>used.reduce((s,u)=>s+area(c,u),0);
+    const best=C.reduce((a,c)=>cost(c)<cost(a)?c:a); used.push(best);
+    return `<span class="mlabel${p.me?' me':''}" aria-hidden="true" style="left:${best[0]}px;top:${best[1]}px;width:${w}px">${esc(p.t)}</span>`;
+  }).join('');
+}
 function visitMap(L,h){
   const pts=L.map(v=>({v,c:visitCoord(v.place)})).filter(x=>x.c);
   if(!pts.length) return '';
-  /* Lebar frame iPhone di mockup; padding menyisakan ruang untuk kepala pin dan legenda. */
-  const H=h||190, W=343, PX=26, PT=34, PB=44;
+  /* Lebar frame iPhone di mockup; padding menyisakan ruang untuk pin dan label nama. */
+  const H=h||230, W=343, PX=62, PT=58, PB=34;
   /* Zoom dipilih otomatis: ambil yang paling dekat tapi semua titik (termasuk posisi sales) tetap masuk. */
   let z=10;
   for(let t=16;t>=10;t--){
@@ -1069,11 +1083,12 @@ function visitMap(L,h){
   for(let tx=t0x;tx<=t1x;tx++) for(let ty=t0y;ty<=t1y;ty++)
     tiles+=`<img class="mtile" alt="" loading="lazy" referrerpolicy="origin" src="https://tile.openstreetmap.org/${z}/${tx}/${ty}.png" style="left:${tx*256-ox}px;top:${ty*256-oy}px" onerror="this.remove()">`;
   const pins=px.map(x=>{ const left=Math.round(x.p[0]-ox), top=Math.round(x.p[1]-oy);
-    return `<button class="mpin" style="left:${left}px;top:${top}px" onclick="go('kunjungan-detail',{id:'${x.v.id}'})" aria-label="${esc(x.v.place)} – ${esc(x.v.status)}"><span class="mdot ${mapTone(x.v)}">${L.indexOf(x.v)+1}</span></button>`; }).join('');
+    return `<button class="mpin" style="left:${left}px;top:${top}px" onclick="go('kunjungan-detail',{id:'${x.v.id}'})" aria-label="${esc(x.v.place)} – ${esc(x.v.status)}"><span class="mdot ${mapTone(x.v)}"><b>${L.indexOf(x.v)+1}</b></span></button>`; }).join('');
+  const mx=Math.round(me[0]-ox), my=Math.round(me[1]-oy);
+  const labels=mapLabels([{x:mx,y:my,t:'Posisi Anda',me:1},...px.map(x=>({x:Math.round(x.p[0]-ox),y:Math.round(x.p[1]-oy),t:x.v.place}))],W,H);
   return `<div class="vmap"><div class="mgrid"></div>${tiles}
     <span class="mattr">© OpenStreetMap</span>
-    <div class="mme" style="left:${Math.round(me[0]-ox)}px;top:${Math.round(me[1]-oy)}px" aria-label="Posisi kamu"></div>${pins}
-    <div class="mlegend"><span><i style="background:#18A957"></i>Selesai</span><span><i style="background:#0A92F2"></i>Berjalan</span><span><i style="background:#8296AE"></i>Belum</span><span><i style="background:#3466FF"></i>Posisi kamu</span></div></div>`;
+    <div class="mme" style="left:${mx}px;top:${my}px" aria-label="Posisi Anda"></div>${pins}${labels}</div>`;
 }
 /* Urutan daftar toko (feedback AMO: sort by default dari dashboard, atau jarak dari titik user). */
 const SORT_KEY='visitSort';
