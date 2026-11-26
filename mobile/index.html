@@ -1067,7 +1067,7 @@ function visitMap(L,h){
   const t0x=Math.floor(ox/256), t1x=Math.floor((ox+W)/256), t0y=Math.floor(oy/256), t1y=Math.floor((oy+H)/256);
   let tiles='';
   for(let tx=t0x;tx<=t1x;tx++) for(let ty=t0y;ty<=t1y;ty++)
-    tiles+=`<img class="mtile" alt="" loading="lazy" src="https://tile.openstreetmap.org/${z}/${tx}/${ty}.png" style="left:${tx*256-ox}px;top:${ty*256-oy}px" onerror="this.remove()">`;
+    tiles+=`<img class="mtile" alt="" loading="lazy" referrerpolicy="origin" src="https://tile.openstreetmap.org/${z}/${tx}/${ty}.png" style="left:${tx*256-ox}px;top:${ty*256-oy}px" onerror="this.remove()">`;
   const pins=px.map(x=>{ const left=Math.round(x.p[0]-ox), top=Math.round(x.p[1]-oy);
     return `<button class="mpin" style="left:${left}px;top:${top}px" onclick="go('kunjungan-detail',{id:'${x.v.id}'})" aria-label="${esc(x.v.place)} – ${esc(x.v.status)}"><span class="mdot ${mapTone(x.v)}">${L.indexOf(x.v)+1}</span></button>`; }).join('');
   return `<div class="vmap"><div class="mgrid"></div>${tiles}
@@ -1085,7 +1085,7 @@ function sortVisits(L){
   return [...L].sort((a,b)=>d(a)-d(b));
 }
 function sortBar(){
-  return `<div class="segtabs" style="margin-bottom:12px">${[['plan','Urutan rencana'],['jarak','Terdekat dari saya']]
+  return `<div class="segtabs" style="margin-bottom:12px">${[['plan','Urutan Default'],['jarak','Terdekat dari saya']]
     .map(o=>`<button class="${visitSort()===o[0]?'on':''}" onclick="setVisitSort('${o[0]}')">${o[1]}</button>`).join('')}</div>`;
 }
 function visitRow(x){
@@ -1329,10 +1329,10 @@ SCR['kunjungan-detail'] = p => {
   else if(x.status==='Terlewat') foot=`<button class="btn" disabled>Terlewat. Check-in hanya di hari yang sama</button>`;
   else if(x.status==='Dijadwal ulang') foot=`<button class="btn" disabled>Dijadwal ulang ke ${x.resched?x.resched.hari+' '+x.resched.tgl:''}</button>`;
   else if(vk()==='cbd'&&x.mid) foot=x.status==='Selesai'?`<button class="btn" disabled>Monitoring selesai</button>`:`<button class="btn" onclick="go('mitra-detail',{id:'${x.mid}'})">Isi monitoring mitra</button>`;
-  else if(noCheckin()) foot=x.status==='Selesai'?`<button class="btn" disabled>Kunjungan selesai</button>`:`<button class="btn" onclick="act(()=>{leadDone('${x.id}')})">${I('check',18,2.2)} Tandai selesai</button>`;
-  else if(x.status==='Selesai') foot=`<button class="btn" disabled>Kunjungan selesai</button>`;
+  else if(noCheckin()) foot=x.status==='Selesai'?'':`<button class="btn" onclick="act(()=>{leadDone('${x.id}')})">${I('check',18,2.2)} Tandai selesai</button>`;
+  else if(x.status==='Selesai') foot='';
   else if(!x.cin) foot=`<button class="btn ghost" onclick="toast('Membuka Google Maps…','route')">${I('route',18)} Rute</button>`;
-  else foot=x.cout?`<button class="btn" disabled>Kunjungan selesai</button>`:`<button class="btn" onclick="go('aktivitas-toko',{id:'${x.id}'})">${I('grid',18)} Aktivitas Toko</button>`;
+  else foot=x.cout?'':`<button class="btn" onclick="go('aktivitas-toko',{id:'${x.id}'})">${I('grid',18)} Aktivitas Toko</button>`;
   return {note:(canTutup()?'<b>MOM 12 Nov:</b> jika toko tutup, tekan Toko tutup sebagai ganti check-in. Wajib 1 foto, catatan opsional, GPS tercatat. Status Toko tutup tidak dihitung terlewat dan toko tidak bisa di-check-in lagi hari itu. ':'')+'Check-in dan check-out wajib 1 foto ber-watermark, catatan opsional (MOM 5.2). Untuk Promotor FMCG dan MD, tugas selalu semua aktivitas toko kecuali support task, dan check-out baru bisa setelah semua tugas hijau. Check-in dan check-out harus di lokasi yang sama, dan Promotor FMCG boleh berulang kali dalam sehari. Lupa check-out ditutup otomatis saat check-in di toko berikutnya atau saat absen pulang. Sales Canvasing dan Taking Order wajib check-in dan check-out di tiap toko, hanya di dalam radius toko. Jika keluar radius tanpa check-out, muncul notifikasi belum check-out. Saat check-in di toko berikutnya, sales boleh check-out toko sebelumnya tanpa harus berada di radius toko itu (revisi Nov 2026).',
   html:`${appbar('Detail kunjungan',{right:(canResched(x)?`<button class="ib" onclick="act(()=>reschedSheet('${x.id}'))" aria-label="Jadwal ulang">${I('calendar',22)}</button>`:'')})}<main class="content">
     <div class="card"><div class="row"><div class="ico-tile">${I('pin',20)}</div><div class="grow"><div class="t" style="font-weight:800;font-size:16px">${x.place}${x.unplanned?' '+chip('Unplanned','amber'):''}</div><div class="small muted">Sen, 26 Okt 2026 · ${x.time}</div></div>${chip(x.status,visitTone(x.status))}</div>
@@ -1345,7 +1345,7 @@ SCR['kunjungan-detail'] = p => {
     ${role()==='fmcg'?fmTaskSummary(x):`<div class="list">${x.tasks.map(t=>/^(Quiz|Survey)$/.test(t)?`<button class="li" onclick="go('${t.toLowerCase()}')"><div class="ico-tile tan">${I(t==='Quiz'?'quiz':'survey',18,2)}</div><div class="grow"><div class="t">${t}</div><div class="s">Dikerjakan di dalam kunjungan</div></div>${I('right',18)}</button>`:`<div class="li"><div class="ico-tile">${I('check',18,2.2)}</div><div class="grow"><div class="t">${t}</div></div></div>`).join('')}</div>`}
     ${x.cin?`<div class="sec-title">Foto check-in</div><div class="thumbs">${visitPhotos(x,'in')}</div>`:''}
     ${x.cout?`<div class="sec-title">Foto check-out</div><div class="thumbs">${visitPhotos(x,'out')}</div>`:''}
-  </main><footer class="actions">${foot}</footer>`};
+  </main>${foot?`<footer class="actions">${foot}</footer>`:''}`};
 };
 const VISIT_FORM={
   spg:[['Kondisi display','opt',['Rapi','Perlu dirapikan','Kosong']],['Promo kompetitor aktif','opt',['Ada','Tidak ada']],['Stok terlihat','opt',['Cukup','Menipis','Habis']]],
