@@ -1285,8 +1285,7 @@ const apprChain = u => { const r=RID[u]; if(['r6','r8','r10'].includes(r)) retur
 /* Dipakai halaman Kunjungan dan Aktivitas Toko */
 const segHari = seg => `<div class="segtabs">${[['hari','Hari ini'],['rencana','Rencana']].map(s=>`<button class="${seg===s[0]?'on':''}" onclick="setP({seg:'${s[0]}'})">${s[1]}</button>`).join('')}</div>`;
 function kunjBanners(){ const lo=S.leftOpen&&visitById(S.leftOpen);
-  return missedOpen().map(m=>`<button class="banner amber" style="width:100%;text-align:left;margin-bottom:14px" onclick="act(()=>missedSheet('${m.id}'))">${I('alert',18)}<span>Kunjungan ke ${esc(m.place)} (${m.tgl}) terlewat. Isi alasannya.</span></button>`).join('')
-  +(lo&&!lo.cout?`<div class="banner amber" style="margin-bottom:14px">${I('alert',18)}<span>Kamu keluar dari radius ${lo.place} dan belum check-out. Check-out sekarang atau saat check-in di toko berikutnya.</span></div>`:''); }
+  return (lo&&!lo.cout?`<div class="banner amber" style="margin-bottom:14px">${I('alert',18)}<span>Kamu keluar dari radius ${lo.place} dan belum check-out. Check-out sekarang atau saat check-in di toko berikutnya.</span></div>`:''); }
 function progresCard(v){ const done=v.filter(x=>x.status==='Selesai').length, nTT=v.filter(x=>x.status==='Toko tutup').length;
   return `<div class="card" style="margin-bottom:14px"><div class="row between"><b>Progres hari ini</b><span class="num small muted">${done} dari ${v.length} selesai${nTT?' · '+nTT+' tutup':''}</span></div><div class="bar" style="margin-top:10px"><i style="width:${Math.max(3,done/(v.length||1)*100)}%"></i></div></div>`; }
 const planList = () => `<div class="list">${S.plans.map(x=>`<div class="li"><div class="ico-tile tan">${I('calendar',20)}</div><div class="grow"><div class="t">${x.place}</div><div class="s">${x.date}</div></div>${chip(x.status,x.status==='Disetujui'?'green':'amber')}</div>`).join('')}
@@ -1364,7 +1363,7 @@ function visitAction(id){
   /* Feedback AMO: kunjungan tambahan perlu approval Team Leader dulu, aktivitas belum bisa jalan. */
   if(v.status==='Perlu approval'){ toast('Kunjungan ke '+v.place+' menunggu approval Team Leader','alert'); return; }
   if(v.status==='Toko tutup'){ toast(v.place+' ditandai tutup hari ini. Check-in tidak tersedia','alert'); return; }
-  if(v.status==='Terlewat'){ toast('Kunjungan ke '+v.place+' terlewat. Isi alasan di tab Kunjungan','alert'); return; }
+  if(v.status==='Terlewat'){ toast('Kunjungan ke '+v.place+' terlewat','alert'); return; }
   if(v.status==='Dijadwal ulang'){ toast('Kunjungan ini dijadwal ulang ke '+(v.resched?v.resched.hari+' '+v.resched.tgl:'hari lain'),'alert'); return; }
   if(v.status==='Selesai'){ if(role()==='fmcg') repeatVisit(id); else toast('Kunjungan ke '+v.place+' sudah selesai'); return; }
   if(!v.cin) startCheckin(id);
