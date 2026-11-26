@@ -1111,8 +1111,7 @@ function visitMap(L,h){
 const MAP_APPS=['Google Maps','Waze','Apple Maps'];
 function mapAppSheet(id){ const v=visitById(id); if(!v) return;
   sheet(`<h3 style="font-size:18px;font-weight:800">${esc(v.place)}</h3><p class="muted small" style="margin:6px 0 12px;line-height:1.5">Buka rute dengan aplikasi peta di HP.</p>
-  <div class="list">${MAP_APPS.map((a,i)=>`<button class="li" onclick="mapAppOpen(${i},'${v.id}')"><div class="ico-tile">${I('route',20)}</div><div class="grow"><div class="t">${a}</div></div>${I('right',18)}</button>`).join('')}</div>
-  <button class="btn ghost" style="margin-top:12px" onclick="closeSheet();go('kunjungan-detail',{id:'${v.id}'})">Lihat detail kunjungan</button>`); }
+  <div class="list">${MAP_APPS.map((a,i)=>`<button class="li" onclick="mapAppOpen(${i},'${v.id}')"><div class="ico-tile">${I('route',20)}</div><div class="grow"><div class="t">${a}</div></div>${I('right',18)}</button>`).join('')}</div>`); }
 function mapAppOpen(i,id){ const v=visitById(id); closeSheet(); toast('Membuka '+MAP_APPS[i]+' ke '+v.place,'route'); }
 /* Peta layar penuh: geser, cubit, roda mouse, ketuk dua kali, dan tombol + / −. */
 const MAP_M=128, MAP_Z=[10,18];
