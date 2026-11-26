@@ -661,11 +661,11 @@ function freshState0(){
       {id:'L-2610-052',name:'Intan Permata',prod:'Kredit Modal Kerja',amount:18000000,tenor:24,phone:'0812-7000-3302',job:'Pedagang',addr:'Cilandak',cabang:'Cilandak',status:'Baru',date:'26 Okt 2026',log:[]},
       {id:'L-2610-041',name:'Rahmat Hidayat',prod:'Kredit Modal Kerja',amount:15000000,tenor:24,phone:'0812-7000-1101',job:'Pedagang',addr:'Cilandak',status:'Baru',owner:'cbd.tono',date:'26 Okt 2026',log:[]},
       {id:'L-2610-042',name:'Dewi Anggun',prod:'Kredit Multiguna',amount:12000000,tenor:18,phone:'0812-7000-1102',job:'Karyawan',addr:'Fatmawati',status:'Baru',owner:'rea.nina',date:'26 Okt 2026',log:[]},
-      {id:'L-2610-031',age:'masuk 12 mnt lalu',name:'Ahmad Fauzi',prod:'Kredit Modal Kerja',amount:10000000,tenor:12,phone:'0812-8841-2207',job:'Pedagang sembako',addr:'Jl. Fatmawati Raya No. 41, Cilandak',status:'Baru',owner:'rea.nina',date:'26 Okt 2026',log:[]},
+      {id:'L-2610-031',jaminan:'BPKB Motor',age:'masuk 12 mnt lalu',name:'Ahmad Fauzi',prod:'Kredit Modal Kerja',amount:10000000,tenor:12,phone:'0812-8841-2207',job:'Pedagang sembako',addr:'Jl. Fatmawati Raya No. 41, Cilandak',status:'Baru',owner:'rea.nina',date:'26 Okt 2026',log:[]},
       {id:'L-2610-029',age:'masuk 1 jam lalu',name:'Yuliana Putri',prod:'Kredit Multiguna',amount:25000000,tenor:24,phone:'0813-1170-5582',job:'Karyawan swasta',addr:'Pondok Labu, Jakarta Selatan',status:'Baru',owner:'rea.nina',date:'26 Okt 2026',log:[]},
-      {id:'L-2510-022',fu:'28 Okt',name:'Rudi Hartanto',prod:'Kredit Modal Kerja',amount:15000000,tenor:18,phone:'0857-2290-1134',job:'Bengkel motor',addr:'Jl. Pangeran Antasari No. 7',status:'Prospect',owner:'rea.nina',date:'25 Okt 2026',log:[{t:'Prospect',s:'25 Okt · Minta waktu diskusi dengan istri, follow up 28 Okt'}]},
+      {id:'L-2510-022',jaminan:'Sertifikat Rumah (SHM)',fu:'28 Okt',name:'Rudi Hartanto',prod:'Kredit Modal Kerja',amount:15000000,tenor:18,phone:'0857-2290-1134',job:'Bengkel motor',addr:'Jl. Pangeran Antasari No. 7',status:'Prospect',owner:'rea.nina',date:'25 Okt 2026',log:[{t:'Prospect',s:'25 Okt · Minta waktu diskusi dengan istri, follow up 28 Okt'}]},
       {id:'L-2410-017',fu:'hari ini',name:'Lina Kusuma',prod:'Kredit Multiguna',amount:8000000,tenor:12,phone:'0821-6634-0981',job:'Guru honorer',addr:'Gandaria Selatan',status:'Prospect',owner:'rea.nina',date:'24 Okt 2026',log:[{t:'Prospect',s:'24 Okt · Melengkapi slip gaji'}]},
-      {id:'L-2310-011',name:'Hendra Saputra',prod:'Kredit Modal Kerja',amount:10000000,tenor:12,phone:'0812-9903-4471',job:'Warung makan',addr:'Cipete Utara',status:'Deal',goal:5000000,owner:'rea.nina',date:'23 Okt 2026',log:[{t:'Deal',s:'23 Okt · Disetujui Rp5.000.000 · Terkirim ke SIM'}]},
+      {id:'L-2310-011',jaminan:'BPKB Mobil',name:'Hendra Saputra',prod:'Kredit Modal Kerja',amount:10000000,tenor:12,phone:'0812-9903-4471',job:'Warung makan',addr:'Cipete Utara',status:'Deal',goal:5000000,owner:'rea.nina',date:'23 Okt 2026',log:[{t:'Deal',s:'23 Okt · Disetujui Rp5.000.000 · Terkirim ke SIM'}]},
       {id:'L-2210-008',name:'Wawan Gunadi',prod:'Kredit Multiguna',amount:30000000,tenor:36,phone:'0896-1102-7745',job:'Ojek online',addr:'Lebak Bulus',status:'Belum Tertarik',sub:'Rejected',owner:'rea.nina',date:'22 Okt 2026',log:[{t:'Belum Tertarik · Rejected',s:'22 Okt · Penghasilan tidak memenuhi syarat'}]},
       {id:'L-2610-033',name:'Maria Situmorang',prod:'Kredit Modal Kerja',amount:20000000,tenor:24,phone:'0811-2045-8890',job:'Toko kelontong',addr:'Kebayoran Lama',status:'Baru',owner:null,date:'26 Okt 2026',log:[]},
       {id:'L-2610-034',name:'Bayu Ramadhan',prod:'Kredit Multiguna',amount:12000000,tenor:12,phone:'0858-7731-2210',job:'Karyawan pabrik',addr:'Pesanggrahan',status:'Baru',owner:null,date:'26 Okt 2026',log:[]},
@@ -956,8 +956,8 @@ const MENUS = {
   order:[['Usulkan toko','plus',"go('toko-list')"],['Daftar pesanan','file',"go('pesanan')"],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
   leads:[['Leads','users',"act(()=>tab('leads'))",1],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   fmcg:[['Buat jadwal','route',"act(()=>go('kunjungan-form'))",1],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
-  cbd:[['Leads','users',"act(()=>tab('leads'))",1],['Mitra saya','user',"act(()=>go('mitra'))",1],['Rekrut mitra','plus',"act(()=>go('rekrut-mitra'))",1],['Jualan direct / mitra','bag',"act(()=>go('jualan-mf'))",1],['Task Team Leader','check',"act(()=>go('cbd-task'))",1],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
-  rea:[['Leads','users',"act(()=>tab('leads'))",1],['Jualan direct','bag',"act(()=>go('jualan-mf',{tipe:'Direct'}))",1],['Jualan mitra','users',"act(()=>go('jualan-mf',{tipe:'Mitra'}))",1],['Activity (canvasing)','route',"act(()=>go('rea-canvas'))",1],['Rekrut mitra','plus',"act(()=>go('rekrut-mitra'))",1],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  cbd:[['Aktivitas saya','grid',"act(()=>go('mf-akt'))",1],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  rea:[['Aktivitas saya','grid',"act(()=>go('mf-akt'))",1],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   arco:[['Assign leads','users',"go('assign')"],['Semua leads','file',"go('leads-all')"],['Tim saya','user',"tab('tim')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   spv:[['Approve Loading Barang','box',"go('approve-loading')"],['Approve Unloading Barang','retur',"go('approve-unloading')"],['Approval','check',"go('approval')"],['Approval kunjungan','route',"go('approval-kunjungan')"],['Assign canvasser','route',"go('assign-canvas')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tugaskan tim','route',"act(()=>go('kunjungan-form',{spv:1}))",1],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   spvM:[['Approval','check',"go('approval')"],['Approval kunjungan','route',"go('approval-kunjungan')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]]
@@ -2416,12 +2416,31 @@ function moveType(){ const u=U(), rl=u.roleLabel; if(/Canvas|Taking|CBD|Mobile/.
 function leadRow(l,showOwner){
   return `<button class="li" onclick="go('lead-detail',{id:'${l.id}'})"><div class="av ${l.status==='Baru'?'blue':''}">${l.name.split(' ').map(s=>s[0]).join('').slice(0,2)}</div><div class="grow"><div class="t">${l.name}</div><div class="s">${l.prod} · ${rpShort(l.amount)}${showOwner?' · '+(l.owner?USERS[l.owner].name.split(' ')[0]:'Belum di-assign'):''}${l.status==='Baru'&&l.age?' · '+l.age:''}${l.status==='Prospect'&&l.fu?' · follow up '+l.fu:''}${l.pending?' · menunggu sinkron':''}</div></div>${chip(l.status==='Deal'?'Deal '+rpShort(l.goal):l.status,LTONE[l.status])}</button>`;
 }
+const leadMine = () => S.leads.filter(l=>l.owner===S.user);
+function leadsList(f='Semua'){ const mine=leadMine(), list=mine.filter(l=>f==='Semua'||l.status===f);
+  return `<div class="segtabs">${['Semua','Baru','Prospect','Deal','Belum Tertarik'].map(x=>`<button class="${f===x?'on':''}" onclick="setP({f:'${x}'})">${x} ${x==='Semua'?mine.length:mine.filter(l=>l.status===x).length}</button>`).join('')}</div>
+    <div class="list">${list.length?list.map(l=>leadRow(l)).join(''):`<div class="empty">Tidak ada leads dengan status ini.</div>`}</div>`; }
+const leadBaruBtn = () => `<button class="ib" onclick="act(()=>go('lead-baru'))" aria-label="Buat leads">${I('plus',24,2)}</button>`;
 SCR.leads = p => {
-  const f=p.f||'Semua', mine=S.leads.filter(l=>l.owner===S.user), list=mine.filter(l=>f==='Semua'||l.status===f);
-  return {tab:'leads', note:'Multi Finance hanya melihat leads yang di-assign ke dia (URD FR-004, FR-008). Verifikasi dilakukan manual lewat telepon/WA, lalu hasilnya diinput di aplikasi.',
-  html:`${appbar('Leads saya',{backBtn:false,right:`<button class="ib" onclick="act(()=>go('lead-baru'))" aria-label="Buat leads">${I('plus',24,2)}</button>`})}<main class="content">
-    <div class="segtabs">${['Semua','Baru','Prospect','Deal','Belum Tertarik'].map(x=>`<button class="${f===x?'on':''}" onclick="setP({f:'${x}'})">${x} ${x==='Semua'?mine.length:mine.filter(l=>l.status===x).length}</button>`).join('')}</div>
-    <div class="list">${list.length?list.map(l=>leadRow(l)).join(''):`<div class="empty">Tidak ada leads dengan status ini.</div>`}</div>
+  return {tab:p.back?undefined:'leads', note:'Multi Finance hanya melihat leads yang di-assign ke dia (URD FR-004, FR-008). Verifikasi dilakukan manual lewat telepon/WA, lalu hasilnya diinput di aplikasi.',
+  html:`${appbar('Leads saya',{backBtn:!!p.back,right:leadBaruBtn()})}<main class="content">
+    ${leadsList(p.f)}
+  </main>`};
+};
+/* Aktivitas saya (CBD dan REA): pekerjaan masing-masing dalam satu halaman, dibuka dari Beranda setelah absen masuk.
+   Super Admin melihat gabungan keduanya. */
+SCR['mf-akt'] = () => {
+  const L=leadMine(), rk=rekrutList().filter(x=>x.u===S.user), jm=jualMfList().filter(x=>x.u===S.user), T=cbdTasks(), tunggu=T.filter(x=>x.st==='Menunggu jawaban').length, pantau=MITRA.filter(m=>S.mitraLog[m.id]).length;
+  const cat=n=>n+' pencairan tercatat', jml=tipe=>jm.filter(x=>x.tipe===tipe).length;
+  const leads=['users','Leads',L.length+' leads · '+L.filter(l=>l.status==='Baru').length+' belum dihubungi',"go('leads',{back:1})"];
+  const rekrut=['plus','Rekrut mitra',rk.length+' calon mitra',"go('rekrut-mitra')"];
+  const cbd=[leads,['user','Mitra saya',pantau+' dari '+MITRA.length+' mitra dipantau',"go('mitra')"],rekrut,
+    ['bag','Jualan direct / mitra',cat(jm.length),"go('jualan-mf')"],['check','Task Team Leader',tunggu?tunggu+' menunggu jawaban':'Semua task terjawab',"go('cbd-task')"]];
+  const rea=[leads,['bag','Jualan direct',cat(jml('Direct')),"go('jualan-mf',{tipe:'Direct'})"],['users','Jualan mitra',cat(jml('Mitra')),"go('jualan-mf',{tipe:'Mitra'})"],rekrut];
+  const rows=vk()==='rea'?rea:vk()==='cbd'?cbd:[...cbd,...rea.filter(r=>!cbd.some(c=>c[1]===r[1]))];
+  return {note:'Aktivitas saya. CBD: Leads, Mitra saya, Rekrut mitra, Jualan direct / mitra, Task Team Leader. REA: Leads, Jualan direct, Jualan mitra, Rekrut mitra. Menu di Beranda terkunci sampai absen masuk.',
+  html:`${appbar('Aktivitas saya')}<main class="content">
+    <div class="list">${rows.map(([ic,t,sub,go])=>`<button class="li" onclick="act(()=>${go.replace(/"/g,'&quot;')})"><div class="ico-tile">${I(ic,20)}</div><div class="grow"><div class="t">${t}</div><div class="s">${sub}</div></div>${I('right',18)}</button>`).join('')}</div>
   </main>`};
 };
 SCR['leads-all'] = p => {
@@ -2438,7 +2457,7 @@ SCR['lead-detail'] = p => {
   html:`${appbar(l.id)}<main class="content">
     <div class="card"><div class="row"><div class="av blue" style="width:48px;height:48px;font-size:16px">${l.name.split(' ').map(s=>s[0]).join('').slice(0,2)}</div><div class="grow"><div style="font-weight:800;font-size:17px">${l.name}</div><div class="small muted">${l.job}</div></div>${chip(leadLabel(l),LTONE[l.status])}</div>
       <div class="row" style="gap:8px;margin-top:14px"><a class="btn sec sm grow" href="tel:${l.phone}" onclick="event.preventDefault();contactLead('${l.id}','phone')">${I('phone',18)} Telepon</a><a class="btn sec sm grow" href="#" onclick="event.preventDefault();contactLead('${l.id}','chat')">${I('chat',18)} WhatsApp</a></div></div>
-    <div class="card"><div class="kv"><span>Produk</span><span>${l.prod}</span></div><div class="kv"><span>Nominal pengajuan</span><span class="num">${l.amount?rp(l.amount):'Diisi saat Deal'}</span></div><div class="kv"><span>Tenor</span><span>${l.tenor} bulan</span></div>${l.status==='Deal'?`<div class="kv"><span>Nominal disetujui (goal)</span><span class="num" style="color:var(--green)">${rp(l.goal)}</span></div>`:''}<div class="kv"><span>No. HP</span><span class="num">${l.phone}</span></div><div class="kv"><span>Alamat</span><span>${l.addr}</span></div><div class="kv"><span>Masuk</span><span>${l.date} · upload backend</span></div><div class="kv"><span>Ditangani</span><span>${l.owner?USERS[l.owner].name:'Belum di-assign'}</span></div>${l.calls?`<div class="kv"><span>Percobaan kontak</span><span>${l.calls} kali</span></div>`:''}</div>
+    <div class="card"><div class="kv"><span>Produk</span><span>${l.prod}</span></div><div class="kv"><span>Jaminan</span><span>${esc(l.jaminan||'–')}</span></div><div class="kv"><span>Nominal pengajuan</span><span class="num">${l.amount?rp(l.amount):'Diisi saat Deal'}</span></div><div class="kv"><span>Tenor</span><span>${l.tenor} bulan</span></div>${l.status==='Deal'?`<div class="kv"><span>Nominal disetujui (goal)</span><span class="num" style="color:var(--green)">${rp(l.goal)}</span></div>`:''}<div class="kv"><span>No. HP</span><span class="num">${l.phone}</span></div><div class="kv"><span>Alamat</span><span>${l.addr}</span></div><div class="kv"><span>Masuk</span><span>${l.date} · upload backend</span></div><div class="kv"><span>Ditangani</span><span>${l.owner?USERS[l.owner].name:'Belum di-assign'}</span></div>${l.calls?`<div class="kv"><span>Percobaan kontak</span><span>${l.calls} kali</span></div>`:''}</div>
     ${leadExtra(l)}
     ${l.log.length?`<div class="sec-title">Riwayat status</div><div class="card"><div class="timeline">${l.log.map(x=>`<div class="ti"><b>${x.t}</b><small>${x.s}</small></div>`).join('')}</div></div>`:''}
   </main>${!leadClosed(l)?`<footer class="actions"><button class="btn ${isLocked()?'locked':''}" onclick="act(()=>go('lead-hasil',{id:'${l.id}'}))">${isLocked()?I('lock',18):''} Input hasil verifikasi</button></footer>`:''}`};
@@ -2999,11 +3018,14 @@ function leadExtra(l){
   const doc=l.status==='Deal'&&l.docOk?`<div class="sec-title">Dokumen</div><div class="card"><div class="kv"><span>Bukti sudah approve</span><span style="color:var(--green)">Terunggah</span></div><div class="kv"><span>Persetujuan pencairan dana</span><span style="color:${l.docCair?'var(--green)':'var(--amber)'}">${l.docCair?'Terunggah':'Belum'}</span></div><div class="kv"><span>Dokumen serah terima dana dengan nasabah</span><span style="color:${l.docSerah?'var(--green)':'var(--amber)'}">${l.docSerah?'Terunggah':'Belum'}</span></div>${S.user==='rea.nina'&&!l.docCair?`<p class="hint">Insentif cair setelah foto dokumen pencairan diunggah.</p>`:''}${!l.docCair?`<button class="btn sec sm" style="margin-top:10px" onclick="act(()=>leadDoc('${l.id}'))">${I('camera',18)} Unggah persetujuan pencairan dana</button>`:!l.docSerah?`<button class="btn sec sm" style="margin-top:10px" onclick="act(()=>leadSerah('${l.id}'))">${I('camera',18)} Unggah dokumen serah terima dana</button>`:''}</div>`:'';
   return doc;
 }
+/* Pilihan Jaminan leads (data contoh, menunggu daftar resmi dari klien). Isinya harus sama di mobile dan dashboard. */
+const JAMINAN=['BPKB Motor','BPKB Mobil','Sertifikat Rumah (SHM)','Sertifikat HGB','SK Karyawan','Deposito','Tanpa jaminan'];
 SCR['lead-baru'] = () => ({note:'CBD dan REA/SPG boleh membuat leads sendiri. Customer yang sudah terdaftar di REA lain tetap boleh dibuat; duplikat tidak masalah (MOM 12.4).',
   html:`${appbar('Buat leads')}<main class="content">
     <label class="field"><span>Nama nasabah *</span><input class="input" id="nl_n"></label>
     <label class="field"><span>Nomor HP *</span><input class="input" id="nl_p" inputmode="tel"></label>
     <label class="field"><span>Produk</span><select class="input" id="nl_d"><option>Kredit Modal Kerja</option><option>Kredit Multiguna</option><option>Dana Tunai</option></select></label>
+    <label class="field"><span>Jaminan</span><select class="input" id="nl_g"><option value="">Pilih jaminan</option>${JAMINAN.map(x=>`<option>${x}</option>`).join('')}</select></label>
     <label class="field"><span>Pekerjaan</span><input class="input" id="nl_j"></label>
     <label class="field"><span>Alamat</span><input class="input" id="nl_a"></label>
     <p class="hint">Nominal diisi saat leads menjadi Deal.</p>
@@ -3011,16 +3033,20 @@ SCR['lead-baru'] = () => ({note:'CBD dan REA/SPG boleh membuat leads sendiri. Cu
 function saveNewLead(){
   const n=val('nl_n'), h=val('nl_p');
   if(!n||!h){ toast('Isi nama dan nomor HP','alert'); return; }
-  S.leads.unshift({id:'L-2610-'+(100+S.leads.length),name:n,prod:val('nl_d'),amount:0,tenor:12,phone:h,job:val('nl_j')||'–',addr:val('nl_a')||'–',status:'Baru',owner:S.user,date:'26 Okt 2026',self:true,log:[]});
+  const l={id:'L-2610-M'+(Date.now()%100000),name:n,prod:val('nl_d'),jaminan:val('nl_g'),amount:0,tenor:12,phone:h,job:val('nl_j')||'–',addr:val('nl_a')||'–',status:'Baru',owner:S.user,cabang:vk()==='cbd'?'Cilandak':'Fatmawati',date:'26 Okt 2026',self:true,log:[]};
+  S.leads.unshift(l);
+  /* Leads buatan sales dikirim ke dashboard lewat salesapp.shared.v1 (leadBaru). */
+  shSet('leadBaru',[...shRead('leadBaru',[]),{id:l.id,u:fmUk(),name:l.name,prod:l.prod,jaminan:l.jaminan,phone:h,job:l.job,addr:l.addr,cab:l.cabang}]);
   back(); toast('Leads tersimpan');
 }
 const MITRA=[{id:'mt1',name:'Agen Sejahtera Fatmawati',area:'Fatmawati',phone:'0812-7000-2201',leads:6},{id:'mt2',name:'Agen Berkah Cilandak',area:'Cilandak',phone:'0812-7000-2202',leads:3}];
 SCR.mitra = () => ({note:'Mitra adalah agent di luar SIM. Datanya dari client, hanya berupa data, dan melekat pada CBD (MOM 12.2).',
-  html:`${appbar('Mitra saya')}<main class="content"><div class="list">${MITRA.map(m=>`<button class="li" onclick="go('mitra-detail',{id:'${m.id}'})"><div class="ico-tile">${I('users',20)}</div><div class="grow"><div class="t">${m.name}</div><div class="s">${m.area} · ${m.leads} leads</div></div>${S.mitraLog[m.id]?chip('Dipantau','green'):chip('Belum','amber')}</button>`).join('')}</div></main>`});
-/* Rekrut mitra, jualan direct/mitra, dan activity canvasing REA.
+  html:`${appbar('Mitra saya')}<main class="content">${mitraList()}</main>`});
+function mitraList(){ return `<div class="list">${MITRA.map(m=>`<button class="li" onclick="go('mitra-detail',{id:'${m.id}'})"><div class="ico-tile">${I('users',20)}</div><div class="grow"><div class="t">${m.name}</div><div class="s">${m.area} · ${m.leads} leads</div></div>${S.mitraLog[m.id]?chip('Dipantau','green'):chip('Belum','amber')}</button>`).join('')}</div>`; }
+/* Rekrut mitra dan jualan direct/mitra.
    Feedback AMO baris 28: rincian pekerjaan CBD dan REA berbeda, jadi menunya dipisah.
    CBD: monitoring mitra, lead dihubungi, rekrut mitra, jualan direct/mitra.
-   REA: jualan direct, jualan mitra, activity (canvasing), rekrut mitra. */
+   REA: jualan direct, jualan mitra, rekrut mitra. */
 const REKRUT_STATUS=['Pendekatan','Berkas','Verifikasi','Aktif'];
 const rekrutList = () => shRead('mitraRekrut',[
   {id:'rk1',nama:'Toko Sumber Rezeki',pic:'Pak Hadi',area:'Cilandak',st:'Berkas',u:'cbd.tono',tgl:'24 Okt'},
@@ -3073,29 +3099,6 @@ function jualMfSave(){
   if(tipe==='Mitra') row.mitra=val('jm_m');
   shSet('jualMf',[...jualMfList(),row]);
   back(); toast('Jualan '+tipe.toLowerCase()+' tercatat','check');
-}
-/* Activity canvasing REA: kegiatan mencari nasabah di lapangan, tanpa toko. */
-const REA_AKT=['Sebar brosur','Open table','Door to door','Follow up nasabah lama'];
-const reaAktList = () => shRead('reaAkt',[]);
-SCR['rea-canvas'] = p => {
-  const L=reaAktList().filter(x=>x.u===S.user), jenis=p.jenis||REA_AKT[0];
-  return {note:'Activity canvasing REA: kegiatan mencari nasabah di lapangan. REA bekerja in house, jadi kegiatannya dicatat sebagai aktivitas, bukan kunjungan toko.',
-  html:`${appbar('Activity canvasing')}<main class="content">
-    ${L.length?`<div class="sec-title">Kegiatan hari ini <span class="small muted num">${L.length}</span></div><div class="list">${L.map(x=>`<div class="li"><div class="ico-tile green">${I('check',20)}</div><div class="grow"><div class="t">${esc(x.jenis)}</div><div class="s">${esc(x.lokasi)} · ${esc(x.jam)} · ${x.leads} leads baru</div></div></div>`).join('')}</div>`
-      :`<div class="empty"><div class="ico-tile">${I('route',24)}</div>Belum ada kegiatan hari ini.</div>`}
-    <div class="sec-title" style="margin-top:18px">Catat kegiatan</div>
-    <div class="field"><span>Jenis kegiatan</span><div class="opts">${REA_AKT.map(x=>`<button class="opt ${jenis===x?'on':''}" onclick="setP({jenis:'${x}'})">${x}</button>`).join('')}</div></div>
-    <label class="field"><span>Lokasi</span><input class="input" id="ra_l" placeholder="Contoh: Pasar Mede, Fatmawati" maxlength="60"></label>
-    <label class="field"><span>Leads baru didapat</span><input class="input num" id="ra_n" type="number" inputmode="numeric" placeholder="0"></label>
-    <label class="field"><span>Catatan (opsional)</span><textarea class="input" id="ra_c" placeholder="Misalnya: respons bagus, 2 minta dihubungi besok"></textarea></label>
-    <div id="raerr"></div>
-  </main><footer class="actions"><button class="btn" onclick="reaAktSave()">Simpan kegiatan</button></footer>`};
-};
-function reaAktSave(){
-  const jenis=cur().p.jenis||REA_AKT[0], lok=val('ra_l').trim(), n=+val('ra_n')||0;
-  if(!lok){ $('#raerr').innerHTML='<div class="err">Lokasi wajib diisi.</div>'; return; }
-  shSet('reaAkt',[...reaAktList(),{id:'ra'+Date.now(),u:S.user,jenis,lokasi:lok,leads:n,jam:clock(),catatan:val('ra_c').trim()}]);
-  back(); toast('Kegiatan '+jenis.toLowerCase()+' tercatat','check');
 }
 const MITRAQ_DEFAULT=[{id:'mq1',q:'Bagaimana kondisi usaha atau kegiatan mitra bulan ini?'},{id:'mq2',q:'Kendala apa yang dihadapi mitra dalam mencari nasabah?'},{id:'mq3',q:'Dukungan apa yang dibutuhkan mitra dari tim bulan depan?'}];
 const mitraQ = () => shRead('mitraQ',MITRAQ_DEFAULT).filter(x=>!x.del&&x.status!=='Nonaktif');
@@ -3899,12 +3902,9 @@ function capItems(){
     const rekrut={c:'task',label:'Rekrut mitra',done:rk.filter(x=>x.st==='Aktif').length,total:Math.max(2,rk.length),sub:'calon mitra',go:"act(()=>go('rekrut-mitra'))"};
     if(vk()==='cbd') out.push(
       {c:'visit',label:'Monitoring mitra',done:v.filter(x=>x.status==='Selesai').length,total:v.length,sub:'mitra dikunjungi',go:"act(()=>go('mitra'))"},
-      {c:'job',label:'Leads dihubungi',done:mine.filter(l=>l.status!=='Baru').length,total:mine.length,sub:'leads kamu',go:"tab('leads')"},
+      {c:'job',label:'Leads dihubungi',done:mine.filter(l=>l.status!=='Baru').length,total:mine.length,sub:'leads kamu',go:"act(()=>go('leads',{back:1}))"},
       rekrut, jualan('Jualan direct / mitra','',3,'pencairan tercatat'));
-    else { const ra=reaAktList().filter(x=>x.u===S.user);
-      out.push(jualan('Jualan direct','Direct',3,'nasabah langsung'), jualan('Jualan mitra','Mitra',2,'lewat agen'),
-        {c:'visit',label:'Activity (canvasing)',done:ra.length,total:Math.max(2,ra.length),sub:'kegiatan lapangan',go:"act(()=>go('rea-canvas'))"}, rekrut);
-    }
+    else out.push(jualan('Jualan direct','Direct',3,'nasabah langsung'), jualan('Jualan mitra','Mitra',2,'lewat agen'), rekrut);
     return out;
   }
   const vGo=aktGo()||"tab('home')";
