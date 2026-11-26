@@ -663,8 +663,8 @@ function freshState0(){
       {id:'L-2610-042',name:'Dewi Anggun',prod:'Kredit Multiguna',amount:12000000,tenor:18,phone:'0812-7000-1102',job:'Karyawan',addr:'Fatmawati',status:'Baru',owner:'rea.nina',date:'26 Okt 2026',log:[]},
       {id:'L-2610-031',jaminan:'BPKB Motor',age:'masuk 12 mnt lalu',name:'Ahmad Fauzi',prod:'Kredit Modal Kerja',amount:10000000,tenor:12,phone:'0812-8841-2207',job:'Pedagang sembako',addr:'Jl. Fatmawati Raya No. 41, Cilandak',status:'Baru',owner:'rea.nina',date:'26 Okt 2026',log:[]},
       {id:'L-2610-029',age:'masuk 1 jam lalu',name:'Yuliana Putri',prod:'Kredit Multiguna',amount:25000000,tenor:24,phone:'0813-1170-5582',job:'Karyawan swasta',addr:'Pondok Labu, Jakarta Selatan',status:'Baru',owner:'rea.nina',date:'26 Okt 2026',log:[]},
-      {id:'L-2510-022',jaminan:'Sertifikat Rumah (SHM)',fu:'28 Okt',name:'Rudi Hartanto',prod:'Kredit Modal Kerja',amount:15000000,tenor:18,phone:'0857-2290-1134',job:'Bengkel motor',addr:'Jl. Pangeran Antasari No. 7',status:'Prospect',owner:'rea.nina',date:'25 Okt 2026',log:[{t:'Prospect',s:'25 Okt · Minta waktu diskusi dengan istri, follow up 28 Okt'}]},
-      {id:'L-2410-017',fu:'hari ini',name:'Lina Kusuma',prod:'Kredit Multiguna',amount:8000000,tenor:12,phone:'0821-6634-0981',job:'Guru honorer',addr:'Gandaria Selatan',status:'Prospect',owner:'rea.nina',date:'24 Okt 2026',log:[{t:'Prospect',s:'24 Okt · Melengkapi slip gaji'}]},
+      {id:'L-2510-022',docOk:true,jaminan:'Sertifikat Rumah (SHM)',fu:'28 Okt',name:'Rudi Hartanto',prod:'Kredit Modal Kerja',amount:15000000,tenor:18,phone:'0857-2290-1134',job:'Bengkel motor',addr:'Jl. Pangeran Antasari No. 7',status:'Prospect',owner:'rea.nina',date:'25 Okt 2026',log:[{t:'Prospect',s:'25 Okt · Minta waktu diskusi dengan istri, follow up 28 Okt'}]},
+      {id:'L-2410-017',docOk:true,fu:'hari ini',name:'Lina Kusuma',prod:'Kredit Multiguna',amount:8000000,tenor:12,phone:'0821-6634-0981',job:'Guru honorer',addr:'Gandaria Selatan',status:'Prospect',owner:'rea.nina',date:'24 Okt 2026',log:[{t:'Prospect',s:'24 Okt · Melengkapi slip gaji'}]},
       {id:'L-2310-011',jaminan:'BPKB Mobil',name:'Hendra Saputra',prod:'Kredit Modal Kerja',amount:10000000,tenor:12,phone:'0812-9903-4471',job:'Warung makan',addr:'Cipete Utara',status:'Deal',goal:5000000,owner:'rea.nina',date:'23 Okt 2026',log:[{t:'Deal',s:'23 Okt · Disetujui Rp5.000.000 · Terkirim ke SIM'}]},
       {id:'L-2210-008',name:'Wawan Gunadi',prod:'Kredit Multiguna',amount:30000000,tenor:36,phone:'0896-1102-7745',job:'Ojek online',addr:'Lebak Bulus',status:'Belum Tertarik',sub:'Rejected',owner:'rea.nina',date:'22 Okt 2026',log:[{t:'Belum Tertarik · Rejected',s:'22 Okt · Penghasilan tidak memenuhi syarat'}]},
       {id:'L-2610-033',name:'Maria Situmorang',prod:'Kredit Modal Kerja',amount:20000000,tenor:24,phone:'0811-2045-8890',job:'Toko kelontong',addr:'Kebayoran Lama',status:'Baru',owner:null,date:'26 Okt 2026',log:[]},
@@ -2462,23 +2462,31 @@ SCR['lead-detail'] = p => {
     ${l.log.length?`<div class="sec-title">Riwayat status</div><div class="card"><div class="timeline">${l.log.map(x=>`<div class="ti"><b>${x.t}</b><small>${x.s}</small></div>`).join('')}</div></div>`:''}
   </main>${!leadClosed(l)?`<footer class="actions"><button class="btn ${isLocked()?'locked':''}" onclick="act(()=>go('lead-hasil',{id:'${l.id}'}))">${isLocked()?I('lock',18):''} Input hasil verifikasi</button></footer>`:''}`};
 };
+/* Dua tahap. Belum Prospect: pilih Prospect (isi data pengajuan) atau Belum Tertarik. Sudah Prospect: Deal atau Reject. */
 SCR['lead-hasil'] = p => {
-  const l=S.leads.find(x=>x.id===p.id), st=p.st;
-  const opts=[['Deal','green','check','Nasabah setuju dan memenuhi kriteria'],['Prospect','amber','clock','Masih proses, perlu follow up'],['Belum Tertarik','red','x','Nasabah belum tertarik, pilih status turunan']];
-  return {note:'Input status (URD FR-009–FR-014, MOM 12.4). Kalau <b>Deal</b>, sales menentukan nominal disetujui (goal), lalu data dikirim ke sistem SIM. <b>Belum Tertarik</b> menggantikan Rejected dan punya tiga status turunan.',
+  const l=S.leads.find(x=>x.id===p.id), st=p.st, lanjut=l.status==='Prospect';
+  if(leadClosed(l)) return {html:`${appbar('Hasil verifikasi')}<main class="content"><div class="empty">Leads ini sudah selesai dan tidak bisa diproses lagi.</div></main>`};
+  const opts=lanjut?[['Deal','green','check','Nasabah setuju dan memenuhi kriteria'],['Reject','red','x','Pengajuan ditolak, leads selesai']]
+    :[['Prospect','amber','clock','Nasabah berminat, isi data pengajuan'],['Belum Tertarik','red','x','Nasabah belum tertarik, pilih status turunan']];
+  const isi=st==='Prospect'||(st==='Belum Tertarik'&&p.sub==='Masih prospect');
+  const form=`<label class="field"><span>Nominal pengajuan</span><input class="input num" id="lg" inputmode="numeric" placeholder="Rp" value="${esc(p.g??(l.amount?l.amount.toLocaleString('id-ID'):''))}" oninput="cur().p.g=this.value=this.value.replace(/\\D/g,'')?(+this.value.replace(/\\D/g,'')).toLocaleString('id-ID'):''"></label>
+    <label class="field"><span>Tenor (bulan)</span><input class="input num" id="lt" inputmode="numeric" value="${esc(p.ten??l.tenor)}" oninput="cur().p.ten=this.value"></label>
+    <div class="field"><span>Foto approval *</span><div class="thumbs">${photoSlot('Bukti approve',p.doc,'setP({doc:1})')}</div></div>`;
+  return {note:'Input status bertahap (URD FR-009–FR-014). Leads baru dipilih <b>Prospect</b> atau <b>Belum Tertarik</b>; data pengajuan dan foto approval diisi saat Prospect, lalu hanya ditampilkan saat Deal. Leads Prospect dilanjutkan ke <b>Deal</b> (dikirim ke sistem SIM) atau <b>Reject</b> (leads selesai).',
   html:`${appbar('Hasil verifikasi')}<main class="content">
     <div class="card" style="padding:12px 16px"><div class="row between"><div><b>${l.name}</b><div class="small muted">${l.prod}</div></div><b class="num">${l.amount?rp(l.amount):'–'}</b></div></div>
     <div class="sec-title">Status</div>
-    <div class="list">${opts.map(o=>`<button class="li" onclick="setP({st:'${o[0]}'})" style="${st===o[0]?'background:var(--blue-50)':''}"><div class="ico-tile ${o[1]}">${I(o[2],20,2.2)}</div><div class="grow"><div class="t">${o[0]}</div><div class="s">${o[3]}</div></div><span class="check ${st===o[0]?'on':''}" style="border-radius:50%">${st===o[0]?I('check',14,3):''}</span></button>`).join('')}</div>
+    <div class="list">${opts.map(o=>`<button class="li" aria-pressed="${st===o[0]}" onclick="setP({st:'${o[0]}'})" style="${st===o[0]?'background:var(--blue-50)':''}"><div class="ico-tile ${o[1]}">${I(o[2],20,2.2)}</div><div class="grow"><div class="t">${o[0]}</div><div class="s">${o[3]}</div></div><span class="check ${st===o[0]?'on':''}" style="border-radius:50%">${st===o[0]?I('check',14,3):''}</span></button>`).join('')}</div>
     <div style="height:16px"></div>
-    ${st==='Deal'?`<label class="field"><span>Nominal pengajuan</span><input class="input num" id="lg" inputmode="numeric" value="${esc(p.g??l.amount.toLocaleString('id-ID'))}" oninput="cur().p.g=this.value=this.value.replace(/\\D/g,'')?(+this.value.replace(/\\D/g,'')).toLocaleString('id-ID'):''"></label>
-    <label class="field"><span>Tenor (bulan)</span><input class="input num" id="lt" inputmode="numeric" value="${esc(p.ten??l.tenor)}" oninput="cur().p.ten=this.value"></label>
-    <div class="field"><span>Foto approval *</span><div class="thumbs">${photoSlot('Bukti approve',p.doc,'setP({doc:1})')}</div></div>`:''}
-    ${st==='Prospect'?`<label class="field"><span>Jadwal follow up</span><input class="input" type="date" value="2026-10-29"></label>`:''}
+    ${st==='Deal'?`<div class="sec-title" style="margin-top:0">Data dari Prospect</div><div class="card" style="margin-bottom:14px"><div class="kv"><span>Nominal pengajuan</span><span class="num">${rp(l.amount)}</span></div><div class="kv"><span>Tenor</span><span>${l.tenor} bulan</span></div><div class="kv"><span>Jadwal follow up</span><span>${l.fu||'–'}</span></div>${l.note?`<div class="kv"><span>Catatan</span><span style="text-align:right;max-width:60%">${esc(l.note)}</span></div>`:''}<div class="kv"><span>Foto approval</span><span>Terlampir</span></div></div><div class="thumbs" style="margin:0 0 14px"><div class="thumb" role="img" aria-label="Foto approval">${I('image',22)}</div></div>`:''}
+    ${st==='Prospect'?form:''}
+    ${st==='Prospect'?`<label class="field"><span>Jadwal follow up</span><input class="input" type="date" id="lf" value="2026-10-29"></label>`:''}
     ${st==='Belum Tertarik'?`<div class="field"><span>Status turunan</span><div class="opts">${['Tertarik','Masih prospect','Rejected'].map(x=>`<button class="opt ${p.sub===x?'on':''}" onclick="setP({sub:'${x}'})">${x}</button>`).join('')}</div><div class="hint">${p.sub==='Masih prospect'?'Leads kembali ke status Prospect.':p.sub==='Rejected'?'Leads ditutup.':p.sub==='Tertarik'?'Leads tetap terbuka untuk diproses lagi.':'Pilih salah satu.'}</div></div>`:''}
-    ${st==='Belum Tertarik'&&p.sub==='Rejected'?`<label class="field"><span>Alasan</span><select class="input" id="lr2"><option>Penghasilan tidak memenuhi syarat</option><option>Nasabah tidak tertarik</option><option>Tidak bisa dihubungi</option><option>Dokumen tidak lengkap</option></select></label>`:''}
-    ${st?`<label class="field"><span>Catatan</span><textarea class="input" id="ln" placeholder="Ringkasan hasil telepon / WA"></textarea></label>`:''}
-  </main><footer class="actions"><button class="btn" ${st?'':'disabled'} onclick="saveLead('${l.id}')">${st==='Deal'?'Simpan & kirim ke SIM':'Simpan status'}</button></footer>`};
+    ${st==='Belum Tertarik'&&isi?form:''}
+    ${st==='Reject'||(st==='Belum Tertarik'&&p.sub==='Rejected')?`<label class="field"><span>Alasan</span><select class="input" id="lr2"><option>Penghasilan tidak memenuhi syarat</option><option>Nasabah tidak tertarik</option><option>Tidak bisa dihubungi</option><option>Dokumen tidak lengkap</option></select></label>`:''}
+    ${st==='Reject'?`<div class="banner red" style="margin-bottom:14px">${I('alert',18)}<span>Setelah di-reject, leads selesai dan tidak bisa dilanjutkan lagi.</span></div>`:''}
+    ${st&&st!=='Deal'?`<label class="field"><span>Catatan</span><textarea class="input" id="ln" placeholder="Ringkasan hasil telepon / WA"></textarea></label>`:''}
+  </main><footer class="actions"><button class="btn ${st==='Reject'?'red':''}" ${st?'':'disabled'} onclick="saveLead('${l.id}')">${st==='Deal'?'Simpan & kirim ke SIM':st==='Reject'?'Reject leads':'Simpan status'}</button></footer>`};
 };
 function contactLead(id,ch){
   toast(ch==='phone'?'Membuka aplikasi telepon…':'Membuka WhatsApp…',ch);
@@ -2495,28 +2503,37 @@ function logContact(id,res){
   closeSheet(); render(false,true); toast(res==='Tidak diangkat'?'Pengingat telepon ulang dibuat untuk 12:15':'Dicatat, supervisor akan diberi tahu','bell');
 }
 function saveLead(id){
-  const l=S.leads.find(x=>x.id===id), st=cur().p.st, note=val('ln');
-  if(st==='Deal'){
+  const l=S.leads.find(x=>x.id===id), st=cur().p.st, note=val('ln'), ket=note?' · '+note:'';
+  if(!l||leadClosed(l)) return;
+  /* Data pengajuan diisi saat leads menjadi Prospect; Deal memakai data itu apa adanya. */
+  if(st==='Prospect'||(st==='Belum Tertarik'&&cur().p.sub==='Masih prospect')){
     const g=parseInt(val('lg').replace(/\D/g,''))||0;
     if(!g){ toast('Isi nominal pengajuan','alert'); return; }
     if(!cur().p.doc){ toast('Lampirkan foto approval','alert'); return; }
-    if(!l.amount) l.amount=g;
-    if(g>l.amount){ toast('Nominal disetujui melebihi pengajuan','alert'); return; }
-    l.tenor=parseInt(val('lt'))||l.tenor; l.docOk=true; delete l.sub;
-    l.goal=g; l.status='Deal'; l.log.unshift({t:'Deal',s:`26 Okt · Disetujui ${rp(g)} · ${S.demo.offline?'Menunggu sinkron ke SIM':'Terkirim ke SIM'}${note?' · '+note:''}`});
+    l.amount=g; l.tenor=parseInt(val('lt'))||l.tenor; l.docOk=true;
+  }
+  if(st==='Deal'){
+    const g=l.amount; delete l.sub; delete l.fu;
+    l.goal=g; l.status='Deal'; l.log.unshift({t:'Deal',s:`26 Okt · Disetujui ${rp(g)} · ${S.demo.offline?'Menunggu sinkron ke SIM':'Terkirim ke SIM'}${ket}`});
     if(!l.owner) l.owner=S.user;
     if(S.demo.offline){ l.pending=true; back(); toast('Deal disimpan di HP, dikirim ke SIM saat online','refresh'); return; }
     replace('lead-kirim',{id});
     return;
   }
+  if(st==='Reject'){
+    l.status='Belum Tertarik'; l.sub='Rejected'; delete l.fu;
+    l.log.unshift({t:'Reject',s:'26 Okt · '+val('lr2')+ket});
+    back(); toast('Leads di-reject dan selesai'); return;
+  }
   if(st==='Belum Tertarik'){
     const sub=cur().p.sub;
     if(!sub){ toast('Pilih status turunan','alert'); return; }
-    if(sub==='Masih prospect'){ l.status='Prospect'; delete l.sub; l.log.unshift({t:'Belum Tertarik · Masih prospect',s:'26 Okt · Kembali ke Prospect'+(note?' · '+note:'')}); }
+    if(sub==='Masih prospect'){ l.status='Prospect'; l.note=note; delete l.sub; l.log.unshift({t:'Belum Tertarik · Masih prospect',s:'26 Okt · Kembali ke Prospect'+(note?' · '+note:'')}); }
     else { l.status=st; l.sub=sub; l.log.unshift({t:leadLabel(l),s:'26 Okt'+(sub==='Rejected'?' · '+val('lr2'):'')+(note?' · '+note:'')}); }
     back(); toast('Status '+(sub==='Masih prospect'?'Prospect':leadLabel(l))+' tersimpan'); return;
   }
-  delete l.sub; l.status=st; l.log.unshift({t:st,s:'26 Okt · Follow up 29 Okt'+(note?' · '+note:'')});
+  const fu=tglID(val('lf')).replace(/ \d{4}$/,'');
+  delete l.sub; l.status=st; l.fu=fu; l.note=note; l.log.unshift({t:st,s:'26 Okt · Pengajuan '+rp(l.amount)+' · Follow up '+fu+ket});
   back(); toast('Status '+st+' tersimpan');
 }
 SCR['lead-kirim'] = p => {
