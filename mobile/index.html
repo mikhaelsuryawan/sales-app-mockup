@@ -996,16 +996,21 @@ SCR.home = () => {
     </div>
   </main>`};
 };
-/* Kartu Penjualan hari ini di Beranda: pie (donut) pencapaian dan tiga data: unit terjual, amount terjual, target. */
-function salesPie({pct,unit,amount,target,sub}){
-  const R=40, C=2*Math.PI*R, p=Math.max(0,Math.min(1,pct||0)), id='sp'+(++_gid);
-  return `<div class="card"><div class="row" style="gap:16px;align-items:center">
-    <div style="position:relative;width:112px;height:112px;flex:none" role="img" aria-label="Pencapaian ${Math.round(p*100)} persen"><svg viewBox="0 0 100 100" width="112" height="112" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#21CFF7"/><stop offset="1" stop-color="#3466FF"/></linearGradient></defs><circle cx="50" cy="50" r="${R}" fill="none" stroke="#EFA477" stroke-opacity=".45" stroke-width="16"/><circle cx="50" cy="50" r="${R}" fill="none" stroke="url(#${id})" stroke-width="16" stroke-dasharray="${(C*p).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 50 50)"/></svg><div style="position:absolute;inset:0;display:grid;place-items:center;text-align:center"><div><b class="num" style="font-size:22px">${Math.round(p*100)}%</b><div class="small muted" style="font-size:10.5px">tercapai</div></div></div></div>
-    <div class="grow" style="display:grid;gap:10px;min-width:0">
-      <div class="row" style="gap:8px"><i style="width:10px;height:10px;border-radius:3px;background:#3466FF;flex:none"></i><div><div class="small muted">Total unit terjual</div><b class="num">${unit}</b></div></div>
-      <div class="row" style="gap:8px"><i style="width:10px;height:10px;border-radius:3px;background:#12875F;flex:none"></i><div><div class="small muted">Total amount terjual</div><b class="num">${amount}</b></div></div>
-      <div class="row" style="gap:8px"><i style="width:10px;height:10px;border-radius:3px;background:#EFA477;flex:none"></i><div><div class="small muted">Total target</div><b class="num">${target}</b></div></div>
-    </div></div>${sub?`<div class="small muted" style="margin-top:10px">${sub}</div>`:''}</div>`;
+/* Capaian penjualan bulan berjalan (data contoh). Dipakai Beranda dan layar Target supaya angkanya sama. */
+const SALES_BULAN={canvas:{a:48.2e6,at:80e6,q:131,qt:220},spg:{a:214e6,at:300e6,q:58,qt:80}};
+/* Promotor yang targetnya diatur dashboard memakai target quantity per kategori. */
+function salesBulan(){ const b=SALES_BULAN[role()==='canvas'?'canvas':'spg']; if(!isSpg()) return b;
+  const R=tgtRows(); return {...b,q:R.reduce((s,t)=>s+(t.act||0),0),qt:R.reduce((s,t)=>s+t.target,0)}; }
+/* Kartu Penjualan bulan ini di Beranda: tab Amount dan Quantity, donut pencapaian, total terjual, dan total target. */
+function salesPie(sub){
+  const m=salesBulan(), tab=S.salesTab||'amount', amt=tab==='amount', done=amt?m.a:m.q, tgt=amt?m.at:m.qt, fmt=v=>amt?rpShort(v):v+' unit';
+  const pct=tgt?done/tgt:0, R=40, C=2*Math.PI*R, p=Math.max(0,Math.min(1,pct)), id='sp'+(++_gid);
+  const row=(c,l,v)=>`<div class="row" style="gap:8px"><i style="width:10px;height:10px;border-radius:3px;background:${c};flex:none"></i><div><div class="small muted">${l}</div><b class="num">${v}</b></div></div>`;
+  return `<div class="card"><div class="segtabs" style="margin-bottom:14px">${[['amount','Amount'],['qty','Quantity']].map(([k,l])=>`<button class="${tab===k?'on':''}" aria-pressed="${tab===k}" onclick="S.salesTab='${k}';render(false,true)">${l}</button>`).join('')}</div>
+  <div class="row" style="gap:16px;align-items:center">
+    <div style="position:relative;width:112px;height:112px;flex:none" role="img" aria-label="Pencapaian ${Math.round(pct*100)} persen"><svg viewBox="0 0 100 100" width="112" height="112" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#21CFF7"/><stop offset="1" stop-color="#3466FF"/></linearGradient></defs><circle cx="50" cy="50" r="${R}" fill="none" stroke="#EFA477" stroke-opacity=".45" stroke-width="16"/><circle cx="50" cy="50" r="${R}" fill="none" stroke="url(#${id})" stroke-width="16" stroke-dasharray="${(C*p).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 50 50)"/></svg><div style="position:absolute;inset:0;display:grid;place-items:center;text-align:center"><div><b class="num" style="font-size:22px">${Math.round(pct*100)}%</b><div class="small muted" style="font-size:10.5px">tercapai</div></div></div></div>
+    <div class="grow" style="display:grid;gap:10px;min-width:0">${row('#3466FF',amt?'Total amount terjual':'Total unit terjual',fmt(done))}${row('#EFA477',amt?'Total target amount':'Total target',tgt?fmt(tgt):'Belum diisi')}</div>
+  </div><div class="small muted" style="margin-top:10px">${BULAN_AKTIF}${sub?' · '+sub:''}</div></div>`;
 }
 function fieldDash(){
   const r=role();
@@ -1025,16 +1030,14 @@ function fieldDash(){
     <div class="card"><div class="small muted">Nilai pesanan Oktober</div><div class="big-num num">${rpShort(tot+68e6)}</div><div class="bar" style="margin:10px 0 6px"><i style="width:${(tot+68e6)/150e6*100}%"></i></div><div class="small muted">Target Rp150 jt · ${S.orders.filter(o=>o.status!=='Lunas').length} pesanan perlu follow up</div></div>
     <!--SPLIT-->${todayVisits()}`;
   }
-  const list = salesList().filter(x=>!x.d);
-  const today=list.reduce((s,x)=>s+x.total,0);
-  if(isSpg()&&aktCfg().dasar==='qty'){ const q=list.reduce((s,x)=>s+x.items.reduce((a,i)=>a+i.q,0),0), o=visitOpen(), td=tgtDaily().total||1, need=aktCfg().checkin==='Ya';
+  const head=`<div class="sec-title">Penjualan bulan ini <a onclick="tab('target')">Target</a></div>`;
+  if(isSpg()&&aktCfg().dasar==='qty'){ const o=visitOpen(), need=aktCfg().checkin==='Ya';
     return `${o||!need?'':`<button class="banner amber" style="margin-top:12px;width:100%;text-align:left;font:inherit" onclick="go('spg-akt')">${I('pin',18)}<span>Belum check-in${byPenempatan()?' di '+esc(spgToko().name):''}. Buka <b>Aktivitas saya</b> untuk check-in.</span></button>`}
-  <div class="sec-title">Penjualan hari ini <a onclick="tab('target')">Target</a></div>
-  ${salesPie({pct:q/td,unit:q+' unit',amount:rpShort(today),target:td+' unit',sub:list.length+' transaksi'})}
+  ${head}
+  ${salesPie()}
   <!--SPLIT-->${todayVisits()}`; }
-  const target = r==='canvas'?3500000:12000000;
-  return `<div class="sec-title">Penjualan hari ini <a onclick="tab('target')">Target</a></div>
-  ${salesPie({pct:today/target,unit:list.reduce((s,x)=>s+x.items.reduce((a,i)=>a+i.q,0),0)+' unit',amount:rpShort(today),target:rpShort(target),sub:list.length+' transaksi'+(r==='canvas'&&membawaBarang()?' · stok layak jual '+Object.values(S.stock).reduce((s,x)=>s+x.good,0)+' unit':'')})}
+  return `${head}
+  ${salesPie(r==='canvas'&&membawaBarang()?'stok layak jual '+Object.values(S.stock).reduce((s,x)=>s+x.good,0)+' unit':'')}
   <!--SPLIT-->${todayVisits()}`;
 }
 function todayVisits(){
@@ -2536,7 +2539,7 @@ SCR.target = () => {
   else if(r==='order') main=`<div class="card"><div class="small muted">Nilai pesanan Oktober</div><div class="big-num num">Rp110,5 jt <span class="muted" style="font-size:15px;font-weight:600">/ Rp150 jt</span></div><div class="bar" style="margin:10px 0"><i style="width:74%"></i></div><div class="kv"><span>Toko aktif memesan</span><span>14 / 20</span></div></div>`;
   else if(isSpg()){ const c=aktCfg(), M=c.metrik||[], rows=tgtRows(), tq=rows.reduce((a,t)=>a+t.target,0), aq=rows.reduce((a,t)=>a+(t.act||0),0), td=tgtDaily();
     const qd=S.sales.filter(x=>!x.d).reduce((s,x)=>s+x.items.reduce((a,i)=>a+i.q,0),0), bar=(n,t,tone='')=>`<div class="bar ${tone}" style="margin-top:6px"><i style="width:${Math.min(100,Math.max(3,t?n/t*100:0))}%"></i></div>`;
-    const NOM={a:214e6,t:300e6}, AKU={a:41,t:60}, pct={qty:tq?aq/tq:0,nominal:NOM.a/NOM.t,akuisisi:AKU.a/AKU.t}[c.dasar]||0;
+    const NOM={a:SALES_BULAN.spg.a,t:SALES_BULAN.spg.at}, AKU={a:41,t:60}, pct={qty:tq?aq/tq:0,nominal:NOM.a/NOM.t,akuisisi:AKU.a/AKU.t}[c.dasar]||0;
     main=`<div class="card"><div class="row between"><div class="small muted">Pencapaian ${BULAN_AKTIF.split(' ')[0]}</div>${chip(Math.round(pct*100)+'% dari target','blue')}</div>
     ${c.dasar==='qty'?`<div class="big-num num">${aq} <span class="muted" style="font-size:15px;font-weight:600">/ ${tq} unit terjual</span></div>${bar(aq,tq)}`:c.dasar==='nominal'?`<div class="big-num num">${rpShort(NOM.a)} <span class="muted" style="font-size:15px;font-weight:600">/ ${rpShort(NOM.t)}</span></div>${bar(NOM.a,NOM.t)}`:`<div class="big-num num">${AKU.a} <span class="muted" style="font-size:15px;font-weight:600">/ ${AKU.t} pelanggan baru</span></div>${bar(AKU.a,AKU.t)}`}
     <p class="hint">Pencapaian dihitung dari ${({qty:'jumlah unit produk yang terjual',nominal:'nilai penjualan',akuisisi:'pelanggan baru'})[c.dasar]}.</p>
@@ -2546,8 +2549,8 @@ SCR.target = () => {
     <div class="row between small" style="margin-top:8px"><span>Terjual hari ini</span><span class="num"><b>${qd}</b> / ${td.total} unit</span></div>${bar(qd,td.total)}
     <p class="hint">Target harian dihitung dari target unit bulanan dibagi ${HARI_KERJA()} hari kerja. Kekurangan hari sebelumnya ditambahkan ke hari berikutnya.</p></div>`:''}`; }
   else if(r==='spv') main=spvTarget();
-  else { const isC=r==='canvas'; main=`<div class="card"><div class="small muted">Penjualan Oktober</div><div class="big-num num">${isC?'Rp48,2 jt':'Rp214 jt'} <span class="muted" style="font-size:15px;font-weight:600">/ ${isC?'Rp80 jt':'Rp300 jt'}</span></div><div class="bar" style="margin:10px 0"><i style="width:${isC?60:71}%"></i></div>
-    <div class="kv"><span>Quantity</span><span>${isC?'131 / 220 unit':'58 / 80 unit'}</span></div><div class="kv"><span>Akuisisi pelanggan baru</span><span>${isC?'3 / 5 toko':'41 / 60'}</span></div></div>
+  else { const isC=r==='canvas', B=SALES_BULAN[isC?'canvas':'spg']; main=`<div class="card"><div class="small muted">Penjualan Oktober</div><div class="big-num num">${rpShort(B.a)} <span class="muted" style="font-size:15px;font-weight:600">/ ${rpShort(B.at)}</span></div><div class="bar" style="margin:10px 0"><i style="width:${isC?60:71}%"></i></div>
+    <div class="kv"><span>Quantity</span><span>${B.q} / ${B.qt} unit</span></div><div class="kv"><span>Akuisisi pelanggan baru</span><span>${isC?'3 / 5 toko':'41 / 60'}</span></div></div>
     <div class="card"><b>Target hari ini</b><div class="kv" style="margin-top:6px"><span>Target harian (prorata)</span><span class="num">${isC?'Rp3,1 jt':'Rp11,3 jt'}</span></div><div class="kv"><span>Sisa kemarin (carry forward)</span><span class="num">${isC?'Rp400 rb':'Rp700 rb'}</span></div><div class="kv"><span>Total target hari ini</span><span class="num">${isC?'Rp3,5 jt':'Rp12 jt'}</span></div>
     <p class="hint">Target harian dihitung dari target bulanan dibagi hari kerja. Kekurangan hari sebelumnya ditambahkan ke hari berikutnya.</p></div>`; }
   const achv = r==='spv'?'':`<div class="card"><div class="row between"><b>Pencapaian kamu</b>${chip('Oktober','blue')}</div>
