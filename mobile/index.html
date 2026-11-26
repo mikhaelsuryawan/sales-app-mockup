@@ -1712,6 +1712,17 @@ function visitReqSync(){ reqAll().forEach(r=>{ const ok=r.status==='Disetujui', 
   else if(i<0) L.push({id:r.vid,place:r.place,time:r.data.jam,tasks:r.data.tasks,status:ok?'Belum':'Perlu approval',photos:{},own:true,unplanned:true});
   else if(ok&&L[i].status==='Perlu approval'){ L[i].status='Belum'; L[i].approvedBy=r.by; }
 }); }
+/* Jadwal yang ditambah, diubah, atau dihapus di dashboard (visitDash) diterapkan ke daftar hari ini milik sales yang login.
+   Kunjungan yang sudah check-in tidak disentuh. Daftar SPG dipakai bersama, jadi jadwal milik sales lain dicabut. */
+function visitDashSync(){ const L=S.visits[vk()]; if(!L) return; const me=fmUk();
+  shRead('visitDash',[]).forEach(r=>{ const mine=r.u===me, asalSaya=r.from&&r.from.u===me;
+    for(let i=L.length-1;i>=0;i--){ const v=L[i]; if(v.cin) continue;
+      if(v.dashId===r.id?(r.del||!mine):(!v.dashId&&asalSaya&&v.place===r.from.place&&(r.del||!mine||r.place!==r.from.place))) L.splice(i,1); }
+    if(!mine||r.del) return;
+    let v=L.find(x=>x.dashId===r.id)||(asalSaya&&r.from.place===r.place?L.find(x=>!x.dashId&&x.place===r.place):null);
+    if(!v){ v={id:'d-'+r.id,status:'Belum',photos:{}}; L.push(v); }
+    if(!v.cin) Object.assign(v,{dashId:r.id,place:r.place,time:r.time,tasks:String(r.tasks||'Kunjungan').split(', '),own:true});
+  }); }
 function visitApprove(aid){ if(!visitReqs().some(x=>x.id===aid)) return;
   reqSet(aid,{status:'Disetujui',by:U().name}); visitReqSync();
   visitDone(); toast('Kunjungan disetujui. Sales bisa mulai aktivitas','check'); }
@@ -2740,8 +2751,8 @@ function supClientTasks(){ const cl=U()?.client, cur=shRead('supportTasks',null)
   return recs.filter(r=>!r.del&&r.status==='Aktif'&&r.clientName===cl).flatMap(r=>r.tasks.map((t,i)=>({key:r.id+':'+i,t:t.name,foto:t.foto!==false}))); }
 function supTasks(){ const o=visitOpen(), st=k=>(o&&(o.sup||{})[k])||{};
   return [...supClientTasks().map(c=>({t:c.t,from:'Dari client',key:c.key,foto:c.foto,sync:true,done:!!st(c.key).done,draft:!!st(c.key).draft})),...S.fm.tasks]; }
-SCR['fm-task'] = () => { const L=supTasks(); return {note:'Support task (MOM 10.2). Task dari client dibuat di dashboard dan berlaku untuk semua toko milik client itu. Sales juga boleh membuat task sendiri. Team Leader melihat hasilnya tanpa approval.',
-  html:`${appbar('Support task',{right:`<button class="ib" onclick="act(()=>go('fm-task-form',{}))" aria-label="Buat task">${I('plus',24,2)}</button>`})}<main class="content">
+SCR['fm-task'] = () => { const L=supTasks(); return {note:'Support task (MOM 10.2). Task dari client dibuat di dashboard dan berlaku untuk semua toko milik client itu. Team Leader melihat hasilnya tanpa approval.',
+  html:`${appbar('Support task')}<main class="content">
     ${L.length?`<div class="list">${L.map((x,i)=>`<button class="li" onclick="act(()=>go('fm-task-form',{i:${i}}))"><div class="ico-tile ${x.done?'green':'tan'}">${I(x.done?'check':'clock',20,2)}</div><div class="grow"><div class="t">${esc(x.t)}</div><div class="s">${x.from||'Dibuat sendiri'}</div></div>${stChip(x.done?'Selesai':x.draft?'Draft':'Belum Selesai')}</button>`).join('')}</div>`:`<div class="empty">Belum ada support task untuk client ini.</div>`}
   </main>`}; };
 SCR['fm-task-form'] = p => {
@@ -3122,7 +3133,7 @@ function aktGate(fn){ act(()=>{ if(!visitOpen()){ sheet(`<h3 style="font-size:18
 function aktTasks(v){
   const r=role(), has=!!v, done=k=>v&&(v.done||{})[k];
   if(isMobilePromo()) return [['bag','Catat penjualan','startSale()'],['grid','SKU display',"go('sku')"],['pie','Display share',"go('share')"],['box','Stock opname',"go('fm-stok')"],['image','Campaign & POSM',"go('posm')"]].map(([ic,t,go])=>({ic,t,sub:'Pekerjaan di toko',go,lock:1}));
-  const sup={ic:'check',t:'Support task',sub:'Task dari client dan buatan sendiri',go:"go('fm-task')",lock:1};
+  const sup={ic:'check',t:'Support task',sub:'Task dari client',go:"go('fm-task')",lock:1};
   const retur={ic:'retur',t:'Catat retur',sub:'Bisa lebih dari satu produk',go:"startRetur()",lock:1,st:has?(done('retur')?'Selesai':'Belum Selesai'):''};
   if(r==='canvas'&&!membawaBarang()) return [
     {ic:'bag',t:'Catat penjualan',sub:'Penjualan di toko, tanpa stok bawaan',go:'startSale()',lock:1,st:has?(S.canvasESales.some(x=>!x.d&&x.toko===v.place)?'Selesai':'Belum Selesai'):''},
@@ -3268,7 +3279,7 @@ const AKT_MOD={
   stok:{t:'Stock opname',ic:'box',go:"go('fm-stok')",sub:()=>'Stok display dan gudang',st:()=>stChip(S.fm.stokDone?'Selesai':(S.fm.draft||{}).stok?'Draft':'Belum Selesai')},
   posm:{t:'Campaign & POSM',ic:'image',go:"go('posm')",sub:()=>'Foto dinilai AI, bisa tambah item sendiri',st:()=>posmAll().every(a=>S.posm[a.id])?stChip('Selesai'):chip(posmAll().filter(a=>S.posm[a.id]).length+'/'+posmAll().length,'')},
   promo:{t:'Price promo',ic:'tag',go:"go('fm-promo')",sub:()=>'Harga promo dan foto price tag',st:()=>stChip(S.fm.promoDone?'Selesai':(S.fm.draft||{}).promo?'Draft':'Belum Selesai')},
-  support:{t:'Support task',ic:'check',go:"go('fm-task')",sub:()=>'Task dari client dan buatan sendiri',st:()=>{ const L=supTasks(); return chip(L.filter(t=>t.done).length+'/'+L.length,L.length&&L.every(t=>t.done)?'green':''); }}
+  support:{t:'Support task',ic:'check',go:"go('fm-task')",sub:()=>'Task dari client',st:()=>{ const L=supTasks(); return chip(L.filter(t=>t.done).length+'/'+L.length,L.length&&L.every(t=>t.done)?'green':''); }}
 };
 SCR['spg-akt'] = (p={}) => {
   const c=aktCfg()||{akt:[]}, pen=byPenempatan(), v=pen?spgVisit():null, o=visitOpen(), t=spgToko(), lk=isLocked(), need=c.checkin==='Ya', open=!need||o;
@@ -3893,7 +3904,7 @@ function capItems(){
   else if(isSpg()){ const c=aktCfg(), st={jual:spgTrx().length>0,sku:S.dispDone,share:S.shareState==='kirim',stok:S.fm.stokDone,posm:posmAll().every(a=>S.posm[a.id]),promo:!!S.fm.promoDone,support:supTasks().length>0&&supTasks().every(t=>t.done)}, m=(c.akt||[]).filter(k=>k in st); out.push({c:'job',label:'Aktivitas saya',done:m.filter(k=>st[k]).length,total:m.length,sub:'modul hari ini',go:"go('spg-akt')"}); }
   else if(isMobilePromo()) out.push({c:'job',label:'Campaign & POSM',done:posmAll().filter(a=>S.posm[a.id]).length,total:posmAll().length,sub:'brief dinilai',go:"go('posm')"});
   else if(r==='spg'){ const n=salesList().filter(x=>!x.d).length; out.push({c:'job',label:'Transaksi',done:Math.min(n,3),total:3,sub:'target 3 per hari',go:"tab('penjualan')"}); }
-  if(r==='fmcg') out.push({c:'task',label:'Support task',done:supTasks().filter(t=>t.done).length,total:supTasks().length,sub:'dari client dan buatan sendiri',go:"fmGate(()=>go('fm-task'))"});
+  if(r==='fmcg') out.push({c:'task',label:'Support task',done:supTasks().filter(t=>t.done).length,total:supTasks().length,sub:'dari client',go:"fmGate(()=>go('fm-task'))"});
   else out.push(qItem);
   return out;
 }
@@ -4045,7 +4056,7 @@ function render(scrollTop=true, keepScroll=false){
   const c=cur(); if(!c) return;
   if(S.user&&role()==='fmcg'){ fmSyncVisits(); fmPushState(); }
   else if(S.user) jpSyncVisits();
-  if(S.user){ visitReqSync(); cbdSync(); tutupSync(); eodSync(); }
+  if(S.user){ visitReqSync(); visitDashSync(); cbdSync(); tutupSync(); eodSync(); }
   const content=$('#view .content'); const st=keepScroll&&content?content.scrollTop:0;
   const def=SCR[c.name](c.p);
   $('#view').innerHTML=def.html;
