@@ -3105,7 +3105,7 @@ const AKT_MOD={
   promo:{t:'Price promo',ic:'tag',go:"go('fm-promo')",sub:()=>'Harga promo dan foto price tag',st:()=>stChip(S.fm.promoDone?'Selesai':(S.fm.draft||{}).promo?'Draft':'Belum Selesai')},
   support:{t:'Support task',ic:'check',go:"go('fm-task')",sub:()=>'Task dari client dan buatan sendiri',st:()=>{ const L=supTasks(); return chip(L.filter(t=>t.done).length+'/'+L.length,L.length&&L.every(t=>t.done)?'green':''); }}
 };
-SCR['spg-akt'] = () => {
+SCR['spg-akt'] = (p={}) => {
   const c=aktCfg()||{akt:[]}, pen=byPenempatan(), v=pen?spgVisit():null, o=visitOpen(), t=spgToko(), lk=isLocked(), need=c.checkin==='Ya', open=!need||o;
   const row=m=>{ const x=AKT_MOD[m]; if(!x) return ''; return `<button class="li" onclick="spgGate(()=>${x.go})"><div class="ico-tile">${I(x.ic,20)}</div><div class="grow"><div class="t">${x.t}</div><div class="s">${x.sub()}</div></div>${open?(x.st()+I('right',18)):I('lock',18)}</button>`; };
   const head = !need&&!o ? ''
@@ -3116,11 +3116,13 @@ SCR['spg-akt'] = () => {
       <div class="banner blue" style="margin-top:12px">${I('alert',18)}<span>Lokasi ditetapkan admin lewat dashboard. Check-in sekali di sini, lalu semua aktivitas di bawah terbuka.</span></div>
       <button class="btn ${lk?'locked':''}" style="margin-top:12px" onclick="spgCheckin()">${I(lk?'lock':'pin',18)} Check-in di lokasi</button></div>`
     : `<div class="banner amber" style="margin-bottom:14px">${I('pin',18)}<span>Belum check-in. Pilih toko dari jadwal kunjungan, lalu check-in di lokasi.</span></div><button class="btn ${lk?'locked':''}" style="margin-bottom:14px" onclick="spgCheckin()">${I(lk?'lock':'pin',18)} Pilih toko & check-in</button>`;
+  const seg=p.seg||'hari', L=S.visits[vk()]||[];
   return {note:'Aktivitas saya. Isi menu, sumber lokasi check-in (penempatan user atau jadwal kunjungan), dan wajib tidaknya check-in diatur di dashboard: Konfigurasi aplikasi › Aktivitas per role. SPG ditempatkan di satu toko lewat User SIM, jadi langsung diarahkan check-in di toko itu. Check-in cukup sekali untuk semua aktivitas.',
-  html:`${appbar('Aktivitas saya')}<main class="content">${head}
+  html:`${appbar('Aktivitas saya')}<main class="content">${segHari(seg)}
+    ${seg==='rencana'?planList():`${kunjBanners()}${L.length?progresCard(L):''}${head}
     <div class="sec-title">Aktivitas</div>
     <div class="list">${c.akt.map(row).join('')||`<div class="empty">Admin belum memilih aktivitas untuk role ini.</div>`}</div>
-    ${open?'':`<p class="hint" style="margin-top:12px">Semua aktivitas terkunci sampai kamu check-in${pen?' di lokasi penempatan':''}.</p>`}
+    ${open?'':`<p class="hint" style="margin-top:12px">Semua aktivitas terkunci sampai kamu check-in${pen?' di lokasi penempatan':''}.</p>`}`}
   </main>`};
 };
 
