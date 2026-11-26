@@ -1712,6 +1712,17 @@ function visitReqSync(){ reqAll().forEach(r=>{ const ok=r.status==='Disetujui', 
   else if(i<0) L.push({id:r.vid,place:r.place,time:r.data.jam,tasks:r.data.tasks,status:ok?'Belum':'Perlu approval',photos:{},own:true,unplanned:true});
   else if(ok&&L[i].status==='Perlu approval'){ L[i].status='Belum'; L[i].approvedBy=r.by; }
 }); }
+/* Jadwal yang ditambah, diubah, atau dihapus di dashboard (visitDash) diterapkan ke daftar hari ini milik sales yang login.
+   Kunjungan yang sudah check-in tidak disentuh. Daftar SPG dipakai bersama, jadi jadwal milik sales lain dicabut. */
+function visitDashSync(){ const L=S.visits[vk()]; if(!L) return; const me=fmUk();
+  shRead('visitDash',[]).forEach(r=>{ const mine=r.u===me, asalSaya=r.from&&r.from.u===me;
+    for(let i=L.length-1;i>=0;i--){ const v=L[i]; if(v.cin) continue;
+      if(v.dashId===r.id?(r.del||!mine):(!v.dashId&&asalSaya&&v.place===r.from.place&&(r.del||!mine||r.place!==r.from.place))) L.splice(i,1); }
+    if(!mine||r.del) return;
+    let v=L.find(x=>x.dashId===r.id)||(asalSaya&&r.from.place===r.place?L.find(x=>!x.dashId&&x.place===r.place):null);
+    if(!v){ v={id:'d-'+r.id,status:'Belum',photos:{}}; L.push(v); }
+    if(!v.cin) Object.assign(v,{dashId:r.id,place:r.place,time:r.time,tasks:String(r.tasks||'Kunjungan').split(', '),own:true});
+  }); }
 function visitApprove(aid){ if(!visitReqs().some(x=>x.id===aid)) return;
   reqSet(aid,{status:'Disetujui',by:U().name}); visitReqSync();
   visitDone(); toast('Kunjungan disetujui. Sales bisa mulai aktivitas','check'); }
@@ -4045,7 +4056,7 @@ function render(scrollTop=true, keepScroll=false){
   const c=cur(); if(!c) return;
   if(S.user&&role()==='fmcg'){ fmSyncVisits(); fmPushState(); }
   else if(S.user) jpSyncVisits();
-  if(S.user){ visitReqSync(); cbdSync(); tutupSync(); eodSync(); }
+  if(S.user){ visitReqSync(); visitDashSync(); cbdSync(); tutupSync(); eodSync(); }
   const content=$('#view .content'); const st=keepScroll&&content?content.scrollTop:0;
   const def=SCR[c.name](c.p);
   $('#view').innerHTML=def.html;

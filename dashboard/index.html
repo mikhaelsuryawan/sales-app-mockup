@@ -809,17 +809,28 @@ textarea.ta[aria-invalid=true]{border-color:var(--danger)}
 @keyframes sheetup{from{transform:translateY(100%)}}
 .overlay{position:fixed;inset:0;z-index:50;background:rgb(16 17 18 / .5);backdrop-filter:blur(2px);animation:fade .2s}
 .lock main{overflow:hidden}
-.panel{position:fixed;top:12px;right:12px;bottom:12px;z-index:61;width:min(448px,calc(100% - 24px));background:var(--card);border-radius:var(--r-hero);overflow:hidden;box-shadow:var(--shadow-float);display:flex;flex-direction:column;animation:slideinr .2s cubic-bezier(.2,.8,.2,1)}
-.panel.w576{width:min(576px,calc(100% - 24px))} .panel.w672{width:min(672px,calc(100% - 24px))}
+.panel{position:fixed;inset:16px;margin:auto;height:fit-content;max-height:calc(100dvh - 32px);z-index:61;width:min(480px,calc(100% - 32px));background:var(--card);border-radius:var(--r-hero);overflow:hidden;box-shadow:var(--shadow-float);display:flex;flex-direction:column;animation:rise .2s}
 .panel-h{display:flex;align-items:flex-start;gap:12px;padding:20px 20px 12px}
 .panel-h h2{font-size:18px;font-weight:600;color:var(--fg);letter-spacing:-.01em;line-height:1.2}
 .panel-h h2 .dot-accent{display:none}
-.panel-b{flex:1;overflow-y:auto;padding:4px 20px 20px}
+.panel-b{flex:1 1 auto;min-height:0;overflow-y:auto;padding:4px 20px 20px}
 .panel-f{border-top:1px solid var(--line);padding:16px 20px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
-.modal{position:fixed;z-index:61;top:50%;left:50%;transform:translate(-50%,-50%);width:min(512px,calc(100% - 32px));max-height:calc(100dvh - 32px);overflow:auto;border-radius:var(--r-card);background:var(--card);box-shadow:var(--shadow-float);padding:24px;animation:rise .2s}
+.modal{position:fixed;z-index:61;inset:16px;margin:auto;height:fit-content;width:min(512px,calc(100% - 32px));max-height:calc(100dvh - 32px);overflow:auto;border-radius:var(--r-card);background:var(--card);box-shadow:var(--shadow-float);padding:24px;animation:rise .2s}
 .modal.s384{width:min(384px,calc(100% - 32px))} .modal.s448{width:min(448px,calc(100% - 32px))} .modal.s672{width:min(672px,calc(100% - 32px))} .modal.s896{width:min(896px,calc(100% - 32px))}
 .modal h2.pt{font-size:18px!important;font-weight:600;line-height:1.2;letter-spacing:-.01em;padding-right:28px;margin:0}
 .modal h2 i{display:none}
+/* Ukuran dialog mengikuti isi (fitDialog): kecil, sedang, besar. Di ponsel tetap bottom sheet. */
+@media (min-width:768px){
+  .panel.dlg-s,.modal.dlg-s{width:min(480px,calc(100% - 32px))}
+  .panel.dlg-m,.modal.dlg-m{width:min(640px,calc(100% - 32px))}
+  .panel.dlg-l,.modal.dlg-l{width:min(920px,calc(100% - 32px))}
+  .panel.dlg-s .kv{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .panel.dlg-l .kv{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .panel.dlg-l .kvl,.modal.dlg-l .kvl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:32px;align-items:start}
+  .panel.dlg-l .kvl>div:nth-child(2),.modal.dlg-l .kvl>div:nth-child(2){border-top:0}
+  .cols2{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+  .cols2>:not(.field),.cols2>.span-all{grid-column:1/-1}
+}
 .dlg-x{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;color:var(--muted);display:grid;place-items:center;transition:background-color .15s,color .15s}
 .dlg-x:hover{background:var(--canvas);color:var(--fg)}
 .dlg-d{margin-top:6px;font-size:14px;color:var(--muted);line-height:1.5}
@@ -896,7 +907,7 @@ textarea.ta[aria-invalid=true]{border-color:var(--danger)}
   .bb-act:hover,.bb-act.on{background:var(--accent-dark);color:#fff}
   .bb-i .cnt{position:absolute;top:-4px;right:-4px;box-shadow:0 0 0 2px var(--ink)}
   .user-btn{height:44px;padding:4px}
-  .panel{top:auto;left:0;right:0;bottom:0;width:100%;max-height:92dvh;border-radius:28px 28px 0 0}
+  .panel{inset:auto 0 0 0;margin:0;height:auto;width:100%;max-height:92dvh;border-radius:28px 28px 0 0;animation:sheetup .2s cubic-bezier(.2,.8,.2,1)}
   .attn-g{grid-template-columns:repeat(2,minmax(0,1fr))}
   .at small{white-space:normal;line-height:1.25}
   .hero-big{font-size:48px}
@@ -1085,8 +1096,20 @@ let lastFocus=null;
 const layerOpen=()=>!!$('#layer').innerHTML.trim();
 function syncLayer(){ const open=layerOpen(), app=$('#app'); if(app) app.inert=open; document.documentElement.classList.toggle('lock',open); }
 function mountLayer(html,sel){ const first=!layerOpen(); if(first){ lastFocus=document.activeElement; try{ history.pushState({layer:1},''); }catch(e){} } $('#layer').innerHTML=html; syncLayer(); const el=$('#layer '+sel); el?.focus(); return el; }
+/* Pilih ukuran dialog dari banyaknya isi. min = ukuran terkecil yang diminta pemanggil (0 kecil, 1 sedang, 2 besar). */
+function fitDialog(el,min=0){
+  if(!el||!el.isConnected) return;
+  const n=el.querySelectorAll('.field,.kv>div,.kvl>div,.rowlink,.rows>*,.tile').length, cols=Math.max(0,...[...el.querySelectorAll('table')].map(t=>t.querySelector('tr')?.children.length||0));
+  let lv=cols||n>=6||el.querySelector('.panel-hero,.thumbs,.chart,.pills,.utabs,iframe')?1:0;
+  if(cols>=5||n>=12||el.textContent.length>1600) lv=2;
+  lv=Math.max(lv,min);
+  el.classList.add(['dlg-s','dlg-m','dlg-l'][lv]);
+  if(lv) el.querySelectorAll('.grid:not(.g2):not(.g3)').forEach(g=>{ const f=[...g.children].filter(c=>c.classList.contains('field')); if(f.length<4) return;
+    g.classList.add('cols2'); f.forEach(c=>{ if(c.querySelector('textarea,.chips,.fchip,select[multiple],.coordmap,.thumbs,table')) c.classList.add('span-all'); }); });
+}
 function openPanel(title,body,foot='',{sub='',size=''}={}){
-  mountLayer(`<div class="overlay" onclick="closeLayer()"></div><aside class="panel ${size?'w'+size:''} ${isPhone()?'as-sheet':''}" role="dialog" aria-modal="true" aria-labelledby="dlg-t" tabindex="-1"><div class="panel-h"><div style="flex:1;min-width:0">${sub?`<div class="xs muted" style="margin-bottom:4px">${sub}</div>`:''}<h2 id="dlg-t">${title}<span class="dot-accent">.</span></h2></div>${ibtn('x','Tutup','closeLayer()',{v:'ghost'})}</div><div class="panel-b">${body}</div>${foot?`<div class="panel-f">${foot}</div>`:''}</aside>`,'.panel');
+  mountLayer(`<div class="overlay" onclick="closeLayer()"></div><aside class="panel ${isPhone()?'as-sheet':''}" role="dialog" aria-modal="true" aria-labelledby="dlg-t" tabindex="-1"><div class="panel-h"><div style="flex:1;min-width:0">${sub?`<div class="xs muted" style="margin-bottom:4px">${sub}</div>`:''}<h2 id="dlg-t">${title}<span class="dot-accent">.</span></h2></div>${ibtn('x','Tutup','closeLayer()',{v:'ghost'})}</div><div class="panel-b">${body}</div>${foot?`<div class="panel-f">${foot}</div>`:''}</aside>`,'.panel');
+  const el=$('#layer .panel'); queueMicrotask(()=>fitDialog(el,size>=672?2:size>=576?1:0));
 }
 function openModal(html,opts={}){
   if(/<h2[^>]*>(Hapus|Ajukan hapus|Tidak bisa)/.test(html)) opts={size:448,alert:true,...opts};
@@ -1094,6 +1117,7 @@ function openModal(html,opts={}){
   const el=mountLayer(`<div class="overlay" onclick="closeLayer()"></div><div class="modal ${size?'s'+size:''}" role="${alert?'alertdialog':'dialog'}" aria-modal="true" aria-labelledby="dlg-t" tabindex="-1"><button type="button" class="dlg-x" aria-label="Tutup" onclick="closeLayer()">${I('x',16)}</button>${html}</div>`,'.modal');
   el.querySelector('h2')?.setAttribute('id','dlg-t');
   const d=el.querySelector('.dlg-d'); if(d){ d.id='dlg-d'; el.setAttribute('aria-describedby','dlg-d'); }
+  if(!alert) queueMicrotask(()=>fitDialog(el,size>=896?2:size>=672?1:0));
 }
 function openSheet(html,{title=''}={}){ mountLayer(`<div class="overlay" onclick="closeLayer()"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title||'Menu')}" tabindex="-1">${title?`<div class="st">${esc(title)}</div>`:''}${html}</div>`,'.sheet'); }
 function closeLayerCore(){ $('#layer').innerHTML=''; syncLayer(); document.querySelector('.bb-more.on')?.classList.remove('on'); if(lastFocus&&lastFocus.isConnected) lastFocus.focus?.({preventScroll:true}); }
@@ -2526,14 +2550,18 @@ function visForm(id){ if(!can('visit.create')) return noAccess();
   <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn(id?'Simpan perubahan':'Simpan jadwal',{v:'accent',on:`visSave('${id||''}')`})}</div>`); }
 function visTaskField(u,val){ return isFm(u)?`<div class="tile"><div class="xs muted">Tugas</div><b class="fg">${FM_TASKS_LABEL}</b><p class="xs muted" style="margin-top:6px">Tugas otomatis semua aktivitas toko. Promotor tidak bisa menghapus kunjungan yang dibuat admin.</p></div>`:`<label class="field"><span>Tugas</span><span class="inp"><input id="vf_k" value="${esc(val||'')}" placeholder="contoh: Penjualan, Cek display"></span></label>`; }
 function visTaskHint(u){ const e=document.getElementById('vf_tk'); if(e) e.innerHTML=visTaskField(u,''); }
+/* Tambah, ubah, dan hapus jadwal dari dashboard dikirim ke mobile lewat salesapp.shared.v1 (kunci visitDash).
+   from = sales dan tujuan sebelum perubahan pertama, supaya mobile tahu jadwal mana yang diganti atau dicabut. */
+function visPublish(v,from){ const L=shRead('visitDash',[]), old=L.find(x=>x.id===v.id);
+  shSet('visitDash',[...L.filter(x=>x.id!==v.id),{id:v.id,u:v.u,place:v.place,time:v.plan,tasks:v.tasks,del:!!v.del,from:old?old.from:from}]); }
 function visSave(id){
   const u=document.getElementById('vf_u').value, place=document.getElementById('vf_p').value, plan=document.getElementById('vf_t').value, period=document.getElementById('vf_r').value;
   const tasks=isFm(u)?FM_TASKS_LABEL:(document.getElementById('vf_k')?.value||'').replace(/['"<>`]/g,'').trim();
   const days=needDays(period)?[...document.querySelectorAll('#vf_days .fchip.on')].map(b=>b.dataset.d):[];
   if(!plan||!tasks){ toast('Periksa isian','Isi jam dan tugas kunjungan.','danger'); return; }
   if(needDays(period)&&!days.length){ toast('Periksa isian','Pilih minimal satu hari kunjungan.','danger'); return; }
-  if(id){ Object.assign(D.visits.find(x=>x.id===id),{u,place,plan,period,tasks,days}); audit('Mengubah jadwal kunjungan '+byU(u).name+' ke '+place); }
-  else { D.visits.push({id:newId('kv'),u,place,plan,period,days,tasks,cin:'',cout:'',dur:'',photos:0,status:'Belum',by:'tl'}); audit('Membuat jadwal kunjungan '+byU(u).name+' ke '+place); }
+  if(id){ const v=D.visits.find(x=>x.id===id), from={u:v.u,place:v.place}; Object.assign(v,{u,place,plan,period,tasks,days}); visPublish(v,from); audit('Mengubah jadwal kunjungan '+byU(u).name+' ke '+place); }
+  else { const v={id:newId('kv'),u,place,plan,period,days,tasks,cin:'',cout:'',dur:'',photos:0,status:'Belum',by:'tl'}; D.visits.push(v); visPublish(v,null); audit('Membuat jadwal kunjungan '+byU(u).name+' ke '+place); }
   fmVisitSync(); closeLayer(); render(false); toast(id?'Jadwal diperbarui':'Jadwal tersimpan',isFm(u)?'Muncul di aplikasi mobile promotor.':'Sales menerima notifikasi di aplikasi.'); }
 function visDelAsk(id){ const v=D.visits.find(x=>x.id===id);
   { const bl=visBlock(v); if(bl) return blockedModal(bl); }
@@ -2542,7 +2570,7 @@ function visDelAsk(id){ const v=D.visits.find(x=>x.id===id);
 const visBlock=v=>visLive(v).status!=='Belum'?`Kunjungan ke ${esc(v.place)} sudah berjalan atau selesai. Datanya dipakai di laporan, jadi tidak bisa dihapus.`:'';
 function visDel(id){
   const v=D.visits.find(x=>x.id===id);
-  act('visit/remove',{perm:'visit.create',guard:()=>visBlock(v),blockedTitle:'Tidak bisa dihapus',run:()=>{ v.del=true; fmVisitSync(); },audit:()=>'Menghapus jadwal kunjungan '+byU(v.u).name+' ke '+v.place,toast:['Jadwal dihapus',v.place,'default']});
+  act('visit/remove',{perm:'visit.create',guard:()=>visBlock(v),blockedTitle:'Tidak bisa dihapus',run:()=>{ v.del=true; visPublish(v,{u:v.u,place:v.place}); fmVisitSync(); },audit:()=>'Menghapus jadwal kunjungan '+byU(v.u).name+' ke '+v.place,toast:['Jadwal dihapus',v.place,'default']});
 }
 
 /* ---------- Approval ---------- */
