@@ -4188,7 +4188,7 @@ function posmNilaiFoto(id,ref){ const r=posmNilaiRows().find(a=>a._id===id); if(
 function posmNilaiPanel(id){ const r=posmNilaiRows().find(a=>a._id===id); if(!r){ toast('Foto tidak ditemukan','Muat ulang halaman lalu coba lagi.','danger'); return; }
   const b=posmBriefOf(r), adj=Number(r.adj)||0, fin=Number(r.final)||0;
   const foto=(label,src,ref)=>subSec(label,posmImg(src)?`<button type="button" class="foto-lg" aria-label="Perbesar ${label.toLowerCase()}" onclick="posmNilaiFoto('${id}',${ref})"><img src="${posmImg(src)}" alt="${label} ${esc(r.brief)}"></button>`:'<p class="xs muted">Foto tidak tersedia.</p>');
-  openPanel(esc(r.brief),foto('Foto dari lapangan',r.foto,0)+foto('Foto referensi',b.foto,1)
+  openPanel(esc(r.brief),foto('Foto referensi',b.foto,1)+foto('Foto dari lapangan',r.foto,0)
     +subSec('Kiriman',keyValue([['Sales',esc(userName(r.u))],['Toko',esc(r.toko)],['Waktu kirim',esc(r.tgl)+' 2026'+(r.jam?' · '+esc(r.jam)+' WIB':'')],['Jenis',esc(r.kind||b.kind)],['Acuan',esc(b.acuan)],r.own&&['Sumber','Item tambahan dari sales']]))
     +subSec('Penilaian',keyValue([['Nilai AI',Number(r.ai)||0],['Adjustment',(adj>0?'+':'')+adj],['Alasan',adj?esc(r.alasan):'Tanpa adjustment'],['Nilai akhir',`<b class="fg">${fin}</b>`],['Hasil',spill(fin>=80?'Lulus':fin>=70?'Ditinjau':'Foto ulang',fin>=80?'success':fin>=70?'warning':'danger')]])),
     btn('Tutup',{v:'accent',on:'closeLayer()'}),{sub:esc(userName(r.u))+' · '+esc(r.tgl)}); }
