@@ -4159,11 +4159,16 @@ function pageSinkron(){
 }
 
 /* ---------- POSM & planogram ---------- */
-const POSM=[{id:'pm3',name:'Campaign: penempatan barang promo akhir tahun',kind:'Campaign',to:'SPG / Promotor',done:9,of:25,avg:81},{id:'pm1',name:'Planogram rak utama',kind:'Planogram',to:'SPG / Promotor',done:12,of:20,avg:84},{id:'pm2',name:'POSM wobbler promo akhir tahun',kind:'POSM',to:'SPG / Promotor',done:5,of:15,avg:78}];
+/* Gambar contoh foto referensi, sama dengan mobile. */
+const posmArt=c=>'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90"><rect width="160" height="90" fill="#eef2f8"/><path d="M12 36h136M12 62h136M12 86h136" stroke="#9aa6b8" stroke-width="3"/><g fill="${c}">${[14,36,58,80,102,124].map((x,i)=>`<rect x="${x}" y="${14+i%2*4}" width="18" height="${20-i%2*4}" rx="2"/><rect x="${x}" y="42" width="18" height="18" rx="2" opacity=".65"/><rect x="${x}" y="${68+i%2*3}" width="18" height="${16-i%2*3}" rx="2" opacity=".4"/>`).join('')}</g></svg>`);
+const POSM=[{id:'pm3',name:'Campaign: penempatan barang promo akhir tahun',kind:'Campaign',to:'SPG / Promotor, Mobile Promotor',acuan:'Barang promo di end gondola',foto:posmArt('#d17a22'),done:9,of:25,avg:81},{id:'pm1',name:'Planogram rak utama',kind:'Planogram',to:'SPG / Promotor, Mobile Promotor',acuan:'Urutan brand dan jumlah facing',foto:posmArt('#3a7bd5'),done:12,of:20,avg:84},{id:'pm2',name:'POSM wobbler promo akhir tahun',kind:'POSM',to:'SPG / Promotor, Mobile Promotor',acuan:'Posisi wobbler di depan rak',foto:posmArt('#2f9e5b'),done:5,of:15,avg:78}];
 const POSM_TARGET=['SPG / Promotor','Mobile Promotor','SPG / Promotor, Mobile Promotor'];
+/* Brief dikirim ke mobile lewat data bersama (kunci posmBrief). */
+function syncPosm(){ const L=POSM.filter(x=>!x.del).map(({id,name,kind,to,acuan,foto})=>({id,name,kind,to,acuan:acuan||'',foto:foto||''})); if(JSON.stringify(shRead('posmBrief',null))!==JSON.stringify(L)) shSet('posmBrief',L); }
 function pagePosm(){
+  syncPosm();
   return {title:'Campaign, POSM & planogram',html:`
-  ${card('Brief aktif',dataTable('psm',{rows:POSM.filter(x=>!x.del).map(x=>({...x,_id:x.id})),rowClick:r=>`posmModal('${r.id}')`,acts:r=>rowActs(`posmModal('${r.id}')`,`posmDelAsk('${r.id}')`),cols:[{label:'Brief',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${r.to}</span>`,prim:true},{label:'Jenis',render:r=>tag(r.kind,'accent'),hide:true},{label:'Terkirim',render:r=>r.done+'/'+r.of,align:'r'},{label:'Nilai',render:r=>r.avg,align:'r'}]}),{acts:`${btn('Upload brief',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Foto brief')"})}${btn('Buat brief',{v:'accent',size:'sm',icon:'plus',on:'posmModal()'})}`})}
+  ${card('Brief aktif',dataTable('psm',{rows:POSM.filter(x=>!x.del).map(x=>({...x,_id:x.id})),rowClick:r=>`posmModal('${r.id}')`,acts:r=>rowActs(`posmModal('${r.id}')`,`posmDelAsk('${r.id}')`),cols:[{label:'Brief',render:r=>`<span style="display:flex;gap:10px;align-items:center">${fotoThumb(r.foto,40)}<span><span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${r.to}</span></span></span>`,prim:true},{label:'Jenis',render:r=>tag(r.kind,'accent'),hide:true},{label:'Terkirim',render:r=>r.done+'/'+r.of,align:'r'},{label:'Nilai',render:r=>r.avg,align:'r'}]}),{acts:`${btn('Upload brief',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Foto brief')"})}${btn('Buat brief',{v:'accent',size:'sm',icon:'plus',on:'posmModal()'})}`})}
   <div style="margin-top:16px">${card('Nilai foto dari lapangan',dataTable('psn',{rows:posmNilaiRows(),rowClick:r=>`toast('${esc(userName(r.u))}','${esc(r.brief)}: AI ${r.ai}, adjustment ${r.adj>0?'+':''}${r.adj}, akhir ${r.final}.')`,empty:'Belum ada foto yang dinilai.',cols:[
     {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(userName(r.u))}</span><span class="xs muted" style="display:block">${esc(r.brief)} · ${esc(r.tgl)}</span>`,prim:true},
     {label:'Nilai AI',render:r=>r.ai,align:'r',hide:true},{label:'Adjustment',render:r=>r.adj?`<b class="tabular ${r.adj<0?'':'fg'}">${r.adj>0?'+':''}${r.adj}</b>${r.alasan?`<span class="xs muted" style="display:block">${esc(r.alasan)}</span>`:''}`:'<span class="muted">0</span>',align:'r'},
@@ -4173,16 +4178,18 @@ function pagePosm(){
 /* Nilai foto dari mobile (kunci posmNilai: AI + adjustment). Data contoh dipakai bila belum ada kiriman dari mobile. */
 const POSM_NILAI_DEFAULT=[{u:'rina',brief:'Planogram rak utama',ai:76,adj:6,final:82,alasan:'Rak tertutup troli saat foto, susunan sudah sesuai',tgl:'25 Okt'},{u:'fikri',brief:'POSM wobbler promo akhir tahun',ai:84,adj:0,final:84,alasan:'',tgl:'25 Okt'},{u:'rina',brief:'Campaign: penempatan barang promo akhir tahun',ai:72,adj:-5,final:67,alasan:'Label harga promo belum terpasang',tgl:'24 Okt'}];
 const posmNilaiRows=()=>{ const m=shRead('posmNilai',[]); return [...(Array.isArray(m)?m:[]),...POSM_NILAI_DEFAULT].map((r,i)=>({...r,_id:'pn'+i})); };
-function posmModal(id){ const x=id?POSM.find(a=>a.id===id):{name:'',kind:'Campaign',to:'SPG / Promotor'};
+function posmModal(id){ const x=id?POSM.find(a=>a.id===id):{name:'',kind:'Campaign',to:'SPG / Promotor',acuan:'',foto:''};
   openModal(`<h2 class="pt">${id?'Edit':'Buat'} brief<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Foto brief di-assign ke user, lalu user mengirim foto untuk dinilai.</p>
   <div class="grid" style="gap:12px"><label class="field"><span>Nama brief</span><span class="inp"><input id="pm_n" value="${esc(x.name)}" placeholder="contoh: POSM wobbler promo akhir tahun"></span></label>
   <label class="field"><span>Jenis</span>${sel(['Campaign','POSM','Planogram'],x.kind,'',{label:'Jenis',id:'pm_k'})}</label>
-  <label class="field"><span>Di-assign ke</span>${sel(POSM_TARGET,x.to,'',{label:'Di-assign ke',id:'pm_t'})}</label></div>
+  <label class="field"><span>Di-assign ke</span>${sel(POSM_TARGET,x.to,'',{label:'Di-assign ke',id:'pm_t'})}</label>
+  <label class="field"><span>Acuan penilaian (opsional)</span><span class="inp"><input id="pm_a" value="${esc(x.acuan||'')}" placeholder="contoh: Posisi wobbler di depan rak"></span></label>
+  ${fotoField('pb',x.foto,'JPG atau PNG, maksimal 2 MB. Tampil di aplikasi mobile sebagai pembanding foto sales.','Foto referensi (opsional)')}</div>
   <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan',{v:'accent',on:`posmSave('${id||''}')`})}</div>`); }
-function posmSave(id){ const n=document.getElementById('pm_n').value.replace(/['"<>`]/g,'').trim(), k=document.getElementById('pm_k').value, t=document.getElementById('pm_t').value;
+function posmSave(id){ const clean=v=>v.replace(/['"<>`]/g,'').trim(), n=clean(document.getElementById('pm_n').value), acuan=clean(document.getElementById('pm_a').value), foto=FOTO.pb, k=document.getElementById('pm_k').value, t=document.getElementById('pm_t').value;
   if(!n){ toast('Periksa isian','Isi nama brief.','danger'); return; }
-  if(id){ Object.assign(POSM.find(a=>a.id===id),{name:n,kind:k,to:t}); audit('Mengubah brief '+n); }
-  else { POSM.push({id:newId('pm'),name:n,kind:k,to:t,done:0,of:25,avg:0}); audit('Membuat brief '+n); }
+  if(id){ Object.assign(POSM.find(a=>a.id===id),{name:n,kind:k,to:t,acuan,foto}); audit('Mengubah brief '+n); }
+  else { POSM.push({id:newId('pm'),name:n,kind:k,to:t,acuan,foto,done:0,of:25,avg:0}); audit('Membuat brief '+n); }
   closeLayer(); render(false); toast(id?'Brief diperbarui':'Brief dibuat',n); }
 function posmDelAsk(id){ const x=POSM.find(a=>a.id===id);
   { const bl=posmBlock(x); if(bl) return blockedModal(bl); }
@@ -4471,12 +4478,13 @@ const mptState=()=>{ const rec=FORM&&FORM.id?MD.mapping.find(m=>m.id===FORM.id):
 const mptTokoOpts=cl=>cl?[['','Pilih toko'],...live('toko').filter(t=>t.status==='Aktif'&&tokoClients(t).includes(cl)).map(t=>[t.id,t.name])]:[['','Pilih client dulu']];
 function mptPick(){ const el=document.getElementById('mp_hb'), id=document.getElementById('f_produk').value; if(el) el.textContent=id?rp(pmOne(id).price||0):''; }
 function mptSync(){ const c=document.getElementById('f_client').value, t=document.getElementById('f_toko'), k=document.getElementById('f_kategori'), oh=a=>a.map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join(''); t.innerHTML=oh(mptTokoOpts(c)); k.innerHTML=oh(katOptsFor(c)); pmKatSync(); }
-const FOTO={mp:'',pm:''};
+const FOTO={mp:'',pm:'',pb:''};
 const fotoHTML=k=>`<div class="photos" style="max-width:240px">${FOTO[k]?`<div class="ph"><button type="button" class="foto-t" style="width:100%;height:100%;border-radius:0" aria-label="Lihat foto lebih besar" onclick="fotoShow('${k}')"><img src="${FOTO[k]}" alt="Foto produk"></button><button type="button" class="rm" aria-label="Hapus foto" onclick="fotoClear('${k}')">${I('x',14)}</button></div>`:`<button type="button" class="ph add" aria-label="Pilih foto" onclick="document.getElementById('${k}_file').click()">${I('camera',24)}</button>`}</div>`;
 function fotoPick(inp,k){ const f=inp.files&&inp.files[0]; if(!f) return; if(!/^image\//.test(f.type)){ toast('Bukan gambar','Pilih berkas JPG atau PNG.','danger'); return; } if(f.size>2*1024*1024){ toast('Foto terlalu besar','Maksimal 2 MB.','danger'); return; }
-  const rd=new FileReader(); rd.onload=()=>{ FOTO[k]=rd.result; document.getElementById(k+'_fwrap').innerHTML=fotoHTML(k); }; rd.readAsDataURL(f); }
+  const rd=new FileReader(), pasang=src=>{ FOTO[k]=src; document.getElementById(k+'_fwrap').innerHTML=fotoHTML(k); }; rd.onload=()=>k==='pb'?fotoKecil(rd.result,pasang):pasang(rd.result); rd.readAsDataURL(f); }
+function fotoKecil(src,done){ const im=new Image(); im.onload=()=>{ const s=Math.min(1,960/Math.max(im.width,im.height)), c=document.createElement('canvas'); c.width=Math.round(im.width*s); c.height=Math.round(im.height*s); const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(im,0,0,c.width,c.height); done(c.toDataURL('image/jpeg',.8)); }; im.onerror=()=>toast('Foto tidak terbaca','Pilih berkas JPG atau PNG lain.','danger'); im.src=src; }
 function fotoClear(k){ FOTO[k]=''; document.getElementById(k+'_fwrap').innerHTML=fotoHTML(k); }
-const fotoField=(k,val,note)=>{ FOTO[k]=val||''; return `<div class="field"><span>Foto produk (opsional)</span><div id="${k}_fwrap">${fotoHTML(k)}</div><input id="${k}_file" type="file" accept="image/*" style="display:none" onchange="fotoPick(this,'${k}')"><p class="xs muted" style="margin-top:6px">${note}</p></div>`; };
+const fotoField=(k,val,note,label='Foto produk (opsional)')=>{ FOTO[k]=val||''; return `<div class="field"><span>${label}</span><div id="${k}_fwrap">${fotoHTML(k)}</div><input id="${k}_file" type="file" accept="image/*" style="display:none" onchange="fotoPick(this,'${k}')"><p class="xs muted" style="margin-top:6px">${note}</p></div>`; };
 const fotoSrcOf=(kind,id)=>{ if(kind==='pm') return pmOne(id).foto||''; const m=MD.mapping.find(x=>x.id===id)||{}; return m.foto||pmOne(m.produk).foto||''; };
 const fotoTitleOf=(kind,id)=>{ if(kind==='pm') return pmName(id); const m=MD.mapping.find(x=>x.id===id)||{}; return pmName(m.produk)+' · '+tokoName(m.toko); };
 const fotoThumb=(src,sz=36,kind='',id='')=>{ if(!src) return ''; const img=`<img src="${src}" alt="" style="width:${sz}px;height:${sz}px;object-fit:cover;border-radius:8px">`; return kind?`<button type="button" class="foto-t" aria-label="Lihat foto ${esc(fotoTitleOf(kind,id))}" onclick="event.stopPropagation();fotoPrev('${kind}','${id}')">${img}</button>`:img; };
@@ -5264,7 +5272,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
 /* ---------- Penyimpanan data dashboard (D6) ----------
    Perubahan di dashboard disimpan sebagai snapshot berversi. Data bersama dengan mobile tetap di salesapp.shared.v1.
    Naikkan DASH_VER bila bentuk data contoh berubah, supaya snapshot lama dibuang dan data contoh baru dipakai. */
-const DASH_VER=26;
+const DASH_VER=27;
 const PARAM={};
 const dashData=()=>({D,MD,TOKO,TRX,INFO,POSM,AR,KLAIM,ATT,REK_ADJ,PARAM});
 function restoreInto(t,src){
