@@ -409,6 +409,38 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .pc-rb{height:8px;border-radius:99px;background:rgba(12,46,89,.08);overflow:hidden;margin:9px 0 7px}.pc-rb i{display:block;height:100%;border-radius:99px;transition:width .5s}
 .pc-rm{display:flex;justify-content:space-between;gap:8px;font-size:12px}
 @media (prefers-reduced-motion:reduce){.pc-arc,.pc-bar i,.pc-rb i{animation:none;transition:none}}
+/* Summary: filter periode, kartu utama gradasi, sisa pekerjaan, rincian per aktivitas */
+.sum-seg{display:grid;grid-template-columns:1fr 1fr;padding:4px;gap:4px;border-radius:999px;background:rgba(255,255,255,.5);box-shadow:inset 0 0 0 1px rgba(255,255,255,.9)}
+.sum-seg button{min-height:44px;border:0;background:transparent;font-size:14px;font-weight:700}
+.sum-hero{position:relative;overflow:hidden;border-radius:24px;padding:16px;color:#fff;background:linear-gradient(140deg,#21CFF7 -35%,#0A92F2 30%,#3466FF 100%);box-shadow:0 18px 34px -18px rgba(25,80,200,.8)}
+.sum-hero::after{content:"";position:absolute;right:-56px;top:-64px;width:180px;height:180px;border-radius:50%;border:26px solid rgba(255,255,255,.09);pointer-events:none}
+.sum-hh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;position:relative}
+.sum-hh b{font-size:17px;font-weight:800}.sum-hh small{font-size:12.5px;font-weight:600;opacity:.9}
+.sum-top{display:flex;align-items:center;gap:14px;margin:12px 0 14px;position:relative}
+.sum-ring{position:relative;width:112px;height:112px;flex:none}
+.sum-ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;letter-spacing:-.02em}
+.sum-ring b small{font-size:14px;font-weight:700;margin-top:8px;opacity:.85}
+.sum-meta{flex:1;min-width:0}
+.sum-cnt{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sum-cnt>div{padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
+.sum-cnt b{display:block;font-size:22px;line-height:1.1;font-weight:800}.sum-cnt small{display:block;white-space:nowrap}.sum-cnt small{font-size:11.5px;font-weight:700;opacity:.92}
+.sum-left{margin-top:10px;font-size:13px;line-height:1.4;font-weight:600}.sum-left b{font-weight:800}
+.sum-none{margin:18px 0 6px;font-size:14px;font-weight:600;position:relative}
+.sum-other{position:relative;display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:8px 10px 8px 12px;border-radius:14px;color:#fff;background:rgba(10,30,90,.18);font-size:12.5px;font-weight:700;text-align:left}
+.sum-other:active{background:rgba(10,30,90,.28)}
+.sum-obar{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.22);overflow:hidden}.sum-obar i{display:block;height:100%;border-radius:99px;background:#fff}
+.sum-todo .li{min-height:64px}.sum-todo .li:active{background:var(--blue-50)}.sum-todo .li>svg{color:var(--muted);flex:none}
+.sum-done{display:flex;align-items:center;gap:12px;padding:14px 16px}.sum-done b{display:block;font-size:14.5px}.sum-done small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.sum-list{padding:4px 14px}
+.sum-row+.sum-row{border-top:1px solid var(--sep)}
+.sum-rowbtn{display:block;width:100%;text-align:left;padding:12px 0;min-height:44px}
+.sum-rowbtn:active{opacity:.7}
+.sum-rt{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13.5px}.sum-rt>b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sum-rt>span.num{flex:none;color:var(--ink-2)}
+.sum-ic{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;flex:none;background:var(--blue-100);color:var(--blue-700)}
+.sum-rm{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px;font-size:12px;color:var(--muted)}.sum-rm span:last-child{display:inline-flex;align-items:center;gap:4px;font-weight:700;color:var(--ink-2)}
+.sum-rm svg{transition:transform .2s}.sum-row.open .sum-rm svg{transform:rotate(180deg)}
+.sum-det{display:none;padding:0 0 12px}.sum-row.open .sum-det{display:block}
+.sum-dgo{display:inline-flex;align-items:center;min-height:44px}
 .cap3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .cap3 button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 2px;border-radius:14px;text-align:center;min-width:0}
 .cap3 button:hover{background:rgba(255,255,255,.5)}
@@ -2706,8 +2738,65 @@ function targetHariIni(){
   return `<div class="card"><b>Target hari ini</b><table class="ttable"><thead><tr><th scope="col">Keterangan</th><th scope="col">Quantity</th><th scope="col">Amount</th></tr></thead><tbody>${R.map(([l,u,v,tot])=>`<tr class="${tot?'tot':''}"><th scope="row">${l}</th><td class="num">${u} unit</td><td class="num">${uang(v)}</td></tr>`).join('')}</tbody></table>
   <p class="hint">Target harian dihitung dari target bulanan dibagi hari kerja. Kekurangan hari sebelumnya ditambahkan ke hari berikutnya.</p></div>`;
 }
-/* Sementara: Summary memakai isi Target sampai halaman Summary baru dibuat. */
-SCR.summary = () => { const d=SCR.target(); return {...d, tab:'summary', html:d.html.replace(/<h1>[^<]*<\/h1>/,'<h1>Summary</h1>')}; };
+/* ---------- Summary: apa yang sudah dikerjakan dan apa yang tersisa ---------- */
+/* Kartu Pencapaian kamu (peringkat, tepat waktu, badge). Dipakai Summary dan Target; tidak untuk SPV. */
+function achvCard(){
+  if(role()==='spv') return '';
+  return `<div class="card"><div class="row between"><b>Pencapaian kamu</b>${chip('Oktober','blue')}</div>
+    <div class="stat3" style="margin-top:12px"><div><small>Peringkat cabang</small><b>#3<span class="muted small">/12</span></b></div><div><small>Tepat waktu</small><b>9 hari</b></div><div><small>Kunjungan</small><b>96%</b></div></div>
+    <div class="row" style="flex-wrap:wrap;gap:6px;margin-top:12px">${chip(I('star',12,2.2)+' Top 3 cabang','tan')}${chip(I('clock',12,2.2)+' Rajin 9 hari','green')}${chip(I('trophy',12,2.2)+' Quiz 95','blue')}</div>
+    <p class="hint">Grade final tetap dihitung di sistem (BRD Grading).</p></div>`;
+}
+/* Rasio capaian satu item (0..1). Uang boleh melebihi target, jadi dibatasi 100%. */
+const sumRatio = i => i.total ? Math.min(1,i.done/i.total) : 0;
+/* Persen periode: rata-rata rasio tiap item, tanpa item hitungan (todo). */
+function sumPct(L){ const P=L.filter(i=>!i.todo); return P.length?Math.round(P.reduce((s,i)=>s+sumRatio(i),0)/P.length*100):0; }
+/* Kalimat sisa: "7 pekerjaan lagi" atau "Rp86 jt lagi". */
+function sumGap(i){ const g=Math.max(0,i.total-i.done); if(!g) return 'Tercapai'; return (i.money?rpShort(g):g+(i.unit?' '+i.unit:''))+' lagi'; }
+const sumNum = (i,n) => i.money?rpShort(n):n.toLocaleString('id-ID');
+const sumGo = go => `act(()=>${go})`.replace(/"/g,'&quot;');
+function sumPer(k){ S.sumPer=k; render(false,true); }
+/* Buka-tutup rincian tanpa render ulang, supaya ring tidak beranimasi lagi. */
+function sumToggle(k){ S.sumOpen=S.sumOpen||{}; S.sumOpen[k]=!S.sumOpen[k];
+  const el=document.querySelector(`[data-sum="${k}"]`); if(!el) return; el.classList.toggle('open',S.sumOpen[k]); el.querySelector('.sum-rowbtn').setAttribute('aria-expanded',S.sumOpen[k]); }
+function sumRing(pct){ const R=42, C=2*Math.PI*R, o=(C*(1-pct/100)).toFixed(1);
+  return `<div class="sum-ring" role="img" aria-label="Capaian ${pct} persen"><svg viewBox="0 0 100 100" width="112" height="112" aria-hidden="true"><circle cx="50" cy="50" r="${R}" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="10"/>${pct?`<circle class="pc-arc" cx="50" cy="50" r="${R}" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" transform="rotate(-90 50 50)" style="--c:${C.toFixed(1)};--o:${o}" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${o}"/>`:''}</svg><b class="num">${pct}<small>%</small></b></div>`;
+}
+SCR.summary = () => {
+  const per=S.sumPer==='m'?'m':'d', other=per==='d'?'m':'d', L=sumItems(per), W=L.filter(i=>!i.todo), T=L.filter(i=>i.todo);
+  const pct=sumPct(L), tuntas=W.filter(i=>sumRatio(i)>=1).length, oPct=sumPct(sumItems(other));
+  const perLab={d:'Hari ini',m:'Bulan ini'}, when=per==='d'?'Senin, 26 Okt 2026':'Oktober 2026';
+  const seg=`<div class="segtabs sum-seg" role="group" aria-label="Periode">${['d','m'].map(k=>`<button type="button" class="${k===per?'on':''}" aria-pressed="${k===per}" onclick="sumPer('${k}')">${perLab[k]}</button>`).join('')}</div>`;
+  // Sisa pekerjaan: item hitungan dulu, lalu yang paling jauh dari target.
+  const left=W.filter(i=>sumRatio(i)<1).sort((a,b)=>sumRatio(a)-sumRatio(b)), far=left[0];
+  const todoRows=[...T,...left].slice(0,4);
+  let hero;
+  if(!L.length) hero=`<section class="sum-hero" aria-label="Capaian ${perLab[per].toLowerCase()}"><div class="sum-hh"><b>Capaian</b><small>${when}</small></div><p class="sum-none">Belum ada pekerjaan ${perLab[per].toLowerCase()}.</p></section>`;
+  else hero=`<section class="sum-hero" aria-label="Capaian ${perLab[per].toLowerCase()}">
+    <div class="sum-hh"><b>Capaian</b><small>${when}</small></div>
+    <div class="sum-top">${sumRing(pct)}<div class="sum-meta">
+      <div class="sum-cnt"><div><b class="num">${tuntas}</b><small>selesai</small></div><div><b class="num">${W.length-tuntas}</b><small>belum</small></div></div>
+      <p class="sum-left">${far?`<b>${sumGap(far)}</b> di ${esc(far.label)}`:'Semua target tercapai'}${T.length?` · ${T.map(t=>t.total+' '+esc(t.label.toLowerCase())).join(', ')}`:''}</p>
+    </div></div>
+    <button type="button" class="sum-other" onclick="sumPer('${other}')" aria-label="Lihat ${perLab[other].toLowerCase()}, capaian ${oPct} persen"><span>${perLab[other]}</span><span class="sum-obar" role="progressbar" aria-label="Capaian ${perLab[other].toLowerCase()}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${oPct}"><i style="width:${oPct}%"></i></span><b class="num">${oPct}%</b>${I('right',16,2.4)}</button>
+  </section>`;
+  const todo=`<div class="sec-title">Yang perlu dikerjakan${todoRows.length?`<span class="small muted num">${T.length+left.length} sisa</span>`:''}</div>
+  <div class="list sum-todo">${todoRows.length?todoRows.map(i=>{ const p=Math.round(sumRatio(i)*100), tone=i.todo?'amber':p<50?'tan':'';
+    const txt=i.todo?`${i.total} ${esc(i.label.toLowerCase())}`:sumGap(i), sub=i.todo?esc(i.sub||''):`${esc(i.label)} · ${p}% tercapai`;
+    return `<button type="button" class="li sum-trow" onclick="${sumGo(i.go)}"><div class="ico-tile ${tone}">${I(i.ic,20)}</div><div class="grow"><div class="t">${txt}</div><div class="s">${sub}</div></div>${I('right',20)}</button>`; }).join('')
+    :`<div class="sum-done"><div class="ico-tile green">${I('check',20,2.2)}</div><div><b>${L.length?'Semua tuntas '+perLab[per].toLowerCase():'Belum ada pekerjaan'}</b><small>${L.length?'Tidak ada sisa pekerjaan. Kerja bagus.':'Pekerjaan muncul setelah jadwal dibuat.'}</small></div></div>`}</div>`;
+  S.sumOpen=S.sumOpen||{};
+  const rows=W.map((i,n)=>{ const p=Math.round(sumRatio(i)*100), k=per+n, open=!!(i.detail&&S.sumOpen[k]), lab=`${esc(i.label)}: ${sumNum(i,i.done)} dari ${sumNum(i,i.total)}${i.unit?' '+i.unit:''}`;
+    const body=`<div class="sum-rt"><span class="sum-ic">${I(i.ic,16,2)}</span><b>${esc(i.label)}</b><span class="num"><b>${sumNum(i,i.done)}</b> / ${sumNum(i,i.total)}${i.unit?' '+esc(i.unit):''}</span></div>
+      <div class="bar ${p<50?'tan':''}" role="progressbar" aria-label="${esc(i.label)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p}"><i style="width:${p?Math.max(4,p):0}%"></i></div>
+      <div class="sum-rm"><span>${esc(i.sub||'')}</span><span class="num">${p}%${i.detail?I('down',16,2.4):I('right',16,2.4)}</span></div>`;
+    return i.detail
+      ? `<div class="sum-row ${open?'open':''}" data-sum="${k}"><button type="button" class="sum-rowbtn" onclick="sumToggle('${k}')" aria-expanded="${open}" aria-label="${lab}, buka rincian">${body}</button><div class="sum-det">${i.detail}<button type="button" class="link sum-dgo" onclick="${sumGo(i.go)}">Buka halaman ${I('right',16,2.4)}</button></div></div>`
+      : `<div class="sum-row"><button type="button" class="sum-rowbtn" onclick="${sumGo(i.go)}" aria-label="${lab}">${body}</button></div>`; }).join('');
+  const rincian=W.length?`<div class="sec-title">Rincian</div><div class="card sum-list">${rows}</div>`:'';
+  return {tab:'summary', note:'Summary menjawab dua hal: apa yang sudah dikerjakan dan apa yang tersisa. Filter <b>Hari ini</b> memakai data yang sama dengan kartu Pencapaian di Beranda; <b>Bulan ini</b> memakai target bulanan. Persen = rata-rata capaian tiap aktivitas (penjualan di atas target dihitung 100%). Yang perlu dikerjakan diurutkan dari yang paling jauh dari target; ketuk untuk membuka halaman kerjanya.'+(role()==='spv'?' SPV melihat capaian tim.':' Kartu <b>Pencapaian kamu</b> dipindah dari halaman Target.'),
+  html:`${appbar('Summary',{backBtn:false})}<main class="content">${seg}${hero}${todo}${rincian}${achvCard()}</main>`};
+};
 SCR.target = () => {
   const r=role();
   let main;
@@ -2725,10 +2814,7 @@ SCR.target = () => {
     main=`${salesTabs(12)}${salesPie('',false)}${targetTokoBulan()}
     <div class="card"><div class="kv"><span>Akuisisi pelanggan baru</span><span class="num">${isC?'3 / 5 toko':'41 / 60'}</span></div></div>
     ${targetHariIni()}`; }
-  const achv = r==='spv'?'':`<div class="card"><div class="row between"><b>Pencapaian kamu</b>${chip('Oktober','blue')}</div>
-    <div class="stat3" style="margin-top:12px"><div><small>Peringkat cabang</small><b>#3<span class="muted small">/12</span></b></div><div><small>Tepat waktu</small><b>9 hari</b></div><div><small>Kunjungan</small><b>96%</b></div></div>
-    <div class="row" style="flex-wrap:wrap;gap:6px;margin-top:12px">${chip(I('star',12,2.2)+' Top 3 cabang','tan')}${chip(I('clock',12,2.2)+' Rajin 9 hari','green')}${chip(I('trophy',12,2.2)+' Quiz 95','blue')}</div>
-    <p class="hint">Grade final tetap dihitung di sistem (BRD Grading).</p></div>`;
+  const achv = achvCard();
   return {tab:'target', note:(isSpg()?'Metrik yang ditampilkan dan dasar pencapaian diatur di dashboard (Aktivitas per role). Target quantity per kategori diisi di dashboard: Target & sell-in › Target quantity. ':'')+'Target diset admin di Web. Di mobile sales melihat pencapaian, target harian prorata, dan carry forward (BRD 2.9.10–2.9.11). Estimasi insentif dihapus dari tampilan promotor (MOM 9.1). <span class="tagx">Usulan</span>Yang ditugaskan di lebih dari 1 toko melihat rincian pencapaian per toko. <span class="tagx">Usulan</span>Kartu <b>Pencapaian kamu</b> (peringkat, streak, badge).',
   html:`${appbar('Target & pencapaian',{backBtn:false})}<main class="content">${main}${achv}${r==='spg'?`<div class="card"><b>Pergantian promotor</b><p class="hint" style="margin-top:6px">Jika promotor diganti di tengah bulan, target promotor baru mengikuti target toko yang sudah diinput, bukan sisa target setelah dikurangi capaian promotor sebelumnya (MOM 9.1).</p></div>`:''}
   </main>`};
