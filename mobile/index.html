@@ -2744,9 +2744,14 @@ function targetToko(done,tgt,amt){
 const targetTokoBulan = () => { const m=salesBulan(), q=S.salesTab==='qty'; return q?targetToko(m.q,m.qt,false):targetToko(m.a,m.at,true); };
 /* Target hari ini (data contoh): [prorata, sisa kemarin]. Terjual hari ini dihitung dari transaksi di aplikasi. */
 const SALES_HARI={canvas:{q:[9,1],a:[3.1e6,4e5]},spg:{q:[4,1],a:[11.3e6,7e5]}};
-function targetHariIni(){
+/* Angka target hari ini: [prorata, sisa kemarin] untuk quantity dan amount, serta terjual hari ini dari transaksi di aplikasi. */
+function salesHarian(){
   const h=SALES_HARI[role()==='canvas'?'canvas':'spg'], td=isSpg()?tgtDaily():null, q=td?[td.prorata,td.carry]:h.q, a=h.a;
   const L=salesList().filter(x=>!x.d), qd=L.reduce((s,x)=>s+x.items.reduce((n,i)=>n+i.q,0),0), ad=L.reduce((s,x)=>s+x.total,0);
+  return {q,a,qd,ad};
+}
+function targetHariIni(){
+  const {q,a,qd,ad}=salesHarian();
   const uang=v=>v>=1e6?rpShort(v):v?'Rp'+Math.round(v/1e3).toLocaleString('id-ID')+' rb':'Rp0';
   const R=[['Target harian (prorata)',q[0],a[0]],['Sisa kemarin (carry forward)',q[1],a[1]],['Total target hari ini',q[0]+q[1],a[0]+a[1],1],['Terjual hari ini',qd,ad]];
   return `<div class="card"><b>Target hari ini</b><table class="ttable"><thead><tr><th scope="col">Keterangan</th><th scope="col">Quantity</th><th scope="col">Amount</th></tr></thead><tbody>${R.map(([l,u,v,tot])=>`<tr class="${tot?'tot':''}"><th scope="row">${l}</th><td class="num">${u} unit</td><td class="num">${uang(v)}</td></tr>`).join('')}</tbody></table>
@@ -2784,7 +2789,7 @@ function sumByToko(L,per,toko){
     if(per==='d'&&v&&x.label==='Kunjungan') return {...x,done:['Selesai','Toko tutup'].includes(v.status)?1:0,total:1};
     if(per==='d'&&v&&x.label==='Pekerjaan toko'){ const t=aktTasks(v).filter(t=>t.st); return {...x,done:t.filter(t=>t.st==='Selesai').length,total:t.length}; }
     const step=x.money?1e5:1, rnd=n=>Math.round(n/step)*step, tot=Math.max(step,rnd(x.total*share)), dn=rnd(x.done*share*f);
-    return {...x,total:tot,done:x.money?dn:Math.min(dn,tot),detail:''};
+    return {...x,total:tot,done:x.money?dn:Math.min(dn,tot),detail:'',detailTitle:''};
   }).filter(x=>x.total>0);
 }
 /* Item Summary sesuai periode dan filter toko yang sedang dipilih. */
@@ -2826,7 +2831,7 @@ SCR['sum-detail'] = p => {
   const pr=Math.round(sumRatio(i)*100), gap=Math.max(0,i.total-i.done), perLab=per==='d'?'Hari ini':'Bulan ini', ST=sumStores(), toko=ST.includes(S.sumToko)?S.sumToko:'';
   const n=v=>sumNum(i,v)+(i.money||!i.unit?'':' '+i.unit);
   const twin=sumNow(per==='d'?'m':'d').find(x=>x.label===i.label);
-  const pace=per==='m'&&gap?`${i.money?rpShort(Math.ceil(gap/SUM_SISA_HARI/1e5)*1e5):Math.ceil(gap/SUM_SISA_HARI)+(i.unit?' '+i.unit:'')}`:per==='d'&&gap?'Selesaikan sebelum jam pulang':'–';
+  const pace=per==='m'&&gap?`${i.money?rpShort(Math.ceil(gap/SUM_SISA_HARI/1e5)*1e5):Math.ceil(gap/SUM_SISA_HARI)+(i.unit?' '+i.unit:'')}`:'–';
   const bar=(d,t)=>{ const q=t?Math.min(1,d/t):0; return `<div class="bar ${q<.5?'tan':''}"><i style="width:${q?Math.max(4,q*100):0}%"></i></div>`; };
   const byToko=!toko&&ST.length>1?ST.map(t=>[t,sumByToko(sumItems(per),per,t).find(x=>x.label===i.label)]).filter(([,x])=>x):[];
   return {note:'Detail summary untuk satu aktivitas: capaian, sisa, kebutuhan per hari, perbandingan dengan periode lain, dan rincian per toko atau per isi. Halaman ini hanya menampilkan data.',
@@ -2835,12 +2840,13 @@ SCR['sum-detail'] = p => {
       <div class="row between"><span class="small muted">${perLab}${toko?' · '+esc(toko):''}</span>${chip(pr>=100?'Tercapai':pr>=50?'Berjalan':'Perlu dikejar',pr>=100?'green':pr>=50?'blue':'amber')}</div>
       <div class="big"><b class="num">${sumNum(i,i.done)}</b><span>dari ${n(i.total)}</span></div>
       <div class="bar ${pr<50?'tan':''}" role="progressbar" aria-label="Capaian ${esc(i.label)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pr}"><i style="width:${pr?Math.max(4,pr):0}%"></i></div>
-      <div class="sdt-grid"><div><small>Capaian</small><b class="num">${pr}%</b></div><div><small>Sisa</small><b class="num">${gap?n(gap):'0'}</b></div><div><small>${per==='m'?'Perlu per hari':'Target'}</small><b>${per==='m'?pace:n(i.total)}</b></div></div>
-      ${per==='m'&&gap?`<p class="hint">Sisa ${SUM_SISA_HARI} hari kerja di bulan ini.</p>`:per==='d'&&gap?`<p class="hint">${pace}.</p>`:''}
+      <div class="sdt-grid"><div><small>Capaian</small><b class="num">${pr}%</b></div><div><small>Sisa</small><b class="num">${gap?n(gap):'0'}</b></div><div><small>${per==='m'?'Perlu per hari':'Batas'}</small><b>${per==='m'?pace:'17.00'}</b></div></div>
+      ${per==='m'&&gap?`<p class="hint">Sisa ${SUM_SISA_HARI} hari kerja di bulan ini.</p>`:''}
     </section>
     ${twin?`<div class="sec-title">Perbandingan</div><div class="card">${[[perLab,i],[per==='d'?'Bulan ini':'Hari ini',twin]].map(([l,x])=>`<div class="sdt-row"><div class="top"><span>${l}</span><span class="num"><b>${sumNum(x,x.done)}</b> / ${sumNum(x,x.total)}${x.unit&&!x.money?' '+esc(x.unit):''}</span></div>${bar(x.done,x.total)}</div>`).join('')}</div>`:''}
     ${byToko.length?`<div class="sec-title">Per toko</div><div class="card">${byToko.map(([t,x])=>`<div class="sdt-row"><div class="top"><span>${esc(t)}</span><span class="num"><b>${sumNum(x,x.done)}</b> / ${sumNum(x,x.total)}</span></div>${bar(x.done,x.total)}</div>`).join('')}</div>`:''}
-    ${i.detail?`<div class="sec-title">Rincian isi</div><div class="card">${i.detail}</div>`:''}
+    ${i.detail?`<div class="sec-title">${esc(i.detailTitle||'Rincian isi')}</div><div class="card">${i.detail}</div>`:''}
+    ${i.info?`<div class="banner blue" style="margin-top:14px">${I('alert',18)}<span>${esc(i.info)}</span></div>`:''}
     <div class="card"><div class="kv"><span>Keterangan</span><span>${esc(i.sub||'–')}</span></div><div class="kv"><span>Periode</span><span>${per==='d'?'Senin, 26 Okt 2026':'Oktober 2026'}</span></div></div>
   </main>`};
 };
@@ -4266,15 +4272,23 @@ function sumItems(per){
       const hadir=tm.filter(t=>t.status==='Hadir'||t.status==='Terlambat').length, wait=otherReqs().length+visitReqs().length;
       out=[mk('Tim hadir','users',hadir,tm.length,'orang',tm.filter(t=>t.status==='Cuti').length+' cuti',akt,{sisa:'belum hadir',detail:kv(tm.map(t=>[USERS[t.u]?USERS[t.u].name:t.u,t.status+' · '+t.time]))}),
         mk('Approval menunggu','check',0,wait,'permintaan','perlu diproses',"go('approval')",{todo:true})];
-    } else out=capItems().map(c=>mk(c.label,ICON[c.c]||'grid',c.done,c.total,c.unit||(c.c==='visit'?'toko':c.c==='task'?'tugas':'pekerjaan'),c.sub,c.go));
+    } else {
+      out=capItems().map(c=>mk(c.label,ICON[c.c]||'grid',c.done,c.total,c.unit||(c.c==='visit'?'toko':c.c==='task'?'tugas':'pekerjaan'),c.sub,c.go));
+      if(r==='spg'||r==='canvas'){ const h=salesHarian(), uang=v=>v>=1e6?rpShort(v):'Rp'+Math.round(v/1e3).toLocaleString('id-ID')+' rb';
+        out.unshift(mk('Penjualan hari ini','bag',h.qd,h.q[0]+h.q[1],'unit','target harian + sisa kemarin',akt,{
+          detail:kv([['Target harian (prorata)',h.q[0]+' unit · '+uang(h.a[0])],['Sisa kemarin (carry forward)',h.q[1]+' unit · '+uang(h.a[1])],['Amount terjual / target',uang(h.ad)+' / '+uang(h.a[0]+h.a[1])]]),detailTitle:'Komposisi target hari ini',
+          info:'Target harian dihitung dari target bulanan dibagi hari kerja. Kekurangan hari sebelumnya ditambahkan ke hari berikutnya.'})); }
+    }
   } else if(r==='spv'){
     const D=spvSet();
     const rows=D.sales.map(([u,l,a,t])=>mk(USERS[u]?USERS[u].name:u,'user',a*1e6,t*1e6,'',l,akt,{money:true}));
     // Total tim = jumlah baris sales, jadi tidak pernah lebih kecil dari bagiannya.
-    out=[mk('Total tim','target',rows.reduce((x,i)=>x+i.done,0),rows.reduce((x,i)=>x+i.total,0),'',D.unit,akt,{money:true,head:true}),...rows];
+    const f=n=>'Rp'+String(n).replace('.',',')+' jt';
+    out=[mk('Total tim','target',rows.reduce((x,i)=>x+i.done,0),rows.reduce((x,i)=>x+i.total,0),'',D.unit,akt,{money:true,head:true,
+      detail:kv(D.toko.map(([n,sl,a,t])=>[n+' · '+sl.split(' ')[0],f(a)+' / '+f(t)])),detailTitle:'Target per '+(U().menu==='spvM'||U().menu==='arco'?'lokasi':'toko')}),...rows];
   } else if(r==='leads'){
     const deal=leadMine().filter(l=>l.status==='Deal'), M=mitraAll(), A=actNow().length;
-    out=[mk('Goal pencairan','money',deal.reduce((s,l)=>s+(l.goal||0),0),150e6,'','target Rp150 jt',"act(()=>go('leads',{back:1}))",{money:true}),
+    out=[mk('Goal pencairan','money',deal.reduce((s,l)=>s+(l.goal||0),0),150e6,'','target Rp150 jt',"act(()=>go('leads',{back:1}))",{money:true,info:'Goal dihitung dari nominal disetujui pada Direct Sales berstatus Deal.'}),
       mk('Deal','check',deal.length,12,'deal','dari data kamu',"act(()=>go('leads',{back:1}))"),
       mk('Mitra dipantau','store',M.filter(m=>mmNow(m.id).length).length,M.length,'mitra','bulan ini',"act(()=>go('mitra'))"),
       mk('Activity','target',A,4,'aktivitas','rekrut mitra bulan ini',"act(()=>go('mf-activity'))")];
@@ -4284,12 +4298,14 @@ function sumItems(per){
     out=[mk('Nilai pesanan','bag',110.5e6,150e6,'','target Rp150 jt',akt,{money:true}),mk('Toko aktif memesan','store',14,20,'toko','bulan ini',akt)];
   } else if(r==='canvas'){
     const b=SALES_BULAN.canvas;
-    out=[mk('Penjualan','money',b.a,b.at,'','target bulan ini',akt,{money:true}),mk('Kunjungan','pin',74,88,'toko','bulan ini',akt),mk('Akuisisi toko','store',3,5,'toko','toko baru',akt)];
+    out=[mk('Penjualan','money',b.a,b.at,'','target bulan ini',akt,{money:true}),mk('Quantity','box',b.q,b.qt,'unit','target bulan ini',akt),mk('Kunjungan','pin',74,88,'toko','bulan ini',akt),mk('Akuisisi toko','store',3,5,'toko','toko baru',akt)];
   } else {
     const b=salesBulan(), R=tgtRows(), c=aktCfg()||{};
-    out=[mk('Penjualan','money',b.a,b.at,'','target bulan ini',akt,{money:true}),
-      mk('Quantity','box',b.q,b.qt,'unit','target bulan ini',akt,R.length?{detail:kv(R.map(t=>[t.kat,(t.act||0)+' / '+t.target+' unit']))}:{})];
-    if(isSpg()||isMobilePromo()){ if(c.dasar==='akuisisi'||(c.metrik||[]).includes('akuisisi')) out.push(mk('Akuisisi','store',41,60,'pelanggan','pelanggan baru',akt)); }
+    const dasar=isSpg()&&c.dasar?'Pencapaian dihitung dari '+({qty:'jumlah unit produk yang terjual',nominal:'nilai penjualan',akuisisi:'pelanggan baru'})[c.dasar]+'.':'',
+      ganti=r==='spg'&&isSpg()?' Jika promotor diganti di tengah bulan, target promotor baru mengikuti target toko yang sudah diinput, bukan sisa target promotor sebelumnya (MOM 9.1).':'';
+    out=[mk('Penjualan','money',b.a,b.at,'','target bulan ini',akt,{money:true,info:(dasar+ganti).trim()}),
+      mk('Quantity','box',b.q,b.qt,'unit','target bulan ini',akt,R.length?{detail:kv(R.map(t=>[t.kat,(t.act||0)+' / '+t.target+' unit'])),detailTitle:'Quantity per kategori'}:(isSpg()?{info:'Admin belum mengisi target quantity untuk kamu.'}:{}))];
+    if(!isSpg()||c.dasar==='akuisisi'||(c.metrik||[]).includes('akuisisi')) out.push(mk('Akuisisi','store',41,60,'pelanggan','pelanggan baru',akt));
   }
   return out.filter(i=>i.total>0).map(i=>i.money?i:{...i,done:Math.min(i.done,i.total)});
 }
