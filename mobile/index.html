@@ -1028,8 +1028,8 @@ const MENUS = {
   order:[['Usulkan toko','plus',"go('toko-list')"],['Daftar pesanan','file',"go('pesanan')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
   leads:[['Leads','users',"act(()=>go('leads',{back:1}))",1],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   fmcg:[['Buat jadwal','route',"act(()=>go('kunjungan-form'))",1],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
-  cbd:[['Aktivitas saya','grid',"act(()=>go('mf-akt'))",1],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
-  rea:[['Aktivitas saya','grid',"act(()=>go('mf-akt'))",1],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  cbd:[['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  rea:[['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   arco:[['Assign leads','users',"go('assign')"],['Semua leads','file',"go('leads-all')"],['Tim saya','user',"tab('tim')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   spv:[['Approve Loading Barang','box',"go('approve-loading')"],['Approve Unloading Barang','retur',"go('approve-unloading')"],['Approval','check',"go('approval')"],['Approval kunjungan','route',"go('approval-kunjungan')"],['Assign canvasser','route',"go('assign-canvas')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tugaskan tim','route',"act(()=>go('kunjungan-form',{spv:1}))",1],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   spvM:[['Approval','check',"go('approval')"],['Approval kunjungan','route',"go('approval-kunjungan')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]]
@@ -1051,11 +1051,9 @@ function attCard(){
 SCR.home = () => {
   const u=U(), r=role(), locked=isLocked();
   let menus=MENUS[u.menu||r]; const cfg=aktCfg();
-  if(r==='fmcg') menus=[[fmAktLabel(),'grid',"act(()=>tab('aktivitas'))",1],...menus];
-  else if(hasAkt()) menus=[[aktLabel(),'grid',"act(()=>tab('akt'))",1],...menus];
+  // Aktivitas Saya / Aktivitas Toko hanya dibuka dari menu bawah, jadi tidak ada di grid Menu Beranda.
   // Konfigurasi Aktivitas per role: modul yang masuk Aktivitas saya disembunyikan dari beranda, menu terpisah bisa ikut dikunci check-in
-  else if(isMobilePromo()) menus=[[aktLabel(),'grid',"go('akt')"],...menus];
-  else if(cfg) menus=[['Aktivitas saya','grid',"go('spg-akt')"],...menus.filter(m=>!cfg.akt.includes(m[4])).map(m=>cfg.checkin==='Ya'&&(cfg.gated||[]).includes(m[4])?[m[0],m[1],`spgGate(()=>${m[2]})`,m[3],m[4]]:m)];
+  if(cfg&&r!=='fmcg'&&!hasAkt()&&!isMobilePromo()) menus=menus.filter(m=>!cfg.akt.includes(m[4])).map(m=>cfg.checkin==='Ya'&&(cfg.gated||[]).includes(m[4])?[m[0],m[1],`spgGate(()=>${m[2]})`,m[3],m[4]]:m);
   // MOM 12 Nov 2026: menu webview SIM SIAP untuk semua role
   menus=[...menus,['SIM SIAP','globe',"go('sim-siap')"]];
   let extra='', top='';
@@ -2501,14 +2499,14 @@ SCR.leads = p => {
     ${leadsList(p.f)}
   </main>`};
 };
-/* Aktivitas saya (CBD dan REA): pekerjaan masing-masing dalam satu halaman, dibuka dari Beranda setelah absen masuk.
+/* Aktivitas saya (CBD dan REA): pekerjaan masing-masing dalam satu halaman, dibuka dari menu bawah.
    Super Admin melihat gabungan keduanya. */
 SCR['mf-akt'] = () => {
   const L=leadMine(), M=mitraAll(), A=actNow();
   const rows=[['users','Direct Sales',L.length+' data · '+L.filter(l=>l.status==='Baru').length+' belum dihubungi',"go('leads',{back:1})"],
     ['user','Monitoring Mitra',M.filter(m=>mmNow(m.id).length).length+' dari '+M.length+' mitra dipantau bulan ini',"go('mitra')"],
     ['grid','Activity',A.length+' activity bulan ini',"go('mf-activity')"]];
-  return {tab:S.stack.length===1?'mf-akt':undefined, note:'Aktivitas saya untuk CBD dan REA: Direct Sales, Monitoring Mitra, dan Activity. Menu di Beranda terkunci sampai absen masuk.',
+  return {tab:S.stack.length===1?'mf-akt':undefined, note:'Aktivitas saya untuk CBD dan REA: Direct Sales, Monitoring Mitra, dan Activity. Dibuka dari menu bawah; isinya terkunci sampai absen masuk.',
   html:`${appbar('Aktivitas saya',{backBtn:S.stack.length>1})}<main class="content">
     <div class="list">${rows.map(([ic,t,sub,go])=>`<button class="li" onclick="act(()=>${go.replace(/"/g,'&quot;')})"><div class="ico-tile">${I(ic,20)}</div><div class="grow"><div class="t">${t}</div><div class="s">${sub}</div></div>${I('right',18)}</button>`).join('')}</div>
   </main>`};
