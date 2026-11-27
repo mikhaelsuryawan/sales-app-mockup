@@ -1833,7 +1833,7 @@ const NAV_DEFAULT=[
   ['Operasional lapangan',[['/absensi','Absensi','finger'],['/kunjungan','Kunjungan','route'],['/approval','Approval','checks','approval'],['/aktivitas','Aktivitas lapangan','route'],['/submission','Submission by role','file'],['/support-task','Support task','checks'],['/kepatuhan-kunjungan','Kepatuhan kunjungan','checks']]],
   ['Penjualan',[['/data-penjualan','Data penjualan','file'],['/penjualan','Laporan penjualan','chart'],['/pemesanan','Pemesanan','checks'],['/sell-in','Sell-in dealer','wallet'],['/canvassing','Canvassing','pkg'],['/sku-display','Laporan SKU display','grid'],['/market-share','Laporan display share','chart']]],
   ['Kinerja & insentif',[['/target','Target & sell-in','target'],['/insentif','Insentif','wallet'],['/grading','Grading','award']]],
-  ['Leads pinjaman',[['/leads','Leads pinjaman','users','leads'],['/overdue','Overdue','alert','overdue'],['/mitra','Mitra','users']]],
+  ['Leads pinjaman',[['/leads','Direct Sales','users','leads'],['/overdue','Overdue','alert','overdue'],['/mitra','Monitoring Mitra','users'],['/activity','Activity','route']]],
   ['Program & konten',[['/promo','Promo','tag'],['/event','Event','tag'],['/posm','Campaign, POSM & planogram','grid'],['/quiz','Quiz','bulb'],['/survey','Survey','checks']]],
   ['Usulan SFA',[['/penagihan','Penagihan & piutang','wallet'],['/klaim-biaya','Klaim biaya','file'],['/pengumuman','Pengumuman','bell'],['/sinkron','Status sinkron','refresh']]],
   ['Client management',[['/client','Client','building'],['/cabang-client','Cabang client','pin'],['/mapping-outlet','Mapping outlet','store'],['/penugasan','Penugasan & jadwal','cal']]],
@@ -1975,7 +1975,7 @@ function drawMore(){
 function moreGo(p,label){ const r=[{to:p,label},...recentNav().filter(x=>x.to!==p)].slice(0,4); store.set('salesapp.dashboard.recent',JSON.stringify(r)); closeLayer(); }
 
 /* Kepala halaman: satu kalimat tujuan layar. Papan langsung menampilkan waktu pembaruan. */
-const PAGE_DESC={'/penjualan':'Pantau penjualan per klien, cabang, toko, dan sales, lalu telusuri sampai transaksi.','/absensi':'Lihat kehadiran sales hari ini, jam masuk, mode kerja, dan hasil pencocokan wajah.','/kunjungan':'Pantau kunjungan sales ke toko: jadwal, durasi, dan hasilnya.','/approval':'Putuskan pengajuan dari lapangan: absen terlambat, cuti, hapus penjualan, batal pesanan, dan promo.','/target':'Atur target per sales, toko, dan bulan, lalu bandingkan dengan pencapaian.','/promo':'Kelola promo yang berjalan dan promo yang menunggu approval.','/insentif':'Hitung insentif sales per bulan dan cocokkan dengan data klien.','/grading':'Lihat skor grading sales dari penjualan, absensi, quiz, SKU, dan display share.','/leads':'Kelola leads pinjaman: assign ke manager atau sales, tindak lanjut, lalu kirim ke SIM.','/overdue':'Pantau leads yang melewati batas tindak lanjut.','/company-sim':'Kelola data company SIMGROUP yang menjadi induk klien.','/sektor':'Kelola sektor bisnis yang dipakai klien dan produk.','/client':'Kelola klien SaaS beserta sektor dan statusnya.','/kategori-toko':'Kelola kategori toko untuk pelaporan.','/toko':'Kelola toko yang dikunjungi sales, termasuk usulan toko baru dari lapangan.','/iam':'Atur hak akses tiap role: modul, aksi, dan menu di aplikasi mobile.','/produk':'Kelola produk dan harga, pemetaan produk ke toko, serta produk dari sales.','/penugasan':'Atur penugasan dan jadwal sales per toko.','/pemesanan':'Pantau pesanan dealer dari dibuat sampai lunas.','/sell-in':'Bandingkan sell-in dealer dengan target dan sell-out.','/user-sales':'Kelola sales lapangan yang tersinkron dari SIM.','/user-admin':'Kelola pengguna dashboard dan role-nya.','/parameter':'Atur parameter yang dipakai aplikasi dan perhitungan.','/aktivitas':'Lihat hasil kerja per sales dan log aktivitas toko.','/submission':'Lihat setiap kiriman aktivitas dari aplikasi per role, lalu buka isiannya.','/canvassing':'Pantau canvassing: barang dibawa, terjual, dan limit.','/posm':'Kelola campaign, POSM, dan planogram untuk toko.','/region':'Kelola region dan cabang.','/brand':'Kelola brand klien.','/kategori-produk':'Kelola kategori produk berjenjang.','/kompetitor':'Kelola kompetitor yang dipantau.','/cabang-client':'Kelola cabang tiap klien.','/mapping-outlet':'Petakan outlet ke klien dan cabang.','/data-penjualan':'Telusuri semua transaksi penjualan dari aplikasi dan dashboard.','/penagihan':'Pantau piutang dan penagihan menurut umur.','/klaim-biaya':'Putuskan klaim biaya sales berdasarkan bukti dan limit.','/kepatuhan-kunjungan':'Ukur kepatuhan kunjungan sales terhadap jadwal.','/pengumuman':'Kirim pengumuman ke sales menurut role dan klien.','/sinkron':'Cek status sinkron perangkat sales dan data dari SIM.','/satuan':'Kelola satuan produk.','/konversi':'Atur konversi satuan untuk semua produk (General) atau per produk.','/sidebar-menu':'Atur susunan menu sidebar: nama, urutan, level, halaman, dan role yang melihatnya.','/konfigurasi-aktivitas':'Atur aktivitas yang tampil di aplikasi tiap role.','/form-penjualan':'Susun field form catat penjualan di aplikasi.','/status-produk':'Kelola status produk.','/event':'Kelola event dan jadwalnya.','/mitra':'Kelola mitra dan pertanyaan monitoringnya.','/sku-display':'Lihat laporan SKU display per toko.','/market-share':'Lihat laporan display share per toko dan kategori.','/quiz':'Susun dan kelola quiz untuk sales.','/survey':'Susun dan kelola survey untuk sales.','/pengaturan':'Atur preferensi dashboard dan data demo.'};
+const PAGE_DESC={'/penjualan':'Pantau penjualan per klien, cabang, toko, dan sales, lalu telusuri sampai transaksi.','/absensi':'Lihat kehadiran sales hari ini, jam masuk, mode kerja, dan hasil pencocokan wajah.','/kunjungan':'Pantau kunjungan sales ke toko: jadwal, durasi, dan hasilnya.','/approval':'Putuskan pengajuan dari lapangan: absen terlambat, cuti, hapus penjualan, batal pesanan, dan promo.','/target':'Atur target per sales, toko, dan bulan, lalu bandingkan dengan pencapaian.','/promo':'Kelola promo yang berjalan dan promo yang menunggu approval.','/insentif':'Hitung insentif sales per bulan dan cocokkan dengan data klien.','/grading':'Lihat skor grading sales dari penjualan, absensi, quiz, SKU, dan display share.','/leads':'Kelola Direct Sales: data dari sistem dan dari aplikasi mobile CBD/REA, assign, tindak lanjut, lalu kirim ke SIM.','/activity':'Pantau calon mitra hasil Rekrut Mitra CBD dan REA beserta Info Mitra, Visit, dan Canvassing.','/overdue':'Pantau leads yang melewati batas tindak lanjut.','/company-sim':'Kelola data company SIMGROUP yang menjadi induk klien.','/sektor':'Kelola sektor bisnis yang dipakai klien dan produk.','/client':'Kelola klien SaaS beserta sektor dan statusnya.','/kategori-toko':'Kelola kategori toko untuk pelaporan.','/toko':'Kelola toko yang dikunjungi sales, termasuk usulan toko baru dari lapangan.','/iam':'Atur hak akses tiap role: modul, aksi, dan menu di aplikasi mobile.','/produk':'Kelola produk dan harga, pemetaan produk ke toko, serta produk dari sales.','/penugasan':'Atur penugasan dan jadwal sales per toko.','/pemesanan':'Pantau pesanan dealer dari dibuat sampai lunas.','/sell-in':'Bandingkan sell-in dealer dengan target dan sell-out.','/user-sales':'Kelola sales lapangan yang tersinkron dari SIM.','/user-admin':'Kelola pengguna dashboard dan role-nya.','/parameter':'Atur parameter yang dipakai aplikasi dan perhitungan.','/aktivitas':'Lihat hasil kerja per sales dan log aktivitas toko.','/submission':'Lihat setiap kiriman aktivitas dari aplikasi per role, lalu buka isiannya.','/canvassing':'Pantau canvassing: barang dibawa, terjual, dan limit.','/posm':'Kelola campaign, POSM, dan planogram untuk toko.','/region':'Kelola region dan cabang.','/brand':'Kelola brand klien.','/kategori-produk':'Kelola kategori produk berjenjang.','/kompetitor':'Kelola kompetitor yang dipantau.','/cabang-client':'Kelola cabang tiap klien.','/mapping-outlet':'Petakan outlet ke klien dan cabang.','/data-penjualan':'Telusuri semua transaksi penjualan dari aplikasi dan dashboard.','/penagihan':'Pantau piutang dan penagihan menurut umur.','/klaim-biaya':'Putuskan klaim biaya sales berdasarkan bukti dan limit.','/kepatuhan-kunjungan':'Ukur kepatuhan kunjungan sales terhadap jadwal.','/pengumuman':'Kirim pengumuman ke sales menurut role dan klien.','/sinkron':'Cek status sinkron perangkat sales dan data dari SIM.','/satuan':'Kelola satuan produk.','/konversi':'Atur konversi satuan untuk semua produk (General) atau per produk.','/sidebar-menu':'Atur susunan menu sidebar: nama, urutan, level, halaman, dan role yang melihatnya.','/konfigurasi-aktivitas':'Atur aktivitas yang tampil di aplikasi tiap role.','/form-penjualan':'Susun field form catat penjualan di aplikasi.','/status-produk':'Kelola status produk.','/event':'Kelola event dan jadwalnya.','/mitra':'Kelola mitra, pantau log Visit, Telepon, dan WhatsApp dari CBD dan REA, serta pertanyaan Info Mitra.','/sku-display':'Lihat laporan SKU display per toko.','/market-share':'Lihat laporan display share per toko dan kategori.','/quiz':'Susun dan kelola quiz untuk sales.','/survey':'Susun dan kelola survey untuk sales.','/pengaturan':'Atur preferensi dashboard dan data demo.'};
 const LIVE_PAGES=['/absensi','/sinkron','/kunjungan'];
 const timeLabel=()=>{ const d=new Date(nowMs()+7*36e5); return String(d.getUTCHours()).padStart(2,'0')+'.'+String(d.getUTCMinutes()).padStart(2,'0'); };
 const SCOPE_LABEL={q:'pencarian',f:'filter',u:'sales',st:'status',cat:'kategori',cl:'klien',cb:'cabang',tk:'toko',r:'peran'}, SCOPE_SKIP=['tab','per','p','preset','from','to','new'];
@@ -2795,7 +2795,7 @@ function pageLeads(q){
   const rows=base.filter(l=>f==='unassigned'?!l.owner:!f||l.status===f).filter(l=>!qq||l.name.toLowerCase().includes(qq)).map(l=>({...l,_id:l.id}));
   const c=k=>base.filter(l=>l.status===k).length; const S=ST.sel.lds||(ST.sel.lds=new Set());
   const goal=base.filter(l=>l.status==='Deal').reduce((a,b)=>a+b.goal,0);
-  return {title:'Leads pinjaman',html:`
+  return {title:'Direct Sales',html:`
   <div style="margin-bottom:16px">${ldFilters(q,base)}</div>
   <div class="stats">
     <div class="stat ${base.filter(l=>!l.owner).length?'tn-warning':'tn-success'}"><small>Belum di-assign</small><b class="tabular">${base.filter(l=>!l.owner).length}</b><span class="xs muted">Dari upload 26 Okt, 06:00</span></div>
@@ -2803,22 +2803,23 @@ function pageLeads(q){
     <div class="stat"><small>Deal</small><b class="tabular">${c('Deal')}</b><span class="xs muted">Goal ${jt(goal)}</span></div>
     <div class="stat"><small>Belum Tertarik</small><b class="tabular">${c('Belum Tertarik')}</b><span class="xs muted">Tertarik, prospect, atau rejected</span></div>
   </div>
+  <div class="stats" style="margin-top:-4px">${[['Mobile','Dari aplikasi mobile','Dibuat CBD dan REA'],['Sistem','Dari sistem','Upload backend atau dashboard']].map(([k,l,sub])=>{ const n=base.filter(x=>leadSrc(x)===k).length; return `<a class="stat" role="button" tabindex="0" style="cursor:pointer;${q.src===k?'box-shadow:inset 0 0 0 2px var(--accent)':''}" onclick="setQ({src:'${q.src===k?'':k}'})" aria-pressed="${q.src===k}"><small>${l}</small><b class="tabular">${n}</b><span class="xs muted">${sub}</span></a>`; }).join('')}</div>
   <div class="grid g-side" style="margin-bottom:16px">
     ${card('Pengajuan vs deal',`${lineChart({labels:['Mg 1','Mg 2','Mg 3','Mg 4'],series:[{name:'Pengajuan',values:[9,12,14,13],tone:'ink',area:true},{name:'Dihubungi',values:[6,8,9,8],tone:'info'},{name:'Deal',values:[2,3,2,3],tone:'accent'}],label:'Pengajuan, dihubungi, dan deal per minggu'})}
       <div class="legend" style="margin-top:8px"><span><i class="dotc" style="background:var(--fg)"></i>Pengajuan</span><span><i class="dotc" style="background:var(--info)"></i>Dihubungi</span><span><i class="dotc" style="background:var(--accent-strong)"></i>Deal</span></div>`,{acts:pills([['okt','Oktober'],['q4','Q4']],'okt','leadPer')})}
     ${card('Status Oktober',donut('lds',[{label:'Deal',value:10,slot:4},{label:'Prospect',value:14,slot:1},{label:'Belum Tertarik',value:9,slot:2},{label:'Belum dihubungi',value:15,slot:0}],{total:'48',caption:'total pengajuan',link:it=>`setQ({f:'${it.label==='Belum dihubungi'?'Baru':it.label}'})`}))}
   </div>
-  ${card('Daftar leads',`${S.size?`<div class="bulk"><span style="flex:1">${S.size} leads dipilih</span>${btn('Assign '+S.size+' leads',{perm:'leads.assign',v:'accent',size:'sm',icon:'users',on:"assignModal('',[...ST.sel.lds])"})}</div>`:''}
+  ${card('Daftar Direct Sales',`${S.size?`<div class="bulk"><span style="flex:1">${S.size} leads dipilih</span>${btn('Assign '+S.size+' leads',{perm:'leads.assign',v:'accent',size:'sm',icon:'users',on:"assignModal('',[...ST.sel.lds])"})}</div>`:''}
     ${dataTable('lds',{rows,select:true,rowClick:r=>`leadPanel('${r.id}')`,empty:'Tidak ada leads dengan filter ini.',cols:[
-      {label:'Nasabah',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="mono muted" style="display:block">${r.id}</span>`,prim:true,sort:r=>r.name},{label:'Produk',k:'prod',hide:true},{label:'Jaminan',render:r=>esc(r.jaminan||'–'),sort:r=>r.jaminan||'',hide:true},
+      {label:'Nasabah',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="mono muted" style="display:block">${r.id}</span>`,prim:true,sort:r=>r.name},{label:'Sumber',render:r=>leadSrcTag(r),sort:r=>leadSrc(r)},{label:'Produk',k:'prod',hide:true},{label:'Jaminan',render:r=>esc(r.jaminan||'–'),sort:r=>r.jaminan||'',hide:true},
       {label:'Cabang',render:r=>leadCab(r),hide:true},{label:'Pengajuan',render:r=>rp(r.amount),align:'r',sort:r=>r.amount},{label:'Goal',render:r=>r.goal?`<b class="fg tabular">${rp(r.goal)}</b>`:'–',align:'r',hide:true},
       {label:'Ditangani',render:r=>r.owner?personChip(r.owner==='sari'?'Sari W. (manager)':byU(r.owner).name):tag('Belum di-assign','accent'),sort:r=>r.owner?(r.owner==='sari'?'Sari W.':byU(r.owner).name):''},
       {label:'Status',render:r=>spill(r.sub?r.status+' · '+r.sub:r.status,{Baru:'accent',Prospect:'warning',Deal:'success','Belum Tertarik':'muted'}[r.status])},{label:'SIM',render:r=>r.sync?tag('Terkirim','success'):'–',hide:true}]})}`,
-    {acts:`${btn('Buat leads',{perm:'leads.assign',v:'accent',size:'sm',icon:'plus',on:'leadForm()'})}${btn('Template',{v:'outline',size:'sm',icon:'down',on:"toast('Template diunduh','template_leads_crm.xlsx. Kolom wajib: ID sumber, nama, nomor HP, produk, cabang.')"})}${btn('Assign leads',{v:'outline',size:'sm',icon:'users',on:"assignModal()"})}${btn('Import assign',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Assign leads')"})}${btn('Upload pengajuan',{v:'accent',size:'sm',icon:'up',on:"uploadModal('Data pengajuan')"})}`})}`};
+    {acts:`${btn('Buat Direct Sales',{perm:'leads.assign',v:'accent',size:'sm',icon:'plus',on:'leadForm()'})}${btn('Template',{v:'outline',size:'sm',icon:'down',on:"toast('Template diunduh','template_leads_crm.xlsx. Kolom wajib: ID sumber, nama, nomor HP, produk, cabang.')"})}${btn('Assign leads',{v:'outline',size:'sm',icon:'users',on:"assignModal()"})}${btn('Import assign',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Assign leads')"})}${btn('Upload pengajuan',{v:'accent',size:'sm',icon:'up',on:"uploadModal('Data pengajuan')"})}`})}`};
 }
 function leadPer(){ toast('Periode diubah','Data mockup tetap sama.'); }
 /* Filter Leads mengikuti Laporan penjualan: periode (preset dan rentang tanggal), klien, cabang, lalu dimensi khusus leads: produk dan ditangani. Tanggal leads = tanggal masuk. */
-const leadDimOk=(l,q)=>(!q.cl||q.cl==='cl2')&&(!q.cb||leadCab(l)===q.cb)&&(!q.pk||l.prod===q.pk)&&(!q.u||(q.u==='__none'?!l.owner:l.owner===q.u));
+const leadDimOk=(l,q)=>(!q.src||leadSrc(l)===q.src)&&(!q.cl||q.cl==='cl2')&&(!q.cb||leadCab(l)===q.cb)&&(!q.pk||l.prod===q.pk)&&(!q.u||(q.u==='__none'?!l.owner:l.owner===q.u));
 const leadIn=(l,q)=>{ const r=repRange(q), x=labIso(l.date); return x>=r.from&&x<=r.to; };
 const leadOwnerName=u=>u==='sari'?'Sari W. (manager)':((byU(u)||{}).name||u);
 function ldPer(k){ setQ({per:k,from:'',to:''}); }
@@ -2827,20 +2828,24 @@ function ldFilters(q,base){
   const r=repRange(q), clients=live('client').filter(c=>clientHasModul(c,'Sales automation')&&c.status==='Aktif');
   const cabs=[...new Set(D.leads.map(leadCab))], prods=[...new Set(D.leads.map(l=>l.prod))];
   const owners=[...new Set(D.leads.filter(l=>leadDimOk(l,{...q,u:''})).map(l=>l.owner).filter(Boolean))];
-  const dirty=q.cl||q.cb||q.pk||q.u||q.from||q.to||(q.per&&q.per!=='m');
+  const dirty=q.src||q.cl||q.cb||q.pk||q.u||q.from||q.to||(q.per&&q.per!=='m');
   const goal=base.filter(l=>l.status==='Deal').reduce((a,b)=>a+(b.goal||0),0);
   const lf=q.f||'', lq=(q.q||'');
   return filterCard({search:searchBox(lq,{ph:'Cari nama nasabah',label:'Cari nasabah'}),chips:{key:'f',val:lf==='unassigned'?'__':lf,label:'Status',items:[['','Semua',base.length],...['Baru','Prospect','Deal','Belum Tertarik'].map(k=>[k,k,base.filter(l=>l.status===k).length])]},top:`${pills(REP_PRESETS.map(x=>[x[0],x[1]]),(REP_PRESETS.find(x=>x[2][0]===r.from&&x[2][1]===r.to)||[''])[0],'ldPer')}${rangePicker({id:'ld',from:r.from,to:r.to,min:LD_START,max:LD_END,on:'ldDate',presets:REP_PRESETS})}`,
     selects:`${sel([['','Semua klien'],...clients.map(c=>[c.id,c.name])],q.cl||'',"setQ({cl:this.value})",{label:'Filter klien',cls:'sm'})}
       ${sel([['','Semua cabang'],...cabs],q.cb||'',"setQ({cb:this.value,u:''})",{label:'Filter cabang',cls:'sm'})}
       ${sel([['','Semua produk'],...prods],q.pk||'',"setQ({pk:this.value})",{label:'Filter produk',cls:'sm'})}
+      ${sel([['','Semua sumber'],['Mobile','Mobile'],['Sistem','Sistem']],q.src||'',"setQ({src:this.value})",{label:'Filter sumber data',cls:'sm'})}
       ${sel([['','Semua ditangani'],['__none','Belum di-assign'],...owners.map(u=>[u,leadOwnerName(u)])],q.u||'',"setQ({u:this.value})",{label:'Filter ditangani',cls:'sm'})}`,
-    clear:(dirty||lf||lq)?"setQ({cl:'',cb:'',pk:'',u:'',from:'',to:'',per:'',f:'',q:''})":'',
+    clear:(dirty||lf||lq)?"setQ({src:'',cl:'',cb:'',pk:'',u:'',from:'',to:'',per:'',f:'',q:''})":'',
     summary:`Menampilkan <b class="fg">${repLabel(q)}</b>: ${base.length} leads, pengajuan ${jt(base.reduce((a,b)=>a+b.amount,0))}, goal ${jt(goal)}. Filter berlaku untuk kartu status dan daftar leads; grafik di bawah masih data contoh.`});
 }
 /* Assign leads mengikuti mobile: pilih user REA atau CBD dulu, lalu pilih satu leads atau lebih di cabang user itu (MOM 12.5).
    Penerima diambil dari role, bukan daftar tetap, jadi user REA atau CBD baru langsung muncul. */
 const leadCab=l=>l.cab||'Fatmawati';
+/* Flag sumber data: Mobile = dibuat CBD/REA di aplikasi, Sistem = upload backend atau dibuat di dashboard. */
+const leadSrc=l=>l.src||'Sistem';
+const leadSrcTag=l=>tag(leadSrc(l),leadSrc(l)==='Mobile'?'info':'neutral',{icon:leadSrc(l)==='Mobile'?'phone':''});
 const userCab=x=>x.cabang.replace(/^BPR /,'');
 const leadClosed=l=>l.status==='Deal'||l.sub==='Rejected';
 const leadReceivers=cab=>LEADS_USERS.filter(x=>/^(REA|CBD)/.test(x.job)&&(!cab||userCab(x)===cab));
@@ -2864,8 +2869,8 @@ function assignSave(){
 }
 /* Pilihan Jaminan leads (data contoh, menunggu daftar resmi dari klien). Isinya harus sama di mobile dan dashboard. */
 const JAMINAN=['BPKB Motor','BPKB Mobil','Sertifikat Rumah (SHM)','Sertifikat HGB','SK Karyawan','Deposito','Tanpa jaminan'];
-/* Leads yang dibuat sales di mobile masuk ke daftar leads dashboard. */
-function syncLeadBaru(){ try{ shRead('leadBaru',[]).forEach(n=>{ if(D.leads.some(l=>l.id===n.id)) return; D.leads.unshift({id:n.id,name:n.name,prod:n.prod,jaminan:n.jaminan,phone:n.phone,job:n.job,addr:n.addr,cab:n.cab,amount:0,tenor:12,status:'Baru',owner:n.u,date:'26 Okt',sync:''}); }); }catch(e){} }
+/* Direct Sales yang dibuat CBD/REA di mobile masuk ke daftar dashboard dengan flag Mobile. */
+function syncLeadBaru(){ try{ shRead('leadBaru',[]).forEach(n=>{ if(D.leads.some(l=>l.id===n.id)) return; D.leads.unshift({id:n.id,name:n.name,prod:n.prod,jaminan:n.jaminan,phone:n.phone,job:n.job,addr:n.addr,cab:n.cab,amount:n.amount||0,tenor:12,status:'Baru',owner:n.u,date:'26 Okt',sync:'',src:n.src||'Mobile'}); }); }catch(e){} }
 function leadForm(){ if(!can('leads.assign')) return noAccess();
   openModal(`<h2 class="pt">Buat leads<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Leads baru belum di-assign. Pilih penerimanya lewat Assign leads.</p>
   <div class="grid" style="gap:12px"><label class="field"><span>Nama nasabah <b class="req" aria-hidden="true">*</b></span><span class="inp"><input id="ld_n"></span></label>
@@ -2878,12 +2883,12 @@ function leadForm(){ if(!can('leads.assign')) return noAccess();
   <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan leads',{v:'accent',on:'leadSaveNew()'})}</div>`); }
 function leadSaveNew(){ const g=id=>(document.getElementById(id).value||'').replace(/['"<>`\\]/g,'').trim(), name=g('ld_n'), phone=g('ld_p');
   if(!name||!phone){ toast('Periksa isian','Isi nama nasabah dan nomor HP.','danger'); return; }
-  act('leads/create',{perm:'leads.assign',run:()=>{ D.leads.unshift({id:newId('L'),name,phone,prod:g('ld_d'),jaminan:document.getElementById('ld_g').value,cab:g('ld_c'),job:g('ld_j'),addr:g('ld_a'),amount:0,tenor:12,status:'Baru',owner:null,date:'26 Okt',sync:''}); },audit:'Membuat leads '+name,toast:['Leads tersimpan',name]}); }
+  act('leads/create',{perm:'leads.assign',run:()=>{ D.leads.unshift({id:newId('L'),name,phone,prod:g('ld_d'),jaminan:document.getElementById('ld_g').value,cab:g('ld_c'),job:g('ld_j'),addr:g('ld_a'),amount:0,tenor:12,status:'Baru',owner:null,date:'26 Okt',sync:'',src:'Sistem'}); },audit:'Membuat leads '+name,toast:['Leads tersimpan',name]}); }
 function leadPanel(id){ const l=D.leads.find(x=>x.id===id); if(!l) return panelMissing('Leads');
-  openPanel(l.name,`${panelHero({eyebrow:l.id,title:esc(l.name),sub:l.prod+' · '+l.cab,badge:spill(l.status,toneOf(l.status)),metrics:[['Pengajuan',rp(l.amount)],['Tenor',l.tenor+' bulan'],['Goal',l.goal?rp(l.goal):'Belum']]})}
-  <div class="grid g2" style="gap:12px;margin-bottom:12px"><div class="tile"><div class="xs muted">Produk</div><b class="fg">${l.prod}</b></div><div class="tile"><div class="xs muted">Jaminan</div><b class="fg">${esc(l.jaminan||'–')}</b></div></div>
+  openPanel(l.name,`${panelHero({eyebrow:l.id+' · '+leadSrc(l),title:esc(l.name),sub:l.prod+' · '+l.cab,badge:spill(l.status,toneOf(l.status)),metrics:[['Pengajuan',rp(l.amount)],['Tenor',l.tenor+' bulan'],['Goal',l.goal?rp(l.goal):'Belum']]})}
+  <div class="grid g2" style="gap:12px;margin-bottom:12px"><div class="tile"><div class="xs muted">Produk</div><b class="fg">${l.prod}</b></div><div class="tile"><div class="xs muted">Jaminan</div><b class="fg">${esc(l.jaminan||'–')}</b></div><div class="tile"><div class="xs muted">Sumber data</div><b class="fg">${leadSrc(l)==='Mobile'?'Aplikasi mobile':'Sistem'}</b></div><div class="tile"><div class="xs muted">Dana tunai / pengajuan</div><b class="fg tabular">${l.amount?rp(l.amount):'–'}</b></div></div>
   ${l.status==='Deal'?`<div class="tile" style="margin-bottom:12px"><div class="xs muted">Dokumen Deal</div><b class="fg">Bukti approve terunggah · Persetujuan pencairan ${l.owner==='nina'&&l.goal>10e6?'terunggah':'belum'} · Serah terima dana ${l.owner==='nina'&&l.goal>10e6?'terunggah':'belum'}</b></div>`:''}
-  <div class="steps">${[['Upload backend',l.date+' 2026 · 06:00','done'],['Assign ke sales',l.owner?byU(l.owner).name:'Belum',l.owner?'done':'cur'],['Verifikasi (telepon / WA)',l.status==='Baru'?'Belum':'Selesai',l.status==='Baru'?(l.owner?'cur':'up'):'done'],['Hasil: '+(l.sub?l.status+' · '+l.sub:l.status),l.status==='Deal'?'Goal '+rp(l.goal):l.status==='Prospect'?'Follow up 29 Okt':l.sub==='Rejected'?'Tidak memenuhi syarat':'Belum',l.status==='Deal'||l.sub==='Rejected'?'done':l.status==='Prospect'?'cur':'up'],['Kirim ke SIM',l.sync?'Terkirim':'–',l.sync?'done':'up']].map(([t,s,k])=>`<div class="step"><span class="sd ${k}">${k==='done'?I('check',14,2.6):''}</span><div><b>${t}</b><small>${s}</small></div></div>`).join('')}</div>`,
+  <div class="steps">${[leadSrc(l)==='Mobile'?['Dibuat di aplikasi mobile',l.date+' 2026 · '+(l.owner?byU(l.owner)?.name||'':''),'done']:['Upload backend',l.date+' 2026 · 06:00','done'],['Assign ke sales',l.owner?byU(l.owner).name:'Belum',l.owner?'done':'cur'],['Verifikasi (telepon / WA)',l.status==='Baru'?'Belum':'Selesai',l.status==='Baru'?(l.owner?'cur':'up'):'done'],['Hasil: '+(l.sub?l.status+' · '+l.sub:l.status),l.status==='Deal'?'Goal '+rp(l.goal):l.status==='Prospect'?'Follow up 29 Okt':l.sub==='Rejected'?'Tidak memenuhi syarat':'Belum',l.status==='Deal'||l.sub==='Rejected'?'done':l.status==='Prospect'?'cur':'up'],['Kirim ke SIM',l.sync?'Terkirim':'–',l.sync?'done':'up']].map(([t,s,k])=>`<div class="step"><span class="sd ${k}">${k==='done'?I('check',14,2.6):''}</span><div><b>${t}</b><small>${s}</small></div></div>`).join('')}</div>`,
   !l.owner?`${btn('Tutup',{v:'outline',on:'closeLayer()'})}${btn('Assign',{perm:'leads.assign',v:'accent',on:`closeLayer();assignModal('',['${id}'])`})}`:btn('Tutup',{v:'outline',on:'closeLayer()'}),{sub:l.id}); }
 
 /* ---------- Overdue ---------- */
@@ -2905,13 +2910,13 @@ function pageOverdue(q){
 const MODULES=['Absensi','Kunjungan','Approval','Penjualan','Pesanan','Target','Promo','Insentif','Grading','Leads','Overdue','Master data','IAM'];
 const ACTS=['Lihat','Buat','Ubah','Hapus','Approve'];
 /* Menu aplikasi mobile (sama dengan menu Beranda dan tab bawah di mockup mobile). Hak akses mobile cukup aktif atau tidak per menu. */
-const MOBILE_MENUS=['Absen','Aktivitas','Kunjungan','Penjualan','Pesanan','Stok bawaan','SKU display','Display share','Stock opname','Campaign & POSM','Leads','Mitra saya','Task Team Leader','Assign leads','Assign canvasser','Approval','Task pending','Tim saya','Data overdue','Target','Quiz','Survey','Ajukan izin','Notifikasi'];
+const MOBILE_MENUS=['Absen','Aktivitas','Kunjungan','Penjualan','Pesanan','Stok bawaan','SKU display','Display share','Stock opname','Campaign & POSM','Leads','Direct Sales','Monitoring Mitra','Activity','Assign leads','Assign canvasser','Approval','Task pending','Tim saya','Data overdue','Target','Quiz','Survey','Ajukan izin','Notifikasi'];
 const MOBILE_OWN={
   spg:['Absen','Aktivitas','Kunjungan','Penjualan','SKU display','Display share','Stock opname','Campaign & POSM','Target','Quiz','Survey','Ajukan izin','Notifikasi'],
   canvas:['Absen','Aktivitas','Kunjungan','Penjualan','Stok bawaan','Target','Quiz','Survey','Ajukan izin','Notifikasi'],
   order:['Absen','Aktivitas','Kunjungan','Pesanan','Target','Quiz','Survey','Ajukan izin','Notifikasi'],
-  leads:['Absen','Leads','Target','Quiz','Survey','Ajukan izin','Notifikasi'],
-  cbd:['Absen','Leads','Mitra saya','Task Team Leader','Target','Quiz','Survey','Ajukan izin','Notifikasi'],
+  leads:['Absen','Direct Sales','Monitoring Mitra','Activity','Target','Quiz','Survey','Ajukan izin','Notifikasi'],
+  cbd:['Absen','Direct Sales','Monitoring Mitra','Activity','Target','Quiz','Survey','Ajukan izin','Notifikasi'],
   fmcg:['Absen','Aktivitas','Kunjungan','Quiz','Survey','Ajukan izin','Notifikasi'],
   arco:['Absen','Assign leads','Leads','Tim saya','Ajukan izin','Notifikasi'],
   bantuan:['Absen','Kunjungan','Penjualan','Ajukan izin','Notifikasi'],
@@ -3852,7 +3857,7 @@ function jpKategoriHariIni(){ const rows=TOKO_KAT.map(c=>({_id:c,cat:c,plan:0,do
 /* Kepatuhan REA dan CBD (R11): tanpa check-in dan radius. REA dihitung dari kunjungan nasabah yang hasilnya disubmit, CBD dari mitra yang monitoringnya sudah dijawab. */
 function leadKepatuhan(){ const done=shRead('leadVisitDone',[]), ans=shRead('mitraAns',{});
   const rea=LEADS_USERS.filter(l=>/REA/.test(l.job)).map(l=>{ const vs=D.visits.filter(v=>!v.del&&v.u===l.u); return {_id:l.u,u:l.u,jenis:'Kunjungan nasabah',plan:vs.length,done:vs.filter(v=>v.status==='Selesai'||done.some(x=>x.u===l.u&&x.place===v.place)).length,to:'/kunjungan?u='+l.u}; });
-  const cbd=LEADS_USERS.filter(l=>/CBD/.test(l.job)).map(l=>{ const ms=MD.mitra.filter(m=>m.cbd===l.u&&m.status==='Aktif'); return {_id:l.u,u:l.u,jenis:'Monitoring mitra',plan:ms.length,done:ms.filter(m=>ans[m.id]).length,to:'/mitra?tab=jawab'}; });
+  const cbd=LEADS_USERS.filter(l=>/CBD/.test(l.job)).map(l=>{ const ms=MD.mitra.filter(m=>m.cbd===l.u&&m.status==='Aktif'), lg=mmLogAll(); return {_id:l.u,u:l.u,jenis:'Monitoring Mitra',plan:ms.length,done:ms.filter(m=>ans[m.id]||lg.some(x=>x.mid===m.id&&x.bln===MF_NOW)).length,to:'/mitra?tab=log'}; });
   return [...rea,...cbd].map(r=>({...r,pct:r.plan?Math.round(r.done/r.plan*100):0})); }
 /* Scheduler pukul 23.59 (jawaban klien 12 Nov 2026): kunjungan yang belum check-in sampai akhir hari menjadi Terlewat. Hanya check-in kunjungan, bukan absensi.
    Check-in kunjungan boleh kapan saja asalkan masih hari itu. Check-in absensi yang terlambat tetap boleh. REA dan CBD tidak memakai check-in, jadi tidak ikut. */
@@ -4386,13 +4391,78 @@ function pageKonversi(q){
 const MITRAQ_DEFAULT=[{id:'mq1',q:'Bagaimana kondisi usaha atau kegiatan mitra bulan ini?',status:'Aktif'},{id:'mq2',q:'Kendala apa yang dihadapi mitra dalam mencari nasabah?',status:'Aktif'},{id:'mq3',q:'Dukungan apa yang dibutuhkan mitra dari tim bulan depan?',status:'Aktif'}];
 const mitraQAll=()=>shRead('mitraQ',MITRAQ_DEFAULT).filter(x=>!x.del);
 const mitraAnsRows=()=>Object.entries(shRead('mitraAns',{})).flatMap(([mid,r])=>Object.keys(r.a||{}).map(qid=>({_id:mid+qid,mid,mitra:r.name,by:r.by,tgl:r.tgl,q:(r.q||{})[qid]||qid,a:r.a[qid]})));
+/* ---------- Monitoring Mitra dan Activity dari aplikasi mobile (CBD dan REA) ----------
+   Data dibaca dari salesapp.shared.v1. Data contoh di bawah harus sama dengan mockup mobile.
+   Log dihitung per bulan; awal bulan log mulai kosong lagi. Activity bulan sebelumnya pindah ke Monitoring Mitra. */
+const MF_NOW='2026-10';
+const MF_BLN={'2026-09':'September 2026','2026-10':'Oktober 2026','2026-11':'November 2026'};
+const mfUser=u=>{ const k=(u||'').split('.')[1]||u; return byU(k)?.name||k||'–'; };
+const mfActAll=()=>shRead('mfAct',[
+  {id:'ac1',u:'cbd.tono',nama:'Toko Sumber Rezeki',hp:'0812-7100-3301',prod:'Kredit Modal Kerja',jaminan:'BPKB Motor',dana:10000000,job:'Pedagang sembako',addr:'Jl. Cilandak Tengah 8',bln:'2026-09',tgl:'18 Sep 2026'},
+  {id:'ac2',u:'cbd.tono',nama:'Bengkel Maju Jaya',hp:'0812-7100-3302',prod:'Kredit Multiguna',jaminan:'BPKB Mobil',dana:25000000,job:'Pemilik bengkel',addr:'Jl. Fatmawati Raya 40',bln:'2026-10',tgl:'20 Okt 2026'},
+  {id:'ac3',u:'rea.nina',nama:'Warung Bu Tini',hp:'0812-7100-3303',prod:'Kredit Modal Kerja',jaminan:'Tanpa jaminan',dana:5000000,job:'Pemilik warung',addr:'Jl. Haji Nawi 3',bln:'2026-10',tgl:'22 Okt 2026'},
+  {id:'ac4',u:'rea.nina',nama:'Konter Pulsa Andalas',hp:'0812-7100-3304',prod:'Kredit Multiguna',jaminan:'SK Karyawan',dana:8000000,job:'Pemilik konter',addr:'Jl. Panglima Polim 21',bln:'2026-09',tgl:'12 Sep 2026'}]);
+const mmLogAll=()=>shRead('mmLog',[{id:'ml0',mid:'mt1',jenis:'Visit',hasil:'Tersambung',bln:'2026-09',tgl:'15 Sep 2026',jam:'10:20',lokasi:'Agen Sejahtera Fatmawati',hp:'0812-7000-2201',tk:'Simulasi angsuran',ps:'–',bk:'–',foto:'Kamera',by:'Tono Hidayat'}]);
+const actLogAll=()=>shRead('actLog',[]);
+const mfMitraName=id=>MD.mitra.find(m=>m.id===id)?.name||mfActAll().find(a=>a.id===id)?.nama||id;
+const MM_TONE={Visit:'accent',Telepon:'info',WhatsApp:'success','Info Mitra':'accent',Canvassing:'warning'};
+const mfStat=(l,v,sub)=>`<div class="stat"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></div>`;
+
+/* Mitra dari Activity bulan sebelumnya (dibuat lewat Rekrut Mitra di mobile). */
+function mitraFromActCard(){ const L=mfActAll().filter(a=>a.bln<MF_NOW).map(a=>({...a,_id:a.id}));
+  return card('Mitra dari Activity',dataTable('mtact',{rows:L,rowClick:r=>`actPanel('${r.id}')`,empty:'Belum ada Activity dari bulan sebelumnya.',cols:[
+    {label:'Mitra',render:r=>`<span class="fg" style="font-weight:500">${esc(r.nama)}</span><span class="xs muted" style="display:block">${esc(r.hp)}</span>`,prim:true,sort:r=>r.nama},
+    {label:'Sumber',render:()=>tag('Activity','warning')},{label:'Sales',render:r=>personChip(mfUser(r.u)),sort:r=>mfUser(r.u)},{label:'Direkrut',k:'tgl'},{label:'Alamat',render:r=>esc(r.addr),hide:true}]}),
+    {desc:'Activity dari bulan sebelumnya otomatis pindah ke Monitoring Mitra di aplikasi CBD dan REA. Mitra di tabel atas diinput dari dashboard.'}); }
+
+function mmLogBody(q){ const b=q.bln||MF_NOW, j=q.j||'', all=mmLogAll(), M=all.filter(x=>x.bln===b);
+  const rows=M.filter(x=>!j||x.jenis===j).map(x=>({...x,_id:x.id})), bulan=[...new Set([MF_NOW,...all.map(x=>x.bln)])].sort().reverse();
+  const gagal=M.filter(x=>x.hasil!=='Tersambung').length;
+  return `<div style="margin:12px 0 16px">${filterCard({selects:`${sel(bulan.map(x=>[x,MF_BLN[x]||x]),b,"setQ({bln:this.value})",{label:'Bulan',cls:'sm'})}${sel([['','Semua jenis'],...['Visit','Telepon','WhatsApp'].map(k=>[k,k+' ('+M.filter(x=>x.jenis===k).length+')'])],j,"setQ({j:this.value})",{label:'Filter jenis',cls:'sm'})}`,clear:(j||b!==MF_NOW)?"setQ({j:'',bln:''})":'',
+    summary:`Menampilkan <b class="fg">${MF_BLN[b]||b}</b>: ${rows.length} aktivitas. Log di-reset tiap awal bulan; Telepon dan WhatsApp tetap aktif untuk mitra yang pernah di-visit.`})}</div>
+  <div class="stats">${mfStat('Visit',M.filter(x=>x.jenis==='Visit').length,'Wajib sebelum Telepon/WA')}${mfStat('Telepon',M.filter(x=>x.jenis==='Telepon').length,'Tersambung dan tidak')}${mfStat('WhatsApp',M.filter(x=>x.jenis==='WhatsApp').length,'Tersambung dan tidak')}${mfStat('Tidak tersambung',gagal,'Tidak diangkat / nomor tidak aktif')}</div>
+  ${card('Log monitoring',dataTable('mml',{rows,rowClick:r=>`mmPanel('${r.id}')`,empty:'Belum ada aktivitas monitoring di bulan ini.',emptyDesc:'Visit, Telepon, dan WhatsApp dari aplikasi CBD dan REA muncul di sini.',cols:[
+    {label:'Mitra',render:r=>`<span class="fg" style="font-weight:500">${esc(mfMitraName(r.mid))}</span><span class="xs muted" style="display:block">${esc(r.by||'')}</span>`,prim:true,sort:r=>mfMitraName(r.mid)},
+    {label:'Jenis',render:r=>tag(r.jenis,MM_TONE[r.jenis]),sort:r=>r.jenis},
+    {label:'Hasil',render:r=>spill(r.hasil,r.hasil==='Tersambung'?'success':'danger'),sort:r=>r.hasil},
+    {label:'Waktu',render:r=>`<span class="tabular">${r.tgl}, ${r.jam}</span>`},
+    {label:'Keterangan',render:r=>esc(r.alasan||r.tk||'–'),hide:true},
+    {label:'Foto',render:r=>r.foto?tag(r.foto,'neutral',{icon:r.foto==='Kamera'?'camera':''}):'–',hide:true}]}))}`; }
+function mmPanel(id){ const x=mmLogAll().find(a=>a.id===id); if(!x) return panelMissing('Log monitoring');
+  const kv=[['Nama lokasi',x.lokasi],['No. HP',x.hp],['Transfer knowledge',x.tk],['Problem solving',x.ps],['Bantu proses kredit',x.bk],['Penyebab',x.hasil!=='Tersambung'?x.hasil:''],['Alasan',x.alasan],['Bukti foto',x.foto?'Dari '+x.foto.toLowerCase():'']].filter(([,v])=>v);
+  openPanel(x.jenis+' · '+mfMitraName(x.mid),`${panelHero({eyebrow:x.tgl+', '+x.jam,title:esc(mfMitraName(x.mid)),sub:x.jenis+' oleh '+esc(x.by||'–'),badge:spill(x.hasil,x.hasil==='Tersambung'?'success':'danger')})}
+  <div class="grid g2" style="gap:12px">${kv.map(([k,v])=>`<div class="tile"><div class="xs muted">${k}</div><b class="fg">${esc(v)}</b></div>`).join('')}</div>`,btn('Tutup',{v:'outline',on:'closeLayer()'}),{sub:x.jenis}); }
+
+/* Activity: calon mitra hasil Rekrut Mitra di aplikasi CBD dan REA. */
+function pageActivity(q){ const b=q.bln||MF_NOW, u=q.u||'', qq=(q.q||'').toLowerCase(), A=mfActAll(), LG=actLogAll();
+  const rows=A.filter(a=>a.bln===b&&(!u||a.u===u)&&(!qq||a.nama.toLowerCase().includes(qq))).map(a=>({...a,_id:a.id,log:LG.filter(x=>x.aid===a.id&&x.bln===b)}));
+  const lgB=LG.filter(x=>x.bln===b), c=j=>lgB.filter(x=>x.jenis===j).length, bulan=[...new Set([MF_NOW,...A.map(a=>a.bln)])].sort().reverse();
+  const users=[...new Set(A.map(a=>a.u))];
+  return {title:'Activity',html:`
+  <div style="margin-bottom:16px">${filterCard({selects:`${sel(bulan.map(x=>[x,MF_BLN[x]||x]),b,"setQ({bln:this.value})",{label:'Bulan',cls:'sm'})}${sel([['','Semua sales'],...users.map(x=>[x,mfUser(x)])],u,"setQ({u:this.value})",{label:'Filter sales',cls:'sm'})}`,
+    clear:(u||qq||b!==MF_NOW)?"setQ({u:'',q:'',bln:''})":'',summary:`Menampilkan <b class="fg">${MF_BLN[b]||b}</b>: ${rows.length} activity. ${b<MF_NOW?'Activity bulan ini sudah pindah ke Monitoring Mitra.':'Bulan depan, activity ini pindah ke Monitoring Mitra.'}`})}</div>
+  <div class="stats">${mfStat('Calon mitra',rows.length,'Dari Rekrut Mitra')}${mfStat('Info Mitra',c('Info Mitra'),'Kali dicatat')}${mfStat('Visit',c('Visit'),'Kunjungan konsumen')}${mfStat('Canvassing',c('Canvassing'),'Event')}</div>
+  ${card('Daftar activity',dataTable('mfa',{rows,rowClick:r=>`actPanel('${r.id}')`,empty:'Belum ada activity di bulan ini.',emptyDesc:'Calon mitra dari Rekrut Mitra di aplikasi CBD dan REA muncul di sini.',cols:[
+    {label:'Calon mitra',render:r=>`<span class="fg" style="font-weight:500">${esc(r.nama)}</span><span class="xs muted" style="display:block">${esc(r.hp)}</span>`,prim:true,sort:r=>r.nama},
+    {label:'Sales',render:r=>personChip(mfUser(r.u)),sort:r=>mfUser(r.u)},
+    {label:'Produk',render:r=>esc(r.prod),hide:true},{label:'Jaminan',render:r=>esc(r.jaminan),hide:true},
+    {label:'Dana tunai',render:r=>rp(r.dana),align:'r',sort:r=>r.dana},
+    {label:'Aktivitas',render:r=>r.log.length?`<b class="fg tabular">${r.log.length}</b><span class="xs muted" style="display:block;white-space:nowrap">IM ${r.log.filter(x=>x.jenis==='Info Mitra').length} · V ${r.log.filter(x=>x.jenis==='Visit').length} · C ${r.log.filter(x=>x.jenis==='Canvassing').length}</span>`:'<span class="muted">Belum ada</span>',sort:r=>r.log.length},
+    {label:'Status',render:r=>r.bln<MF_NOW?spill('Di Monitoring Mitra','success'):spill('Activity bulan ini','accent')},
+    {label:'Dibuat',k:'tgl',hide:true}]}),{acts:btn('Buka Monitoring Mitra',{v:'outline',size:'sm',icon:'users',on:"go('/mitra?tab=log')"})})}`}; }
+function actPanel(id){ const a=mfActAll().find(x=>x.id===id); if(!a) return panelMissing('Activity');
+  const L=actLogAll().filter(x=>x.aid===id), cnt=j=>L.filter(x=>x.jenis===j).length;
+  openPanel(a.nama,`${panelHero({eyebrow:a.tgl,title:esc(a.nama),sub:esc(a.job)+' · '+esc(mfUser(a.u)),badge:a.bln<MF_NOW?spill('Di Monitoring Mitra','success'):spill('Activity','accent'),metrics:[['Info Mitra',cnt('Info Mitra')],['Visit',cnt('Visit')],['Canvassing',cnt('Canvassing')]]})}
+  <div class="grid g2" style="gap:12px;margin-bottom:12px">${[['No. HP',a.hp],['Produk',a.prod],['Jaminan',a.jaminan],['Dana tunai',rp(a.dana)],['Alamat',a.addr]].map(([k,v])=>`<div class="tile"><div class="xs muted">${k}</div><b class="fg">${esc(v)}</b></div>`).join('')}</div>
+  ${L.length?`<div class="steps">${L.map(x=>`<div class="step"><span class="sd done">${I('check',14,2.6)}</span><div><b>${x.jenis}</b><small>${[x.tgl+', '+x.jam,esc(x.ket||''),x.q?esc(x.q):'',x.otp?'OTP terisi':'',x.foto?'foto '+x.foto.toLowerCase():''].filter(Boolean).join(' · ')}</small></div></div>`).join('')}</div>`:emptyState({icon:'route',title:'Belum ada aktivitas',desc:'Info Mitra, Visit, dan Canvassing dari aplikasi muncul di sini.'})}`,btn('Tutup',{v:'outline',on:'closeLayer()'}),{sub:'Activity'}); }
+
 function mtTab(t){ setQ({tab:t,q:'',st:''}); }
 const pageMitra=q=>{ const tab=q.tab||'mitra';
-  const tabs=utabs([['mitra','Daftar mitra'],['tanya','Pertanyaan monitoring',mitraQAll().length],['jawab','Jawaban',mitraAnsRows().length]],tab,'mtTab');
-  const body=tab==='mitra'?`${crudList('mitra',q,{acts:btn('Upload',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Mitra')"})})}<div style="margin-top:12px">${callout('<b>Rekomendasi.</b> Kolom mitra menunggu format data resmi dari klien.')}</div>`
-  :tab==='tanya'?`<p class="xs muted" style="margin:12px 0">Pertanyaan ini muncul di detail mitra pada aplikasi CBD. CBD menjawab dengan teks bebas.</p>${card('Pertanyaan monitoring',dataTable('mtq',{rows:mitraQAll().map(x=>({...x,_id:x.id})),rowClick:r=>`mitraQModal('${r.id}')`,acts:r=>rowActs(`mitraQModal('${r.id}')`,`mitraQDelAsk('${r.id}')`),empty:'Belum ada pertanyaan.',cols:[{label:'Pertanyaan',render:r=>`<span class="fg" style="font-weight:500">${esc(r.q)}</span>`,prim:true},{label:'Status',render:r=>stPill(r.status||'Aktif')}]}),{acts:btn('Tambah pertanyaan',{v:'accent',size:'sm',icon:'plus',on:'mitraQModal()'})})}`
-  :`<p class="xs muted" style="margin:12px 0">Jawaban monitoring dari CBD, langsung dari aplikasi mobile.</p>${card('Jawaban monitoring',dataTable('mta',{rows:mitraAnsRows(),empty:'Belum ada jawaban dari CBD.',cols:[{label:'Mitra',render:r=>`<span class="fg" style="font-weight:500">${esc(r.mitra)}</span><span class="xs muted" style="display:block">${esc(r.by)} · ${r.tgl}</span>`,prim:true},{label:'Pertanyaan',render:r=>`<span class="xs">${esc(r.q)}</span>`,hide:true},{label:'Jawaban',render:r=>esc(r.a)}]}))}`;
-  return {title:'Mitra',html:`<div style="margin-bottom:4px">${tabs}</div>${body}`}; };
+  const tabs=utabs([['mitra','Daftar mitra'],['log','Log monitoring',mmLogAll().filter(x=>x.bln===MF_NOW).length],['tanya','Pertanyaan monitoring',mitraQAll().length],['jawab','Jawaban',mitraAnsRows().length]],tab,'mtTab');
+  const body=tab==='log'?mmLogBody(q):tab==='mitra'?`${crudList('mitra',q,{acts:btn('Upload',{v:'outline',size:'sm',icon:'up',on:"uploadModal('Mitra')"})})}<div style="margin-top:16px">${mitraFromActCard()}</div><div style="margin-top:12px">${callout('<b>Rekomendasi.</b> Kolom mitra menunggu format data resmi dari klien.')}</div>`
+  :tab==='tanya'?`<p class="xs muted" style="margin:12px 0">Pertanyaan ini muncul sebagai pilihan List pertanyaan di form Info Mitra (menu Activity) pada aplikasi CBD dan REA.</p>${card('Pertanyaan monitoring',dataTable('mtq',{rows:mitraQAll().map(x=>({...x,_id:x.id})),rowClick:r=>`mitraQModal('${r.id}')`,acts:r=>rowActs(`mitraQModal('${r.id}')`,`mitraQDelAsk('${r.id}')`),empty:'Belum ada pertanyaan.',cols:[{label:'Pertanyaan',render:r=>`<span class="fg" style="font-weight:500">${esc(r.q)}</span>`,prim:true},{label:'Status',render:r=>stPill(r.status||'Aktif')}]}),{acts:btn('Tambah pertanyaan',{v:'accent',size:'sm',icon:'plus',on:'mitraQModal()'})})}`
+  :`<p class="xs muted" style="margin:12px 0">Isian Transfer knowledge, Problem solving, dan Bantu proses kredit terakhir per mitra dari Visit atau Telepon/WhatsApp yang tersambung.</p>${card('Jawaban monitoring',dataTable('mta',{rows:mitraAnsRows(),empty:'Belum ada jawaban dari CBD.',cols:[{label:'Mitra',render:r=>`<span class="fg" style="font-weight:500">${esc(r.mitra)}</span><span class="xs muted" style="display:block">${esc(r.by)} · ${r.tgl}</span>`,prim:true},{label:'Pertanyaan',render:r=>`<span class="xs">${esc(r.q)}</span>`,hide:true},{label:'Jawaban',render:r=>esc(r.a)}]}))}`;
+  return {title:'Monitoring Mitra',html:`<div style="margin-bottom:4px">${tabs}</div>${body}`}; };
 function mitraQModal(id){ const x=id?mitraQAll().find(a=>a.id===id):{q:'',status:'Aktif'};
   openModal(`<h2 class="pt">${id?'Edit':'Tambah'} pertanyaan<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">CBD menjawab pertanyaan ini dengan teks bebas di detail mitra.</p>
   <div class="grid" style="gap:12px"><label class="field"><span>Pertanyaan</span><textarea class="ta" id="mq_q" style="min-height:80px" maxlength="200">${esc(x.q)}</textarea></label>
@@ -5258,7 +5328,7 @@ function subPanel(id){
   openPanel(subLbl(x.akt),head+subDetail(x),foot,{sub:esc(me.name)+' · '+fmtIso(x.iso)+' '+x.jam});
 }
 
-const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi,'/kunjungan':pageKunjungan,'/approval':pageApproval,'/target':pageTarget,'/promo':pagePromo,'/insentif':pageInsentif,'/grading':pageGrading,'/leads':pageLeads,'/overdue':pageOverdue,'/company-sim':pageSimco,'/sektor':pageSektor,'/client':pageClient,'/kategori-toko':pageKategori,'/toko':pageToko,'/iam':pageIAM,'/produk':pageProduk,'/penugasan':pagePenugasan,'/pemesanan':pagePemesanan,'/sell-in':pageSellin,'/user-sales':pagePengguna,'/job':pageJob,'/user-admin':pageAdmin,'/parameter':pageParameter,'/aktivitas':pageAktivitas,'/submission':pageSubmission,'/support-task':pageSupportTask,'/canvassing':pageCanvassing,'/posm':pagePosm,'/region':pageRegion,'/brand':pageBrand,'/kategori-produk':pageKatProd,'/kompetitor':pageKompetitor,'/cabang-client':pageCabang,'/mapping-outlet':pageMapOutlet,'/data-penjualan':pageDataJual,'/penagihan':pagePenagihan,'/klaim-biaya':pageKlaim,'/kepatuhan-kunjungan':pageKepatuhan,'/pengumuman':pagePengumuman,'/sinkron':pageSinkron,'/satuan':pageSatuan,'/konversi':pageKonversi,'/sidebar-menu':pageSidebarMenu,'/konfigurasi-aktivitas':pageAktCfg,'/form-penjualan':pageFormJual,'/status-produk':pageStatProd,'/event':pageEvent,'/mitra':pageMitra,'/sku-display':pageSkuDisplay,'/market-share':pageMarketShare,'/quiz':q=>pageKonten(q,'Quiz'),'/survey':q=>pageKonten(q,'Survey'),'/pengaturan':pagePengaturan};
+const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi,'/kunjungan':pageKunjungan,'/approval':pageApproval,'/target':pageTarget,'/promo':pagePromo,'/insentif':pageInsentif,'/grading':pageGrading,'/leads':pageLeads,'/activity':pageActivity,'/overdue':pageOverdue,'/company-sim':pageSimco,'/sektor':pageSektor,'/client':pageClient,'/kategori-toko':pageKategori,'/toko':pageToko,'/iam':pageIAM,'/produk':pageProduk,'/penugasan':pagePenugasan,'/pemesanan':pagePemesanan,'/sell-in':pageSellin,'/user-sales':pagePengguna,'/job':pageJob,'/user-admin':pageAdmin,'/parameter':pageParameter,'/aktivitas':pageAktivitas,'/submission':pageSubmission,'/support-task':pageSupportTask,'/canvassing':pageCanvassing,'/posm':pagePosm,'/region':pageRegion,'/brand':pageBrand,'/kategori-produk':pageKatProd,'/kompetitor':pageKompetitor,'/cabang-client':pageCabang,'/mapping-outlet':pageMapOutlet,'/data-penjualan':pageDataJual,'/penagihan':pagePenagihan,'/klaim-biaya':pageKlaim,'/kepatuhan-kunjungan':pageKepatuhan,'/pengumuman':pagePengumuman,'/sinkron':pageSinkron,'/satuan':pageSatuan,'/konversi':pageKonversi,'/sidebar-menu':pageSidebarMenu,'/konfigurasi-aktivitas':pageAktCfg,'/form-penjualan':pageFormJual,'/status-produk':pageStatProd,'/event':pageEvent,'/mitra':pageMitra,'/sku-display':pageSkuDisplay,'/market-share':pageMarketShare,'/quiz':q=>pageKonten(q,'Quiz'),'/survey':q=>pageKonten(q,'Survey'),'/pengaturan':pagePengaturan};
 /* ---------- Dropdown dengan pencarian dan pagination ----------
    Semua <select> otomatis diganti tombol + panel. Select asli tetap ada (tersembunyi), jadi value, onchange, dan id tetap bekerja. */
 (function(){
@@ -5331,7 +5401,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
 /* ---------- Penyimpanan data dashboard (D6) ----------
    Perubahan di dashboard disimpan sebagai snapshot berversi. Data bersama dengan mobile tetap di salesapp.shared.v1.
    Naikkan DASH_VER bila bentuk data contoh berubah, supaya snapshot lama dibuang dan data contoh baru dipakai. */
-const DASH_VER=28;
+const DASH_VER=29;
 const PARAM={};
 const dashData=()=>({D,MD,TOKO,TRX,INFO,POSM,AR,KLAIM,ATT,REK_ADJ,PARAM});
 function restoreInto(t,src){
