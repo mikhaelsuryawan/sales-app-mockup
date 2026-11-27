@@ -409,6 +409,38 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .pc-rb{height:8px;border-radius:99px;background:rgba(12,46,89,.08);overflow:hidden;margin:9px 0 7px}.pc-rb i{display:block;height:100%;border-radius:99px;transition:width .5s}
 .pc-rm{display:flex;justify-content:space-between;gap:8px;font-size:12px}
 @media (prefers-reduced-motion:reduce){.pc-arc,.pc-bar i,.pc-rb i{animation:none;transition:none}}
+/* Summary: filter periode, kartu utama gradasi, sisa pekerjaan, rincian per aktivitas */
+.sum-seg{display:grid;grid-template-columns:1fr 1fr;padding:4px;gap:4px;border-radius:999px;background:rgba(255,255,255,.5);box-shadow:inset 0 0 0 1px rgba(255,255,255,.9)}
+.sum-seg button{min-height:44px;border:0;background:transparent;font-size:14px;font-weight:700}
+.sum-hero{position:relative;overflow:hidden;border-radius:24px;padding:16px;color:#fff;background:linear-gradient(140deg,#21CFF7 -35%,#0A92F2 30%,#3466FF 100%);box-shadow:0 18px 34px -18px rgba(25,80,200,.8)}
+.sum-hero::after{content:"";position:absolute;right:-56px;top:-64px;width:180px;height:180px;border-radius:50%;border:26px solid rgba(255,255,255,.09);pointer-events:none}
+.sum-hh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;position:relative}
+.sum-hh b{font-size:17px;font-weight:800}.sum-hh small{font-size:12.5px;font-weight:600;opacity:.9}
+.sum-top{display:flex;align-items:center;gap:14px;margin:12px 0 14px;position:relative}
+.sum-ring{position:relative;width:112px;height:112px;flex:none}
+.sum-ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;letter-spacing:-.02em}
+.sum-ring b small{font-size:14px;font-weight:700;margin-top:8px;opacity:.85}
+.sum-meta{flex:1;min-width:0}
+.sum-cnt{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sum-cnt>div{padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
+.sum-cnt b{display:block;font-size:22px;line-height:1.1;font-weight:800}.sum-cnt small{display:block;white-space:nowrap}.sum-cnt small{font-size:11.5px;font-weight:700;opacity:.92}
+.sum-left{margin-top:10px;font-size:13px;line-height:1.4;font-weight:600}.sum-left b{font-weight:800}
+.sum-none{margin:18px 0 6px;font-size:14px;font-weight:600;position:relative}
+.sum-other{position:relative;display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:8px 10px 8px 12px;border-radius:14px;color:#fff;background:rgba(10,30,90,.18);font-size:12.5px;font-weight:700;text-align:left}
+.sum-other:active{background:rgba(10,30,90,.28)}
+.sum-obar{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.22);overflow:hidden}.sum-obar i{display:block;height:100%;border-radius:99px;background:#fff}
+.sum-todo .li{min-height:64px}.sum-todo .li:active{background:var(--blue-50)}.sum-todo .li>svg{color:var(--muted);flex:none}
+.sum-done{display:flex;align-items:center;gap:12px;padding:14px 16px}.sum-done b{display:block;font-size:14.5px}.sum-done small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.sum-list{padding:4px 14px}
+.sum-row+.sum-row{border-top:1px solid var(--sep)}
+.sum-rowbtn{display:block;width:100%;text-align:left;padding:12px 0;min-height:44px}
+.sum-rowbtn:active{opacity:.7}
+.sum-rt{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13.5px}.sum-rt>b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sum-rt>span.num{flex:none;color:var(--ink-2)}
+.sum-ic{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;flex:none;background:var(--blue-100);color:var(--blue-700)}
+.sum-rm{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px;font-size:12px;color:var(--muted)}.sum-rm span:last-child{display:inline-flex;align-items:center;gap:4px;font-weight:700;color:var(--ink-2)}
+.sum-rm svg{transition:transform .2s}.sum-row.open .sum-rm svg{transform:rotate(180deg)}
+.sum-det{display:none;padding:0 0 12px}.sum-row.open .sum-det{display:block}
+.sum-dgo{display:inline-flex;align-items:center;min-height:44px}
 .cap3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .cap3 button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 2px;border-radius:14px;text-align:center;min-width:0}
 .cap3 button:hover{background:rgba(255,255,255,.5)}
@@ -612,7 +644,10 @@ const TEAM = [
   {u:'spg.rina',status:'Hadir',time:'07:56',mode:'WFO',tone:'green',sales:'Rp10,7 jt'},
   {u:'sales.budi',status:'Terlambat',time:'08:21',mode:'WFA',tone:'amber',sales:'Rp1,6 jt'},
   {u:'sales.dimas',status:'Cuti',time:'–',mode:'–',tone:'blue',sales:'–'},
-  {u:'rea.nina',status:'Belum absen',time:'–',mode:'WFO',tone:'red',sales:'–'}
+  {u:'rea.nina',status:'Belum absen',time:'–',mode:'WFO',tone:'red',sales:'–'},
+  {u:'cbd.tono',status:'Hadir',time:'08:03',mode:'WFO',tone:'green',sales:'–'},
+  {u:'md.rangga',status:'Hadir',time:'07:48',mode:'WFO',tone:'green',sales:'Rp3,2 jt'},
+  {u:'bantuan.eko',status:'Terlambat',time:'08:14',mode:'WFO',tone:'amber',sales:'Rp2,4 jt'}
 ];
 /* Info perangkat absensi (feedback AMO baris 3: "mencatat device info, misalnya jenis hp
    samsung/iphone"). Perangkat per pengguna dibuat tetap supaya demo bisa dibandingkan. */
@@ -915,7 +950,7 @@ function doLogin(){
   },900);
 }
 function loginAs(u){
-  S.user=u; S.demo.mode=null; fmSyncVisits();
+  S.user=u; S.demo.mode=null; S.sumPer='d'; S.sumOpen={}; fmSyncVisits();
   logAdd('Login','Berhasil','key','');
   if(!S.enrolled[u]) reset('enroll-intro'); else reset('home');
   renderPanel();
@@ -975,17 +1010,17 @@ SCR['enroll-done'] = () => { S.enrolled[S.user]=true; return {note:'Wajah refere
 
 /* ---------- Home ---------- */
 const MENUS = {
-  spg:[['Riwayat penjualan','file',"tab('penjualan')"],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
-  mobile:[['Catat penjualan','bag',"act(()=>startSale())",1,'jual'],['Riwayat penjualan','file',"tab('penjualan')"],['SKU display','grid',"go('sku')",0,'sku'],['Display share','pie',"go('share')",0,'share'],['Stock opname','box',"go('fm-stok')",0,'stok'],['Campaign & POSM','image',"go('posm')",0,'posm'],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
-  canvas:[['Usulkan toko','plus',"go('toko-list')"],['Loading Barang','box',"act(()=>go('loading'))",1],['Unloading Barang','retur',"act(()=>go('unloading'))",1],['Riwayat penjualan','file',"go('penjualan')"],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
-  order:[['Usulkan toko','plus',"go('toko-list')"],['Daftar pesanan','file',"go('pesanan')"],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
-  leads:[['Leads','users',"act(()=>tab('leads'))",1],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
+  spg:[['Riwayat penjualan','file',"go('penjualan')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  mobile:[['Catat penjualan','bag',"act(()=>startSale())",1,'jual'],['Riwayat penjualan','file',"go('penjualan')"],['SKU display','grid',"go('sku')",0,'sku'],['Display share','pie',"go('share')",0,'share'],['Stock opname','box',"go('fm-stok')",0,'stok'],['Campaign & POSM','image',"go('posm')",0,'posm'],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  canvas:[['Usulkan toko','plus',"go('toko-list')"],['Loading Barang','box',"act(()=>go('loading'))",1],['Unloading Barang','retur',"act(()=>go('unloading'))",1],['Riwayat penjualan','file',"go('penjualan')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  order:[['Usulkan toko','plus',"go('toko-list')"],['Daftar pesanan','file',"go('pesanan')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
+  leads:[['Leads','users',"act(()=>go('leads',{back:1}))",1],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
   fmcg:[['Buat jadwal','route',"act(()=>go('kunjungan-form'))",1],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
-  cbd:[['Aktivitas saya','grid',"act(()=>go('mf-akt'))",1],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
-  rea:[['Aktivitas saya','grid',"act(()=>go('mf-akt'))",1],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  cbd:[['Aktivitas saya','grid',"act(()=>go('mf-akt'))",1],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  rea:[['Aktivitas saya','grid',"act(()=>go('mf-akt'))",1],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   arco:[['Assign leads','users',"go('assign')"],['Semua leads','file',"go('leads-all')"],['Tim saya','user',"tab('tim')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
-  spv:[['Approve Loading Barang','box',"go('approve-loading')"],['Approve Unloading Barang','retur',"go('approve-unloading')"],['Approval','check',"go('approval')"],['Approval kunjungan','route',"go('approval-kunjungan')"],['Assign canvasser','route',"go('assign-canvas')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tugaskan tim','route',"act(()=>go('kunjungan-form',{spv:1}))",1],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
-  spvM:[['Approval','check',"go('approval')"],['Approval kunjungan','route',"go('approval-kunjungan')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Target','target',"tab('target')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]]
+  spv:[['Approve Loading Barang','box',"go('approve-loading')"],['Approve Unloading Barang','retur',"go('approve-unloading')"],['Approval','check',"go('approval')"],['Approval kunjungan','route',"go('approval-kunjungan')"],['Assign canvasser','route',"go('assign-canvas')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tugaskan tim','route',"act(()=>go('kunjungan-form',{spv:1}))",1],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  spvM:[['Approval','check',"go('approval')"],['Approval kunjungan','route',"go('approval-kunjungan')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]]
 };
 MENUS.spvF=MENUS.spv;
 /* Super Admin: semua menu mobile dari semua role, tanpa duplikat nama. */
@@ -1057,18 +1092,18 @@ function fieldDash(){
   if(r==='leads'){
     const mine=S.leads.filter(l=>l.owner===S.user), c=k=>mine.filter(l=>l.status===k).length;
     const goal=mine.filter(l=>l.status==='Deal').reduce((s,l)=>s+(l.goal||0),0);
-    return `<div class="sec-title">${isMf()?'Direct Sales':'Leads saya'} <a onclick="tab('leads')">Lihat semua</a></div>
+    return `<div class="sec-title">${isMf()?'Direct Sales':'Leads saya'} <a onclick="go('leads',{back:1})">Lihat semua</a></div>
     <div class="card"><div class="stat3"><div><small>Baru</small><b>${c('Baru')}</b></div><div><small>Prospect</small><b>${c('Prospect')}</b></div><div><small>Deal</small><b>${c('Deal')}</b></div></div>
     <div class="row between" style="margin-top:14px"><span class="small muted">Goal pencairan Oktober</span><b class="num">${rpShort(goal)} / Rp150 jt</b></div><div class="bar tan" style="margin-top:8px"><i style="width:${Math.max(4,goal/150e6*100)}%"></i></div></div>
     <!--SPLIT-->${(()=>{const todo=mine.filter(l=>l.status==='Baru'||l.fu==='hari ini');return todo.length?`<div class="sec-title">Perlu dihubungi hari ini</div><div class="list">${todo.map(l=>leadRow(l)).join('')}</div>`:''})()}`;
   }
   if(r==='order'){
     const tot=S.orders.reduce((s,o)=>s+o.total,0);
-    return `<div class="sec-title">Pesanan bulan ini <a onclick="tab('target')">Target</a></div>
+    return `<div class="sec-title">Pesanan bulan ini <a onclick="tab('summary')">Summary</a></div>
     <div class="card"><div class="small muted">Nilai pesanan Oktober</div><div class="big-num num">${rpShort(tot+68e6)}</div><div class="bar" style="margin:10px 0 6px"><i style="width:${(tot+68e6)/150e6*100}%"></i></div><div class="small muted">Target Rp150 jt · ${S.orders.filter(o=>o.status!=='Lunas').length} pesanan perlu follow up</div></div>
     <!--SPLIT-->${todayVisits()}`;
   }
-  const head=`<div class="sec-title">Penjualan bulan ini <a onclick="tab('target')">Target</a></div>`;
+  const head=`<div class="sec-title">Penjualan bulan ini <a onclick="tab('summary')">Summary</a></div>`;
   if(isSpg()&&aktCfg().dasar==='qty'){ const o=visitOpen(), need=aktCfg().checkin==='Ya';
     return `${o||!need?'':`<button class="banner amber" style="margin-top:12px;width:100%;text-align:left;font:inherit" onclick="go('spg-akt')">${I('pin',18)}<span>Belum check-in${byPenempatan()?' di '+esc(spgToko().name):''}. Buka <b>Aktivitas saya</b> untuk check-in.</span></button>`}
   ${head}
@@ -1818,10 +1853,9 @@ SCR.penjualan = p => {
   const tot=list.reduce((s,x)=>s+x.total,0);
   const groups=[...new Set(list.map(x=>x.d||0))].sort((a,b)=>a-b);
   const row=x=>`<button class="li" onclick="go('jual-detail',{id:'${x.id}'})"><div class="grow"><div class="t">${esc(x.items.map(i=>(i.name||prodById(i.id).name)+(i.q>1?' ×'+i.q:'')).join(', '))}</div><div class="s">${esc(x.toko)} · ${x.time}</div></div><div class="r"><b class="num">${rpShort(x.total)}</b><div style="margin-top:4px">${chip(x.status,x.status==='Terkirim'?'green':'amber')}${x.inv?.flag?' '+chip(x.inv.none?'Tanpa invoice':'Selisih besar','amber'):''}${x.sel?' '+chip('Selisih unloading','amber'):''}</div></div></button>`;
-  const asTab=!hasAkt()&&U().main.key==='penjualan';
   const tk=[...new Set(list.map(x=>x.toko))].map(t=>{ const Lt=list.filter(x=>x.toko===t); return {t,n:Lt.length,u:Lt.reduce((a,x)=>a+x.items.reduce((b,i)=>b+i.q,0),0),tot:Lt.reduce((a,x)=>a+x.total,0),sel:Lt.some(x=>x.sel)}; });
-  return {tab:asTab?'penjualan':undefined, note:(r==='canvas'&&membawaBarang()?'Penjualan canvasing mengurangi stok bawaan secara otomatis (BRD 2.16.10).':'Riwayat penjualan SPG/promotor, terkirim ke sistem klien lewat API.')+' Riwayat penjualan sendiri bisa difilter per tanggal (BRD 2.14.8, 2.16.11). Hapus transaksi butuh approval supervisor (BRD 2.14.4–2.14.5).',
-  html:`${appbar('Riwayat penjualan',{backBtn:!asTab})}<main class="content">
+  return {note:(r==='canvas'&&membawaBarang()?'Penjualan canvasing mengurangi stok bawaan secara otomatis (BRD 2.16.10).':'Riwayat penjualan SPG/promotor, terkirim ke sistem klien lewat API.')+' Riwayat penjualan sendiri bisa difilter per tanggal (BRD 2.14.8, 2.16.11). Hapus transaksi butuh approval supervisor (BRD 2.14.4–2.14.5).',
+  html:`${appbar('Riwayat penjualan',{backBtn:true})}<main class="content">
     <div class="segtabs">${tabs.map(t=>`<button class="${f===t[0]?'on':''}" onclick="setP({f:'${t[0]}'})">${t[1]}</button>`).join('')}</div>
     <div class="card"><div class="row between"><div><div class="small muted">${tabs.find(t=>t[0]===f)[1]} · ${list.length} transaksi</div><div class="big-num num">${rp(tot)}</div></div><div class="ico-tile">${I('bag',22)}</div></div>
     ${r==='canvas'&&membawaBarang()?`<button class="li" style="padding:12px 0 0;margin-top:12px;border-top:1px solid var(--sep)" onclick="go('stok')"><div class="ico-tile tan">${I('box',20)}</div><div class="grow"><div class="t">Stok bawaan</div><div class="s">${Object.values(S.stock).reduce((s,x)=>s+x.good,0)} layak jual · ${Object.values(S.stock).reduce((s,x)=>s+x.bad,0)} retur</div></div>${I('right',20)}</button>`:''}</div>
@@ -2462,8 +2496,8 @@ SCR['mf-akt'] = () => {
   const rows=[['users','Direct Sales',L.length+' data · '+L.filter(l=>l.status==='Baru').length+' belum dihubungi',"go('leads',{back:1})"],
     ['user','Monitoring Mitra',M.filter(m=>mmNow(m.id).length).length+' dari '+M.length+' mitra dipantau bulan ini',"go('mitra')"],
     ['grid','Activity',A.length+' activity bulan ini',"go('mf-activity')"]];
-  return {note:'Aktivitas saya untuk CBD dan REA: Direct Sales, Monitoring Mitra, dan Activity. Menu di Beranda terkunci sampai absen masuk.',
-  html:`${appbar('Aktivitas saya')}<main class="content">
+  return {tab:S.stack.length===1?'mf-akt':undefined, note:'Aktivitas saya untuk CBD dan REA: Direct Sales, Monitoring Mitra, dan Activity. Menu di Beranda terkunci sampai absen masuk.',
+  html:`${appbar('Aktivitas saya',{backBtn:S.stack.length>1})}<main class="content">
     <div class="list">${rows.map(([ic,t,sub,go])=>`<button class="li" onclick="act(()=>${go.replace(/"/g,'&quot;')})"><div class="ico-tile">${I(ic,20)}</div><div class="grow"><div class="t">${t}</div><div class="s">${sub}</div></div>${I('right',18)}</button>`).join('')}</div>
   </main>`};
 };
@@ -2706,6 +2740,65 @@ function targetHariIni(){
   return `<div class="card"><b>Target hari ini</b><table class="ttable"><thead><tr><th scope="col">Keterangan</th><th scope="col">Quantity</th><th scope="col">Amount</th></tr></thead><tbody>${R.map(([l,u,v,tot])=>`<tr class="${tot?'tot':''}"><th scope="row">${l}</th><td class="num">${u} unit</td><td class="num">${uang(v)}</td></tr>`).join('')}</tbody></table>
   <p class="hint">Target harian dihitung dari target bulanan dibagi hari kerja. Kekurangan hari sebelumnya ditambahkan ke hari berikutnya.</p></div>`;
 }
+/* ---------- Summary: apa yang sudah dikerjakan dan apa yang tersisa ---------- */
+/* Kartu Pencapaian kamu (peringkat, tepat waktu, badge). Dipakai Summary dan Target; tidak untuk SPV. */
+function achvCard(){
+  if(role()==='spv') return '';
+  return `<div class="card"><div class="row between"><b>Pencapaian kamu</b>${chip('Oktober','blue')}</div>
+    <div class="stat3" style="margin-top:12px"><div><small>Peringkat cabang</small><b>#3<span class="muted small">/12</span></b></div><div><small>Tepat waktu</small><b>9 hari</b></div><div><small>Kunjungan</small><b>96%</b></div></div>
+    <div class="row" style="flex-wrap:wrap;gap:6px;margin-top:12px">${chip(I('star',12,2.2)+' Top 3 cabang','tan')}${chip(I('clock',12,2.2)+' Rajin 9 hari','green')}${chip(I('trophy',12,2.2)+' Quiz 95','blue')}</div>
+    <p class="hint">Grade final tetap dihitung di sistem (BRD Grading).</p></div>`;
+}
+/* Rasio capaian satu item (0..1). Uang boleh melebihi target, jadi dibatasi 100%. */
+const sumRatio = i => i.total ? Math.min(1,i.done/i.total) : 0;
+/* Persen periode: rata-rata rasio tiap item, tanpa item hitungan (todo). */
+function sumPct(L){ const H=L.find(i=>i.head); if(H) return Math.round(sumRatio(H)*100); const P=L.filter(i=>!i.todo); return P.length?Math.round(P.reduce((s,i)=>s+sumRatio(i),0)/P.length*100):0; }
+/* Kalimat sisa: "7 pekerjaan lagi" atau "Rp86 jt lagi". */
+function sumGap(i){ const g=Math.max(0,i.total-i.done); if(!g) return 'Tercapai'; if(i.sisa) return g+' '+i.unit+' '+i.sisa; return (i.money?rpShort(g):g+(i.unit?' '+i.unit:''))+' lagi'; }
+const sumNum = (i,n) => i.money?rpShort(n):n.toLocaleString('id-ID');
+const sumGo = go => `act(()=>${go})`.replace(/"/g,'&quot;');
+function sumPer(k){ S.sumPer=k; render(false,true); }
+/* Buka-tutup rincian tanpa render ulang, supaya ring tidak beranimasi lagi. */
+function sumToggle(k){ S.sumOpen=S.sumOpen||{}; S.sumOpen[k]=!S.sumOpen[k];
+  const el=document.querySelector(`[data-sum="${k}"]`); if(!el) return; el.classList.toggle('open',S.sumOpen[k]); el.querySelector('.sum-rowbtn').setAttribute('aria-expanded',S.sumOpen[k]); }
+function sumRing(pct){ const R=42, C=2*Math.PI*R, o=(C*(1-pct/100)).toFixed(1);
+  return `<div class="sum-ring" role="img" aria-label="Capaian ${pct} persen"><svg viewBox="0 0 100 100" width="112" height="112" aria-hidden="true"><circle cx="50" cy="50" r="${R}" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="10"/>${pct?`<circle class="pc-arc" cx="50" cy="50" r="${R}" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" transform="rotate(-90 50 50)" style="--c:${C.toFixed(1)};--o:${o}" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${o}"/>`:''}</svg><b class="num">${pct}<small>%</small></b></div>`;
+}
+SCR.summary = () => {
+  const per=S.sumPer==='m'?'m':'d', other=per==='d'?'m':'d', L=sumItems(per), W=L.filter(i=>!i.todo), T=L.filter(i=>i.todo);
+  const pct=sumPct(L), WA=W.filter(i=>!i.head), tuntas=WA.filter(i=>sumRatio(i)>=1).length, oPct=sumPct(sumItems(other));
+  const perLab={d:'Hari ini',m:'Bulan ini'}, when=per==='d'?'Senin, 26 Okt 2026':'Oktober 2026';
+  const seg=`<div class="segtabs sum-seg" role="group" aria-label="Periode">${['d','m'].map(k=>`<button type="button" class="${k===per?'on':''}" aria-pressed="${k===per}" onclick="sumPer('${k}')">${perLab[k]}</button>`).join('')}</div>`;
+  // Sisa pekerjaan: item hitungan dulu, lalu yang paling jauh dari target.
+  const left=W.filter(i=>!i.head&&sumRatio(i)<1).sort((a,b)=>sumRatio(a)-sumRatio(b)), far=left[0];
+  const todoRows=[...T,...left].slice(0,4);
+  let hero;
+  if(!L.length) hero=`<section class="sum-hero" aria-label="Capaian ${perLab[per].toLowerCase()}"><div class="sum-hh"><b>Capaian</b><small>${when}</small></div><p class="sum-none">Belum ada pekerjaan ${perLab[per].toLowerCase()}.</p></section>`;
+  else hero=`<section class="sum-hero" aria-label="Capaian ${perLab[per].toLowerCase()}">
+    <div class="sum-hh"><b>Capaian</b><small>${when}</small></div>
+    <div class="sum-top">${sumRing(pct)}<div class="sum-meta">
+      <div class="sum-cnt"><div><b class="num">${tuntas}</b><small>aktivitas selesai</small></div><div><b class="num">${WA.length-tuntas}</b><small>belum</small></div></div>
+      <p class="sum-left">${far?(far.sisa?`<b>${sumGap(far)}</b>`:`<b>${sumGap(far)}</b> di ${esc(far.label)}`):'Semua target tercapai'}${T.length?` · ${T.map(t=>t.total+' '+esc(t.label.toLowerCase())).join(', ')}`:''}</p>
+    </div></div>
+    <button type="button" class="sum-other" onclick="sumPer('${other}')" aria-label="Lihat ${perLab[other].toLowerCase()}, capaian ${oPct} persen"><span>${perLab[other]}</span><span class="sum-obar" role="progressbar" aria-label="Capaian ${perLab[other].toLowerCase()}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${oPct}"><i style="width:${oPct}%"></i></span><b class="num">${oPct}%</b>${I('right',16,2.4)}</button>
+  </section>`;
+  const todo=`<div class="sec-title">Yang perlu dikerjakan${todoRows.length?`<span class="small muted num">${T.length+left.length} sisa</span>`:''}</div>
+  <div class="list sum-todo">${todoRows.length?todoRows.map(i=>{ const p=Math.round(sumRatio(i)*100), tone=i.todo?'amber':p<50?'tan':'';
+    const txt=i.todo?`${i.total} ${esc(i.label.toLowerCase())}`:sumGap(i), sub=i.todo?esc(i.sub||''):`${esc(i.label)} · ${p}% tercapai`;
+    return `<button type="button" class="li sum-trow" onclick="${sumGo(i.go)}"><div class="ico-tile ${tone}">${I(i.ic,20)}</div><div class="grow"><div class="t">${txt}</div><div class="s">${sub}</div></div>${I('right',20)}</button>`; }).join('')
+    :`<div class="sum-done"><div class="ico-tile green">${I('check',20,2.2)}</div><div><b>${L.length?'Semua tuntas '+perLab[per].toLowerCase():'Belum ada pekerjaan'}</b><small>${L.length?'Tidak ada sisa pekerjaan. Kerja bagus.':'Pekerjaan muncul setelah jadwal dibuat.'}</small></div></div>`}</div>`;
+  S.sumOpen=S.sumOpen||{};
+  const rows=W.map((i,n)=>{ const p=Math.round(sumRatio(i)*100), k=per+n, open=!!(i.detail&&S.sumOpen[k]), lab=`${esc(i.label)}: ${sumNum(i,i.done)} dari ${sumNum(i,i.total)}${i.unit?' '+i.unit:''}`;
+    const body=`<div class="sum-rt"><span class="sum-ic">${I(i.ic,16,2)}</span><b>${esc(i.label)}</b><span class="num"><b>${sumNum(i,i.done)}</b> / ${sumNum(i,i.total)}${i.unit?' '+esc(i.unit):''}</span></div>
+      <div class="bar ${p<50?'tan':''}" role="progressbar" aria-label="${esc(i.label)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p}"><i style="width:${p?Math.max(4,p):0}%"></i></div>
+      <div class="sum-rm"><span>${esc(i.sub||'')}</span><span class="num">${p}%${i.detail?I('down',16,2.4):I('right',16,2.4)}</span></div>`;
+    return i.detail
+      ? `<div class="sum-row ${open?'open':''}" data-sum="${k}"><button type="button" class="sum-rowbtn" onclick="sumToggle('${k}')" aria-expanded="${open}" aria-label="${lab}, buka rincian">${body}</button><div class="sum-det">${i.detail}<button type="button" class="link sum-dgo" onclick="${sumGo(i.go)}">Buka halaman ${I('right',16,2.4)}</button></div></div>`
+      : `<div class="sum-row"><button type="button" class="sum-rowbtn" onclick="${sumGo(i.go)}" aria-label="${lab}">${body}</button></div>`; }).join('');
+  const rincian=W.length?`<div class="sec-title">Rincian</div><div class="card sum-list">${rows}</div>`:'';
+  return {tab:'summary', note:'Summary menjawab dua hal: apa yang sudah dikerjakan dan apa yang tersisa. Filter <b>Hari ini</b> memakai data yang sama dengan kartu Pencapaian di Beranda; <b>Bulan ini</b> memakai target bulanan. Persen = rata-rata capaian tiap aktivitas (penjualan di atas target dihitung 100%). Yang perlu dikerjakan diurutkan dari yang paling jauh dari target; ketuk untuk membuka halaman kerjanya.'+(role()==='spv'?' SPV melihat capaian tim.':' Kartu <b>Pencapaian kamu</b> dipindah dari halaman Target.'),
+  html:`${appbar('Summary',{backBtn:false})}<main class="content">${seg}${hero}${todo}${rincian}${achvCard()}</main>`};
+};
 SCR.target = () => {
   const r=role();
   let main;
@@ -2723,10 +2816,7 @@ SCR.target = () => {
     main=`${salesTabs(12)}${salesPie('',false)}${targetTokoBulan()}
     <div class="card"><div class="kv"><span>Akuisisi pelanggan baru</span><span class="num">${isC?'3 / 5 toko':'41 / 60'}</span></div></div>
     ${targetHariIni()}`; }
-  const achv = r==='spv'?'':`<div class="card"><div class="row between"><b>Pencapaian kamu</b>${chip('Oktober','blue')}</div>
-    <div class="stat3" style="margin-top:12px"><div><small>Peringkat cabang</small><b>#3<span class="muted small">/12</span></b></div><div><small>Tepat waktu</small><b>9 hari</b></div><div><small>Kunjungan</small><b>96%</b></div></div>
-    <div class="row" style="flex-wrap:wrap;gap:6px;margin-top:12px">${chip(I('star',12,2.2)+' Top 3 cabang','tan')}${chip(I('clock',12,2.2)+' Rajin 9 hari','green')}${chip(I('trophy',12,2.2)+' Quiz 95','blue')}</div>
-    <p class="hint">Grade final tetap dihitung di sistem (BRD Grading).</p></div>`;
+  const achv = achvCard();
   return {tab:'target', note:(isSpg()?'Metrik yang ditampilkan dan dasar pencapaian diatur di dashboard (Aktivitas per role). Target quantity per kategori diisi di dashboard: Target & sell-in › Target quantity. ':'')+'Target diset admin di Web. Di mobile sales melihat pencapaian, target harian prorata, dan carry forward (BRD 2.9.10–2.9.11). Estimasi insentif dihapus dari tampilan promotor (MOM 9.1). <span class="tagx">Usulan</span>Yang ditugaskan di lebih dari 1 toko melihat rincian pencapaian per toko. <span class="tagx">Usulan</span>Kartu <b>Pencapaian kamu</b> (peringkat, streak, badge).',
   html:`${appbar('Target & pencapaian',{backBtn:false})}<main class="content">${main}${achv}${r==='spg'?`<div class="card"><b>Pergantian promotor</b><p class="hint" style="margin-top:6px">Jika promotor diganti di tengah bulan, target promotor baru mengikuti target toko yang sudah diinput, bukan sisa target setelah dikurangi capaian promotor sebelumnya (MOM 9.1).</p></div>`:''}
   </main>`};
@@ -3383,8 +3473,8 @@ SCR.akt = (p={}) => {
     : !L.length ? `<div class="empty">Belum ada jadwal kunjungan. Team Leader membuat jadwalnya.</div>`
     : multi ? ''
     : `<div class="list" style="margin-bottom:14px">${storeRow(L[0])}</div><p class="hint" style="margin:-6px 0 14px">Kamu punya 1 tujuan hari ini. Check-in, kerjakan tugas, lalu check-out.</p>`;
-  return {tab:hasAkt()?'akt':undefined, note:'<b>MOM 12 Nov:</b> daftar toko hari ini tampil langsung di halaman sesuai urutan journey plan, tanpa popup Pilih toko. Tiap baris punya tombol sendiri: Check-in, Check-out, Toko tutup, atau Lihat. Halaman Aktivitas untuk pilih toko, check-in, dan check-out, mengikuti pola Promotor FMCG. Menu pekerjaan ada di halaman Aktivitas Toko, dibuka lewat tombol Aktivitas Toko di baris toko setelah check-in, tidak di Beranda: pilih toko jika lebih dari satu, check-in, kerjakan pekerjaan, lalu check-out. Judul: Aktivitas Saya untuk 1 toko, Aktivitas Toko untuk lebih dari 1 toko. Pekerjaan yang terikat lokasi terkunci sampai check-in. Check-out tidak mewajibkan semua tugas selesai (aturan itu hanya untuk Promotor FMCG dan MD).',
-  html:appbar(aktLabel(),{backBtn:!hasAkt()})+aktHalaman(L,p,head,aktPekerjaan(o))};
+  return {tab:S.stack.length===1?'akt':undefined, note:'<b>MOM 12 Nov:</b> daftar toko hari ini tampil langsung di halaman sesuai urutan journey plan, tanpa popup Pilih toko. Tiap baris punya tombol sendiri: Check-in, Check-out, Toko tutup, atau Lihat. Halaman Aktivitas untuk pilih toko, check-in, dan check-out, mengikuti pola Promotor FMCG. Menu pekerjaan ada di halaman Aktivitas Toko, dibuka lewat tombol Aktivitas Toko di baris toko setelah check-in, tidak di Beranda: pilih toko jika lebih dari satu, check-in, kerjakan pekerjaan, lalu check-out. Judul: Aktivitas Saya untuk 1 toko, Aktivitas Toko untuk lebih dari 1 toko. Pekerjaan yang terikat lokasi terkunci sampai check-in. Check-out tidak mewajibkan semua tugas selesai (aturan itu hanya untuk Promotor FMCG dan MD).',
+  html:appbar(aktLabel(),{backBtn:S.stack.length>1})+aktHalaman(L,p,head,aktPekerjaan(o))};
 };
 /* Halaman Aktivitas Toko: menu pekerjaan satu toko, dibuka dari tombol Aktivitas Toko di daftar toko setelah check-in. */
 SCR['aktivitas-toko'] = p => {
@@ -3511,8 +3601,8 @@ SCR['spg-akt'] = (p={}) => {
       <button class="btn ${lk?'locked':''}" style="margin-top:12px" onclick="spgCheckin()">${I(lk?'lock':'pin',18)} Check-in di lokasi</button></div>`
     : `<div class="banner amber" style="margin-bottom:14px">${I('pin',18)}<span>Belum check-in. Pilih toko dari jadwal kunjungan, lalu check-in di lokasi.</span></div><button class="btn ${lk?'locked':''}" style="margin-bottom:14px" onclick="spgCheckin()">${I(lk?'lock':'pin',18)} Pilih toko & check-in</button>`;
   const seg=p.seg||'hari', L=S.visits[vk()]||[];
-  return {note:'Aktivitas saya. Isi menu, sumber lokasi check-in (penempatan user atau jadwal kunjungan), dan wajib tidaknya check-in diatur di dashboard: Konfigurasi aplikasi › Aktivitas per role. SPG ditempatkan di satu toko lewat User SIM, jadi langsung diarahkan check-in di toko itu. Check-in cukup sekali untuk semua aktivitas.',
-  html:`${appbar('Aktivitas saya')}<main class="content">${segHari(seg)}
+  return {tab:S.stack.length===1?'spg-akt':undefined, note:'Aktivitas saya. Isi menu, sumber lokasi check-in (penempatan user atau jadwal kunjungan), dan wajib tidaknya check-in diatur di dashboard: Konfigurasi aplikasi › Aktivitas per role. SPG ditempatkan di satu toko lewat User SIM, jadi langsung diarahkan check-in di toko itu. Check-in cukup sekali untuk semua aktivitas.',
+  html:`${appbar('Aktivitas saya',{backBtn:S.stack.length>1})}<main class="content">${segHari(seg)}
     ${seg==='rencana'?planList():`${kunjBanners()}${L.length?progresCard(L):''}${head}
     <div class="sec-title">Aktivitas</div>
     <div class="list">${c.akt.map(row).join('')||`<div class="empty">Admin belum memilih aktivitas untuk role ini.</div>`}</div>
@@ -4100,9 +4190,9 @@ function capItems(){
   if(r==='leads'){
     const mine=S.leads.filter(l=>l.owner===S.user);
     const M=mitraAll();
-    out.push({c:'job',label:'Direct Sales dihubungi',done:mine.filter(l=>l.status!=='Baru').length,total:mine.length,sub:'data kamu',go:"act(()=>go('leads',{back:1}))"},
-      {c:'visit',label:'Monitoring Mitra',done:M.filter(m=>mmNow(m.id).length).length,total:M.length,sub:'mitra dipantau bulan ini',go:"act(()=>go('mitra'))"},
-      {c:'task',label:'Activity',done:actNow().length,total:Math.max(2,actNow().length),sub:'rekrut mitra bulan ini',go:"act(()=>go('mf-activity'))"});
+    out.push({c:'job',label:'Direct Sales dihubungi',done:mine.filter(l=>l.status!=='Baru').length,total:mine.length,unit:'data',sub:'data kamu',go:"act(()=>go('leads',{back:1}))"},
+      {c:'visit',label:'Monitoring Mitra',done:M.filter(m=>mmNow(m.id).length).length,total:M.length,unit:'mitra',sub:'mitra dipantau bulan ini',go:"act(()=>go('mitra'))"},
+      {c:'task',label:'Activity',done:actNow().length,total:Math.max(2,actNow().length),unit:'aktivitas',sub:'rekrut mitra bulan ini',go:"act(()=>go('mf-activity'))"});
     return out;
   }
   const vGo=aktGo()||"tab('home')";
@@ -4112,10 +4202,51 @@ function capItems(){
   else if(r==='canvas'||r==='order'){ const T=actv.flatMap(x=>aktTasks(x).filter(t=>t.st)); out.push({c:'job',label:'Pekerjaan toko',done:T.filter(t=>t.st==='Selesai').length,total:T.length,sub:r==='order'?'pesanan per toko':'penjualan dan retur',go:"tab('akt')"}); }
   else if(isSpg()){ const c=aktCfg(), st={jual:spgTrx().length>0,sku:S.dispDone,share:S.shareState==='kirim',stok:S.fm.stokDone,posm:posmAll().every(a=>S.posm[a.id]),promo:!!S.fm.promoDone,support:supTasks().length>0&&supTasks().every(t=>t.done)}, m=(c.akt||[]).filter(k=>k in st); out.push({c:'job',label:'Aktivitas saya',done:m.filter(k=>st[k]).length,total:m.length,sub:'modul hari ini',go:"go('spg-akt')"}); }
   else if(isMobilePromo()) out.push({c:'job',label:'Campaign & POSM',done:posmAll().filter(a=>S.posm[a.id]).length,total:posmAll().length,sub:'brief dinilai',go:"go('posm')"});
-  else if(r==='spg'){ const n=salesList().filter(x=>!x.d).length; out.push({c:'job',label:'Transaksi',done:Math.min(n,3),total:3,sub:'target 3 per hari',go:"tab('penjualan')"}); }
+  else if(r==='spg'){ const n=salesList().filter(x=>!x.d).length; out.push({c:'job',label:'Transaksi',done:Math.min(n,3),total:3,sub:'target 3 per hari',go:"go('penjualan')"}); }
   if(r==='fmcg') out.push({c:'task',label:'Support task',done:supTasks().filter(t=>t.done).length,total:supTasks().length,sub:'dari client',go:"fmGate(()=>go('fm-task'))"});
   else out.push(qItem);
   return out;
+}
+/* Data Summary per role. per: 'd' hari ini, 'm' bulan ini. Setiap item: {label,ic,done,total,unit,sub,go,money?,detail?}. */
+const spvSet = () => ['spvM','arco'].includes(U().menu)?SPV_TGT.mf:SPV_TGT.elek;
+function sumItems(per){
+  const r=role(), ICON={visit:'pin',job:'grid',task:'quiz'};
+  const mk=(label,ic,done,total,unit,sub,go,x)=>({label,ic,done,total,unit,sub,go,...x});
+  const kv=rows=>rows.map(([k,v])=>`<div class="kv"><span>${esc(k)}</span><span class="num">${v}</span></div>`).join('');
+  const akt="tab('"+navAkt()[0]+"')";
+  let out=[];
+  if(per==='d'){
+    if(r==='spv'){
+      const set=new Set(spvSet().sales.map(x=>x[0])), tm=TEAM.filter(t=>set.has(t.u));
+      const hadir=tm.filter(t=>t.status==='Hadir'||t.status==='Terlambat').length, wait=otherReqs().length+visitReqs().length;
+      out=[mk('Tim hadir','users',hadir,tm.length,'orang',tm.filter(t=>t.status==='Cuti').length+' cuti',akt,{sisa:'belum hadir',detail:kv(tm.map(t=>[USERS[t.u]?USERS[t.u].name:t.u,t.status+' · '+t.time]))}),
+        mk('Approval menunggu','check',0,wait,'permintaan','perlu diproses',"go('approval')",{todo:true})];
+    } else out=capItems().map(c=>mk(c.label,ICON[c.c]||'grid',c.done,c.total,c.unit||(c.c==='visit'?'toko':c.c==='task'?'tugas':'pekerjaan'),c.sub,c.go));
+  } else if(r==='spv'){
+    const D=spvSet();
+    const rows=D.sales.map(([u,l,a,t])=>mk(USERS[u]?USERS[u].name:u,'user',a*1e6,t*1e6,'',l,akt,{money:true}));
+    // Total tim = jumlah baris sales, jadi tidak pernah lebih kecil dari bagiannya.
+    out=[mk('Total tim','target',rows.reduce((x,i)=>x+i.done,0),rows.reduce((x,i)=>x+i.total,0),'',D.unit,akt,{money:true,head:true}),...rows];
+  } else if(r==='leads'){
+    const deal=leadMine().filter(l=>l.status==='Deal'), M=mitraAll(), A=actNow().length;
+    out=[mk('Goal pencairan','money',deal.reduce((s,l)=>s+(l.goal||0),0),150e6,'','target Rp150 jt',"act(()=>go('leads',{back:1}))",{money:true}),
+      mk('Deal','check',deal.length,12,'deal','dari data kamu',"act(()=>go('leads',{back:1}))"),
+      mk('Mitra dipantau','store',M.filter(m=>mmNow(m.id).length).length,M.length,'mitra','bulan ini',"act(()=>go('mitra'))"),
+      mk('Activity','target',A,4,'aktivitas','rekrut mitra bulan ini',"act(()=>go('mf-activity'))")];
+  } else if(r==='fmcg'){
+    out=[mk('Kunjungan','pin',41,52,'toko','bulan ini',akt),mk('Tugas aktivitas','grid',168,208,'tugas','stok, promo, facing, share',akt)];
+  } else if(r==='order'){
+    out=[mk('Nilai pesanan','bag',110.5e6,150e6,'','target Rp150 jt',akt,{money:true}),mk('Toko aktif memesan','store',14,20,'toko','bulan ini',akt)];
+  } else if(r==='canvas'){
+    const b=SALES_BULAN.canvas;
+    out=[mk('Penjualan','money',b.a,b.at,'','target bulan ini',akt,{money:true}),mk('Kunjungan','pin',74,88,'toko','bulan ini',akt),mk('Akuisisi toko','store',3,5,'toko','toko baru',akt)];
+  } else {
+    const b=salesBulan(), R=tgtRows(), c=aktCfg()||{};
+    out=[mk('Penjualan','money',b.a,b.at,'','target bulan ini',akt,{money:true}),
+      mk('Quantity','box',b.q,b.qt,'unit','target bulan ini',akt,R.length?{detail:kv(R.map(t=>[t.kat,(t.act||0)+' / '+t.target+' unit']))}:{})];
+    if(isSpg()||isMobilePromo()){ if(c.dasar==='akuisisi'||(c.metrik||[]).includes('akuisisi')) out.push(mk('Akuisisi','store',41,60,'pelanggan','pelanggan baru',akt)); }
+  }
+  return out.filter(i=>i.total>0).map(i=>i.money?i:{...i,done:Math.min(i.done,i.total)});
 }
 const CAP_COL={visit:['#3BE3A6','#0C9E62'],job:['#21CFF7','#3466FF'],task:['#FFC79E','#F09A66']};
 function capDonut(d){ const pct=d.total?Math.round(d.done/d.total*100):0, R=28, C=2*Math.PI*R, id='cg'+(++_gid), g=CAP_COL[d.c]||CAP_COL.job;
@@ -4255,10 +4386,19 @@ SCR.password = () => ({note:'<b>Feedback AMO:</b> ubah password hanya bisa dilak
    RENDER
    ========================================================= */
 function tab(name){ reset(name); }
+/* Tab kedua bawah: halaman aktivitas sesuai role. Mengembalikan [kunci layar, label, ikon]. */
+function navAkt(){
+  const r=role();
+  if(r==='spv') return ['tim','Tim','users'];
+  if(r==='fmcg') return ['aktivitas',fmAktLabel(),'grid'];
+  if(hasAkt()||isMobilePromo()) return ['akt',aktLabel(),'grid'];
+  if(isSpg()) return ['spg-akt','Aktivitas Saya','grid'];
+  return ['mf-akt','Aktivitas Saya','grid'];
+}
 function tabbar(active){
   const u=U(); if(!u) return '';
   const a=att(), fabCls=a.out?'done':a.in?'':'off';
-  const items=[['home','Beranda','home'],hasAkt()?['akt',aktLabel(),'grid']:[u.main.key,u.role==='fmcg'?fmAktLabel():u.main.label,u.main.icon],['absensi','Absen','fingerprint'],['target','Target','target'],['akun','Akun','user']];
+  const items=[['home','Beranda','home'],navAkt(),['absensi','Absen','fingerprint'],['summary','Summary','target'],['akun','Akun','user']];
   return items.map((t,i)=> i===2
     ? `<button class="fab ${fabCls} ${active===t[0]?'on':''}" onclick="tab('absensi')"><span class="ring">${I('fingerprint',28,2)}</span><em>${a.out?'Selesai':a.in?'Pulang':'Absen'}</em></button>`
     : `<button class="${active===t[0]?'on':''}" onclick="tab('${t[0]}')">${I(t[2],24,active===t[0]?2.2:1.8)}${t[1]}</button>`).join('');
