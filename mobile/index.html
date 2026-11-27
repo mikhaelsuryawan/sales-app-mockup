@@ -261,6 +261,31 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .stat3 div{background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.85);border-radius:14px;padding:10px}
 .stat3 small{display:block;font-size:11px;color:var(--muted);font-weight:600}
 .stat3 b{font-size:18px}
+/* Ringkasan aktivitas mitra: kartu gradasi, bar komposisi, dan tile yang menyaring log */
+.mfsum{border-radius:22px;padding:16px;color:#fff;background:linear-gradient(135deg,#0A69C9 0%,#2A52D6 60%,#3B3FB8 100%);box-shadow:0 18px 34px -18px rgba(25,60,180,.75);position:relative;overflow:hidden}
+.mfsum::after{content:"";position:absolute;right:-50px;top:-60px;width:170px;height:170px;border-radius:50%;border:26px solid rgba(255,255,255,.08);pointer-events:none}
+.mfsum .top{display:flex;align-items:baseline;gap:8px}
+.mfsum .top b{font-size:34px;line-height:1;font-weight:800}
+.mfsum .top span{font-size:13px;font-weight:600;opacity:.92}
+.mfsum .mix{display:flex;gap:3px;height:8px;border-radius:99px;margin:12px 0 14px;overflow:hidden;background:rgba(255,255,255,.16)}
+.mfsum .mix i{display:block;height:100%;transition:flex-grow .35s}
+.btn svg{flex:none}
+.mfsum .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;position:relative;z-index:1}
+.mfsum .tile{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:10px;border-radius:16px;text-align:left;color:#fff;background:rgba(255,255,255,.14);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);transition:transform .15s,background .15s}
+.mfsum .tile:active{transform:scale(.95)}
+.mfsum .tile .ic{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;color:#0B2E59}
+.mfsum .tile b{font-size:22px;line-height:1;font-weight:800}
+.mfsum .tile small{font-size:11px;font-weight:700;line-height:1.2}
+.mfsum .tile[aria-pressed="true"]{background:#fff;color:#0B2E59;box-shadow:0 10px 18px -10px rgba(0,20,80,.7)}
+.mfsum .tn-tan{background:#FFC79E}.mfsum .tn-blue{background:#A8E4FF}.mfsum .tn-green{background:#7FEDBF}
+.mfsum .hint{color:#fff;opacity:.9;margin-top:10px;font-size:11.5px}
+.mflog{padding:4px 0;overflow:hidden}
+.mflog button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;min-height:62px}
+.mflog button+button{border-top:1px solid var(--sep)}
+.mflog button:active{background:var(--blue-50)}
+.mflog b{display:block;font-size:14px}
+.mflog small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+.mflog .chev{flex:none;color:var(--muted);display:grid;place-items:center}
 .big-num{font-size:26px;font-weight:800;letter-spacing:-.02em;background:linear-gradient(135deg,#0C2340,#0A6FE0);-webkit-background-clip:text;background-clip:text;color:transparent}
 
 /* ---------- map / camera ---------- */
@@ -3109,7 +3134,31 @@ function mfShotSheet(){ sheet(`<h3 style="font-size:18px;font-weight:800;margin-
   <button class="li" onclick="mfShot('Kamera')"><div class="ico-tile">${I('camera',20)}</div><div class="grow"><div class="t">Ambil foto</div><div class="s">Buka kamera HP</div></div></button>
   <button class="li" onclick="mfShot('Galeri')"><div class="ico-tile">${I('image',20)}</div><div class="grow"><div class="t">Pilih dari galeri</div><div class="s">Foto yang sudah tersimpan</div></div></button></div>`); }
 const mfPhoto = (p,mode) => `<div class="field"><span>Bukti foto *</span><div class="thumbs">${photoSlot(p.foto?'Foto dari '+p.foto.toLowerCase():mode==='both'?'Tambah foto':'Ambil foto',p.foto,mode==='both'?'mfShotSheet()':"mfShot('Kamera')")}</div><span class="hint">${mode==='both'?'Dari kamera atau galeri':'Hanya dari kamera, tidak bisa dari galeri'}</span></div>`;
-const mfTimeline = (L,empty) => L.length?`<div class="card"><div class="timeline">${L.map(x=>`<div class="ti"><b>${x.jenis}${x.hasil&&x.hasil!=='Tersambung'?' · '+x.hasil:''}</b><small>${[x.tgl+', '+x.jam,esc(x.ket||x.lokasi||''),esc(x.alasan||''),x.foto?'foto '+x.foto.toLowerCase():''].filter(Boolean).join(' · ')}</small></div>`).join('')}</div></div>`:`<div class="empty">${empty}</div>`;
+/* [ikon, warna] per jenis aktivitas. Warna dibuat berbeda di dalam satu halaman. */
+const MF_KIND={'Visit':['pin','tan'],'Telepon':['phone','blue'],'WhatsApp':['chat','green'],'Info Mitra':['users','blue'],'Canvassing':['route','green']};
+function mfFilter(j){ cur().p.fj=cur().p.fj===j?'':j; render(false,true); }
+/* Ringkasan bulan berjalan dan daftar log. Tile menyaring log, baris log membuka detail isian. */
+function mfActivity(L,kinds,empty){
+  const f=cur().p.fj||'', rows=f?L.filter(x=>x.jenis===f):L;
+  const sum=`<div class="mfsum"><div class="top"><b class="num">${L.length}</b><span>aktivitas bulan ini</span></div>
+    <div class="mix" aria-hidden="true">${kinds.filter(j=>cnt(L,j)).map(j=>`<i class="tn-${MF_KIND[j][1]}" style="flex:${cnt(L,j)} 1 0"></i>`).join('')}</div>
+    <div class="tiles">${kinds.map(j=>`<button class="tile" aria-pressed="${f===j}" onclick="mfFilter('${j}')"><span class="ic tn-${MF_KIND[j][1]}">${I(MF_KIND[j][0],17,2.2)}</span><b class="num">${cnt(L,j)}</b><small>${j}</small></button>`).join('')}</div>
+    <p class="hint">${f?'Menampilkan '+f+'. Ketuk lagi untuk semua.':'Ketuk salah satu untuk menyaring log.'}</p></div>`;
+  const list=rows.length?`<div class="card mflog">${rows.map(x=>`<button onclick="mfLogDetail('${x.id}')" aria-label="Detail ${x.jenis} ${x.tgl} ${x.jam}"><span class="ico-tile ${MF_KIND[x.jenis][1]==='blue'?'':MF_KIND[x.jenis][1]}">${I(MF_KIND[x.jenis][0],19)}</span><span class="grow"><b>${x.jenis}${x.hasil&&x.hasil!=='Tersambung'?' · '+x.hasil:''}</b><small>${[x.tgl+', '+x.jam,esc(x.ket||x.lokasi||x.alasan||'')].filter(Boolean).join(' · ')}</small></span><span class="chev">${I('right',18,2.2)}</span></button>`).join('')}</div>`
+    :`<div class="empty">${f&&L.length?'Belum ada '+f+' bulan ini.':empty}</div>`;
+  return `<div class="sec-title">Aktivitas ${MF_BLN[mfBln()].label}</div>${sum}<div class="sec-title">Log aktivitas${f?' · '+f:''}</div>${list}`;
+}
+function mfLogDetail(id){
+  const x=[...mmLog(),...actLog()].find(r=>r.id===id); if(!x) return;
+  const [ic,tn]=MF_KIND[x.jenis];
+  const f=[['Tanggal',x.tgl+', '+x.jam],['Nama lokasi',x.lokasi],['Nama mitra',x.nm],['Lokasi mitra',x.lok],['Nama konsumen',x.nk],['Alamat',x.al],['Lokasi event',x.le],
+    ['No. HP',x.hp],['Transfer knowledge',x.tk],['Problem solving',x.ps],['Bantu proses kredit',x.bk],['Catatan',x.cat],['List pertanyaan',x.q],['OTP',x.otp],['Alasan',x.alasan],
+    /* Log lama hanya menyimpan ringkasan. */ ['Keterangan',x.nm||x.nk||x.le?'':x.ket],['Dicatat oleh',x.by]].filter(r=>r[1]);
+  sheet(`<div class="row" style="margin-bottom:12px"><div class="ico-tile ${tn==='blue'?'':tn}">${I(ic,20)}</div><div class="grow"><h3 id="mfDlgT" style="font-size:18px;font-weight:800">${x.jenis}</h3><div class="small muted">Hasil input</div></div>${x.hasil?chip(x.hasil,x.hasil==='Tersambung'?'green':'red'):''}</div>
+    <div class="card" style="box-shadow:none">${f.map(([k,v])=>`<div class="kv"><span>${k}</span><span style="max-width:62%;overflow-wrap:anywhere">${esc(v)}</span></div>`).join('')}</div>
+    ${x.foto?`<div class="wm-photo" style="margin-top:12px" role="img" aria-label="Bukti foto">${I('image',30)}<span class="wm"><b>Bukti foto dari ${x.foto.toLowerCase()}</b><span>${x.tgl}, ${x.jam}</span></span></div>`:''}
+    <button class="btn" style="margin-top:14px" onclick="closeSheet()">Tutup</button>`);
+}
 const mfErr = m => { $('#mferr').innerHTML=`<div class="err">${m}</div>`; };
 
 SCR.mitra = () => {
@@ -3131,10 +3180,7 @@ SCR['mitra-detail'] = p => {
       <div class="kv" style="margin-top:10px"><span>No. HP</span><span class="num">${esc(m.phone)}</span></div></div>
     <div class="row" style="gap:8px;margin:12px 0 4px">${bt('Visit','pin',true)}${bt('Telepon','phone',ok)}${bt('WhatsApp','chat',ok)}</div>
     ${ok?'':`<p class="hint" style="margin:6px 2px 0">Telepon dan WhatsApp aktif setelah mitra di-visit minimal 1 kali.</p>`}
-    <div class="sec-title">Aktivitas ${MF_BLN[mfBln()].label}</div>
-    <div class="card"><div class="stat3"><div><small>Visit</small><b>${cnt(L,'Visit')}</b></div><div><small>Telepon</small><b>${cnt(L,'Telepon')}</b></div><div><small>WhatsApp</small><b>${cnt(L,'WhatsApp')}</b></div></div></div>
-    <div class="sec-title">Log aktivitas</div>
-    ${mfTimeline(L,'Belum ada aktivitas bulan ini.')}
+    ${mfActivity(L,['Visit','Telepon','WhatsApp'],'Belum ada aktivitas bulan ini.')}
   </main>`};
 };
 function mmStart(id,j){
@@ -3221,10 +3267,7 @@ SCR['act-detail'] = p => {
     <div class="card"><div style="font-weight:800;font-size:17px">${esc(a.nama)}</div><div class="small muted" style="margin-bottom:6px">${esc(a.job)}</div>
       <div class="kv"><span>No. HP</span><span class="num">${esc(a.hp)}</span></div><div class="kv"><span>Produk</span><span>${esc(a.prod)}</span></div><div class="kv"><span>Jaminan</span><span>${esc(a.jaminan)}</span></div><div class="kv"><span>Dana tunai</span><span class="num">${rp(a.dana)}</span></div><div class="kv"><span>Alamat</span><span>${esc(a.addr)}</span></div><div class="kv"><span>Dibuat</span><span>${a.tgl}</span></div></div>
     <div class="row" style="gap:8px;margin:12px 0 4px">${Object.entries(ACT_JENIS).map(([j,ic])=>`<button class="btn sec sm grow" onclick="act(()=>go('act-form',{id:'${a.id}',jenis:'${j}'}))">${I(ic,18)} ${j}</button>`).join('')}</div>
-    <div class="sec-title">Aktivitas ${MF_BLN[mfBln()].label}</div>
-    <div class="card"><div class="stat3"><div><small>Info Mitra</small><b>${cnt(L,'Info Mitra')}</b></div><div><small>Visit</small><b>${cnt(L,'Visit')}</b></div><div><small>Canvassing</small><b>${cnt(L,'Canvassing')}</b></div></div></div>
-    <div class="sec-title">Log aktivitas</div>
-    ${mfTimeline(L,'Belum ada aktivitas.')}
+    ${mfActivity(L,Object.keys(ACT_JENIS),'Belum ada aktivitas.')}
   </main>`};
 };
 SCR['act-form'] = p => {
@@ -3244,7 +3287,8 @@ function actSave(){
   if(!p.foto) return mfErr('Ambil bukti foto dari kamera.');
   const ket=j==='Info Mitra'?t('nm')+' · '+t('lok'):j==='Visit'?t('nk')+' · '+t('al'):t('le');
   const row={id:'al'+Date.now(),aid:p.id,jenis:j,bln:mfBln(),tgl:mfToday(),jam:clock(),ket,foto:p.foto,by:U().name};
-  if(j==='Info Mitra') Object.assign(row,{cat:t('cat'),q:p.q||'',otp:t('otp')});
+  const isian={'Info Mitra':['nm','lok','cat','otp'],'Visit':['nk','al','hp'],'Canvassing':['le']}[j];
+  isian.forEach(k=>row[k]=t(k)); if(j==='Info Mitra') row.q=p.q||'';
   shSet('actLog',[row,...actLog()]);
   back(); toast(j+' tercatat');
 }
