@@ -1035,6 +1035,8 @@ const btn=(label,{v='card',size='',icon=null,on='',attrs='',dis=false,href='',lo
   return `<button type="button" class="${cls}" ${on?`onclick="${on}"`:''} ${attrs} ${(dis||loading)?'disabled':''} ${loading?'aria-busy="true"':''}>${inner}</button>`;
 };
 const ibtn=(icon,label,on,{v='ghost',size='icon',attrs=''}={})=>`<button type="button" class="btn b-${v} ${size}" aria-label="${label}" data-tip="${label}" onclick="${on}" ${attrs}>${I(icon,size==='icon-lg'?20:16)}</button>`;
+const multiSel=(id,opts,cur,{ph='Pilih',label='',attrs=''}={})=>`<span class="sel" style="display:flex"><select multiple id="${id}" style="width:100%" data-ph="${ph}" ${label?`aria-label="${label}"`:''} ${attrs}>${opts.map(o=>{const [v,l]=Array.isArray(o)?o:[o,o];return `<option value="${esc(v)}" ${cur.includes(v)?'selected':''}>${esc(l)}</option>`}).join('')}</select>${I('chev',16)}</span>`;
+const picked=id=>[...(document.getElementById(id)?.selectedOptions||[])].map(o=>o.value);
 const sel=(opts,val,on,{cls='',label='',id=''}={})=>`<label class="sel ${cls}"><span class="sr-only">${label}</span><select ${id?`id="${id}"`:''} onchange="${on}">${opts.map(o=>{const [v,l]=Array.isArray(o)?o:[o,o];return `<option value="${esc(v)}" ${String(v)===String(val)?'selected':''}>${esc(l)}</option>`}).join('')}</select>${I('chev',16)}</label>`;
 const tabsX=(inner,cls='')=>`<div class="tabs-x ${cls}">${inner}</div>`;
 const pills=(items,active,fn,{size=''}={})=>tabsX(`<div class="pills ${size}" role="tablist">${items.map(([k,l,n])=>`<button type="button" role="tab" aria-selected="${k===active}" tabindex="${k===active?0:-1}" class="${k===active?'on':''}" onclick="${fn}('${k}')">${l}${n!=null?`<span class="n">${n}</span>`:''}</button>`).join('')}</div>`);
@@ -1965,7 +1967,6 @@ function scopeBanner(path,q){
 }
 function scopeClear(keys){ ST.scope=null; setQ(Object.fromEntries(keys.split(',').map(k=>[k,'']))); }
 /* Klik kedua pada chip filter yang aktif menghapus filternya */
-document.addEventListener('click',e=>{ const b=e.target.closest?.('.chips .fchip.on'); if(!b) return; const m=(b.getAttribute('onclick')||'').match(/^setQ\(\{(\w+):'([^']+)'\}\)$/); if(m){ e.stopPropagation(); e.preventDefault(); setQ({[m[1]]:''}); } },true);
 let lastPath=null;
 /* ---------- Animasi muat data ----------
    Mockup tanpa backend, jadi "fetch" disimulasikan: pindah halaman memuat penuh (skeleton sesuai bentuk komponen),
@@ -2358,7 +2359,7 @@ let DJ_I=0;
 const djIdx=()=>[...document.querySelectorAll('[data-djrow]')].map(r=>+r.dataset.djrow);
 function djRow(i){ const g=PRODUCTS.filter(p=>p.status!=='Nonaktif');
   return `<div class="djrow" data-djrow="${i}"><div class="djrow-h"><b class="sm fg dj-rn">Produk</b>${btn('Hapus',{v:'outline',size:'sm',icon:'trash',on:`djRowDel(${i})`})}</div>
-    <div class="chips" role="radiogroup" aria-label="Sumber produk">${[['master','Dari master'],['free','Di luar master (teks bebas)']].map(([k,l],j)=>`<label class="fchip"><input type="radio" name="dj_pm${i}" value="${k}" ${j?'':'checked'} onchange="djProdMode(${i},this.value)" style="margin-right:6px">${l}</label>`).join('')}</div>
+    ${sel([['master','Dari master'],['free','Di luar master (teks bebas)']],'master',`djProdMode(${i},this.value)`,{label:'Sumber produk',id:'dj_pm'+i})}
     <div id="dj_p_m${i}">${sel(g.map(p=>[p.id,p.name]),g[0].id,`djPrice(${i})`,{label:'Produk',id:'dj_p'+i})}</div><div id="dj_p_f${i}" style="display:none"><span class="inp"><input id="dj_pf${i}" placeholder="Nama produk, contoh: Setrika Uap Mini"></span></div>
     <div class="grid g2" style="gap:10px"><label class="field"><span>Jumlah</span>${qtyBox('dj_q'+i,1,{on:`djNote(${i})`})}</label>
       <label class="field"><span>Harga satuan (Rp) <b class="req" aria-hidden="true">*</b></span><span class="inp"><input id="dj_h${i}" inputmode="numeric" data-num="int" value="${numStr(g[0].price)}" oninput="djNote(${i})"><span class="unit">Rp</span></span></label></div>
@@ -2375,14 +2376,14 @@ function djRowDel(i){ if(djIdx().length<2) return; document.querySelector(`[data
 function djTokoMode(v){ document.getElementById('dj_tk_m').style.display=v==='free'?'none':''; document.getElementById('dj_tk_f').style.display=v==='free'?'':'none'; }
 function djProdMode(i,v){ document.getElementById('dj_p_m'+i).style.display=v==='free'?'none':''; document.getElementById('dj_p_f'+i).style.display=v==='free'?'':'none'; if(v==='free') document.getElementById('dj_h'+i).value=''; else djPrice(i); djNote(i); }
 function djPrice(i){ const id=document.getElementById('dj_p'+i)?.value, tn=document.getElementById('dj_t')?.value, tk=TOKO.find(t=>t.name===tn), m=tk&&MD.mapping.find(x=>!x.del&&x.status==='Aktif'&&x.produk===id&&x.toko===tk.id), p=PRODUCTS.find(x=>x.id===id); if(m) document.getElementById('dj_h'+i).value=numStr(effHarga(m)); else if(p) document.getElementById('dj_h'+i).value=numStr(p.price); djNote(i); }
-function djPriceAll(){ djIdx().forEach(i=>{ if(document.querySelector(`input[name="dj_pm${i}"]:checked`)?.value!=='free') djPrice(i); }); }
+function djPriceAll(){ djIdx().forEach(i=>{ if(document.getElementById('dj_pm'+i)?.value!=='free') djPrice(i); }); }
 function djForm(){ if(!can('sales.input')) return noAccess();
   const sales=SALES.filter(s=>['SPG / Promotor','Canvasing FMCG','Canvasing Elektronik'].includes(s.job)), tk=live('toko').filter(t=>t.status==='Aktif'); DJ_I=0;
   openModal(`<h2 class="pt">Tambah penjualan<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Dipakai bila sales gagal menginput dari aplikasi. Tercatat atas nama sales, dengan jejak admin yang menginput.</p>
   <div class="grid" style="gap:12px">
     <div class="grid g2" style="gap:10px"><label class="field"><span>Sales <b class="req" aria-hidden="true">*</b></span>${sel(sales.map(s=>[s.u,s.name+' – '+s.job]),sales[0].u,'',{label:'Sales',id:'dj_u'})}</label>
     <label class="field"><span>Tanggal (Okt) <b class="req" aria-hidden="true">*</b></span><span class="inp"><input id="dj_d" inputmode="numeric" value="${LD_TODAY}"></span></label></div>
-    <div class="field"><span>Toko</span><div class="chips" role="radiogroup" aria-label="Sumber toko" style="margin-bottom:8px">${[['master','Dari master'],['free','Teks bebas']].map(([k,l],i)=>`<label class="fchip"><input type="radio" name="dj_tm" value="${k}" ${i?'':'checked'} onchange="djTokoMode(this.value)" style="margin-right:6px">${l}</label>`).join('')}</div>
+    <div class="field"><span>Toko</span><div style="margin-bottom:8px">${sel([['master','Dari master'],['free','Teks bebas']],'master','djTokoMode(this.value)',{label:'Sumber toko',id:'dj_tm'})}</div>
       <div id="dj_tk_m">${sel(tk.map(t=>[t.name,t.name]),tk[0]?.name||'','djPriceAll()',{label:'Toko',id:'dj_t'})}</div>
       <div id="dj_tk_f" style="display:none"><span class="inp"><input id="dj_tf" placeholder="Nama toko, contoh: Warung Elektronik Bu Siti"></span></div></div>
     <div class="field"><span>Produk <b class="req" aria-hidden="true">*</b></span><div id="dj_rows" style="display:grid;gap:10px">${djRow(0)}</div>
@@ -2395,18 +2396,18 @@ function djForm(){ if(!can('sales.input')) return noAccess();
     <p class="ferr" id="dj_e"></p></div>
   <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn('Simpan penjualan',{v:'accent',on:'djSave()'})}</div>`); djRenum(); djPrice(0); }
 /* Aturan yang akan terpicu oleh isian tampil sebagai banner yang naik tingkat saat mengetik */
-function djNote(i){ djTotal(); const box=document.getElementById('dj_note'+i); if(!box) return; const pf=document.querySelector(`input[name="dj_pm${i}"]:checked`)?.value==='free'; if(pf){ box.innerHTML=banner({tone:'info',body:'Produk di luar master belum punya harga sistem, jadi harga ini tidak dibandingkan.'}); return; }
+function djNote(i){ djTotal(); const box=document.getElementById('dj_note'+i); if(!box) return; const pf=document.getElementById('dj_pm'+i)?.value==='free'; if(pf){ box.innerHTML=banner({tone:'info',body:'Produk di luar master belum punya harga sistem, jadi harga ini tidak dibandingkan.'}); return; }
   const h=parseInt((document.getElementById('dj_h'+i).value||'').replace(/\D/g,''),10), tn=document.getElementById('dj_t')?.value, tk=TOKO.find(t=>t.name===tn), pid=document.getElementById('dj_p'+i)?.value, ref=priceAt(pid,tk?.id);
   if(!h||!ref){ box.innerHTML=''; return; } const d=Math.round((h-ref)/ref*1000)/10, ab=Math.abs(d);
   box.innerHTML=ab<.5?'':banner({tone:ab>=INV_TOL?'warning':'info',title:ab>=INV_TOL?'Selisih melewati batas':'Harga berbeda dari harga sistem',body:`Harga ${d>0?'lebih tinggi':'lebih rendah'} ${num(ab,1)}% dari harga sistem ${rp(ref)}.${ab>=INV_TOL?' Transaksi ditandai untuk diperiksa.':''}`}); }
 function djSave(){
   const g=id=>document.getElementById(id), err=g('dj_e'), clean=s=>s.replace(/['"<>`]/g,'').trim();
-  const free=document.querySelector('input[name="dj_tm"]:checked')?.value==='free', toko=free?clean(g('dj_tf').value):g('dj_t').value;
+  const free=document.getElementById('dj_tm')?.value==='free', toko=free?clean(g('dj_tf').value):g('dj_t').value;
   const day=parseInt(g('dj_d').value,10), u=g('dj_u').value;
   if(!toko){ err.textContent='Isi nama toko.'; return; }
   if(!(day>=1&&day<=LD_TODAY)){ err.textContent='Tanggal antara 1 dan '+LD_TODAY+' Okt.'; return; }
   const idx=djIdx(), items=[]; let bad='';
-  idx.forEach((i,k)=>{ const pre=idx.length>1?'Produk '+(k+1)+': ':'', pfree=document.querySelector(`input[name="dj_pm${i}"]:checked`)?.value==='free', pname=pfree?clean(g('dj_pf'+i).value):'', qn=parseInt(g('dj_q'+i).value,10), h=parseInt(g('dj_h'+i).value.replace(/\D/g,''),10), dk=djNum('dj_dk'+i);
+  idx.forEach((i,k)=>{ const pre=idx.length>1?'Produk '+(k+1)+': ':'', pfree=document.getElementById('dj_pm'+i)?.value==='free', pname=pfree?clean(g('dj_pf'+i).value):'', qn=parseInt(g('dj_q'+i).value,10), h=parseInt(g('dj_h'+i).value.replace(/\D/g,''),10), dk=djNum('dj_dk'+i);
     if(bad) return; if(pfree&&!pname){ bad=pre+'isi nama produk.'; return; } if(!(qn>0)){ bad=pre+'jumlah minimal 1.'; return; } if(!(h>0)){ bad=pre+'isi harga satuan lebih dari nol.'; return; } if(dk>=h){ bad=pre+'diskon harus lebih kecil dari harga satuan.'; return; }
     items.push({p:pfree?null:g('dj_p'+i).value,pname:pfree?pname:undefined,prodFree:pfree,q:qn,list:h,disc:dk,price:h-dk,total:(h-dk)*qn}); });
   if(bad){ err.textContent=bad.charAt(0).toUpperCase()+bad.slice(1); return; }
@@ -2545,7 +2546,7 @@ function visForm(id){ if(!can('visit.create')) return noAccess();
   <div class="grid" style="gap:12px"><label class="field"><span>Pegawai</span>${sel(people.map(s=>[s.u,s.name+' – '+s.job]),v.u,"visTaskHint(this.value)",{label:'Pegawai',id:'vf_u'})}</label>
   <label class="field"><span>Tujuan</span>${sel([...new Set([...TOKO.map(t=>t.name),v.place])],v.place,'',{label:'Tujuan',id:'vf_p'})}</label>
   <div class="grid g2" style="gap:10px"><label class="field"><span>Jam</span><span class="inp"><input id="vf_t" type="time" value="${v.plan}"></span></label><label class="field"><span>Periode</span>${sel(['Sekali','Harian','Mingguan','2 mingguan','Bulanan'],v.period||'Sekali','visDaysSync()',{label:'Periode',id:'vf_r'})}</label></div>
-  <div class="field" id="vf_days" style="display:${needDays(v.period)?'':'none'}"><span>Hari kunjungan <b class="req" aria-hidden="true">*</b></span><div class="chips" role="group" aria-label="Hari kunjungan">${DAYS7.map(d=>`<button type="button" class="fchip ${(v.days||[]).includes(d)?'on':''}" aria-pressed="${(v.days||[]).includes(d)}" data-d="${d}" onclick="this.classList.toggle('on');this.setAttribute('aria-pressed',this.classList.contains('on'))">${d}</button>`).join('')}</div><p class="xs muted" style="margin-top:6px">Pilih hari apa saja (MOM 9 Nov, bagian 4).</p></div>
+  <div class="field" id="vf_days" style="display:${needDays(v.period)?'':'none'}"><span>Hari kunjungan <b class="req" aria-hidden="true">*</b></span>${multiSel('vf_dsel',DAYS7,(v.days||[]),{ph:'Pilih hari',label:'Hari kunjungan'})}<p class="xs muted" style="margin-top:6px">Pilih hari apa saja (MOM 9 Nov, bagian 4).</p></div>
   <div id="vf_tk">${visTaskField(v.u,v.tasks)}</div></div>
   <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn(id?'Simpan perubahan':'Simpan jadwal',{v:'accent',on:`visSave('${id||''}')`})}</div>`); }
 function visTaskField(u,val){ return isFm(u)?`<div class="tile"><div class="xs muted">Tugas</div><b class="fg">${FM_TASKS_LABEL}</b><p class="xs muted" style="margin-top:6px">Tugas otomatis semua aktivitas toko. Promotor tidak bisa menghapus kunjungan yang dibuat admin.</p></div>`:`<label class="field"><span>Tugas</span><span class="inp"><input id="vf_k" value="${esc(val||'')}" placeholder="contoh: Penjualan, Cek display"></span></label>`; }
@@ -2557,7 +2558,7 @@ function visPublish(v,from){ const L=shRead('visitDash',[]), old=L.find(x=>x.id=
 function visSave(id){
   const u=document.getElementById('vf_u').value, place=document.getElementById('vf_p').value, plan=document.getElementById('vf_t').value, period=document.getElementById('vf_r').value;
   const tasks=isFm(u)?FM_TASKS_LABEL:(document.getElementById('vf_k')?.value||'').replace(/['"<>`]/g,'').trim();
-  const days=needDays(period)?[...document.querySelectorAll('#vf_days .fchip.on')].map(b=>b.dataset.d):[];
+  const days=needDays(period)?picked('vf_dsel'):[];
   if(!plan||!tasks){ toast('Periksa isian','Isi jam dan tugas kunjungan.','danger'); return; }
   if(needDays(period)&&!days.length){ toast('Periksa isian','Pilih minimal satu hari kunjungan.','danger'); return; }
   if(id){ const v=D.visits.find(x=>x.id===id), from={u:v.u,place:v.place}; Object.assign(v,{u,place,plan,period,tasks,days}); visPublish(v,from); audit('Mengubah jadwal kunjungan '+byU(u).name+' ke '+place); }
@@ -3292,14 +3293,14 @@ const ENT={
     fields:[{k:'sumber',label:'Sumber data',type:'ro'},{k:'name',label:'Nama',req:true,roIf:r=>isInteg(r)},{k:'email',label:'Email',type:'email',req:true,roIf:r=>isInteg(r),hint:'Dipakai untuk login. Akun di User management tidak harus terhubung ke SIM (BPR1)',validate:(v)=>MD.user.some(x=>!x.del&&x.id!==FORM.id&&String(x.email).toLowerCase()===v.toLowerCase())?'Email sudah dipakai':''},
       {k:'phone',label:'No telepon (opsional)',type:'tel',roIf:r=>isInteg(r),ph:'0812-3456-7890',validate:v=>/^[0-9+\-\s()]{8,20}$/.test(v)?'':'Nomor telepon tidak valid. Contoh: 0812-3456-7890.'},
       {k:'job',label:'Job',type:'ro',hideIf:r=>!r.id,fmt:(v,r)=>jobName(r.job),hint:'Read only. Mengikuti mapping di menu Job & role'},
-      {k:'simcos',label:'Company',type:'multi',dd:true,req:true,roIf:r=>isInteg(r),fmt:(v,r)=>simcoLabel(r),all:'all',allKey:'allSimco',opts:()=>[['all','Pilih semua'],...simcoOpts()],hint:'Pilih semua atau beberapa company yang boleh dikelola akun ini'},
-      {k:'roles',label:'Role',type:'multi',dd:true,req:true,roIf:r=>isInteg(r),fmt:(v,r)=>r.allRoles?'Semua role':(v||[]).map(roleName).join(', ')||'–',opts:()=>{ const own=(FORM&&FORM.id&&MD.user.find(u=>u.id===FORM.id)?.roles)||[]; return [...live('role').filter(r=>r.status==='Aktif'&&(ADMIN_ROLES.includes(r.id)||own.includes(r.id))).map(r=>[r.id,r.name])]; },hint:r=>isInteg(r)?'Dari mapping job. Ubah di menu Job & role':'Boleh lebih dari satu role (MOM 12 Nov). Direktur, HR, Manager, Client, dan admin'},
-      {k:'clients',label:'Client',type:'multi',dd:true,req:true,roIf:r=>isInteg(r),fmt:(v,r)=>clientLabel(r),all:'all',allKey:'allClients',opts:()=>[['all','Pilih semua'],...live('client').map(c=>[c.id,c.name])],hint:'Pilih semua atau beberapa client yang boleh dikelola atau dipantau akun ini'},
-      {k:'cabangs',label:'Cabang',type:'multi',dd:true,req:true,roIf:r=>isInteg(r),fmt:(v,r)=>r.allCabang?'Semua cabang':(v||[]).join(', ')||'–',all:'all',allKey:'allCabang',opts:()=>[['all','Pilih semua'],'Kantor Pusat',...cabNames()],hint:'Pilih semua atau beberapa cabang (MOM 12 Nov)'},
+      {k:'simcos',label:'Company',type:'multi',req:true,roIf:r=>isInteg(r),fmt:(v,r)=>simcoLabel(r),all:'all',allKey:'allSimco',opts:()=>[['all','Pilih semua'],...simcoOpts()],hint:'Pilih semua atau beberapa company yang boleh dikelola akun ini'},
+      {k:'roles',label:'Role',type:'multi',req:true,roIf:r=>isInteg(r),fmt:(v,r)=>r.allRoles?'Semua role':(v||[]).map(roleName).join(', ')||'–',opts:()=>{ const own=(FORM&&FORM.id&&MD.user.find(u=>u.id===FORM.id)?.roles)||[]; return [...live('role').filter(r=>r.status==='Aktif'&&(ADMIN_ROLES.includes(r.id)||own.includes(r.id))).map(r=>[r.id,r.name])]; },hint:r=>isInteg(r)?'Dari mapping job. Ubah di menu Job & role':'Boleh lebih dari satu role (MOM 12 Nov). Direktur, HR, Manager, Client, dan admin'},
+      {k:'clients',label:'Client',type:'multi',req:true,roIf:r=>isInteg(r),fmt:(v,r)=>clientLabel(r),all:'all',allKey:'allClients',opts:()=>[['all','Pilih semua'],...live('client').map(c=>[c.id,c.name])],hint:'Pilih semua atau beberapa client yang boleh dikelola atau dipantau akun ini'},
+      {k:'cabangs',label:'Cabang',type:'multi',req:true,roIf:r=>isInteg(r),fmt:(v,r)=>r.allCabang?'Semua cabang':(v||[]).join(', ')||'–',all:'all',allKey:'allCabang',opts:()=>[['all','Pilih semua'],'Kantor Pusat',...cabNames()],hint:'Pilih semua atau beberapa cabang (MOM 12 Nov)'},
       {k:'akses',label:'Akses aplikasi',type:'select',req:true,roIf:r=>isInteg(r),opts:[['Web','Ya, akses dashboard web'],['Mobile','Ya, akses mobile'],['Mobile & Web','Ya, akses web dan mobile'],['Tanpa akses','Tidak (people, hanya didata)']],hint:'User memakai aplikasi. People adalah karyawan yang perlu didata tapi tidak login (MOM 9 Nov bagian 5)'},
       {k:'password',label:'Password',hideIf:r=>isInteg(r),req:()=>!(FORM&&FORM.id),ph:'Klik Generate atau ketik sendiri',end:btn('Salin',{v:'ghost',size:'sm',icon:'copy',on:'copyPw(this)',attrs:'aria-label="Salin password" style="flex:none;margin-right:-8px"'}),validate:v=>v.length<8?'Password minimal 8 karakter.':'',hint:r=>r.id?'Kosongkan bila password tidak diubah. Generate membuat password baru.':'Dibuat otomatis lewat Generate. Catat dan berikan ke user, password tidak ditampilkan lagi setelah disimpan.',after:()=>`<span style="display:flex;margin-top:8px">${btn('Generate password',{v:'outline',size:'sm',icon:'refresh',on:'genPw()'})}</span>`}],
     afterOpen:()=>{ const sel=document.getElementById('f_roles'), t=document.getElementById('ro_job'); if(!sel||!t) return; const upd=()=>{ const v=[...sel.selectedOptions].map(o=>o.value), rs=v.includes('all')?[...sel.options].map(o=>o.value).filter(x=>x!=='all'):v, j=jobForRoles(rs); t.textContent=j?jobName(j):'Otomatis dari role yang dipilih'; }; sel.addEventListener('change',upd); upd(); },
-    readExtra:()=>{ const rd=id=>{ const e=document.getElementById(id); return e&&e.tagName==='SELECT'?[...e.selectedOptions].map(o=>o.value):[...document.querySelectorAll('#'+id+' .fchip.on')].map(b=>b.dataset.v); }, ex=(id,key,all)=>{ const v=rd(id), on=v.includes('all'), el=document.getElementById(id); return {on, list:on?(all||[...el.options].map(o=>o.value).filter(x=>x!=='all')):v}; };
+    readExtra:()=>{ const ex=(id,key,all)=>{ const v=picked(id), on=v.includes('all'), el=document.getElementById(id); return {on, list:on?(all||[...el.options].map(o=>o.value).filter(x=>x!=='all')):v}; };
       const c=ex('f_clients',0,live('client').map(x=>x.id)), g=ex('f_simcos',0,live('simco').map(x=>x.id)), r=ex('f_roles'), cb=ex('f_cabangs'); return {allClients:c.on,clients:c.list,allSimco:g.on,simcos:g.list,allRoles:r.on,roles:r.list,allCabang:cb.on,cabangs:cb.list}; },
     cols:[{label:'Nama',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(r.name)}<span><span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="mono muted" style="display:block">${esc(r.email)}</span></span></span>`,prim:true},
       {label:'Role',render:r=>rolesTags(r)},{label:'Job',render:r=>esc(jobName(r.job)),hide:true},{label:'Company',render:r=>esc(simcoLabel(r))},{label:'Sumber',render:r=>srcTag(r.sumber),hide:true},{label:'Jabatan',render:r=>esc(r.jabatan||'–'),hide:true},{label:'Client',render:r=>esc(clientLabel(r)),hide:true},{label:'Status',render:r=>stPill(r.status)}],
@@ -3414,7 +3415,7 @@ function crudList(ent,q,{acts='',prefill='',sels='',top='',ban='',noAdd=false,ad
 
 /* form */
 let FORM=null;
-function multiTog(b,all){ b.classList.toggle('on'); const on=b.classList.contains('on'); b.setAttribute('aria-pressed',on); if(all&&on) b.parentElement.querySelectorAll('.fchip').forEach(x=>{ if(x!==b&&(b.dataset.v===all||x.dataset.v===all)){ x.classList.remove('on'); x.setAttribute('aria-pressed','false'); } }); }
+function multiTog(b){ b.classList.toggle('on'); b.setAttribute('aria-pressed',b.classList.contains('on')); }
 const fromSales=()=>!!(FORM&&FORM.prefill&&FORM.prefill._tmp);
 function fieldHTML(fd,r){
   if(fd.hideIf&&fd.hideIf(r)) return '';
@@ -3424,8 +3425,7 @@ function fieldHTML(fd,r){
   let h;
   if(t==='ro') h=`<div class="field">${lab}<div class="tile" id="ro_${fd.k}" style="padding:11px 16px;color:var(--fg)">${esc(fd.fmt?fd.fmt(v,r):Array.isArray(v)?(v.map(tokoNm).join(', ')||'–'):(v||'–'))}</div>${hint}</div>`;
   else if(t==='select') h=`<label class="field">${lab}<span class="sel" style="display:flex"><select id="${id}" style="width:100%" ${fd.onchange?`onchange="${fd.onchange}"`:''} ${fd.attrs||''}>${opts().map(([ov,ol])=>`<option value="${esc(ov)}" ${String(ov)===String(v??'')?'selected':''}>${esc(ol)}</option>`).join('')}</select>${I('chev',16)}</span>${hint}${err}</label>`;
-  else if(t==='multi'&&fd.dd){ const cur=fd.all&&r[fd.allKey]?[fd.all]:(v||[]); h=`<label class="field">${lab}<span class="sel" style="display:flex"><select multiple id="${id}" style="width:100%" data-ph="Pilih ${esc(fd.label.toLowerCase())}" ${fd.all?`data-all="${fd.all}"`:''}>${opts().map(([ov,ol])=>`<option value="${esc(ov)}" ${cur.includes(ov)?'selected':''}>${esc(ol)}</option>`).join('')}</select>${I('chev',16)}</span>${hint}${err}</label>`; }
-  else if(t==='multi') h=`<div class="field">${lab}<div class="chips" id="${id}" role="group" aria-label="${fd.label}">${opts().map(([ov,ol])=>{const cur=fd.all&&r[fd.allKey]?[fd.all]:(v||[]);const on=cur.includes(ov);return `<button type="button" class="fchip ${on?'on':''}" aria-pressed="${on}" data-v="${esc(ov)}" onclick="multiTog(this${fd.all?`,'${fd.all}'`:''})">${esc(ol)}</button>`}).join('')}</div>${hint}${err}</div>`;
+  else if(t==='multi'){ const cur=fd.all&&r[fd.allKey]?[fd.all]:(v||[]); h=`<label class="field">${lab}${multiSel(id,opts(),cur,{ph:'Pilih '+esc(fd.label.toLowerCase()),attrs:fd.all?`data-all="${fd.all}"`:''})}${hint}${err}</label>`; }
   else if(t==='textarea') h=`<label class="field">${lab}<textarea class="ta short" id="${id}" aria-describedby="e_${fd.k}">${esc(v||'')}</textarea>${hint}${err}</label>`;
   else h=`<label class="field">${lab}<span class="inp"><input id="${id}" aria-describedby="e_${fd.k}" type="${t==='number'?'text':t}" ${t==='number'?'inputmode="decimal" data-num="dec"':''} value="${esc(t==='number'&&v!=null&&v!==''?numStr(v,true):(v??''))}" placeholder="${fd.ph||''}" ${fd.oninput?`oninput="${fd.oninput}"`:''}>${fd.end||''}</span>${hint}${err}${fd.after?fd.after(r):''}</label>`;
   return fd.only?`<div data-only="${fd.only}" ${r.type!==fd.only?'style="display:none"':''}>${h}</div>`:h;
@@ -3456,7 +3456,7 @@ function openForm(ent,id,prefill){
 function saveForm(mode){
   const {ent,id,prefill}=FORM, E=ENT[ent]; const vals={}, errs={}; const cur0=id?E.store().find(x=>x.id===id):null, base=cur0||{...(E.blank?E.blank():{}),...(prefill||{})};
   E.fields.forEach(fd=>{ if(fd.hideIf&&fd.hideIf(base)) return; if(fd.type==='ro'||(fd.lock&&cur0&&fd.lock(cur0))||(fd.roIf&&fd.roIf(base))) return; const el=document.getElementById('f_'+fd.k); let v;
-    if(fd.type==='multi') v=el.tagName==='SELECT'?[...el.selectedOptions].map(o=>o.value):[...el.querySelectorAll('.fchip.on')].map(b=>b.dataset.v);
+    if(fd.type==='multi') v=picked('f_'+fd.k);
     else if(fd.type==='number'){ const raw=el.value.trim().replace(/\./g,'').replace(',','.'); v=raw===''?'':Number(raw); if(raw!==''&&isNaN(v)) errs[fd.k]=fd.label+' harus berupa angka.'; }
     else v=el.value.trim();
     if(fd.num&&v!=='') v=Number(v);
@@ -3472,7 +3472,7 @@ function saveForm(mode){
   if(mode==='check'){ showFormErrs(errs); return; }
   if(!can('master.edit')){ noAccess(); return; }
   showFormErrs(errs);
-  if(keys.length){ FORM.tried=true; document.getElementById('f_'+keys[0])?.focus?.(); toast('Periksa isian',errs.__extra||'Ada '+keys.length+' isian yang perlu diperbaiki.','danger'); return; }
+  if(keys.length){ FORM.tried=true; const bad=document.getElementById('f_'+keys[0]); (bad?._ddBtn||bad)?.focus?.(); toast('Periksa isian',errs.__extra||'Ada '+keys.length+' isian yang perlu diperbaiki.','danger'); return; }
   Object.assign(vals,ex);
   /* Peringatan sebelum simpan (mis. data sudah ada dari integrasi BPR 1). Klik simpan sekali lagi untuk tetap menyimpan. */
   const wmsg=E.warn?E.warn({...base,...vals},id):'';
@@ -3632,7 +3632,7 @@ function pagePengguna(q){ return {title:'Sales management',html:`
   <div style="margin-top:12px">${callout('Sales management berisi tim lapangan: Promotor, Canvassing, Taking Order, Team Leader, dan sejenisnya. Direktur, HR, Manager, dan admin ada di <a href="#/user-admin" style="color:var(--accent-text);font-weight:600">User management</a> (MOM 9 Nov bagian 5).')}</div>`}; }
 function pageAdmin(q){ const all=live('user').filter(inUserMgmt);
   return {title:'User management',html:`
-  ${crudList('admin',q,{sels:`${simcoFilter(q.sg||'')}<div class="chips" role="group" aria-label="Jenis">${[['','User & people',all.length],['user','User (akses app)',all.filter(r=>!isPeople(r)).length],['people','People (hanya didata)',all.filter(isPeople).length]].map(([k,l,n])=>`<button class="fchip ${(q.ak||'')===k?'on':''}" aria-pressed="${(q.ak||'')===k}" onclick="setQ({ak:'${k}'})">${l} <span class="n">${n}</span></button>`).join('')}</div>`,acts:btn('Upload user',{v:'outline',size:'sm',icon:'up',on:"userUpload('admin')",perm:'master.edit'}),addLabel:'Tambah user'})}
+  ${crudList('admin',q,{sels:`${simcoFilter(q.sg||'')}${sel([['',`User & people (${all.length})`],['user',`User (akses app) (${all.filter(r=>!isPeople(r)).length})`],['people',`People (hanya didata) (${all.filter(isPeople).length})`]],q.ak||'',"setQ({ak:this.value})",{label:'Jenis'})}`,acts:btn('Upload user',{v:'outline',size:'sm',icon:'up',on:"userUpload('admin')",perm:'master.edit'}),addLabel:'Tambah user'})}
   <div style="margin-top:12px">${callout('<b>User</b> adalah orang yang memakai aplikasi. <b>People</b> adalah karyawan yang perlu didata tapi tidak perlu akses aplikasi, misalnya manager yang hanya menerima laporan.')}</div>`}; }
 function pageIAM(q){
   shSet('roleJadwal',Object.fromEntries(MD.role.map(r=>[r.id,r.jadwal])));
@@ -3742,7 +3742,6 @@ function jpBody(){
   const J=jpState(), users=jpUsers(), usr=users.find(x=>x.id===J.u), roles=JP_ROLES.filter(r=>users.some(x=>x.role===r)), inRole=users.filter(x=>x.role===J.r);
   if(!usr) return card('Journey plan '+tag('Usulan','accent'),'<p class="muted sm">Belum ada sales yang boleh punya journey plan.</p>');
   const kap=capOf(usr.role), toko=tokoOfU(usr.id), cov=jpCoverage(usr.id), over=jpOver(usr.id), ruteRole=['r4','r21','r5','r13'].includes(usr.role);
-  const chips=(arr,cur,fn)=>`<div class="chips" style="margin-bottom:12px" role="group">${arr.map(([k,l])=>`<button class="fchip ${cur===k?'on':''}" aria-pressed="${cur===k}" onclick="${fn}('${k}')">${l}</button>`).join('')}</div>`;
   const days=JP_DAYS.map((dn,d)=>{ const it=jpItems(usr.id,J.w,d), cuti=jpCuti(usr.id,J.w,d), off=usr.off===dn||cuti, libur=jpLibur(J.w,d);
     return `<div class="tile" style="min-width:0"><div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:8px"><span><b class="fg sm">${dn}</b> <span class="xs muted">${jpTgl(J.w,d)}</span></span><span style="display:flex;gap:6px;align-items:center">${libur?tag('Libur','warning'):''}${cuti?tag('Cuti','danger'):usr.off===dn?tag('Off','danger'):`<span class="xs muted tabular">${it.length}/${kap}</span>`}</span></div>
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">${it.length?it.map((x,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:10px 10px 10px 12px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-card);min-width:0"><span class="xs tabular fg" style="width:24px;height:24px;border-radius:50%;background:var(--raised);display:grid;place-items:center;flex:none;font-weight:600">${i+1}</span><span style="flex:1;min-width:0"><span class="sm fg" style="font-weight:500;display:block">${esc(jpToko(x.t))}</span><span class="xs muted">${esc(TOKO.find(t=>t.id===x.t)?.cat||'')}</span></span>${i>0?ibtn('arrowup','Naikkan urutan',`jpMove('${x.id}',-1)`):''}${i<it.length-1?ibtn('arrowdown','Turunkan urutan',`jpMove('${x.id}',1)`):''}${ibtn('x','Hapus dari plan',`jpDel('${x.id}')`)}</div>`).join(''):`<p class="xs muted">${cuti?'Cuti disetujui. Tidak bisa dijadwalkan.':off?'Hari off. Tidak bisa dijadwalkan.':libur?'Libur: '+esc(libur)+'. Boleh dijadwalkan, dengan peringatan.':'Belum ada kunjungan.'}</p>`}</div>
@@ -3838,8 +3837,7 @@ const BPO=[['Gita Puspita','Promotor Bantuan','Best Denki Senayan City',18,20,'R
 function aktLog(q){
   const f=q.f||'', st=q.st||'', all=fmLogRows(), rows=all.filter(r=>(!f||r.jenis===f)&&(!st||r.status===st));
   return {html:`
-  <div class="chips" style="margin-bottom:8px">${['',...FM_JENIS_LIST].map(k=>`<button class="fchip ${f===k?'on':''}" onclick="setQ({f:'${k}'})">${k||'Semua'}</button>`).join('')}</div>
-  <div class="chips" style="margin-bottom:12px">${['','Selesai','Draft','Belum Selesai'].map(k=>`<button class="fchip ${st===k?'on':''}" onclick="setQ({st:'${k}'})">${k||'Semua status'} <span class="n">${k?all.filter(r=>r.status===k).length:all.length}</span></button>`).join('')}</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">${sel([['','Semua jenis'],...FM_JENIS_LIST],f,"setQ({f:this.value})",{label:'Jenis aktivitas'})}${sel(['','Selesai','Draft','Belum Selesai'].map(k=>[k,`${k||'Semua status'} (${k?all.filter(r=>r.status===k).length:all.length})`]),st,"setQ({st:this.value})",{label:'Status aktivitas'})}</div>
   ${card('Log aktivitas',dataTable('fml',{rows,rowClick:r=>`fmLogPanel('${r._id}')`,empty:'Belum ada aktivitas yang cocok.',cols:[{label:'Promotor',render:r=>`<span class="fg" style="font-weight:500">${esc(r.who)}</span><span class="xs muted" style="display:block">${r.tgl} · ${esc(r.toko)}</span>`,prim:true},{label:'Aktivitas',render:r=>tag(r.jenis,'accent')},{label:'Status',render:r=>spill(r.status,FM_ST_TONE[r.status]||'neutral')},{label:'Rincian',render:r=>`<span class="xs">${esc(r.isi)}</span>`,hide:true}]}),{acts:btn('Unduh laporan',{v:'outline',size:'sm',icon:'down',on:"toast('Laporan aktivitas diunduh','Sesuai filter yang aktif.')"})})}
   <div style="margin-top:16px">${card('Kinerja Promotor Bantuan (BPO)',dataTable('bpo',{rows:BPO,rowClick:r=>`toast('${r.n}','Kinerja dipantau untuk BPO.')`,cols:[{label:'Nama',render:r=>`<span class="fg" style="font-weight:500">${r.n}</span><span class="xs muted" style="display:block">${r.j} · ${r.t}</span>`,prim:true},{label:'Kehadiran',render:r=>r.h+'/'+r.k,align:'r'},{label:'Penjualan',render:r=>r.p,align:'r',hide:true}]}))}</div>`};
 }
@@ -3878,7 +3876,7 @@ function pageCanvassing(){
 const CV_ASSIGN_ROLES=['r4','r21','r5','r13'];
 const cvAssignees=()=>live('user').filter(u=>CV_ASSIGN_ROLES.includes(u.role)&&u.status==='Aktif');
 /* Simpan isian jadwal yang sedang diketik sebelum modal digambar ulang. */
-function penSchedKeep(o){ const g=id=>document.getElementById(id); if(!g('pj_s')) return; o.j={start:g('pj_s').value,end:g('pj_e').value,period:g('pj_p').value,jam:g('pj_j').value,days:[...document.querySelectorAll('#pj_dw .fchip.on')].map(b=>b.dataset.d)}; }
+function penSchedKeep(o){ const g=id=>document.getElementById(id); if(!g('pj_s')) return; o.j={start:g('pj_s').value,end:g('pj_e').value,period:g('pj_p').value,jam:g('pj_j').value,days:picked('pj_dsel')}; }
 function cvAssignModal(u){ const x=live('user').find(r=>r.id===u), cur=tokoOfU(u); ST.cvPick={u,cl:(x.clients||[])[0]||'',sel:new Set(cur.map(t=>t.id)),j:{...(cur[0]?penJ(u,cur[0].id):penDefault(u,'baru'))}}; cvAssignRender(); }
 function cvAssignClient(c){ penSchedKeep(ST.cvPick); ST.cvPick.cl=c; cvAssignRender(); }
 function cvAssignToggle(id){ penSchedKeep(ST.cvPick); const {u,sel:S}=ST.cvPick;
@@ -3939,10 +3937,10 @@ const penPola=j=>j.period+(j.period!=='Bulanan'&&j.days.length?' · '+j.days.joi
 function penSchedHTML(j){ return `<div class="tile" style="margin-top:14px"><b class="fg sm" style="display:block;margin-bottom:10px">Masa penugasan &amp; jadwal kunjungan</b>
   <div class="grid g2" style="gap:10px"><label class="field"><span>Tanggal mulai <b class="req" aria-hidden="true">*</b></span><span class="inp"><input id="pj_s" type="date" value="${j.start}"></span></label><label class="field"><span>Tanggal selesai <b class="req" aria-hidden="true">*</b></span><span class="inp"><input id="pj_e" type="date" value="${j.end}"></span></label></div>
   <div class="grid g2" style="gap:10px;margin-top:10px"><label class="field"><span>Periode kunjungan</span>${sel(PEN_PERIODS,j.period,'penSchedDays()',{label:'Periode kunjungan',id:'pj_p'})}</label><label class="field"><span>Jam</span><span class="inp"><input id="pj_j" type="time" value="${j.jam}"></span></label></div>
-  <div class="field" id="pj_dw" style="margin-top:10px;display:${j.period==='Bulanan'?'none':''}"><span>Hari kunjungan</span><div class="chips" role="group" aria-label="Hari kunjungan">${DAYS7.map(d=>`<button type="button" class="fchip ${j.days.includes(d)?'on':''}" aria-pressed="${j.days.includes(d)}" data-d="${d}" onclick="multiTog(this)">${d}</button>`).join('')}</div></div>
+  <div class="field" id="pj_dw" style="margin-top:10px;display:${j.period==='Bulanan'?'none':''}"><span>Hari kunjungan</span>${multiSel('pj_dsel',DAYS7,j.days,{ph:'Pilih hari',label:'Hari kunjungan'})}</div>
   <p class="xs muted" style="margin-top:8px">Jadwal kunjungan dibuat otomatis dari isian ini selama masa penugasan (MOM 12 Nov). Bulanan mengikuti tanggal mulai.</p><p class="ferr" id="pj_err"></p></div>`; }
 function penSchedDays(){ const e=document.getElementById('pj_dw'); if(e) e.style.display=document.getElementById('pj_p').value==='Bulanan'?'none':''; }
-function penSchedRead(){ const g=id=>document.getElementById(id), j={start:g('pj_s').value,end:g('pj_e').value,period:g('pj_p').value,jam:g('pj_j').value||'09:00',days:[...document.querySelectorAll('#pj_dw .fchip.on')].map(b=>b.dataset.d)}, err=g('pj_err');
+function penSchedRead(){ const g=id=>document.getElementById(id), j={start:g('pj_s').value,end:g('pj_e').value,period:g('pj_p').value,jam:g('pj_j').value||'09:00',days:picked('pj_dsel')}, err=g('pj_err');
   const m=!j.start||!j.end?'Isi tanggal mulai dan selesai.':j.end<j.start?'Tanggal selesai harus setelah tanggal mulai.':j.period!=='Bulanan'&&!j.days.length?'Pilih minimal satu hari kunjungan.':'';
   if(m){ if(err) err.textContent=m; toast('Periksa isian',m,'danger'); return null; } if(j.period==='Bulanan') j.days=[]; return j; }
 function penJadwalModal(u,t){ const j=penJ(u,t), x=MD.user.find(a=>a.id===u), tk=TOKO.find(a=>a.id===t);
@@ -4133,9 +4131,9 @@ function infoForm(id){ if(!can('info.create')) return noAccess(); const x=id?INF
   openModal(`<h2 class="pt">${id?'Edit':'Buat'} pengumuman<i>.</i></h2><p class="muted sm" style="margin:6px 0 16px">Dikirim sebagai notifikasi ke aplikasi sales.</p>
   <div class="grid" style="gap:12px"><label class="field"><span>Judul</span><span class="inp"><input id="in_j" value="${esc(x.judul)}"></span></label><label class="field"><span>Isi</span><textarea class="ta" id="in_i" style="min-height:80px">${esc(x.isi)}</textarea></label>
   <label class="field"><span>Client</span>${sel(clientOpts(),x.cl,'',{label:'Client',id:'in_c'})}</label>
-  <div class="field"><span>Penerima (role)</span><div class="chips" id="in_t">${roles.map(r=>`<button type="button" class="fchip ${x.to.includes(r)?'on':''}" data-v="${esc(r)}" aria-pressed="${x.to.includes(r)}" onclick="this.classList.toggle('on');this.setAttribute('aria-pressed',this.classList.contains('on'))">${esc(r)}</button>`).join('')}</div></div></div>
+  <div class="field"><span>Penerima (role)</span>${multiSel('in_t',roles,x.to,{ph:'Pilih penerima',label:'Penerima (role)'})}</div></div>
   <div class="dlg-f">${btn('Batal',{v:'outline',on:'closeLayer()'})}${btn(id?'Simpan perubahan':'Kirim',{v:'accent',on:`infoSave('${id||''}')`})}</div>`); }
-function infoSave(id){ const clean=s=>s.replace(/['"<>`]/g,'').trim(), j=clean(document.getElementById('in_j').value), isi=clean(document.getElementById('in_i').value), cl=document.getElementById('in_c').value, to=[...document.querySelectorAll('#in_t .fchip.on')].map(b=>b.dataset.v);
+function infoSave(id){ const clean=s=>s.replace(/['"<>`]/g,'').trim(), j=clean(document.getElementById('in_j').value), isi=clean(document.getElementById('in_i').value), cl=document.getElementById('in_c').value, to=picked('in_t');
   if(!j||!isi||!to.length){ toast('Periksa isian','Isi judul, isi, dan minimal satu role penerima.','danger'); return; }
   if(id){ Object.assign(INFO.find(a=>a.id===id),{judul:j,isi,cl,to}); audit('Mengubah pengumuman '+j); }
   else { INFO.unshift({id:newId('in'),judul:j,isi,cl,to,tgl:LD_TODAY+' Okt',baca:0,dari:live('user').filter(u=>to.includes(roleName(u.role))||to.some(t=>roleName(u.role).startsWith(t.split(' ')[0]))).length||1}); audit('Mengirim pengumuman '+j); }
@@ -4649,7 +4647,7 @@ function qRow(q,i,kind){
   return `<div class="qrow tile" style="margin-bottom:10px">
     <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap"><b class="fg sm qn" style="width:22px">${i+1}.</b>
       <span class="sel sm" style="display:flex;flex:1;min-width:160px"><select class="qt" onchange="qType(this)" style="width:100%" aria-label="Jenis pertanyaan ${i+1}">${QTYPES[kind].map(([k,l])=>`<option value="${k}" ${t===k?'selected':''}>${l}</option>`).join('')}</select>${I('chev',14)}</span>
-      <button type="button" class="fchip qr ${q.req!==false?'on':''}" aria-pressed="${q.req!==false}" onclick="multiTog(this)">Wajib</button>
+      ${sel([['1','Wajib'],['0','Opsional']],q.req!==false?'1':'0','',{label:'Wajib diisi, pertanyaan '+(i+1),cls:'sm qr'})}
       ${ibtn('trash','Hapus pertanyaan','qDel(this)',{v:'ghost',size:'icon-sm'})}</div>
     <span class="inp h40" style="margin-bottom:6px"><input class="qq" value="${esc(q.q||'')}" placeholder="Tulis pertanyaan" aria-label="Pertanyaan ${i+1}"></span>
     ${opts.length?`<div class="qopts">${opts.map((o,j)=>qOptRow(o,j,q,keyed)).join('')}</div>${Q_OPT.includes(t)?`<div style="margin-top:6px">${btn('Tambah opsi',{v:'ghost',size:'sm',icon:'plus',on:'qOptAdd(this)',attrs:'type="button"'})}</div>`:''}${keyed?`<p class="xs muted" style="margin-top:6px">${t==='cb'?'Centang semua jawaban benar. Skor penuh hanya bila pilihan peserta sama persis.':'Centang kunci jawaban.'} Skor dihitung otomatis (BRD 6.1.9–6.1.10).</p>`:''}`:''}
@@ -4659,7 +4657,7 @@ function qRow(q,i,kind){
 function qOptAdd(b){ const row=b.closest('.qrow'), box=row.querySelector('.qopts'), d=qRead(row), j=box.children.length; box.insertAdjacentHTML('beforeend',qOptRow('',j,{...d,key:[]},kontenKind()==='Quiz')); box.lastElementChild.querySelector('.qo').focus(); }
 function qOptDel(b){ const box=b.closest('.qopts'); if(box.children.length<=2){ toast('Minimal 2 opsi','Pertanyaan pilihan butuh paling sedikit dua opsi.','danger'); return; } b.closest('.qopt').remove(); }
 function qRead(row){ const g=c=>row.querySelector(c), t=row.querySelector('.qt').value, keys=[...row.querySelectorAll('.qk')].map((b,i)=>b.classList.contains('on')?i:-1).filter(i=>i>=0), lines=el=>el?el.value.split('\n').map(s=>s.trim()).filter(Boolean):[];
-  const d={q:g('.qq').value.trim(),type:t,req:!!g('.qr')?.classList.contains('on'),opts:[...row.querySelectorAll('.qo')].map(i=>i.value.trim()),key:t==='cb'?keys:(keys[0]??-1)};
+  const d={q:g('.qq').value.trim(),type:t,req:g('.qr select').value==='1',opts:[...row.querySelectorAll('.qo')].map(i=>i.value.trim()),key:t==='cb'?keys:(keys[0]??-1)};
   if(t==='skala'){ d.min=+(g('.qmin select')?.value||1); d.max=+(g('.qmax select')?.value||5); d.minLabel=g('.qml')?.value.trim()||''; d.maxLabel=g('.qxl')?.value.trim()||''; }
   if(t==='grid'){ d.rows=lines(g('.qrows')); d.cols=lines(g('.qcols')); }
   return d; }
