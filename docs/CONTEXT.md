@@ -135,6 +135,7 @@ Semua data dummy. CRUD bekerja di memori dan hilang saat reload, kecuali data ya
 | Status kunjungan dan tugas FMCG | Mobile (check-in, tugas) | Dashboard (Kunjungan) |
 | Log aktivitas FMCG | Mobile (simpan sementara atau selesai) | Dashboard (Aktivitas lapangan) |
 | Quiz dan survey terbit (`kontenQ`) | Dashboard (Quiz, Survey) | Mobile (Quiz, Survey) |
+| Brief campaign/POSM/planogram: nama, jenis, role, acuan, foto referensi (`posmBrief`) | Dashboard (Campaign, POSM & planogram) | Mobile (Campaign & POSM) |
 | Nilai foto AI + adjustment (`posmNilai`) | Mobile (Campaign, POSM & planogram) | Dashboard (Campaign, POSM & planogram) |
 | Toko tutup (`tokoTutup`) | Mobile (kunjungan role bergerak) | Dashboard (Kunjungan) |
 

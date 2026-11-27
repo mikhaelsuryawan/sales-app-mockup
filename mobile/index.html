@@ -2820,8 +2820,13 @@ function fmTaskSave(draft){
 }
 
 /* ---------- POSM & planogram ---------- */
-const posmAll=()=>[...POSM,...(S.posmExtra||[])];
-const POSM=[{id:'pm3',name:'Campaign: penempatan barang promo akhir tahun',kind:'Campaign',acuan:'Barang promo di end gondola'},{id:'pm1',name:'Planogram rak utama',kind:'Planogram',acuan:'Urutan brand dan jumlah facing'},{id:'pm2',name:'POSM wobbler promo akhir tahun',kind:'POSM',acuan:'Posisi wobbler di depan rak'}];
+/* Gambar contoh foto referensi, sama dengan dashboard. */
+const posmArt=c=>'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90"><rect width="160" height="90" fill="#eef2f8"/><path d="M12 36h136M12 62h136M12 86h136" stroke="#9aa6b8" stroke-width="3"/><g fill="${c}">${[14,36,58,80,102,124].map((x,i)=>`<rect x="${x}" y="${14+i%2*4}" width="18" height="${20-i%2*4}" rx="2"/><rect x="${x}" y="42" width="18" height="18" rx="2" opacity=".65"/><rect x="${x}" y="${68+i%2*3}" width="18" height="${16-i%2*3}" rx="2" opacity=".4"/>`).join('')}</g></svg>`);
+const POSM_DEFAULT=[{id:'pm3',name:'Campaign: penempatan barang promo akhir tahun',kind:'Campaign',to:'SPG / Promotor, Mobile Promotor',acuan:'Barang promo di end gondola',foto:posmArt('#d17a22')},{id:'pm1',name:'Planogram rak utama',kind:'Planogram',to:'SPG / Promotor, Mobile Promotor',acuan:'Urutan brand dan jumlah facing',foto:posmArt('#3a7bd5')},{id:'pm2',name:'POSM wobbler promo akhir tahun',kind:'POSM',to:'SPG / Promotor, Mobile Promotor',acuan:'Posisi wobbler di depan rak',foto:posmArt('#2f9e5b')}];
+/* Brief dibuat di dashboard (shared posmBrief) dan disaring sesuai role yang di-assign. */
+const posmBriefs=()=>shRead('posmBrief',POSM_DEFAULT).filter(x=>(x.to||'').split(', ').includes(isMobilePromo()?'Mobile Promotor':'SPG / Promotor'));
+const posmAll=()=>[...posmBriefs(),...(S.posmExtra||[])];
+const posmRef=x=>/^data:image\//.test(x.foto||'')?`<div class="wm-photo"><img src="${esc(x.foto)}" alt="Foto referensi ${esc(x.name)}" style="width:100%;height:100%;object-fit:contain;background:#fff"></div>`:`<p class="hint">Belum ada foto referensi dari dashboard.</p>`;
 SCR.posm = () => ({note:'POSM dan planogram (MOM 13). User memotret lokasi, lalu foto dicocokkan dengan foto brief yang di-assign. AI memberi nilai berdasarkan acuan (simulasi).',
   html:`${appbar('Campaign & POSM')}<main class="content"><div class="list">${posmAll().map(x=>`<button class="li" onclick="go('posm-detail',{id:'${x.id}'})"><div class="ico-tile">${I('image',20)}</div><div class="grow"><div class="t">${x.name}</div><div class="s">${x.kind}${x.own?' · ditambahkan sales':''}</div></div>${x.own&&!S.posm[x.id]?chip('Tambahan sales','tan'):''}${S.posm[x.id]?(()=>{ const f=posmFinal(x.id); return chip('Nilai '+f,f>=80?'green':f>=70?'amber':'red'); })():stChip('Belum Selesai')}</button>`).join('')}</div><button class="btn ghost" style="margin-top:12px" onclick="act(()=>posmAddSheet())">${I('plus',20)} Tambah campaign / POSM</button></main><footer class="actions"><button class="btn ghost" onclick="fmDraftSave('posm')">Simpan sementara</button></footer>`});
 function posmAddSheet(){
@@ -2837,9 +2842,9 @@ SCR['posm-detail'] = p => {
   const a=(S.posmAdj||{})[x.id]||{final:null,alasan:''}, f=posmFinal(x.id), d=n?f-n:0;
   return {note:'Nilai AI di sini simulasi. Rekomendasi ambang: 80 atau lebih lulus, 70 sampai 79 ditinjau Team Leader, di bawah 70 foto ulang. Acuan final menunggu klien. <b>MOM 12 Nov:</b> setelah nilai AI keluar, isi nilai adjustment (−20 sampai +20). Alasan wajib jika adjustment bukan 0. Nilai akhir = nilai AI + adjustment (0–100) dan menentukan status. Nilai tersimpan ke dashboard lewat posmNilai.',
   html:`${appbar(x.kind)}<main class="content">
-    <div class="card"><b>${x.name}</b><div class="small muted" style="margin-top:2px">Acuan: ${x.acuan}</div></div>
-    ${x.own?`<div class="banner tan" style="margin-top:12px">${I('plus',18)}<span>Item ini ditambahkan sales, jadi tidak ada foto brief.</span></div>`:`<div class="sec-title">Foto brief</div><div class="wm-photo">${I('image',26)}</div>`}
-    <div class="sec-title">Foto kamu</div>${n?`<div class="wm-photo">${I('image',26)}</div><div class="card" style="margin-top:12px"><div class="row between"><div class="small muted">Nilai AI</div>${posmChip(n)}</div><div class="big-num num">${n}</div><p class="hint">Dicocokkan dengan foto brief.</p></div>
+    <div class="card"><b>${x.name}</b>${x.acuan?`<div class="small muted" style="margin-top:2px">Acuan: ${x.acuan}</div>`:''}</div>
+    ${x.own?`<div class="banner tan" style="margin-top:12px">${I('plus',18)}<span>Item ini ditambahkan sales, jadi tidak ada foto referensi.</span></div>`:`<div class="sec-title">Foto referensi</div>${posmRef(x)}`}
+    <div class="sec-title">Foto kamu</div>${n?`<div class="wm-photo">${I('image',26)}</div><div class="card" style="margin-top:12px"><div class="row between"><div class="small muted">Nilai AI</div>${posmChip(n)}</div><div class="big-num num">${n}</div><p class="hint">Dicocokkan dengan foto referensi.</p></div>
     <div class="sec-title">Nilai akhir</div>
     <div class="card">
       <label class="field"><span>Nilai akhir (0 sampai 100)</span><input class="input num" id="pa_adj" type="number" inputmode="numeric" min="0" max="100" step="1" value="${f}" oninput="posmAdjPreview(${n})"></label>
