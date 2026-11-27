@@ -535,8 +535,8 @@ const USERS = {
   'spv.sari':  {name:'Sari Wulandari', init:'SW', role:'spv', roleLabel:'Team Leader Elektronik (SPV 1)', nip:'CLT-TL-0208', client:'Arunika Elektronik & BPR Mitra Usaha', unit:'Cabang Jakarta Selatan', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
   'ffor.yoga': {name:'Yoga Permana', init:'YP', role:'spv', roleLabel:'FFOR (SPV 2)', nip:'SIM-18-00144', client:'Arunika Elektronik', unit:'Region Jakarta', place:'Kantor SIM Jakarta Selatan', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
   'arco.maya': {name:'Maya Anggraini', init:'MA', role:'spv', menu:'arco', roleLabel:'Arco (Leader SPG)', nip:'ARCO-0012', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'tim',label:'Tim',icon:'users'}},
-  'cbd.tono':  {name:'Tono Hidayat', init:'TH', role:'leads', menu:'cbd', vkey:'cbd', roleLabel:'CBD / Mediator', nip:'SIM-23-00871', client:'BPR Mitra Usaha', unit:'Kantor Cabang Cilandak', place:'Area Fatmawati', sched:'WFA', main:{key:'leads',label:'Leads',icon:'users'}},
-  'rea.nina':  {name:'Nina Safitri', init:'NS', role:'leads', menu:'rea', vkey:'rea', roleLabel:'REA / SPG Multi Finance', nip:'SIM-24-01322', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'leads',label:'Leads',icon:'users'}},
+  'cbd.tono':  {name:'Tono Hidayat', init:'TH', role:'leads', menu:'cbd', vkey:'cbd', roleLabel:'CBD / Mediator', nip:'SIM-23-00871', client:'BPR Mitra Usaha', unit:'Kantor Cabang Cilandak', place:'Area Fatmawati', sched:'WFA', main:{key:'leads',label:'Direct Sales',icon:'users'}},
+  'rea.nina':  {name:'Nina Safitri', init:'NS', role:'leads', menu:'rea', vkey:'rea', roleLabel:'REA / SPG Multi Finance', nip:'SIM-24-01322', client:'BPR Mitra Usaha', unit:'Kantor Cabang Fatmawati', place:'BPR Mitra Usaha Fatmawati', sched:'WFO', main:{key:'leads',label:'Direct Sales',icon:'users'}},
   'fmcg.tari': {name:'Lestari Putri', init:'LP', role:'spg', roleLabel:'Promotor FMCG', nip:'SIM-24-01355', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Electronic City Kemang', sched:'WFO', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
   'md.rangga': {name:'Rangga Saputra', init:'RS', role:'canvas', vkey:'canvasMD', roleLabel:'Merchandising (MD)', nip:'SIM-23-01102', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Best Denki Senayan City', sched:'WFO', main:{key:'aktivitas',label:'Aktivitas',icon:'grid'}},
   'mobile.fikri':{name:'Fikri Ramadhan', init:'FR', role:'spg', menu:'mobile', roleLabel:'Mobile Promotor', nip:'SIM-24-01377', client:'Arunika Elektronik', unit:'Cabang Jakarta Selatan', place:'Beberapa toko dan event', sched:'WFA', main:{key:'penjualan',label:'Penjualan',icon:'bag'}},
@@ -1032,7 +1032,7 @@ function fieldDash(){
   if(r==='leads'){
     const mine=S.leads.filter(l=>l.owner===S.user), c=k=>mine.filter(l=>l.status===k).length;
     const goal=mine.filter(l=>l.status==='Deal').reduce((s,l)=>s+(l.goal||0),0);
-    return `<div class="sec-title">Leads saya <a onclick="tab('leads')">Lihat semua</a></div>
+    return `<div class="sec-title">${isMf()?'Direct Sales':'Leads saya'} <a onclick="tab('leads')">Lihat semua</a></div>
     <div class="card"><div class="stat3"><div><small>Baru</small><b>${c('Baru')}</b></div><div><small>Prospect</small><b>${c('Prospect')}</b></div><div><small>Deal</small><b>${c('Deal')}</b></div></div>
     <div class="row between" style="margin-top:14px"><span class="small muted">Goal pencairan Oktober</span><b class="num">${rpShort(goal)} / Rp150 jt</b></div><div class="bar tan" style="margin-top:8px"><i style="width:${Math.max(4,goal/150e6*100)}%"></i></div></div>
     <!--SPLIT-->${(()=>{const todo=mine.filter(l=>l.status==='Baru'||l.fu==='hari ini');return todo.length?`<div class="sec-title">Perlu dihubungi hari ini</div><div class="list">${todo.map(l=>leadRow(l)).join('')}</div>`:''})()}`;
@@ -2414,31 +2414,30 @@ function pindahCabang(c){ S.cabang=c; closeSheet(); render(false,true); toast('S
 function acctType(){ const u=S.user; if(u==='spv.sari'||u==='spv.hendra') return 'User client (SPV 1 / CRH)'; if(u==='arco.maya') return 'User client, di luar BPR'; if(['bantuan.gita','bantuan.eko','bantuan.citra'].includes(u)) return 'Di luar BPR, non SIM dan non client'; return 'Pegawai SIM (BPR)'; }
 function moveType(){ const u=U(), rl=u.roleLabel; if(/Canvas|Taking|CBD|Mobile/.test(rl)||u.role==='canvas'||u.role==='order') return 'Bergerak (lebih dari 1 toko)'; if(u.role==='spg') return TOKO.spg.length>1?'Bergerak (lebih dari 1 toko)':'Diam (1 toko)'; if(u.role==='fmcg'||/REA/.test(rl)) return 'Diam (1 lokasi)'; return '–'; }
 function leadRow(l,showOwner){
-  return `<button class="li" onclick="go('lead-detail',{id:'${l.id}'})"><div class="av ${l.status==='Baru'?'blue':''}">${l.name.split(' ').map(s=>s[0]).join('').slice(0,2)}</div><div class="grow"><div class="t">${l.name}</div><div class="s">${l.prod} · ${rpShort(l.amount)}${showOwner?' · '+(l.owner?USERS[l.owner].name.split(' ')[0]:'Belum di-assign'):''}${l.status==='Baru'&&l.age?' · '+l.age:''}${l.status==='Prospect'&&l.fu?' · follow up '+l.fu:''}${l.pending?' · menunggu sinkron':''}</div></div>${chip(l.status==='Deal'?'Deal '+rpShort(l.goal):l.status,LTONE[l.status])}</button>`;
+  return `<button class="li" onclick="go('lead-detail',{id:'${l.id}'})"><div class="av ${l.status==='Baru'?'blue':''}">${l.name.split(' ').map(s=>s[0]).join('').slice(0,2)}</div><div class="grow"><div class="t">${l.name}</div><div class="s">${leadSrc(l)}${l.prod} · ${rpShort(l.amount)}${showOwner?' · '+(l.owner?USERS[l.owner].name.split(' ')[0]:'Belum di-assign'):''}${l.status==='Baru'&&l.age?' · '+l.age:''}${l.status==='Prospect'&&l.fu?' · follow up '+l.fu:''}${l.pending?' · menunggu sinkron':''}</div></div>${chip(l.status==='Deal'?'Deal '+rpShort(l.goal):l.status,LTONE[l.status])}</button>`;
 }
+/* Flag sumber data: Mobile (dibuat sales di aplikasi) atau Sistem (upload backend). */
+const isMf = () => ['cbd','rea'].includes(vk());
+const leadSrc = l => `<span class="chip ${l.self?'tan':''}" style="font-size:10.5px;padding:2px 7px;margin-right:4px">${l.self?'Mobile':'Sistem'}</span>`;
 const leadMine = () => S.leads.filter(l=>l.owner===S.user);
 function leadsList(f='Semua'){ const mine=leadMine(), list=mine.filter(l=>f==='Semua'||l.status===f);
   return `<div class="segtabs">${['Semua','Baru','Prospect','Deal','Belum Tertarik'].map(x=>`<button class="${f===x?'on':''}" onclick="setP({f:'${x}'})">${x} ${x==='Semua'?mine.length:mine.filter(l=>l.status===x).length}</button>`).join('')}</div>
     <div class="list">${list.length?list.map(l=>leadRow(l)).join(''):`<div class="empty">Tidak ada leads dengan status ini.</div>`}</div>`; }
-const leadBaruBtn = () => `<button class="ib" onclick="act(()=>go('lead-baru'))" aria-label="Buat leads">${I('plus',24,2)}</button>`;
+const leadBaruBtn = () => `<button class="ib" onclick="act(()=>go('lead-baru'))" aria-label="${isMf()?'Buat Direct Sales':'Buat leads'}">${I('plus',24,2)}</button>`;
 SCR.leads = p => {
   return {tab:p.back?undefined:'leads', note:'Multi Finance hanya melihat leads yang di-assign ke dia (URD FR-004, FR-008). Verifikasi dilakukan manual lewat telepon/WA, lalu hasilnya diinput di aplikasi.',
-  html:`${appbar('Leads saya',{backBtn:!!p.back,right:leadBaruBtn()})}<main class="content">
+  html:`${appbar(isMf()?'Direct Sales':'Leads saya',{backBtn:!!p.back,right:leadBaruBtn()})}<main class="content">
     ${leadsList(p.f)}
   </main>`};
 };
 /* Aktivitas saya (CBD dan REA): pekerjaan masing-masing dalam satu halaman, dibuka dari Beranda setelah absen masuk.
    Super Admin melihat gabungan keduanya. */
 SCR['mf-akt'] = () => {
-  const L=leadMine(), rk=rekrutList().filter(x=>x.u===S.user), jm=jualMfList().filter(x=>x.u===S.user), T=cbdTasks(), tunggu=T.filter(x=>x.st==='Menunggu jawaban').length, pantau=MITRA.filter(m=>S.mitraLog[m.id]).length;
-  const cat=n=>n+' pencairan tercatat', jml=tipe=>jm.filter(x=>x.tipe===tipe).length;
-  const leads=['users','Leads',L.length+' leads · '+L.filter(l=>l.status==='Baru').length+' belum dihubungi',"go('leads',{back:1})"];
-  const rekrut=['plus','Rekrut mitra',rk.length+' calon mitra',"go('rekrut-mitra')"];
-  const cbd=[leads,['user','Mitra saya',pantau+' dari '+MITRA.length+' mitra dipantau',"go('mitra')"],rekrut,
-    ['bag','Jualan direct / mitra',cat(jm.length),"go('jualan-mf')"],['check','Task Team Leader',tunggu?tunggu+' menunggu jawaban':'Semua task terjawab',"go('cbd-task')"]];
-  const rea=[leads,['bag','Jualan direct',cat(jml('Direct')),"go('jualan-mf',{tipe:'Direct'})"],['users','Jualan mitra',cat(jml('Mitra')),"go('jualan-mf',{tipe:'Mitra'})"],rekrut];
-  const rows=vk()==='rea'?rea:vk()==='cbd'?cbd:[...cbd,...rea.filter(r=>!cbd.some(c=>c[1]===r[1]))];
-  return {note:'Aktivitas saya. CBD: Leads, Mitra saya, Rekrut mitra, Jualan direct / mitra, Task Team Leader. REA: Leads, Jualan direct, Jualan mitra, Rekrut mitra. Menu di Beranda terkunci sampai absen masuk.',
+  const L=leadMine(), M=mitraAll(), A=actNow();
+  const rows=[['users','Direct Sales',L.length+' data · '+L.filter(l=>l.status==='Baru').length+' belum dihubungi',"go('leads',{back:1})"],
+    ['user','Monitoring Mitra',M.filter(m=>mmNow(m.id).length).length+' dari '+M.length+' mitra dipantau bulan ini',"go('mitra')"],
+    ['grid','Activity',A.length+' activity bulan ini',"go('mf-activity')"]];
+  return {note:'Aktivitas saya untuk CBD dan REA: Direct Sales, Monitoring Mitra, dan Activity. Menu di Beranda terkunci sampai absen masuk.',
   html:`${appbar('Aktivitas saya')}<main class="content">
     <div class="list">${rows.map(([ic,t,sub,go])=>`<button class="li" onclick="act(()=>${go.replace(/"/g,'&quot;')})"><div class="ico-tile">${I(ic,20)}</div><div class="grow"><div class="t">${t}</div><div class="s">${sub}</div></div>${I('right',18)}</button>`).join('')}</div>
   </main>`};
@@ -2457,7 +2456,7 @@ SCR['lead-detail'] = p => {
   html:`${appbar(l.id)}<main class="content">
     <div class="card"><div class="row"><div class="av blue" style="width:48px;height:48px;font-size:16px">${l.name.split(' ').map(s=>s[0]).join('').slice(0,2)}</div><div class="grow"><div style="font-weight:800;font-size:17px">${l.name}</div><div class="small muted">${l.job}</div></div>${chip(leadLabel(l),LTONE[l.status])}</div>
       <div class="row" style="gap:8px;margin-top:14px"><a class="btn sec sm grow" href="tel:${l.phone}" onclick="event.preventDefault();contactLead('${l.id}','phone')">${I('phone',18)} Telepon</a><a class="btn sec sm grow" href="#" onclick="event.preventDefault();contactLead('${l.id}','chat')">${I('chat',18)} WhatsApp</a></div></div>
-    <div class="card"><div class="kv"><span>Produk</span><span>${l.prod}</span></div><div class="kv"><span>Jaminan</span><span>${esc(l.jaminan||'–')}</span></div><div class="kv"><span>Nominal pengajuan</span><span class="num">${l.amount?rp(l.amount):'Diisi saat Deal'}</span></div><div class="kv"><span>Tenor</span><span>${l.tenor} bulan</span></div>${l.status==='Deal'?`<div class="kv"><span>Nominal disetujui (goal)</span><span class="num" style="color:var(--green)">${rp(l.goal)}</span></div>`:''}<div class="kv"><span>No. HP</span><span class="num">${l.phone}</span></div><div class="kv"><span>Alamat</span><span>${l.addr}</span></div><div class="kv"><span>Masuk</span><span>${l.date} · upload backend</span></div><div class="kv"><span>Ditangani</span><span>${l.owner?USERS[l.owner].name:'Belum di-assign'}</span></div>${l.calls?`<div class="kv"><span>Percobaan kontak</span><span>${l.calls} kali</span></div>`:''}</div>
+    <div class="card"><div class="kv"><span>Produk</span><span>${l.prod}</span></div><div class="kv"><span>Jaminan</span><span>${esc(l.jaminan||'–')}</span></div><div class="kv"><span>Nominal pengajuan</span><span class="num">${l.amount?rp(l.amount):'Diisi saat Deal'}</span></div><div class="kv"><span>Tenor</span><span>${l.tenor} bulan</span></div>${l.status==='Deal'?`<div class="kv"><span>Nominal disetujui (goal)</span><span class="num" style="color:var(--green)">${rp(l.goal)}</span></div>`:''}<div class="kv"><span>No. HP</span><span class="num">${l.phone}</span></div><div class="kv"><span>Alamat</span><span>${l.addr}</span></div><div class="kv"><span>Sumber data</span><span>${l.self?'Aplikasi mobile':'Sistem (upload backend)'}</span></div><div class="kv"><span>Masuk</span><span>${l.date}</span></div><div class="kv"><span>Ditangani</span><span>${l.owner?USERS[l.owner].name:'Belum di-assign'}</span></div>${l.calls?`<div class="kv"><span>Percobaan kontak</span><span>${l.calls} kali</span></div>`:''}</div>
     ${leadExtra(l)}
     ${l.log.length?`<div class="sec-title">Riwayat status</div><div class="card"><div class="timeline">${l.log.map(x=>`<div class="ti"><b>${x.t}</b><small>${x.s}</small></div>`).join('')}</div></div>`:''}
   </main>${!leadClosed(l)?`<footer class="actions"><button class="btn ${isLocked()?'locked':''}" onclick="act(()=>go('lead-hasil',{id:'${l.id}'}))">${isLocked()?I('lock',18):''} Input hasil verifikasi</button></footer>`:''}`};
@@ -3047,59 +3046,209 @@ function leadExtra(l){
 }
 /* Pilihan Jaminan leads (data contoh, menunggu daftar resmi dari klien). Isinya harus sama di mobile dan dashboard. */
 const JAMINAN=['BPKB Motor','BPKB Mobil','Sertifikat Rumah (SHM)','Sertifikat HGB','SK Karyawan','Deposito','Tanpa jaminan'];
-SCR['lead-baru'] = () => ({note:'CBD dan REA/SPG boleh membuat leads sendiri. Customer yang sudah terdaftar di REA lain tetap boleh dibuat; duplikat tidak masalah (MOM 12.4).',
-  html:`${appbar('Buat leads')}<main class="content">
-    <label class="field"><span>Nama nasabah *</span><input class="input" id="nl_n"></label>
-    <label class="field"><span>Nomor HP *</span><input class="input" id="nl_p" inputmode="tel"></label>
-    <label class="field"><span>Produk</span><select class="input" id="nl_d"><option>Kredit Modal Kerja</option><option>Kredit Multiguna</option><option>Dana Tunai</option></select></label>
-    <label class="field"><span>Jaminan</span><select class="input" id="nl_g"><option value="">Pilih jaminan</option>${JAMINAN.map(x=>`<option>${x}</option>`).join('')}</select></label>
-    <label class="field"><span>Pekerjaan</span><input class="input" id="nl_j"></label>
-    <label class="field"><span>Alamat</span><input class="input" id="nl_a"></label>
-    <p class="hint">Nominal diisi saat leads menjadi Deal.</p>
-  </main><footer class="actions"><button class="btn" onclick="saveNewLead()">Simpan leads</button></footer>`});
+const MF_PRODUK=['Kredit Modal Kerja','Kredit Multiguna','Dana Tunai'];
+SCR['lead-baru'] = p => ({note:'CBD dan REA boleh membuat data Direct Sales sendiri. Data dari aplikasi mobile ditandai <b>Mobile</b>, data dari sistem ditandai <b>Sistem</b>. Customer yang sudah terdaftar di REA lain tetap boleh dibuat; duplikat tidak masalah (MOM 12.4).',
+  html:`${appbar('Direct Sales baru')}<main class="content">
+    ${mfIn('n','Nama lengkap',p,{req:true})}
+    ${mfIn('h','No. HP',p,{req:true,mode:'tel'})}
+    <label class="field"><span>Produk</span><select class="input" onchange="cur().p.prod=this.value">${MF_PRODUK.map(x=>`<option ${p.prod===x?'selected':''}>${x}</option>`).join('')}</select></label>
+    <label class="field"><span>Jaminan</span><select class="input" onchange="cur().p.jaminan=this.value"><option value="">Pilih jaminan</option>${JAMINAN.map(x=>`<option ${p.jaminan===x?'selected':''}>${x}</option>`).join('')}</select></label>
+    ${mfMoney('dana','Dana tunai',p,true)}
+    ${mfIn('j','Pekerjaan',p)}
+    ${mfIn('a','Alamat',p)}
+    <div id="mferr"></div>
+  </main><footer class="actions"><button class="btn" onclick="saveNewLead()">Submit</button></footer>`});
 function saveNewLead(){
-  const n=val('nl_n'), h=val('nl_p');
-  if(!n||!h){ toast('Isi nama dan nomor HP','alert'); return; }
-  const l={id:'L-2610-M'+(Date.now()%100000),name:n,prod:val('nl_d'),jaminan:val('nl_g'),amount:0,tenor:12,phone:h,job:val('nl_j')||'–',addr:val('nl_a')||'–',status:'Baru',owner:S.user,cabang:vk()==='cbd'?'Cilandak':'Fatmawati',date:'26 Okt 2026',self:true,log:[]};
+  const p=cur().p, t=k=>(p[k]||'').trim(), n=t('n'), h=t('h'), dana=+String(p.dana||'').replace(/\D/g,'');
+  if(!n||!h) return mfErr('Nama lengkap dan No. HP wajib diisi.');
+  if(!dana) return mfErr('Isi dana tunai.');
+  const l={id:'L-2610-M'+(Date.now()%100000),name:n,prod:p.prod||MF_PRODUK[0],jaminan:p.jaminan||'',amount:dana,tenor:12,phone:h,job:t('j')||'–',addr:t('a')||'–',status:'Baru',owner:S.user,cabang:vk()==='cbd'?'Cilandak':'Fatmawati',date:'26 Okt 2026',self:true,log:[]};
   S.leads.unshift(l);
   /* Leads buatan sales dikirim ke dashboard lewat salesapp.shared.v1 (leadBaru). */
-  shSet('leadBaru',[...shRead('leadBaru',[]),{id:l.id,u:fmUk(),name:l.name,prod:l.prod,jaminan:l.jaminan,phone:h,job:l.job,addr:l.addr,cab:l.cabang}]);
-  back(); toast('Leads tersimpan');
+  shSet('leadBaru',[...shRead('leadBaru',[]),{id:l.id,u:fmUk(),name:l.name,prod:l.prod,jaminan:l.jaminan,amount:dana,phone:h,job:l.job,addr:l.addr,cab:l.cabang,src:'Mobile'}]);
+  back(); toast('Direct Sales tersimpan');
 }
+/* ---------- CBD & REA: Monitoring Mitra dan Activity ----------
+   Mitra datang dari dashboard (MITRA) dan dari Activity bulan sebelumnya.
+   Log aktivitas dihitung per bulan; awal bulan log mulai kosong lagi. */
 const MITRA=[{id:'mt1',name:'Agen Sejahtera Fatmawati',area:'Fatmawati',phone:'0812-7000-2201',leads:6},{id:'mt2',name:'Agen Berkah Cilandak',area:'Cilandak',phone:'0812-7000-2202',leads:3}];
-SCR.mitra = () => ({note:'Mitra adalah agent di luar SIM. Datanya dari client, hanya berupa data, dan melekat pada CBD (MOM 12.2).',
-  html:`${appbar('Mitra saya')}<main class="content">${mitraList()}</main>`});
-function mitraList(){ return `<div class="list">${MITRA.map(m=>`<button class="li" onclick="go('mitra-detail',{id:'${m.id}'})"><div class="ico-tile">${I('users',20)}</div><div class="grow"><div class="t">${m.name}</div><div class="s">${m.area} · ${m.leads} leads</div></div>${S.mitraLog[m.id]?chip('Dipantau','green'):chip('Belum','amber')}</button>`).join('')}</div>`; }
-/* Rekrut mitra dan jualan direct/mitra.
-   Feedback AMO baris 28: rincian pekerjaan CBD dan REA berbeda, jadi menunya dipisah.
-   CBD: monitoring mitra, lead dihubungi, rekrut mitra, jualan direct/mitra.
-   REA: jualan direct, jualan mitra, rekrut mitra. */
-const REKRUT_STATUS=['Pendekatan','Berkas','Verifikasi','Aktif'];
-const rekrutList = () => shRead('mitraRekrut',[
-  {id:'rk1',nama:'Toko Sumber Rezeki',pic:'Pak Hadi',area:'Cilandak',st:'Berkas',u:'cbd.tono',tgl:'24 Okt'},
-  {id:'rk2',nama:'Warung Bu Tini',pic:'Bu Tini',area:'Fatmawati',st:'Pendekatan',u:'rea.nina',tgl:'25 Okt'}
+const MF_BLN={'2026-10':{label:'Oktober 2026',today:'26 Okt 2026'},'2026-11':{label:'November 2026',today:'2 Nov 2026'}};
+const mfBln = () => S.mfBln||'2026-10';
+const mfToday = () => MF_BLN[mfBln()].today;
+const mfMine = x => S.user==='super.admin'||x.u===S.user;
+function mfNextMonth(){ S.mfBln=mfBln()==='2026-10'?'2026-11':'2026-10'; render(false,true); toast('Simulasi bulan '+MF_BLN[mfBln()].label,'calendar'); }
+const mfMonthNote = () => `<br><br><b>Demo:</b> sekarang ${MF_BLN[mfBln()].label}. <a onclick="mfNextMonth()" style="text-decoration:underline;cursor:pointer">${mfBln()==='2026-10'?'Simulasikan bulan berikutnya':'Kembali ke Oktober 2026'}</a>`;
+/* Activity = calon mitra hasil Rekrut Mitra. Activity dari bulan sebelumnya pindah ke Monitoring Mitra. */
+const actList = () => shRead('mfAct',[
+  {id:'ac1',u:'cbd.tono',nama:'Toko Sumber Rezeki',hp:'0812-7100-3301',prod:'Kredit Modal Kerja',jaminan:'BPKB Motor',dana:10000000,job:'Pedagang sembako',addr:'Jl. Cilandak Tengah 8',bln:'2026-09',tgl:'18 Sep 2026'},
+  {id:'ac2',u:'cbd.tono',nama:'Bengkel Maju Jaya',hp:'0812-7100-3302',prod:'Kredit Multiguna',jaminan:'BPKB Mobil',dana:25000000,job:'Pemilik bengkel',addr:'Jl. Fatmawati Raya 40',bln:'2026-10',tgl:'20 Okt 2026'},
+  {id:'ac3',u:'rea.nina',nama:'Warung Bu Tini',hp:'0812-7100-3303',prod:'Kredit Modal Kerja',jaminan:'Tanpa jaminan',dana:5000000,job:'Pemilik warung',addr:'Jl. Haji Nawi 3',bln:'2026-10',tgl:'22 Okt 2026'},
+  {id:'ac4',u:'rea.nina',nama:'Konter Pulsa Andalas',hp:'0812-7100-3304',prod:'Kredit Multiguna',jaminan:'SK Karyawan',dana:8000000,job:'Pemilik konter',addr:'Jl. Panglima Polim 21',bln:'2026-09',tgl:'12 Sep 2026'}
 ]);
-SCR['rekrut-mitra'] = p => {
-  const L=rekrutList().filter(x=>x.u===S.user), st=p.st||'Pendekatan';
-  return {note:'Rekrut mitra: calon agen di luar SIM yang diajak bergabung. Dipakai CBD dan REA. Status berjalan dari pendekatan sampai mitra aktif; mitra yang aktif muncul di daftar Mitra.',
-  html:`${appbar('Rekrut mitra')}<main class="content">
-    <div class="sec-title">Calon mitra saya <span class="small muted num">${L.length}</span></div>
-    ${L.length?`<div class="list">${L.map(x=>`<div class="li"><div class="ico-tile">${I('users',20)}</div><div class="grow"><div class="t">${esc(x.nama)}</div><div class="s">${esc(x.pic)} · ${esc(x.area)} · ${esc(x.tgl)}</div></div>${chip(x.st,x.st==='Aktif'?'green':x.st==='Verifikasi'?'blue':'amber')}</div>`).join('')}</div>`
-      :`<div class="empty"><div class="ico-tile">${I('users',24)}</div>Belum ada calon mitra. Tambahkan dari kunjungan lapangan.</div>`}
-    <div class="sec-title" style="margin-top:18px">Tambah calon mitra</div>
-    <label class="field"><span>Nama usaha</span><input class="input" id="rk_n" placeholder="Contoh: Toko Sumber Rezeki" maxlength="60"></label>
-    <label class="field"><span>Nama PIC</span><input class="input" id="rk_p" placeholder="Contoh: Pak Hadi" maxlength="40"></label>
-    <label class="field"><span>Area</span><input class="input" id="rk_a" placeholder="Contoh: Cilandak" maxlength="40"></label>
-    <div class="field"><span>Status awal</span><div class="opts">${REKRUT_STATUS.map(x=>`<button class="opt ${st===x?'on':''}" onclick="setP({st:'${x}'})">${x}</button>`).join('')}</div></div>
-    <div id="rkerr"></div>
-  </main><footer class="actions"><button class="btn" onclick="rekrutSave()">Simpan calon mitra</button></footer>`};
+const actNow = () => actList().filter(a=>mfMine(a)&&a.bln===mfBln());
+const mitraAll = () => [...MITRA.map(m=>({...m,src:'Dashboard'})),
+  ...actList().filter(a=>mfMine(a)&&a.bln<mfBln()).map(a=>({id:a.id,name:a.nama,area:a.addr,phone:a.hp,src:'Activity'}))];
+const mitraById = id => mitraAll().find(m=>m.id===id);
+/* Log Monitoring Mitra. Contoh: mt1 sudah di-visit bulan lalu, jadi Telepon dan WhatsApp aktif. */
+const mmLog = () => shRead('mmLog',[{id:'ml0',mid:'mt1',jenis:'Visit',hasil:'Tersambung',bln:'2026-09',tgl:'15 Sep 2026',jam:'10:20',lokasi:'Agen Sejahtera Fatmawati',hp:'0812-7000-2201',tk:'Simulasi angsuran',ps:'–',bk:'–',foto:'Kamera',by:'Tono Hidayat'}]);
+const mmNow = mid => mmLog().filter(x=>x.mid===mid&&x.bln===mfBln());
+const mmVisited = mid => mmLog().some(x=>x.mid===mid&&x.jenis==='Visit');
+const actLog = () => shRead('actLog',[]);
+const actLogNow = aid => actLog().filter(x=>x.aid===aid&&x.bln===mfBln());
+const cnt = (L,j) => L.filter(x=>x.jenis===j).length;
+
+/* Field kecil yang menyimpan isian ke cur().p supaya tidak hilang saat layar dirender ulang. */
+const mfIn = (k,label,p,{area=false,ph='',mode='text',req=false}={}) => area
+  ?`<label class="field"><span>${label}${req?' *':''}</span><textarea class="input" id="f_${k}" placeholder="${ph}" maxlength="300" oninput="cur().p.${k}=this.value">${esc(p[k]||'')}</textarea></label>`
+  :`<label class="field"><span>${label}${req?' *':''}</span><input class="input" id="f_${k}" placeholder="${ph}" inputmode="${mode}" maxlength="80" value="${esc(p[k]||'')}" oninput="cur().p.${k}=this.value"></label>`;
+const mfDate = (label) => `<label class="field"><span>${label}</span><input class="input" value="${mfToday()}" readonly aria-readonly="true"><span class="hint">Terisi otomatis hari ini</span></label>`;
+const mfMoney = (k,label,p,req) => `<label class="field"><span>${label}${req?' *':''}</span><input class="input num" id="f_${k}" inputmode="numeric" placeholder="Rp" value="${esc(p[k]||'')}" oninput="cur().p.${k}=this.value=this.value.replace(/\\D/g,'')?(+this.value.replace(/\\D/g,'')).toLocaleString('id-ID'):''"></label>`;
+/* Bukti foto. camera: hanya kamera. both: pilih kamera atau galeri. */
+function mfShot(src){ closeSheet(); toast(src==='Kamera'?'Membuka kamera…':'Memilih dari galeri…',src==='Kamera'?'camera':'image'); setTimeout(()=>setP({foto:src}),500); }
+function mfShotSheet(){ sheet(`<h3 style="font-size:18px;font-weight:800;margin-bottom:12px">Bukti foto</h3><div class="list">
+  <button class="li" onclick="mfShot('Kamera')"><div class="ico-tile">${I('camera',20)}</div><div class="grow"><div class="t">Ambil foto</div><div class="s">Buka kamera HP</div></div></button>
+  <button class="li" onclick="mfShot('Galeri')"><div class="ico-tile">${I('image',20)}</div><div class="grow"><div class="t">Pilih dari galeri</div><div class="s">Foto yang sudah tersimpan</div></div></button></div>`); }
+const mfPhoto = (p,mode) => `<div class="field"><span>Bukti foto *</span><div class="thumbs">${photoSlot(p.foto?'Foto dari '+p.foto.toLowerCase():mode==='both'?'Tambah foto':'Ambil foto',p.foto,mode==='both'?'mfShotSheet()':"mfShot('Kamera')")}</div><span class="hint">${mode==='both'?'Dari kamera atau galeri':'Hanya dari kamera, tidak bisa dari galeri'}</span></div>`;
+const mfTimeline = (L,empty) => L.length?`<div class="card"><div class="timeline">${L.map(x=>`<div class="ti"><b>${x.jenis}${x.hasil&&x.hasil!=='Tersambung'?' · '+x.hasil:''}</b><small>${[x.tgl+', '+x.jam,esc(x.ket||x.lokasi||''),esc(x.alasan||''),x.foto?'foto '+x.foto.toLowerCase():''].filter(Boolean).join(' · ')}</small></div>`).join('')}</div></div>`:`<div class="empty">${empty}</div>`;
+const mfErr = m => { $('#mferr').innerHTML=`<div class="err">${m}</div>`; };
+
+SCR.mitra = () => {
+  const L=mitraAll();
+  return {note:'Monitoring Mitra berisi mitra yang diinput admin di dashboard, ditambah mitra dari Activity bulan sebelumnya. Label kecil menunjukkan asal datanya.'+mfMonthNote(),
+  html:`${appbar('Monitoring Mitra')}<main class="content">
+    <p class="small muted" style="margin:0 2px 12px">${MF_BLN[mfBln()].label} · ${L.length} mitra</p>
+    <div class="list">${L.map(m=>{ const n=mmNow(m.id); return `<button class="li" onclick="go('mitra-detail',{id:'${m.id}'})"><div class="ico-tile ${m.src==='Activity'?'tan':''}">${I('users',20)}</div><div class="grow"><div class="t">${esc(m.name)}</div><div class="s">${esc(m.area)} · ${m.src==='Activity'?'dari Activity':'dari dashboard'}</div></div>${n.length?chip(n.length+' aktivitas','green'):chip('Belum','amber')}</button>`; }).join('')}</div>
+  </main>`};
 };
-function rekrutSave(){
-  const n=val('rk_n').trim(), pic=val('rk_p').trim(), a=val('rk_a').trim(), st=cur().p.st||'Pendekatan';
-  if(!n||!pic||!a){ $('#rkerr').innerHTML='<div class="err">Nama usaha, PIC, dan area wajib diisi.</div>'; return; }
-  shSet('mitraRekrut',[...rekrutList(),{id:'rk'+Date.now(),nama:n,pic,area:a,st,u:S.user,tgl:'26 Okt'}]);
-  back(); toast(n+' ditambahkan sebagai calon mitra','check');
+SCR['mitra-detail'] = p => {
+  const m=mitraById(p.id);
+  if(!m) return {html:`${appbar('Detail mitra')}<main class="content"><div class="empty">Mitra tidak ditemukan.</div></main>`};
+  const L=mmNow(m.id), ok=mmVisited(m.id);
+  const bt=(j,ic,on)=>`<button class="btn sec sm grow" ${on?'':'disabled'} onclick="act(()=>mmStart('${m.id}','${j}'))">${I(ic,18)} ${j}</button>`;
+  return {note:'Mitra yang belum pernah di-visit hanya bisa di-<b>Visit</b>. Setelah minimal 1 visit, Telepon dan WhatsApp aktif dan tetap aktif di bulan berikutnya. Yang di-reset tiap bulan hanya log aktivitas.'+mfMonthNote(),
+  html:`${appbar('Detail mitra')}<main class="content">
+    <div class="card"><div class="row"><div class="av blue" style="width:48px;height:48px;font-size:16px">${m.name.split(' ').map(s=>s[0]).join('').slice(0,2)}</div><div class="grow"><div style="font-weight:800;font-size:17px">${esc(m.name)}</div><div class="small muted">${esc(m.area)}</div></div>${chip(m.src==='Activity'?'Dari Activity':'Dari dashboard',m.src==='Activity'?'tan':'blue')}</div>
+      <div class="kv" style="margin-top:10px"><span>No. HP</span><span class="num">${esc(m.phone)}</span></div></div>
+    <div class="row" style="gap:8px;margin:12px 0 4px">${bt('Visit','pin',true)}${bt('Telepon','phone',ok)}${bt('WhatsApp','chat',ok)}</div>
+    ${ok?'':`<p class="hint" style="margin:6px 2px 0">Telepon dan WhatsApp aktif setelah mitra di-visit minimal 1 kali.</p>`}
+    <div class="sec-title">Aktivitas ${MF_BLN[mfBln()].label}</div>
+    <div class="card"><div class="stat3"><div><small>Visit</small><b>${cnt(L,'Visit')}</b></div><div><small>Telepon</small><b>${cnt(L,'Telepon')}</b></div><div><small>WhatsApp</small><b>${cnt(L,'WhatsApp')}</b></div></div></div>
+    <div class="sec-title">Log aktivitas</div>
+    ${mfTimeline(L,'Belum ada aktivitas bulan ini.')}
+  </main>`};
+};
+function mmStart(id,j){
+  if(j==='Visit'){ go('mm-form',{id,jenis:j,hp:mitraById(id).phone}); return; }
+  if(!mmVisited(id)){ toast('Visit mitra ini dulu','alert'); return; }
+  sheet(`<h3 style="font-size:18px;font-weight:800">Hasil ${j==='Telepon'?'telepon':'WhatsApp'}</h3><p class="muted small" style="margin:6px 0 14px">Pilih dulu sebelum mengisi laporan.</p>
+  <div class="list">
+    <button class="li" onclick="closeSheet();go('mm-form',{id:'${id}',jenis:'${j}',hasil:'Tersambung',hp:'${esc(mitraById(id).phone)}'})"><div class="ico-tile green">${I('check',20,2.2)}</div><div class="grow"><div class="t">Tersambung</div><div class="s">Isi laporan monitoring</div></div>${I('right',20)}</button>
+    <button class="li" onclick="closeSheet();go('mm-gagal',{id:'${id}',jenis:'${j}'})"><div class="ico-tile red">${I('x',20,2.2)}</div><div class="grow"><div class="t">Tidak Tersambung</div><div class="s">Catat alasannya</div></div>${I('right',20)}</button>
+  </div>`);
 }
+SCR['mm-form'] = p => {
+  const m=mitraById(p.id), visit=p.jenis==='Visit';
+  return {note:visit?'Form Visit. Bukti foto hanya dari kamera.':`Form ${p.jenis} tersambung. Bukti foto boleh dari kamera atau galeri.`,
+  html:`${appbar(visit?'Visit mitra':p.jenis+' · Tersambung')}<main class="content">
+    <div class="card" style="padding:12px 16px;margin-bottom:14px"><b>${esc(m.name)}</b><div class="small muted">${esc(m.area)}</div></div>
+    ${mfIn('lokasi','Nama lokasi',p,{req:true,ph:'Contoh: Kios depan pasar'})}
+    ${mfDate('Tanggal')}
+    ${mfIn('hp','No. HP',p,{req:true,mode:'tel'})}
+    ${mfIn('tk','Transfer knowledge',p,{area:true,ph:'Materi yang disampaikan ke mitra'})}
+    ${mfIn('ps','Problem solving',p,{area:true,ph:'Kendala mitra dan solusinya'})}
+    ${mfIn('bk','Bantu proses kredit',p,{area:true,ph:'Pengajuan yang dibantu'})}
+    ${mfPhoto(p,visit?'camera':'both')}
+    <div id="mferr"></div>
+  </main><footer class="actions"><button class="btn" onclick="mmSave()">Submit</button></footer>`};
+};
+SCR['mm-gagal'] = p => {
+  const m=mitraById(p.id), r=p.r||'';
+  return {note:`${p.jenis} tidak tersambung. Pilih penyebab, lalu alasan wajib diisi.`,
+  html:`${appbar(p.jenis+' · Tidak Tersambung')}<main class="content">
+    <div class="card" style="padding:12px 16px;margin-bottom:14px"><b>${esc(m.name)}</b><div class="small muted num">${esc(m.phone)}</div></div>
+    <div class="field"><span>Penyebab *</span><div class="list" role="radiogroup">${['Tidak diangkat','Nomor tidak aktif'].map(x=>`<button class="li" role="radio" aria-checked="${r===x}" onclick="setP({r:'${x}'})" style="${r===x?'background:var(--blue-50)':''}"><div class="grow"><div class="t">${x}</div></div><span class="check ${r===x?'on':''}" style="border-radius:50%">${r===x?I('check',14,3):''}</span></button>`).join('')}</div></div>
+    ${mfIn('alasan','Alasan',p,{area:true,req:true,ph:'Contoh: sudah 3 kali ditelepon sejak pagi'})}
+    <div id="mferr"></div>
+  </main><footer class="actions"><button class="btn" onclick="mmSave()">Submit</button></footer>`};
+};
+function mmSave(){
+  const c=cur(), p=c.p, m=mitraById(p.id), gagal=c.name==='mm-gagal', t=k=>(p[k]||'').trim();
+  if(gagal){ if(!p.r) return mfErr('Pilih Tidak diangkat atau Nomor tidak aktif.'); if(!t('alasan')) return mfErr('Alasan wajib diisi.'); }
+  else { if(!t('lokasi')||!t('hp')) return mfErr('Nama lokasi dan No. HP wajib diisi.'); if(!p.foto) return mfErr('Tambahkan bukti foto.'); }
+  const row={id:'ml'+Date.now(),mid:m.id,jenis:p.jenis,hasil:gagal?p.r:'Tersambung',bln:mfBln(),tgl:mfToday(),jam:clock(),by:U().name};
+  if(gagal) row.alasan=t('alasan'); else Object.assign(row,{lokasi:t('lokasi'),hp:t('hp'),tk:t('tk'),ps:t('ps'),bk:t('bk'),foto:p.foto});
+  shSet('mmLog',[row,...mmLog()]);
+  /* Jawaban yang tersambung juga dikirim ke dashboard (menu Mitra › Jawaban). */
+  if(!gagal){ const all=shRead('mitraAns',{}); all[m.id]={name:m.name,by:row.by,tgl:row.tgl.replace(/ \d{4}$/,''),a:{tk:row.tk||'–',ps:row.ps||'–',bk:row.bk||'–'},q:{tk:'Transfer knowledge',ps:'Problem solving',bk:'Bantu proses kredit'}}; shSet('mitraAns',all); S.mitraLog[m.id]=true; }
+  back(); toast(p.jenis+(gagal?' tidak tersambung dicatat':' tercatat'),gagal?'alert':'check');
+}
+
+/* Activity: daftar calon mitra bulan ini. Tombol + membuka Rekrut Mitra. */
+SCR['mf-activity'] = () => {
+  const L=actNow();
+  return {note:'Activity berisi calon mitra hasil Rekrut Mitra bulan ini. Bulan berikutnya, data Activity pindah ke Monitoring Mitra.'+mfMonthNote(),
+  html:`${appbar('Activity',{right:`<button class="ib" onclick="act(()=>go('rekrut-mitra'))" aria-label="Rekrut mitra">${I('plus',24,2)}</button>`})}<main class="content">
+    <p class="small muted" style="margin:0 2px 12px">${MF_BLN[mfBln()].label} · ${L.length} activity</p>
+    ${L.length?`<div class="list">${L.map(a=>{ const n=actLogNow(a.id).length; return `<button class="li" onclick="go('act-detail',{id:'${a.id}'})"><div class="ico-tile">${I('user',20)}</div><div class="grow"><div class="t">${esc(a.nama)}</div><div class="s">${esc(a.prod)} · ${rpShort(a.dana)} · ${a.tgl}</div></div>${n?chip(n+' aktivitas','green'):chip('Baru','blue')}</button>`; }).join('')}</div>`
+      :`<div class="empty"><div class="ico-tile">${I('users',24)}</div>Belum ada activity bulan ini. Tekan + untuk rekrut mitra.</div>`}
+  </main>`};
+};
+SCR['rekrut-mitra'] = p => ({note:'Rekrut Mitra menambah data ke Activity.',
+  html:`${appbar('Rekrut Mitra')}<main class="content">
+    ${mfIn('nama','Nama lengkap',p,{req:true})}
+    ${mfIn('hp','No. HP',p,{req:true,mode:'tel'})}
+    <label class="field"><span>Produk</span><select class="input" onchange="cur().p.prod=this.value">${MF_PRODUK.map(x=>`<option ${p.prod===x?'selected':''}>${x}</option>`).join('')}</select></label>
+    <label class="field"><span>Jaminan</span><select class="input" onchange="cur().p.jaminan=this.value"><option value="">Pilih jaminan</option>${JAMINAN.map(x=>`<option ${p.jaminan===x?'selected':''}>${x}</option>`).join('')}</select></label>
+    ${mfMoney('dana','Dana tunai',p,true)}
+    ${mfIn('job','Pekerjaan',p)}
+    ${mfIn('addr','Alamat',p)}
+    <div id="mferr"></div>
+  </main><footer class="actions"><button class="btn" onclick="rekrutSave()">Submit</button></footer>`});
+function rekrutSave(){
+  const p=cur().p, t=k=>(p[k]||'').trim(), dana=+String(p.dana||'').replace(/\D/g,'');
+  if(!t('nama')||!t('hp')) return mfErr('Nama lengkap dan No. HP wajib diisi.');
+  if(!dana) return mfErr('Isi dana tunai.');
+  shSet('mfAct',[{id:'ac'+Date.now(),u:S.user,nama:t('nama'),hp:t('hp'),prod:p.prod||MF_PRODUK[0],jaminan:p.jaminan||'–',dana,job:t('job')||'–',addr:t('addr')||'–',bln:mfBln(),tgl:mfToday()},...actList()]);
+  back(); toast(t('nama')+' masuk ke Activity');
+}
+const ACT_JENIS={'Info Mitra':'users','Visit':'pin','Canvassing':'route'};
+SCR['act-detail'] = p => {
+  const a=actList().find(x=>x.id===p.id);
+  if(!a) return {html:`${appbar('Detail activity')}<main class="content"><div class="empty">Activity tidak ditemukan.</div></main>`};
+  const L=actLogNow(a.id);
+  return {note:'Detail activity. Info Mitra, Visit, dan Canvassing bisa dilakukan berulang selama bulan berjalan.'+mfMonthNote(),
+  html:`${appbar('Detail activity')}<main class="content">
+    <div class="card"><div style="font-weight:800;font-size:17px">${esc(a.nama)}</div><div class="small muted" style="margin-bottom:6px">${esc(a.job)}</div>
+      <div class="kv"><span>No. HP</span><span class="num">${esc(a.hp)}</span></div><div class="kv"><span>Produk</span><span>${esc(a.prod)}</span></div><div class="kv"><span>Jaminan</span><span>${esc(a.jaminan)}</span></div><div class="kv"><span>Dana tunai</span><span class="num">${rp(a.dana)}</span></div><div class="kv"><span>Alamat</span><span>${esc(a.addr)}</span></div><div class="kv"><span>Dibuat</span><span>${a.tgl}</span></div></div>
+    <div class="row" style="gap:8px;margin:12px 0 4px">${Object.entries(ACT_JENIS).map(([j,ic])=>`<button class="btn sec sm grow" onclick="act(()=>go('act-form',{id:'${a.id}',jenis:'${j}'}))">${I(ic,18)} ${j}</button>`).join('')}</div>
+    <div class="sec-title">Aktivitas ${MF_BLN[mfBln()].label}</div>
+    <div class="card"><div class="stat3"><div><small>Info Mitra</small><b>${cnt(L,'Info Mitra')}</b></div><div><small>Visit</small><b>${cnt(L,'Visit')}</b></div><div><small>Canvassing</small><b>${cnt(L,'Canvassing')}</b></div></div></div>
+    <div class="sec-title">Log aktivitas</div>
+    ${mfTimeline(L,'Belum ada aktivitas.')}
+  </main>`};
+};
+SCR['act-form'] = p => {
+  const j=p.jenis, Q=mitraQ();
+  const body=j==='Info Mitra'?`${mfDate('Tanggal')}${mfIn('nm','Nama mitra',p,{req:true})}${mfIn('lok','Lokasi mitra',p,{req:true})}${mfIn('cat','Catatan',p,{area:true})}
+      <label class="field"><span>List pertanyaan</span><select class="input" onchange="cur().p.q=this.value"><option value="">Pilih pertanyaan</option>${Q.map(x=>`<option ${p.q===x.q?'selected':''}>${esc(x.q)}</option>`).join('')}</select></label>
+      ${mfPhoto(p,'camera')}${mfIn('otp','OTP (opsional)',p,{mode:'numeric',ph:'6 digit'})}`
+    :j==='Visit'?`${mfDate('Tanggal visit')}${mfIn('nk','Nama konsumen',p,{req:true})}${mfIn('al','Alamat',p,{req:true})}${mfIn('hp','No. HP',p,{req:true,mode:'tel'})}${mfPhoto(p,'camera')}`
+    :`${mfDate('Tanggal event')}${mfIn('le','Lokasi event',p,{req:true})}${mfPhoto(p,'camera')}`;
+  return {note:j+'. Bukti foto hanya dari kamera HP.'+(j==='Info Mitra'?' Pilihan pertanyaan diatur admin di dashboard (menu Mitra › Pertanyaan monitoring).':''),
+  html:`${appbar(j)}<main class="content">${body}<div id="mferr"></div></main><footer class="actions"><button class="btn" onclick="actSave()">Submit</button></footer>`};
+};
+function actSave(){
+  const p=cur().p, j=p.jenis, t=k=>(p[k]||'').trim();
+  const need={'Info Mitra':['nm','lok'],'Visit':['nk','al','hp'],'Canvassing':['le']}[j];
+  if(need.some(k=>!t(k))) return mfErr('Lengkapi isian bertanda *.');
+  if(!p.foto) return mfErr('Ambil bukti foto dari kamera.');
+  const ket=j==='Info Mitra'?t('nm')+' · '+t('lok'):j==='Visit'?t('nk')+' · '+t('al'):t('le');
+  const row={id:'al'+Date.now(),aid:p.id,jenis:j,bln:mfBln(),tgl:mfToday(),jam:clock(),ket,foto:p.foto,by:U().name};
+  if(j==='Info Mitra') Object.assign(row,{cat:t('cat'),q:p.q||'',otp:t('otp')});
+  shSet('actLog',[row,...actLog()]);
+  back(); toast(j+' tercatat');
+}
+
 /* Jualan multi finance: direct (nasabah langsung) atau lewat mitra. */
 const jualMfList = () => shRead('jualMf',[]);
 SCR['jualan-mf'] = p => {
@@ -3130,23 +3279,6 @@ function jualMfSave(){
 const MITRAQ_DEFAULT=[{id:'mq1',q:'Bagaimana kondisi usaha atau kegiatan mitra bulan ini?'},{id:'mq2',q:'Kendala apa yang dihadapi mitra dalam mencari nasabah?'},{id:'mq3',q:'Dukungan apa yang dibutuhkan mitra dari tim bulan depan?'}];
 const mitraQ = () => shRead('mitraQ',MITRAQ_DEFAULT).filter(x=>!x.del&&x.status!=='Nonaktif');
 const mitraAns = id => (shRead('mitraAns',{})[id]||{}).a||{};
-function mitraSave(id){
-  const m=MITRA.find(x=>x.id===id), Q=mitraQ(), a={}, q={};
-  for(const x of Q){ const v=val('mq_'+x.id).replace(/['"\\<>`]/g,'').trim(); if(!v){ toast('Isi semua jawaban','alert'); return; } a[x.id]=v; q[x.id]=x.q; }
-  const all=shRead('mitraAns',{}); all[id]={name:m.name,by:U().name,tgl:'26 Okt',a,q}; shSet('mitraAns',all);
-  S.mitraLog[id]=true; back(); toast('Monitoring mitra tersimpan');
-}
-SCR['mitra-detail'] = p => {
-  const m=MITRA.find(x=>x.id===p.id), Q=mitraQ(), saved=mitraAns(m.id);
-  return {note:'CBD memonitor mitra. Data KPI CBD berupa foto dan catatan (MOM 12.2). Pertanyaan monitoring dengan jawaban teks bebas diatur admin di dashboard (menu Mitra).',
-  html:`${appbar(m.name)}<main class="content">
-    <div class="card"><div class="kv"><span>Area</span><span>${m.area}</span></div><div class="kv"><span>Telepon</span><span class="num">${m.phone}</span></div><div class="kv"><span>Leads</span><span>${m.leads}</span></div></div>
-    <div class="thumbs" style="margin-top:12px">${photoSlot('Foto monitoring',p.f,'setP({f:1})')}</div>
-    <div class="sec-title">Pertanyaan monitoring</div>
-    ${Q.length?Q.map(x=>`<label class="field"><span>${esc(x.q)}</span><textarea class="input" id="mq_${x.id}" placeholder="Tulis jawaban">${esc(saved[x.id]||'')}</textarea></label>`).join(''):`<div class="empty">Admin belum menyiapkan pertanyaan monitoring.</div>`}
-    <label class="field" style="margin-top:14px"><span>Catatan</span><textarea class="input" id="mt_n"></textarea></label>
-  </main><footer class="actions"><button class="btn" ${p.f?'':'disabled'} onclick="act(()=>mitraSave('${m.id}'))">Simpan monitoring</button></footer>`};
-};
 SCR['cbd-task'] = p => {
   const L=cbdTasks(), pend=L.find(x=>x.st==='Menunggu jawaban'), x=pend||L[0], done=!pend;
   return {note:'CBD menerima task dari Team Leader berisi daftar pertanyaan, menanyakannya ke konsumen, lalu jawaban dicatat sebagai submission task (MOM 12.2). Task dibuat di dashboard.',
@@ -3923,15 +4055,10 @@ function capItems(){
   const qItem={c:'task',label:'Quiz & survey',done:qd,total:qf.length,sub:'tugas Team Leader',go:"go('quiz')"};
   if(r==='leads'){
     const mine=S.leads.filter(l=>l.owner===S.user);
-    const rk=rekrutList().filter(x=>x.u===S.user), jm=jualMfList().filter(x=>x.u===S.user);
-    /* CBD kerja visit, REA in house. Isi dan urutan Rincian pekerjaan mengikuti daftar masing-masing. */
-    const jualan=(label,tipe,min,sub)=>{ const n=jm.filter(x=>!tipe||x.tipe===tipe).length; return {c:'job',label,done:n,total:Math.max(min,n),sub,go:tipe?`act(()=>go('jualan-mf',{tipe:'${tipe}'}))`:"act(()=>go('jualan-mf'))"}; };
-    const rekrut={c:'task',label:'Rekrut mitra',done:rk.filter(x=>x.st==='Aktif').length,total:Math.max(2,rk.length),sub:'calon mitra',go:"act(()=>go('rekrut-mitra'))"};
-    if(vk()==='cbd') out.push(
-      {c:'visit',label:'Monitoring mitra',done:v.filter(x=>x.status==='Selesai').length,total:v.length,sub:'mitra dikunjungi',go:"act(()=>go('mitra'))"},
-      {c:'job',label:'Leads dihubungi',done:mine.filter(l=>l.status!=='Baru').length,total:mine.length,sub:'leads kamu',go:"act(()=>go('leads',{back:1}))"},
-      rekrut, jualan('Jualan direct / mitra','',3,'pencairan tercatat'));
-    else out.push(jualan('Jualan direct','Direct',3,'nasabah langsung'), jualan('Jualan mitra','Mitra',2,'lewat agen'), rekrut);
+    const M=mitraAll();
+    out.push({c:'job',label:'Direct Sales dihubungi',done:mine.filter(l=>l.status!=='Baru').length,total:mine.length,sub:'data kamu',go:"act(()=>go('leads',{back:1}))"},
+      {c:'visit',label:'Monitoring Mitra',done:M.filter(m=>mmNow(m.id).length).length,total:M.length,sub:'mitra dipantau bulan ini',go:"act(()=>go('mitra'))"},
+      {c:'task',label:'Activity',done:actNow().length,total:Math.max(2,actNow().length),sub:'rekrut mitra bulan ini',go:"act(()=>go('mf-activity'))"});
     return out;
   }
   const vGo=aktGo()||"tab('home')";
