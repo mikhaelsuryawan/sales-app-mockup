@@ -867,6 +867,27 @@ textarea.ta[aria-invalid=true]{border-color:var(--danger)}
 .toast .tact{flex:none;height:28px;padding:0 12px;border-radius:99px;background:rgb(255 255 255 / .1);color:#fff;font-size:12px;font-weight:600;align-self:center} .toast .tact:hover{background:rgb(255 255 255 / .2)}
 .toast .tx{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:var(--on-ink-muted);align-self:center} .toast .tx:hover{color:#fff;background:rgb(255 255 255 / .1)}
 .toast .tx svg{width:14px;height:14px}
+/* Detail kunjungan: durasi, check-in/out, dan tugas */
+.vsec{margin-bottom:20px} .vsec>h3{font-size:13px;font-weight:700;color:var(--fg);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.vdur{border-radius:var(--r-panel);background:var(--raised);padding:16px}
+.vdur-n{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap} .vdur-n b{font-size:28px;font-weight:800;letter-spacing:-.5px;color:var(--fg);font-variant-numeric:tabular-nums}
+.vline{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:16px;list-style:none;padding:0}
+.vline li{position:relative;padding-top:20px;text-align:center}
+.vline li::before{content:"";position:absolute;top:3px;left:calc(50% - 6px);width:12px;height:12px;border-radius:50%;background:var(--card);border:2px solid var(--line-strong);z-index:1}
+.vline li+li::after{content:"";position:absolute;top:8px;right:50%;width:100%;height:2px;background:var(--line-strong)}
+.vline li.on::before{background:var(--accent-strong);border-color:var(--accent-strong)} .vline li.on+li.on::after{background:var(--accent-strong)}
+.vline small{display:block;font-size:11px;font-weight:600;color:var(--muted)} .vline span{font-size:14px;font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums}
+.vio{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.vio>section{border:1px solid var(--line);border-radius:var(--r-panel);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.vio h3{font-size:13px;font-weight:700;color:var(--fg);display:flex;align-items:center;gap:8px}
+.vio-t{font-size:24px;font-weight:800;color:var(--fg);font-variant-numeric:tabular-nums;line-height:1}
+.vio .foto-lg{height:140px}
+.vio-0{height:140px;border:1.5px dashed var(--line-strong);border-radius:var(--r-panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-size:12px;text-align:center;padding:12px}
+.vtask{border:1px solid var(--line);border-radius:var(--r-panel);margin-top:8px;overflow:hidden}
+.vtask summary{display:flex;align-items:center;gap:12px;padding:12px;min-height:52px;cursor:pointer;list-style:none;transition:background-color .15s}
+.vtask summary::-webkit-details-marker{display:none} .vtask summary:hover{background:var(--raised)} .vtask summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.vtask summary>svg{flex:none;color:var(--muted);transition:transform .15s} .vtask[open] summary>svg{transform:rotate(180deg)}
+.vtask>div{padding:0 12px 12px 56px;font-size:12.5px;color:var(--body);display:flex;flex-direction:column;align-items:flex-start;gap:8px}
 .thumbs{display:flex;gap:8px;flex-wrap:wrap}
 .thumb{width:84px;height:84px;border-radius:14px;background:var(--canvas);display:grid;place-items:center;color:var(--muted)}
 .steps{position:relative}
@@ -1368,13 +1389,13 @@ const D={
     {id:'PR-06',name:'Free product setrika',type:'Free product',prod:'Rice Cooker 1,8 L',period:'Draft',scope:'Canvasing',combine:true,cust:false,status:'Draft',used:0}
   ],
   visits:[
-    {u:'rina',place:'Electronic City Kemang',plan:'08:00',cin:'08:03',cout:'',dur:'',tasks:'Cek SKU display, Penjualan',photos:1,status:'Berjalan'},
+    {u:'rina',place:'Electronic City Kemang',plan:'08:00',cin:'08:03',cout:'',tk:{'Penjualan':'Selesai','Cek SKU display':'Draft'},dur:'',tasks:'Cek SKU display, Penjualan',photos:1,status:'Berjalan'},
     {u:'rina',place:'Best Denki Senayan City',plan:'14:00',cin:'',cout:'',dur:'',tasks:'Survey toko, Display share',photos:0,status:'Belum'},
-    {u:'budi',place:'Toko Sinar Jaya Elektronik',plan:'09:00',cin:'09:02',cout:'09:31',dur:'29 mnt',tasks:'Penjualan, Ambil retur',photos:2,status:'Selesai'},
-    {u:'budi',place:'Toko Makmur Abadi',plan:'10:30',cin:'10:36',cout:'',dur:'',tasks:'Penjualan',photos:1,status:'Berjalan',left:true},
+    {u:'budi',place:'Toko Sinar Jaya Elektronik',plan:'09:00',cin:'09:02',cout:'09:31',tk:{'Penjualan':'Selesai','Ambil retur':'Selesai'},dur:'29 mnt',tasks:'Penjualan, Ambil retur',photos:2,status:'Selesai'},
+    {u:'budi',place:'Toko Makmur Abadi',plan:'10:30',cin:'10:36',cout:'',tk:{'Penjualan':'Belum Selesai'},dur:'',tasks:'Penjualan',photos:1,status:'Berjalan',left:true},
     {u:'budi',place:'Toko Berkah Elektronik',plan:'13:00',cin:'',cout:'',dur:'',tasks:'Penjualan, Cek display',photos:0,status:'Belum'},
-    {u:'dimas',place:'Toko Mega Elektronik',plan:'10:00',cin:'10:04',cout:'10:30',dur:'26 mnt',tasks:'Ambil pesanan',photos:2,status:'Selesai'},
-    {u:'kevin',place:'Toko Jaya Abadi Kembangan',plan:'09:30',cin:'09:41',cout:'10:20',dur:'39 mnt',tasks:'Penjualan',photos:2,status:'Selesai',remote:true},
+    {u:'dimas',place:'Toko Mega Elektronik',plan:'10:00',cin:'10:04',cout:'10:30',tk:{'Ambil pesanan':'Selesai'},dur:'26 mnt',tasks:'Ambil pesanan',photos:2,status:'Selesai'},
+    {u:'kevin',place:'Toko Jaya Abadi Kembangan',plan:'09:30',cin:'09:41',cout:'10:20',tk:{'Penjualan':'Selesai'},dur:'39 mnt',tasks:'Penjualan',photos:2,status:'Selesai',remote:true},
     {u:'tari',place:'Electronic City Kemang',plan:'09:00',cin:'',cout:'',dur:'',tasks:FM_TASKS_LABEL,photos:0,status:'Belum'},
     {u:'tari',place:'Best Denki Senayan City',plan:'13:00',cin:'',cout:'',dur:'',tasks:FM_TASKS_LABEL,photos:0,status:'Belum'},
     {u:'rangga',place:'Best Denki Senayan City',plan:'09:00',cin:'',cout:'',dur:'',tasks:FM_TASKS_LABEL,photos:0,status:'Belum'},
@@ -2525,12 +2546,36 @@ function pageKunjungan(q){
     {acts:`${btn('Atur jadwal di Penugasan',{v:'outline',size:'sm',icon:'cal',on:"go('/penugasan?tab=jadwal')"})}${btn('Unduh laporan',{v:'outline',size:'sm',icon:'down',on:"toast('Laporan kunjungan diunduh','Lengkap dengan foto dokumentasi.')"})}`})}
   <div style="margin-top:12px">${callout('Buka satu kunjungan untuk melihat detail, mengubah, atau menghapusnya. Hanya kunjungan yang belum dimulai yang bisa diubah atau dihapus. Jadwal rutin tetap dibuat dari menu Penugasan &amp; jadwal.')}</div>`};
 }
-function visPanel(id){ const v0=D.visits.find(x=>x.id===id); if(!v0) return panelMissing('Kunjungan'); const v=visLive(v0), s=byU(v.u), fm=isFm(v.u);
-  openPanel(v.place,`${v.tutup?banner({tone:'warning',title:'Toko tutup',body:`Ditandai ${esc(s.name)} pukul ${esc(v.tutup.jam||'–')}, ${esc(v.tutup.tgl||'')}. ${v.tutup.catatan?'Catatan: '+esc(v.tutup.catatan)+'. ':''}Ada ${v.tutup.foto||1} foto ber-watermark dan lokasi GPS. Tidak dihitung terlewat.`,cls:'mb'}):''}${v.status==='Perlu approval'?callout('<b>Unplanned.</b> Menunggu approval Team Leader. Aktivitas di toko ini belum bisa dimulai.')+'<div style="height:14px"></div>':v.by==='sales'&&!v.unplanned?callout('<b>Dibuat sendiri.</b> Jadwal ini dibuat oleh '+esc(s.name)+' ('+esc(s.job)+'), tanpa persetujuan Team Leader.')+'<div style="height:14px"></div>':''}${['Multi Finance','REA / SPG Multi Finance','CBD / Mediator'].includes(s.job)?`<div class="kv" style="margin-bottom:14px"><div><dt>Jadwal</dt><dd>${v.plan}</dd></div><div><dt>Status</dt><dd>${v.status}</dd></div></div>${callout('Multi Finance, REA, dan CBD tidak memakai check-in dan check-out ke nasabah.')}<div style="height:14px"></div>`:`<div class="kv" style="margin-bottom:14px"><div><dt>Jadwal</dt><dd>${v.plan}</dd></div><div><dt>Check-in</dt><dd>${v.cin||'–'}</dd></div><div><dt>Check-out</dt><dd>${v.cout||'–'}${v.dur?' · '+v.dur:''}</dd></div></div>`}
-  ${fm?`<div class="xs muted" style="margin-bottom:8px">Status tugas · ${fmDone(v)} dari ${FM_TASK_KEYS.length} selesai</div><div class="rows" style="margin-bottom:14px">${FM_TASK_KEYS.map(([k,l])=>`<div class="rowlink" style="cursor:default"><span style="flex:1" class="sm fg">${l}</span>${spill(fmTaskSt(v,k),FM_ST_TONE[fmTaskSt(v,k)])}</div>`).join('')}</div>
-  ${callout('Check-out hanya bisa setelah semua tugas berstatus Selesai. Support task dikerjakan terpisah dan tidak wajib. Kalau lupa check-out, kunjungan ditutup otomatis saat check-in di toko berikutnya.')}<div style="height:14px"></div>`
-  :`<div class="tile" style="margin-bottom:14px"><div class="xs muted">Tugas</div><b class="fg">${v.tasks}</b></div>${v.left&&!v.cout?callout('Sales keluar dari radius toko tanpa check-out. Notifikasi belum check-out sudah dikirim. Check-out bisa dilakukan saat check-in di toko berikutnya, tanpa harus di radius toko ini.')+'<div style="height:14px"></div>':''}${v.remote?callout('Check-out dilakukan dari luar radius toko, saat sales check-in di toko berikutnya.')+'<div style="height:14px"></div>':''}`}
-  <div class="xs muted" style="margin-bottom:8px">Dokumentasi (${v.photos} foto, 1 foto per check-in dan check-out)</div><div class="thumbs">${v.photos?Array.from({length:v.photos}).map(()=>`<div class="thumb">${I('image',22)}</div>`).join(''):'<span class="muted sm">Belum ada foto.</span>'}</div>`,
+/* Detail kunjungan */
+const visMin=t=>/^\d{1,2}:\d{2}$/.test(t||'')?+t.split(':')[0]*60+ +t.split(':')[1]:null;
+const visLama=m=>m<60?m+' mnt':Math.floor(m/60)+' jam '+(m%60)+' mnt';
+function visDurasi(v){ const p=visMin(v.plan), i=visMin(v.cin), o=visMin(v.cout), lama=v.dur||(i!=null&&o!=null&&o>=i?visLama(o-i):'');
+  const selisih=p!=null&&i!=null?(i===p?'Check-in sesuai jadwal':'Check-in '+visLama(Math.abs(i-p))+(i>p?' setelah jadwal':' sebelum jadwal')):'';
+  return `<section class="vsec"><h3>Durasi kunjungan</h3><div class="vdur"><div class="vdur-n"><b>${lama?esc(lama):v.cin?'Berjalan':'Belum mulai'}</b>${selisih?tag(selisih,'neutral'):''}</div>
+  <ol class="vline">${[['Jadwal',v.plan],['Check-in',v.cin],['Check-out',v.cout]].map(([l,t])=>`<li class="${t?'on':''}"><small>${l}</small><span>${esc(t||'–')}</span></li>`).join('')}</ol></div></section>`; }
+const visAdaFoto=(v,mode)=>mode==='in'?!!v.cin&&v.photos>=1:!!v.cout&&v.photos>=2;
+const visShot=(v,mode)=>posmShot(mode==='in'?'#3a7bd5':'#2f9e5b',byU(v.u).name,'26 Okt '+(mode==='in'?v.cin:v.cout)+' · '+v.place);
+function visFoto(id,mode){ const v0=D.visits.find(x=>x.id===id); if(v0) fotoPreview(visShot(visLive(v0),mode),'Foto '+(mode==='in'?'check-in':'check-out')+' · '+v0.place); }
+function visIO(id,v){ return `<div class="vsec vio">${[['in','Check-in','finger',v.cin],['out','Check-out','check',v.cout]].map(([m,l,ic,t])=>{
+  const note=m==='out'&&v.left&&!v.cout?'Sales keluar dari radius toko tanpa check-out. Notifikasi sudah dikirim. Check-out bisa dilakukan saat check-in di toko berikutnya, tanpa harus di radius toko ini.':m==='out'&&v.remote?'Check-out dilakukan dari luar radius toko, saat sales check-in di toko berikutnya.':'';
+  return `<section aria-label="${l}"><h3>${iconTile(ic,{tone:t?'success':'neutral',size:'sm'})}${l}</h3><div><div class="xs muted" style="margin-bottom:4px">Jam ${l.toLowerCase()}</div><div class="vio-t">${esc(t||'–')}</div></div>
+  ${visAdaFoto(v,m)?`<button type="button" class="foto-lg" aria-label="Perbesar foto ${l.toLowerCase()}" onclick="visFoto('${id}','${m}')"><img src="${visShot(v,m)}" alt="Foto ${l.toLowerCase()}"></button>`:`<div class="vio-0">${I('image',22)}<span>${t?'Foto tidak tersedia':'Belum '+l.toLowerCase()}</span></div>`}
+  ${note?`<p class="xs" style="color:var(--warning)">${note}</p>`:''}</section>`; }).join('')}</div>`; }
+/* Status tugas: Promotor FMCG/MD dari mobile (fmState); sales lain dari data contoh kunjungan. Kiriman hari ini ditautkan bila ada. */
+const VIS_AKT={'Penjualan':'jual','Ambil retur':'retur','Ambil pesanan':'pesanan','Cek SKU display':'sku','Cek display':'sku','Display share':'share','Cek stok':'stok','Price promo':'promo'};
+const VIS_TK={'Selesai':['success','check'],'Draft':['warning','edit'],'Belum Selesai':['danger','clock'],'Belum dimulai':['neutral','clock'],'Tidak dikerjakan':['neutral','x'],'Tidak tercatat':['neutral','clock']};
+function visTugas(v){ const fm=isFm(v.u), mulai=!!v.cin||v.status==='Selesai';
+  const kirim=n=>mulai?subRows().find(x=>x.u===v.u&&x.toko===v.place&&x.iso==='2026-10-26'&&x.akt===VIS_AKT[n]):null;
+  const L=(fm?FM_TASK_KEYS.map(([k,l])=>[l,fmTaskSt(v,k)]):String(v.tasks||'').split(',').map(t=>t.trim()).filter(Boolean).map(n=>[n,(v.tk||{})[n]])).map(([n,st])=>{ const k=kirim(n);
+    return {n,k,st:v.status==='Toko tutup'?'Tidak dikerjakan':!mulai?'Belum dimulai':st||(k?(k.st==='Draft'?'Draft':'Selesai'):v.status==='Berjalan'?'Belum Selesai':'Tidak tercatat')}; });
+  const done=L.filter(t=>t.st==='Selesai').length, pct=L.length?done/L.length*100:0;
+  const info={'Selesai':'Tugas sudah dikerjakan.','Draft':'Tersimpan sebagai draft, belum dikirim.','Belum Selesai':'Belum diselesaikan.','Belum dimulai':'Menunggu check-in.','Tidak dikerjakan':'Toko tutup.','Tidak tercatat':'Tidak ada catatan pengerjaan.'};
+  return `<section class="vsec"><h3><span>Tugas</span><span class="xs muted">${done} dari ${L.length} selesai</span></h3>${progressBar(pct,{tone:pct===100?'success':'accent',size:'md',label:'Progres tugas'})}
+  ${L.map(t=>{ const [tone,ic]=VIS_TK[t.st]||VIS_TK['Tidak tercatat']; return `<details class="vtask"><summary>${iconTile(ic,{tone,size:'sm'})}<span class="sm fg" style="flex:1;font-weight:600;min-width:0">${esc(t.n)}</span>${spill(t.st,tone)}${I('chev',16)}</summary><div><span>${info[t.st]||''}</span>${t.k?`<span class="muted">${esc(t.k.sum)} · ${esc(t.k.jam)} WIB</span>${btn('Lihat kiriman',{v:'outline',size:'sm',on:`subPanel('${t.k.id}')`})}`:''}</div></details>`; }).join('')}
+  ${fm?'<p class="xs muted" style="margin-top:8px">Check-out hanya bisa setelah semua tugas selesai. Support task dikerjakan terpisah dan tidak wajib.</p>':''}</section>`; }
+function visPanel(id){ const v0=D.visits.find(x=>x.id===id); if(!v0) return panelMissing('Kunjungan'); const v=visLive(v0), s=byU(v.u);
+  openPanel(v.place,`${v.tutup?banner({tone:'warning',title:'Toko tutup',body:`Ditandai ${esc(s.name)} pukul ${esc(v.tutup.jam||'–')}, ${esc(v.tutup.tgl||'')}. ${v.tutup.catatan?'Catatan: '+esc(v.tutup.catatan)+'. ':''}Ada ${v.tutup.foto||1} foto ber-watermark dan lokasi GPS. Tidak dihitung terlewat.`,cls:'mb'}):''}${v.status==='Perlu approval'?callout('<b>Unplanned.</b> Menunggu approval Team Leader. Aktivitas di toko ini belum bisa dimulai.')+'<div style="height:14px"></div>':v.by==='sales'&&!v.unplanned?callout('<b>Dibuat sendiri.</b> Jadwal ini dibuat oleh '+esc(s.name)+' ('+esc(s.job)+'), tanpa persetujuan Team Leader.')+'<div style="height:14px"></div>':''}${['Multi Finance','REA / SPG Multi Finance','CBD / Mediator'].includes(s.job)?`<div class="kv" style="margin-bottom:14px"><div><dt>Jadwal</dt><dd>${v.plan}</dd></div><div><dt>Status</dt><dd>${v.status}</dd></div></div>${callout('Multi Finance, REA, dan CBD tidak memakai check-in dan check-out ke nasabah.')}<div style="height:14px"></div>`:visDurasi(v)+visIO(id,v)}
+  ${visTugas(v)}`,
   `${v.status==='Belum'?btn('Hapus',{perm:'visit.create',v:'outline',icon:'trash',on:`visDelAsk('${id}')`}):''}<span style="flex:1"></span>${btn('Tutup',{v:'outline',on:'closeLayer()'})}${v.status==='Belum'?btn('Ubah',{perm:'visit.create',v:'accent',on:`visForm('${id}')`}):''}${v.status==='Perlu approval'&&v0.reqId?btn('Lihat pengajuan',{v:'accent',on:`reqPanel('${v0.reqId}')`}):''}`,{sub:s.name+' · '+s.job}); }
 function modalPill(k){ document.querySelectorAll('.modal .pills button').forEach(b=>{ const on=b.getAttribute('onclick').includes(`'${k}'`); b.classList.toggle('on',on); b.setAttribute('aria-selected',on); }); }
 const DAYS7=['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
@@ -5286,7 +5331,7 @@ const ROUTES={'/':pageOverview,'/penjualan':pagePenjualan,'/absensi':pageAbsensi
 /* ---------- Penyimpanan data dashboard (D6) ----------
    Perubahan di dashboard disimpan sebagai snapshot berversi. Data bersama dengan mobile tetap di salesapp.shared.v1.
    Naikkan DASH_VER bila bentuk data contoh berubah, supaya snapshot lama dibuang dan data contoh baru dipakai. */
-const DASH_VER=27;
+const DASH_VER=28;
 const PARAM={};
 const dashData=()=>({D,MD,TOKO,TRX,INFO,POSM,AR,KLAIM,ATT,REK_ADJ,PARAM});
 function restoreInto(t,src){
