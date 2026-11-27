@@ -4119,6 +4119,45 @@ function capItems(){
   else out.push(qItem);
   return out;
 }
+/* Data Summary per role. per: 'd' hari ini, 'm' bulan ini. Setiap item: {label,ic,done,total,unit,sub,go,money?,detail?}. */
+function sumItems(per){
+  const r=role(), ICON={visit:'pin',job:'grid',task:'quiz'};
+  const f1=n=>String(n).replace('.',',');
+  const mk=(label,ic,done,total,unit,sub,go,x)=>({label,ic,done,total,unit,sub,go,...x});
+  const kv=rows=>rows.map(([k,v])=>`<div class="kv"><span>${esc(k)}</span><span class="num">${v}</span></div>`).join('');
+  const akt="tab('"+navAkt()[0]+"')";
+  let out=[];
+  if(per==='d'){
+    if(r==='spv'){
+      const hadir=TEAM.filter(t=>t.status==='Hadir'||t.status==='Terlambat').length, wait=otherReqs().length+visitReqs().length;
+      out=[mk('Tim hadir','users',hadir,TEAM.length,'orang',TEAM.filter(t=>t.status==='Cuti').length+' cuti',akt,{detail:kv(TEAM.map(t=>[USERS[t.u]?USERS[t.u].name:t.u,t.status+' · '+t.time]))}),
+        mk('Approval menunggu','check',0,wait,'permintaan','perlu diproses',"go('approval')")];
+    } else out=capItems().map(c=>mk(c.label,ICON[c.c]||'grid',c.done,c.total,c.c==='visit'?'toko':c.c==='task'?'tugas':'pekerjaan',c.sub,c.go));
+  } else if(r==='spv'){
+    const D=U().menu==='spvM'?SPV_TGT.mf:SPV_TGT.elek;
+    out=[mk('Total tim','target',D.tot[0],D.tot[1],'',D.unit,akt,{money:true,mj:1}),
+      ...D.sales.map(([u,l,a,t])=>mk(USERS[u]?USERS[u].name:u,'user',a,t,'',l,akt,{money:true,mj:1}))];
+    out.forEach(i=>{ i.done*=1e6; i.total*=1e6; delete i.mj; });
+  } else if(r==='leads'){
+    const deal=leadMine().filter(l=>l.status==='Deal'), M=mitraAll(), A=actNow().length;
+    out=[mk('Goal pencairan','money',deal.reduce((s,l)=>s+(l.goal||0),0),150e6,'','target Rp150 jt',"act(()=>go('leads',{back:1}))",{money:true}),
+      mk('Deal','check',deal.length,12,'deal','dari data kamu',"act(()=>go('leads',{back:1}))"),
+      mk('Mitra dipantau','store',M.filter(m=>mmNow(m.id).length).length,M.length,'mitra','bulan ini',"act(()=>go('mitra'))"),
+      mk('Activity','target',A,4,'data','rekrut mitra bulan ini',"act(()=>go('mf-activity'))")];
+  } else if(r==='fmcg'){
+    out=[mk('Kunjungan','pin',41,52,'toko','bulan ini',akt),mk('Tugas aktivitas','grid',168,208,'tugas','stok, promo, facing, share',akt)];
+  } else if(r==='order'){
+    out=[mk('Nilai pesanan','bag',110.5e6,150e6,'','target Rp150 jt',akt,{money:true}),mk('Toko aktif memesan','store',14,20,'toko','bulan ini',akt)];
+  } else if(r==='canvas'){
+    const b=SALES_BULAN.canvas;
+    out=[mk('Penjualan','money',b.a,b.at,'','target bulan ini',akt,{money:true}),mk('Kunjungan','pin',74,88,'toko','bulan ini',akt),mk('Akuisisi toko','store',3,5,'toko','toko baru',akt)];
+  } else {
+    const b=salesBulan(), R=tgtRows();
+    out=[mk('Penjualan','money',b.a,b.at,'','target bulan ini',akt,{money:true}),
+      mk('Quantity','box',b.q,b.qt,'unit','target bulan ini',akt,R.length?{detail:kv(R.map(t=>[t.kat,(t.act||0)+' / '+t.target+' unit']))}:{})];
+  }
+  return out.filter(i=>i.total>0);
+}
 const CAP_COL={visit:['#3BE3A6','#0C9E62'],job:['#21CFF7','#3466FF'],task:['#FFC79E','#F09A66']};
 function capDonut(d){ const pct=d.total?Math.round(d.done/d.total*100):0, R=28, C=2*Math.PI*R, id='cg'+(++_gid), g=CAP_COL[d.c]||CAP_COL.job;
   return `<span class="dn"><svg viewBox="0 0 68 68" width="68" height="68" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${g[0]}"/><stop offset="1" stop-color="${g[1]}"/></linearGradient></defs><circle cx="34" cy="34" r="${R}" fill="none" stroke="rgba(12,46,89,.08)" stroke-width="8"/>${pct?`<circle cx="34" cy="34" r="${R}" fill="none" stroke="url(#${id})" stroke-width="8" stroke-linecap="round" stroke-dasharray="${(C*pct/100).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 34 34)"/>`:''}</svg><b class="num">${pct}%</b></span>`; }
