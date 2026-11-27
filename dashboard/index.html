@@ -99,8 +99,8 @@ main.refetch :is(.tbl-wrap,.cc,.lc,.donut-wrap,.stats,.rows){opacity:.4;filter:s
 /* Mikro-interaksi */
 /* Gerak dibatasi (D3): transisi warna, tekan .98, fade dan slide overlay, pulse status hidup */
 .stat,.card{transition:background-color .15s}
-a.stat:hover,button.stat:hover{background:var(--raised)}
-a.stat:active,button.stat:active,.fchip:active,.pills button:active,.dd-opt:active,.mi:active{transform:scale(.98)}
+a.stat:hover{background:var(--raised)}
+a.stat:active,.fchip:active,.pills button:active,.dd-opt:active,.mi:active{transform:scale(.98)}
 .cc-col{transition:background-color .15s,opacity .15s}
 .tbl tbody td{transition:background-color .15s}
 @keyframes pulse{50%{opacity:.45}}
@@ -309,8 +309,7 @@ main{flex:1;min-height:0;overflow-y:auto;padding:2px 2px 8px;outline:none;positi
 .stat{position:relative;border-radius:var(--r-card);background:var(--card);padding:20px;box-shadow:var(--shadow-card);text-align:left;display:flex;flex-direction:column;gap:4px;min-width:0;transition:background-color .15s}
 .stat>*:not(.si){min-width:0}
 .stat.pad-r{padding-right:72px}
-a.stat:hover,button.stat:hover{background:var(--raised)}
-.stat.on{box-shadow:inset 0 0 0 2px var(--fg),var(--shadow-card)}
+a.stat:hover{background:var(--raised)}
 .stat .si{position:absolute;top:16px;right:16px}
 .stat small{font-size:13px;font-weight:600;color:var(--body);opacity:.8}
 .stat:has(.si) small{padding-right:48px}
@@ -1079,7 +1078,7 @@ const personChip=(name,hint='')=>name?`<span style="display:inline-flex;align-it
 const totalFooter=(label,value)=>`<div class="totf"><span class="muted">${label}</span><b>${value}</b></div>`;
 const metricOnInk=(label,value,unit='')=>`<div><div class="kick">${label}</div><div style="margin-top:4px;display:flex;align-items:flex-end;gap:6px;line-height:1"><b style="font-size:30px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:#fff">${value}</b>${unit?`<span style="font-size:12px;font-weight:600;color:var(--on-ink-muted);padding-bottom:2px">${unit}</span>`:''}</div></div>`;
 
-const statCard=({label,value,unit='',hint='',tone='neutral',icon='chart',href='',on='',active=false,kids=''})=>{ const body=`${iconTile(icon,{tone,size:'sm'}).replace('class="ic ','class="ic si ')}<small>${label}</small><b>${value}${unit?`<span class="u">${unit}</span>`:''}</b>${hint?`<span class="xs">${hint}</span>`:''}${kids?`<div class="kids">${kids}</div>`:''}`; return href?`<a class="stat ${active?'on':''}" href="${href}">${body}</a>`:on?`<button type="button" class="stat ${active?'on':''}" onclick="${on}" aria-pressed="${active}">${body}</button>`:`<div class="stat">${body}</div>`; };
+const statCard=({label,value,unit='',hint='',tone='neutral',icon='chart',kids=''})=>{ const body=`${iconTile(icon,{tone,size:'sm'}).replace('class="ic ','class="ic si ')}<small>${label}</small><b>${value}${unit?`<span class="u">${unit}</span>`:''}</b>${hint?`<span class="xs">${hint}</span>`:''}${kids?`<div class="kids">${kids}</div>`:''}`; return `<div class="stat">${body}</div>`; };
 const statIcon=(ic,i)=>iconTile(ic,{tone:['soft','info','ink','soft','neutral','accent'][i%6],size:'sm'}).replace('class="ic ','class="ic si ');
 
 /* Toast: nada default (tanpa tanda), success, danger. Satu wilayah live, maksimal 3 */
@@ -2342,7 +2341,7 @@ function pageDataJual(q){
     search:djField('tr',q.tr,'No. transaksi atau No. invoice toko','Cari no. transaksi atau no. invoice toko'),
     selects:`${sel([['','Semua sales'],...uOpts],q.u||'',"setQ({u:this.value})",{label:'Filter sales',cls:'sm'})}${sel([['','Semua client'],...cOpts],q.cl||'',"setQ({cl:this.value,tk:''})",{label:'Filter client',cls:'sm'})}${sel([['','Semua toko'],...tOpts],q.tk||'',"setQ({tk:this.value})",{label:'Filter toko',cls:'sm'})}${sel([['','Semua produk'],...pOpts],q.pr||'',"setQ({pr:this.value})",{label:'Filter produk',cls:'sm'})}${sel([['','Semua sumber'],['app','Dari aplikasi'],['dash','Input dashboard']],f,"setQ({f:this.value})",{label:'Filter sumber',cls:'sm'})}`,
     clear:dirty?"setQ({tr:'',u:'',cl:'',tk:'',pr:'',f:'',from:'',to:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> transaksi, ${dText}.`})}</div>
-  <div class="stats">${(()=>{ const T=[['','Semua transaksi',all.length,'Jumlah transaksi sesuai filter'],['app','Dari aplikasi',all.length-dash.length,'Input sales di lapangan'],['dash','Input dashboard',dash.length,dash.length?jt(sumVal(dash)):'Belum ada']].map(([k,l,v,sub])=>`<button class="stat ${f===k?'on':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></button>`); T.splice(1,0,`<div class="stat" style="cursor:default"><small>Total amount transaksi</small><b class="tabular">${jt(sumVal(all))}</b><span class="xs muted">Nilai semua transaksi sesuai filter</span></div>`); return T.join(''); })()}</div>
+  <div class="stats">${(()=>{ const T=[['','Semua transaksi',all.length,'Jumlah transaksi sesuai filter'],['app','Dari aplikasi',all.length-dash.length,'Input sales di lapangan'],['dash','Input dashboard',dash.length,dash.length?jt(sumVal(dash)):'Belum ada']].map(([k,l,v,sub])=>`<div class="stat"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></div>`); T.splice(1,0,`<div class="stat" style="cursor:default"><small>Total amount transaksi</small><b class="tabular">${jt(sumVal(all))}</b><span class="xs muted">Nilai semua transaksi sesuai filter</span></div>`); return T.join(''); })()}</div>
   ${card('Transaksi penjualan',`${dataTable('dj',{rows,rowClick:r=>`trxPanel('${r.id}')`,acts:r=>isDash(r)?rowActs(`trxPanel('${r.id}')`,`djDelAsk('${r.id}')`):'',empty:'Belum ada transaksi yang cocok.',cols:[
       {label:'No. transaksi',render:r=>`<span class="mono">${r.id}</span><span class="xs muted" style="display:block">${r.date}</span>`,prim:true},{label:'No. invoice toko',render:r=>invNoOf(r)?`<span class="mono">${esc(invNoOf(r))}</span>`:'<span class="muted">–</span>'},{label:'Sales',render:r=>esc(byU(r.u).name)},
       {label:'Client',render:r=>trxClient(r)?esc(clientName(trxClient(r))):'<span class="muted">–</span>',hide:true},
@@ -2429,7 +2428,7 @@ function pagePemesanan(q){
   const live_=all.filter(o=>o.st!=='Dibatalkan'), c=k=>all.filter(o=>o.st===k).length;
   return {title:'Pemesanan',html:`
   <div style="margin-bottom:16px">${filterCard({selects:sel(LD_MONTHS.map(x=>[x,LD_FULL[x]+' 2026']),m,"ordFilter('p',this.value)",{label:'Periode',cls:'sm'}),chips:{key:'f',val:f,label:'Status',items:[['','Semua',all.length],['Dibuat','Dibuat',c('Dibuat')],['Dikirim','Dikirim',c('Dikirim')],['Menunggu batal','Menunggu batal',c('Menunggu batal')]]},clear:f?"setQ({f:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> pesanan di ${LD_FULL[m]} 2026.`})}</div>
-  <div class="stats">${[['','Semua pesanan',all.length,jt(live_.reduce((a,o)=>a+ordTotal(o),0))+' aktif'],['Dibuat','Dibuat',c('Dibuat'),'Belum dikirim'],['Dikirim','Dikirim',c('Dikirim'),'Menunggu pelunasan'],['Menunggu batal','Menunggu batal',c('Menunggu batal'),'Perlu approval']].map(([k,l,v,sub])=>`<button class="stat ${f===k?'on':''}" onclick="ordFilter('f','${k}')"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></button>`).join('')}</div>
+  <div class="stats">${[['','Semua pesanan',all.length,jt(live_.reduce((a,o)=>a+ordTotal(o),0))+' aktif'],['Dibuat','Dibuat',c('Dibuat'),'Belum dikirim'],['Dikirim','Dikirim',c('Dikirim'),'Menunggu pelunasan'],['Menunggu batal','Menunggu batal',c('Menunggu batal'),'Perlu approval']].map(([k,l,v,sub])=>`<div class="stat"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></div>`).join('')}</div>
   ${card('Daftar pesanan',dataTable('ord',{rows,rowClick:r=>`ordPanel('${r.id}')`,empty:'Belum ada pesanan di periode ini.',cols:[
     {label:'No. PO',render:r=>`<span class="mono">${r.id}</span>`,prim:true},{label:'Tanggal',k:'date'},{label:'Sales',render:r=>esc(byU(r.u).name),hide:true},{label:'Toko',render:r=>esc(tokoName(r.toko))},{label:'Produk',render:r=>esc(ordText(r)),hide:true},{label:'Kirim',k:'ship',hide:true},{label:'Total',render:r=>`<b class="fg tabular">${rp(r.total)}</b>`,align:'r'},{label:'Status',render:r=>spill(r.st,ORD_TONE[r.st]||'neutral')}]}),
     {acts:`${btn('Buat pesanan',{v:'accent',size:'sm',icon:'plus',on:'ordForm()'})}`})}`};
@@ -2443,7 +2442,7 @@ function pageAbsensi(q){
   return {title:'Absensi',html:`
   
   <div style="margin-bottom:16px">${filterCard({search:searchBox(q.q,{ph:'Cari nama sales',label:'Cari sales'}),chips:{key:'st',val:q.st||'',items:[['','Semua',TODAY.length],...['Hadir','Terlambat','Cuti','Belum absen'].map(k=>[k,k,cnt(k)])]},clear:(q.q||q.st)?"setQ({q:'',st:''})":'',summary:(q.q||q.st)?`Menampilkan <b class="fg">${rows.length}</b> dari ${TODAY.length} sales.`:''})}</div>
-  <div class="stats">${[['Hadir','success',cnt('Hadir')],['Terlambat','warning',cnt('Terlambat')],['Cuti','accent',cnt('Cuti')],['Belum absen','danger',cnt('Belum absen')]].map(([k,tn,v],i)=>`<button class="stat ${q.st===k?'on':''}" onclick="setQ({st:'${q.st===k?'':k}'})"><small>${k}</small><b class="tabular">${v}</b><span class="xs muted">${q.st===k?'Filter aktif · klik untuk hapus':'Klik untuk filter tabel'}</span></button>`).join('')}</div>
+  <div class="stats">${[['Hadir','success',cnt('Hadir')],['Terlambat','warning',cnt('Terlambat')],['Cuti','accent',cnt('Cuti')],['Belum absen','danger',cnt('Belum absen')]].map(([k,tn,v],i)=>`<div class="stat"><small>${k}</small><b class="tabular">${v}</b></div>`).join('')}</div>
   ${card('Absensi hari ini',`${dataTable('att',{rows,rowClick:r=>`attPanel('${r.u}')`,empty:'Tidak ada sales dengan filter ini.',cols:[
       {label:'Sales',render:r=>`<span style="display:flex;gap:10px;align-items:center">${av(byU(r.u).name)}<span><span class="fg" style="font-weight:500">${byU(r.u).name}</span><span class="xs muted" style="display:block">${byU(r.u).job}</span></span></span>`,prim:true},
       {label:'Masuk',render:r=>`<span class="tabular">${r.in||'–'}</span>`},{label:'Pulang',render:r=>`<span class="tabular">${r.out||'–'}</span>`,hide:true},{label:'Mode',render:r=>r.mode==='–'?'–':tag(r.mode,r.mode==='WFO'?'accent':'info')},
@@ -2520,7 +2519,7 @@ function pageKunjungan(q){
   const c=k=>all.filter(v=>v.status===k).length;
   return {title:'Kunjungan',html:head+`
   <div style="margin-bottom:16px">${filterCard({search:searchBox(q.q,{ph:'Cari sales atau tujuan',label:'Cari kunjungan'}),chips:{key:'f',val:f,items:[['','Semua',all.length],['Selesai','Selesai',c('Selesai')],['Berjalan','Berjalan',c('Berjalan')],['Belum','Belum dimulai',c('Belum')],['Terlewat','Terlewat',c('Terlewat')],['Toko tutup','Toko tutup',c('Toko tutup')],['Perlu approval','Perlu approval',c('Perlu approval')]]},selects:(fu||fc)?`<div class="chips">${fu?`<button class="fchip on" aria-pressed="true" onclick="setQ({u:''})">Sales: ${esc((byU(fu)||{}).name||fu)} ×</button>`:''}${fc?`<button class="fchip on" aria-pressed="true" onclick="setQ({cat:''})">Kategori: ${esc(fc)} ×</button>`:''}</div>`:'',clear:(fu||fc||f||q.q)?"setQ({u:'',cat:'',f:'',q:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> dari ${all.length} kunjungan.`})}</div>
-  <div class="stats">${[['','Semua',all.length],['Selesai','Selesai',c('Selesai')],['Berjalan','Berjalan',c('Berjalan')],['Belum','Belum dimulai',c('Belum')],['Terlewat','Terlewat',c('Terlewat')],['Toko tutup','Toko tutup',c('Toko tutup')],['Perlu approval','Perlu approval',c('Perlu approval')]].map(([k,l,v])=>`<button class="stat ${f===k?'on':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${v}</b></button>`).join('')}</div>
+  <div class="stats">${[['','Semua',all.length],['Selesai','Selesai',c('Selesai')],['Berjalan','Berjalan',c('Berjalan')],['Belum','Belum dimulai',c('Belum')],['Terlewat','Terlewat',c('Terlewat')],['Toko tutup','Toko tutup',c('Toko tutup')],['Perlu approval','Perlu approval',c('Perlu approval')]].map(([k,l,v])=>`<div class="stat"><small>${l}</small><b class="tabular">${v}</b></div>`).join('')}</div>
   ${card('Hasil check-in hari ini',dataTable('vis',{rows,rowClick:r=>`visPanel('${r.id}')`,cols:[
     {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${byU(r.u).name}</span><span class="xs muted" style="display:block">${byU(r.u).job}</span>`,prim:true},{label:'Tujuan',render:r=>esc(r.place)+(r.unplanned?' '+tag('Unplanned','warning'):r.by==='sales'?' '+tag('Dibuat '+esc(byU(r.u).job),'accent'):''),prim:false},{label:'Jadwal',render:r=>`${r.plan}${r.period&&r.period!=='Sekali'?` <span class="xs muted">· ${perLabel(r)}</span>`:''}`,hide:true},{label:'Check-in',render:r=>r.cin||'–'},{label:'Tugas',render:r=>isFm(r.u)?`<span class="tabular">${fmDone(r)}/${FM_TASK_KEYS.length}</span> selesai`:'<span class="muted">–</span>',hide:true},{label:'Foto',render:r=>r.photos,align:'r',hide:true},{label:'Status',render:r=>spill(r.status,r.status==='Selesai'?'success':r.status==='Berjalan'?'accent':r.status==='Terlewat'?'danger':r.status==='Toko tutup'?'warning':'neutral')+(r.left&&!r.cout?' '+spill('Keluar radius','warning'):'')+(r.remote?' '+spill('Check-out luar radius','neutral'):'')}]}),
     {acts:`${btn('Atur jadwal di Penugasan',{v:'outline',size:'sm',icon:'cal',on:"go('/penugasan?tab=jadwal')"})}${btn('Unduh laporan',{v:'outline',size:'sm',icon:'down',on:"toast('Laporan kunjungan diunduh','Lengkap dengan foto dokumentasi.')"})}`})}
@@ -2711,7 +2710,7 @@ function pageInsentif(q){
   <div class="stats">
     ${statCard({label:'Total insentif Oktober',value:jt(total),hint:INC.filter(r=>r.ok).length+' dari '+INC.length+' sales memenuhi syarat',icon:'wallet',tone:'soft'})}
     ${statCard({label:'Batas 2× UMK Jaksel',value:jt(2*UMK),hint:'Per sales per bulan',icon:'shield'})}
-    ${statCard({label:'Selisih rekonsiliasi',value:ST.rekonFile?unmatched:'–',hint:ST.rekonFile?'Perlu disesuaikan':'Upload file klien dulu',icon:'alert',tone:ST.rekonFile&&unmatched?'warning':'neutral',href:'#/insentif?tab=rekon'})}
+    ${statCard({label:'Selisih rekonsiliasi',value:ST.rekonFile?unmatched:'–',hint:ST.rekonFile?'Perlu disesuaikan':'Upload file klien dulu',icon:'alert',tone:ST.rekonFile&&unmatched?'warning':'neutral'})}
     ${statCard({label:'September 2026',value:jt(deriveInc(9).reduce((a,b)=>a+b.final,0)),hint:'Final · dibayar 5 Okt',icon:'cal'})}
   </div>
   ${card('Oktober 2026',`${utabs([['hitung','Perhitungan'],['rekon','Rekonsiliasi',ST.rekonFile?unmatched:null],['param','Parameter']],tab,'incTab')}${body}`,
@@ -2754,10 +2753,10 @@ function pageLeads(q){
   return {title:'Leads pinjaman',html:`
   <div style="margin-bottom:16px">${ldFilters(q,base)}</div>
   <div class="stats">
-    <button class="stat ${f==='unassigned'?'on':''} ${base.filter(l=>!l.owner).length?'tn-warning':'tn-success'}" onclick="setQ({f:'${f==='unassigned'?'':'unassigned'}'})"><small>Belum di-assign</small><b class="tabular">${base.filter(l=>!l.owner).length}</b><span class="xs muted">Dari upload 26 Okt, 06:00</span></button>
-    <button class="stat ${f==='Prospect'?'on':''}" onclick="setQ({f:'${f==='Prospect'?'':'Prospect'}'})"><small>Prospect</small><b class="tabular">${c('Prospect')}</b><span class="xs muted">Perlu follow up</span></button>
-    <button class="stat ${f==='Deal'?'on':''}" onclick="setQ({f:'${f==='Deal'?'':'Deal'}'})"><small>Deal</small><b class="tabular">${c('Deal')}</b><span class="xs muted">Goal ${jt(goal)}</span></button>
-    <button class="stat ${f==='Belum Tertarik'?'on':''}" onclick="setQ({f:'${f==='Belum Tertarik'?'':'Belum Tertarik'}'})"><small>Belum Tertarik</small><b class="tabular">${c('Belum Tertarik')}</b><span class="xs muted">Tertarik, prospect, atau rejected</span></button>
+    <div class="stat ${base.filter(l=>!l.owner).length?'tn-warning':'tn-success'}"><small>Belum di-assign</small><b class="tabular">${base.filter(l=>!l.owner).length}</b><span class="xs muted">Dari upload 26 Okt, 06:00</span></div>
+    <div class="stat"><small>Prospect</small><b class="tabular">${c('Prospect')}</b><span class="xs muted">Perlu follow up</span></div>
+    <div class="stat"><small>Deal</small><b class="tabular">${c('Deal')}</b><span class="xs muted">Goal ${jt(goal)}</span></div>
+    <div class="stat"><small>Belum Tertarik</small><b class="tabular">${c('Belum Tertarik')}</b><span class="xs muted">Tertarik, prospect, atau rejected</span></div>
   </div>
   <div class="grid g-side" style="margin-bottom:16px">
     ${card('Pengajuan vs deal',`${lineChart({labels:['Mg 1','Mg 2','Mg 3','Mg 4'],series:[{name:'Pengajuan',values:[9,12,14,13],tone:'ink',area:true},{name:'Dihubungi',values:[6,8,9,8],tone:'info'},{name:'Deal',values:[2,3,2,3],tone:'accent'}],label:'Pengajuan, dihubungi, dan deal per minggu'})}
@@ -2846,8 +2845,8 @@ function leadPanel(id){ const l=D.leads.find(x=>x.id===id); if(!l) return panelM
 function pageOverdue(q){
   const b=q.b||''; const rows=D.overdue.filter(o=>!b||(b==='1'?o.days<=7:b==='2'?o.days>7&&o.days<=14:o.days>14)).map(o=>({...o,_id:o.no}));
   return {title:'Overdue',html:`
-  <div style="margin-bottom:16px">${filterCard({chips:{key:'b',val:b,label:'Lama keterlambatan',items:[['','Semua',D.overdue.length],['1','1–7 hari',D.overdue.filter(o=>o.days<=7).length],['2','8–14 hari',D.overdue.filter(o=>o.days>7&&o.days<=14).length],['3','Lebih dari 14 hari',D.overdue.filter(o=>o.days>14).length]]},clear:b?"setQ({b:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> nasabah.`})}</div>
-  <div class="stats">${[['','Total tertunggak',jt(D.overdue.reduce((a,o)=>a+o.ang,0)),D.overdue.length+' nasabah'],['1','1–7 hari',D.overdue.filter(o=>o.days<=7).length,'Reminder telepon / WA'],['2','8–14 hari',D.overdue.filter(o=>o.days>7&&o.days<=14).length,'Reminder ulang'],['3','Lebih dari 14 hari',D.overdue.filter(o=>o.days>14).length,'Penagihan ke lokasi']].map(([k,l,v,s])=>`<button class="stat ${b===k&&k?'on':''}" onclick="setQ({b:'${b===k?'':k}'})"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${s}</span></button>`).join('')}</div>
+  <div style="margin-bottom:16px">${filterCard({selects:sel([['','Semua keterlambatan'],['1','1–7 hari'],['2','8–14 hari'],['3','Lebih dari 14 hari']],b,"setQ({b:this.value})",{label:'Filter lama keterlambatan',cls:'sm'}),chips:{key:'b',val:b,label:'Lama keterlambatan',items:[['','Semua',D.overdue.length],['1','1–7 hari',D.overdue.filter(o=>o.days<=7).length],['2','8–14 hari',D.overdue.filter(o=>o.days>7&&o.days<=14).length],['3','Lebih dari 14 hari',D.overdue.filter(o=>o.days>14).length]]},clear:b?"setQ({b:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> nasabah.`})}</div>
+  <div class="stats">${[['','Total tertunggak',jt(D.overdue.reduce((a,o)=>a+o.ang,0)),D.overdue.length+' nasabah'],['1','1–7 hari',D.overdue.filter(o=>o.days<=7).length,'Reminder telepon / WA'],['2','8–14 hari',D.overdue.filter(o=>o.days>7&&o.days<=14).length,'Reminder ulang'],['3','Lebih dari 14 hari',D.overdue.filter(o=>o.days>14).length,'Penagihan ke lokasi']].map(([k,l,v,s])=>`<div class="stat"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${s}</span></div>`).join('')}</div>
   ${card('Lewat jatuh tempo',dataTable('ovd',{rows,rowClick:r=>`toast('${esc(r.name)}','${r.no} · ${r.addr}')`,cols:[
     {label:'Nasabah',render:r=>`<span class="fg" style="font-weight:500">${r.name}</span><span class="mono muted" style="display:block">${r.no}</span>`,prim:true},{label:'Jatuh tempo',k:'due'},{label:'Angsuran',render:r=>rp(r.ang),align:'r'},
     {label:'Terlambat',render:r=>tag(r.days+' hari',r.days>14?'danger':'warning')},{label:'Alamat',k:'addr',hide:true},{label:'Kontak',render:r=>`<span onclick="event.stopPropagation()" style="display:flex;gap:6px">${ibtn('phone','Telepon',`toast('Membuka telepon','${r.phone}')`,{v:'outline',size:'icon-sm'})}${ibtn('chat','WhatsApp',`toast('Membuka WhatsApp','${r.phone}')`,{v:'outline',size:'icon-sm'})}</span>`}]}),
@@ -4038,7 +4037,7 @@ function pagePenagihan(q){
   const sum=l=>l.reduce((s,a)=>s+arSisa(a),0);
   return {title:'Penagihan & piutang',html:`
   <div style="margin-bottom:16px">${filterCard({chips:{key:'f',val:f,label:'Umur tagihan',items:[['','Semua'],...UMUR.map(([l],i)=>[String(i),l]),['lunas','Lunas']]},clear:f!==''?"setQ({f:''})":'',summary:`Menampilkan <b class="fg">${rows.length}</b> dari ${AR.length} tagihan.`})}</div>
-  <div class="stats">${[['','Total piutang',jt(sum(open)),open.length+' tagihan terbuka'],...UMUR.map(([l],i)=>[String(i),l,jt(sum(open.filter(a=>arUmur(a)===i))),open.filter(a=>arUmur(a)===i).length+' tagihan'])].slice(0,4).map(([k,l,v,sub])=>`<button class="stat ${f===k?'on':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></button>`).join('')}</div>
+  <div class="stats">${[['','Total piutang',jt(sum(open)),open.length+' tagihan terbuka'],...UMUR.map(([l],i)=>[String(i),l,jt(sum(open.filter(a=>arUmur(a)===i))),open.filter(a=>arUmur(a)===i).length+' tagihan'])].slice(0,4).map(([k,l,v,sub])=>`<div class="stat"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></div>`).join('')}</div>
   ${card('Tagihan per toko',`${dataTable('ar',{rows,rowClick:r=>`arPanel('${r.id}')`,rowCls:r=>arSisa(r)>0&&arUmur(r)>=2?'aging':'',empty:'Tidak ada tagihan.',cols:[
       {label:'Toko',render:r=>`<span class="fg" style="font-weight:500">${esc(tokoName(r.toko))}</span><span class="xs muted mono" style="display:block">${r.no}</span>`,prim:true},{label:'Sales',render:r=>esc(byU(r.u).name),hide:true},
       {label:'Jatuh tempo',render:r=>`${r.due>0?r.due+' Okt':(30+r.due)+' Sep'}`,hide:true},{label:'Sisa',render:r=>`<b class="fg tabular">${rp(arSisa(r))}</b><span class="xs muted" style="display:block">dari ${rp(r.total)}</span>`,align:'r'},
@@ -4060,8 +4059,8 @@ const klaimLimit=j=>(KLAIM_JENIS.find(x=>x[0]===j)||[0,0])[1];
 function pageKlaim(q){
   const fr=q.f||'Menunggu', f=fr==='semua'?'':fr, rows=KLAIM.filter(k=>!f||k.st===f).map(k=>({...k,_id:k.id})), c=s=>KLAIM.filter(k=>k.st===s);
   return {title:'Klaim biaya',html:`
-  <div style="margin-bottom:16px">${filterCard({chips:{key:'f',val:fr,label:'Status',items:[['Menunggu','Menunggu approval',c('Menunggu').length],['Disetujui','Disetujui',c('Disetujui').length],['Ditolak','Ditolak',c('Ditolak').length],['semua','Semua',KLAIM.length]]},summary:`Menampilkan <b class="fg">${rows.length}</b> klaim${f?' berstatus '+f.toLowerCase():''}.`})}</div>
-  <div class="stats">${[['Menunggu','Menunggu approval'],['Disetujui','Disetujui'],['Ditolak','Ditolak'],['semua','Semua']].map(([k,l])=>{ const L=k!=='semua'?c(k):KLAIM; return `<button class="stat ${fr===k?'on':''} ${k==='Menunggu'&&L.length?'tn-warning':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${L.length}</b><span class="xs muted">${jt(L.reduce((s,x)=>s+x.n,0))}</span></button>`; }).join('')}</div>
+  <div style="margin-bottom:16px">${filterCard({selects:sel([['Menunggu','Menunggu approval'],['Disetujui','Disetujui'],['Ditolak','Ditolak'],['semua','Semua status']],fr,"setQ({f:this.value})",{label:'Filter status klaim',cls:'sm'}),chips:{key:'f',val:fr,label:'Status',items:[['Menunggu','Menunggu approval',c('Menunggu').length],['Disetujui','Disetujui',c('Disetujui').length],['Ditolak','Ditolak',c('Ditolak').length],['semua','Semua',KLAIM.length]]},summary:`Menampilkan <b class="fg">${rows.length}</b> klaim${f?' berstatus '+f.toLowerCase():''}.`})}</div>
+  <div class="stats">${[['Menunggu','Menunggu approval'],['Disetujui','Disetujui'],['Ditolak','Ditolak'],['semua','Semua']].map(([k,l])=>{ const L=k!=='semua'?c(k):KLAIM; return `<div class="stat ${k==='Menunggu'&&L.length?'tn-warning':''}"><small>${l}</small><b class="tabular">${L.length}</b><span class="xs muted">${jt(L.reduce((s,x)=>s+x.n,0))}</span></div>`; }).join('')}</div>
   ${card('Klaim dari lapangan',dataTable('klm',{rows,rowClick:r=>`klaimPanel('${r.id}')`,empty:'Tidak ada klaim.',cols:[
     {label:'Sales',render:r=>`<span class="fg" style="font-weight:500">${esc(byU(r.u).name)}</span><span class="xs muted" style="display:block">${r.tgl} · ${esc(r.toko)}</span>`,prim:true},{label:'Jenis',render:r=>tag(r.jenis,'accent')},
     {label:'Nominal',render:r=>`<b class="tabular fg">${rp(r.n)}</b>${r.n>klaimLimit(r.jenis)?' '+tag('Lewat limit','warning'):''}`,align:'r'},{label:'Status',render:r=>spill(r.st,r.st==='Disetujui'?'success':r.st==='Ditolak'?'danger':'warning'),hide:true}]}))}
@@ -4355,7 +4354,7 @@ const SKU_REP=[['26 Okt','Electronic City Kemang','rina','tv50',2,'Rak utama','B
 function pageSkuDisplay(q){
   const f=q.f||'', rows=SKU_REP.filter(r=>!f||r.cond===f), c=k=>SKU_REP.filter(r=>r.cond===k).length;
   return {title:'Laporan SKU display',html:`
-  <div class="stats">${[['','Semua',SKU_REP.length],['Baik','Baik',c('Baik')],['Rusak','Rusak',c('Rusak')],['Kosong','Kosong',c('Kosong')]].map(([k,l,v])=>`<button class="stat ${f===k?'on':''}" onclick="setQ({f:'${k}'})"><small>${l}</small><b class="tabular">${v}</b></button>`).join('')}</div>
+  <div class="stats">${[['','Semua',SKU_REP.length],['Baik','Baik',c('Baik')],['Rusak','Rusak',c('Rusak')],['Kosong','Kosong',c('Kosong')]].map(([k,l,v])=>`<div class="stat"><small>${l}</small><b class="tabular">${v}</b></div>`).join('')}</div>
   ${card('SKU display harian',dataTable('skr',{rows,rowClick:r=>`skuPanel('${r._id}')`,cols:[{label:'Toko',render:r=>`<span class="fg" style="font-weight:500">${r.toko}</span><span class="xs muted" style="display:block">${r.tgl} · ${byU(r.u).name}</span>`,prim:true},{label:'Produk',render:r=>PRODUCTS.find(p=>p.id===r.id).name},{label:'Qty',k:'q',align:'r',hide:true},{label:'Penempatan',k:'place',hide:true},{label:'Kondisi',render:r=>tag(r.cond,r.cond==='Baik'?'success':r.cond==='Rusak'?'danger':'warning')}]}),{acts:btn('Unduh laporan',{v:'outline',size:'sm',icon:'down',on:"toast('Laporan SKU display diunduh','Sesuai filter yang aktif.')"})})}`};
 }
 function skuPanel(id){ const r=SKU_REP.find(x=>x._id===id), p=PRODUCTS.find(x=>x.id===r.id);
@@ -4722,7 +4721,7 @@ function pageKonten(q,kind){
   const cnt=(k,v)=>all.filter(r=>r[k]===v).length;
   return {title:kind,html:`
   <div style="margin-bottom:16px">${filterCard({search:searchBox(q.q,{ph:'Cari judul',label:'Cari konten'}),chips:{key:'st',val:fS,label:'Status',items:[['','Semua status',all.length],['Draft','Draft',cnt('status','Draft')],['Terbit','Terbit',cnt('status','Terbit')],['Selesai','Selesai',cnt('status','Selesai')]]},selects:sel([['','Semua role'],...live('role').filter(r=>r.id!=='r1').map(r=>[r.id,r.name])],fR,"setQ({role:this.value})",{label:'Filter role',cls:'sm'}),clear:(fS||fR||qq)?"setQ({q:'',st:'',role:''})":'',summary:(fS||fR||qq)?`Menampilkan <b class="fg">${rows.length}</b> dari ${all.length} ${isQuiz?'quiz':'survey'}.`:''})}</div>
-  <div class="stats">${[['',isQuiz?'Semua quiz':'Semua survey',all.length],['Terbit','Sedang terbit',cnt('status','Terbit')],['Draft','Draft',cnt('status','Draft')],['Selesai','Selesai',cnt('status','Selesai')]].map(([v,l,n])=>`<button class="stat ${fS===v?'on':''}" onclick="setQ({st:'${fS===v?'':v}'})"><small>${l}</small><b class="tabular">${n}</b><span class="xs muted">${fS===v&&v?'Filter aktif · klik untuk hapus':'Klik untuk filter'}</span></button>`).join('')}</div>
+  <div class="stats">${[['',isQuiz?'Semua quiz':'Semua survey',all.length],['Terbit','Sedang terbit',cnt('status','Terbit')],['Draft','Draft',cnt('status','Draft')],['Selesai','Selesai',cnt('status','Selesai')]].map(([v,l,n])=>`<div class="stat"><small>${l}</small><b class="tabular">${n}</b></div>`).join('')}</div>
   <div class="grid g-side">
   ${card(isQuiz?'Daftar quiz':'Daftar survey',`${dataTable('knt',{rows,rowClick:r=>`openForm('konten','${r.id}')`,acts:r=>rowActs(`openForm('konten','${r.id}')`,`delAsk('konten','${r.id}')`),empty:'Tidak ada konten yang cocok. Ubah atau hapus filter di kartu Filter.',cols:[
       {label:'Judul',render:r=>`<span class="fg" style="font-weight:500">${esc(r.name)}</span><span class="xs muted" style="display:block">${r.questions.length} pertanyaan</span>`,prim:true},
@@ -4950,20 +4949,21 @@ function hkView(q){
   const clients=live('client').filter(c=>c.status==='Aktif');
   const tokoOpts=live('toko').filter(t=>t.status==='Aktif'&&(!q.cl||t.client===q.cl)&&(!q.cb||t.cabang===q.cb));
   const dirty=q.cl||q.cb||q.tk||role||q.q||q.from||q.to||(q.per&&q.per!=='d');
-  const stat=(l,v,sub,on,act)=>`<button class="stat ${act?'on':''}" onclick="${on}"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></button>`;
+  const stat=(l,v,sub)=>`<div class="stat"><small>${l}</small><b class="tabular">${v}</b><span class="xs muted">${sub}</span></div>`;
   filterCard({top:`${pills(REP_PRESETS.map(p=>[p[0],p[1]]),(REP_PRESETS.find(x=>x[2][0]===r.from&&x[2][1]===r.to)||[''])[0],'hkPer')}${rangePicker({id:'hk',from:r.from,to:r.to,min:LD_START,max:LD_END,on:'hkDate',presets:REP_PRESETS})}`,
     selects:`${sel(HK_ROLES,role,"setQ({r:this.value})",{label:'Filter peran',cls:'sm'})}
       ${sel([['','Semua klien'],...clients.map(c=>[c.id,c.name])],q.cl||'',"setQ({cl:this.value,tk:''})",{label:'Filter klien',cls:'sm'})}
       ${sel([['','Semua cabang'],...CABANG.slice(1)],q.cb||'',"setQ({cb:this.value,tk:''})",{label:'Filter cabang',cls:'sm'})}
-      ${sel([['','Semua toko'],...tokoOpts.map(t=>[t.id,t.name])],q.tk||'',"setQ({tk:this.value})",{label:'Filter toko',cls:'sm'})}`,
+      ${sel([['','Semua toko'],...tokoOpts.map(t=>[t.id,t.name])],q.tk||'',"setQ({tk:this.value})",{label:'Filter toko',cls:'sm'})}
+      ${sel([['','Semua laporan'],['lapor','Sudah melapor'],['belum','Ada pekerjaan belum selesai'],['flag','Perlu tindak lanjut']],f,"setQ({f:this.value})",{label:'Filter laporan',cls:'sm'})}`,
     clear:dirty?"setQ({cl:'',cb:'',tk:'',r:'',q:'',f:'',from:'',to:'',per:''})":'',
     summary:`Menampilkan <b class="fg">${hkLabel(q)}</b>: ${all.length} sales, ${T} pekerjaan (${D_} selesai). Data aktivitas di mockup baru ada sejak 25 Okt 2026 (SKU display, tugas FMCG dan MD), stok bawaan, display share, dan kunjungan sejak 26 Okt. <b>Usulan</b>: tab ini belum ada di BRD atau URD.`});
   return {html:`
   <div class="stats">
-    ${stat('Sales melapor',lapor+' dari '+all.length,f==='lapor'?'Filter aktif · klik untuk hapus':'Klik untuk lihat yang sudah input',`setQ({f:'${f==='lapor'?'':'lapor'}'})`,f==='lapor')}
-    ${stat('Total pekerjaan',T,(T-D_)+' belum selesai · '+D_+' selesai',`setQ({f:'${f==='belum'?'':'belum'}'})`,f==='belum')}
-    ${stat('Pekerjaan selesai',T?Math.round(D_/T*100)+'%':'–',D_+' dari '+T+' · buka log aktivitas',"setQ({tab:'log'})")}
-    ${stat('Perlu tindak lanjut',nflag+' sales',f==='flag'?'Filter aktif · klik untuk hapus':'SKU rusak, retur, draft, usulan',`setQ({f:'${f==='flag'?'':'flag'}'})`,f==='flag')}
+    ${stat('Sales melapor',lapor+' dari '+all.length,'Sudah mengirim input')}
+    ${stat('Total pekerjaan',T,(T-D_)+' belum selesai · '+D_+' selesai')}
+    ${stat('Pekerjaan selesai',T?Math.round(D_/T*100)+'%':'–',D_+' dari '+T+' pekerjaan')}
+    ${stat('Perlu tindak lanjut',nflag+' sales','SKU rusak, retur, draft, usulan')}
   </div>
   ${card('Aktivitas Sales',dataTable('hk',{rows,rowClick:x=>`hkPanel('${x.u}')`,colFilters:false,empty:'Tidak ada sales dengan filter ini.',cols:[
       {label:'Sales',render:x=>`<span style="display:flex;gap:10px;align-items:center">${av(x.me.name)}<span><span class="fg" style="font-weight:500">${esc(x.me.name)}</span><span class="xs muted" style="display:block">${esc(x.me.job)}</span></span></span>`,prim:true},
@@ -5129,7 +5129,6 @@ function pageSubmission(q){
   const nDone=scope.filter(x=>subGrp(x.st)==='done').length, nDraft=scope.filter(x=>subGrp(x.st)==='draft').length, nWait=scope.filter(x=>subGrp(x.st)==='wait').length;
   const tokoOpts=[...new Set(inRole.map(x=>x.toko))].sort();
   const dirty=q.cl||q.cb||q.tk||q.u||q.q||q.akt||q.st||q.from||q.to||(q.per&&q.per!=='w');
-  const stTog=k=>`setQ({st:'${q.st===k?'':k}'})`;
   filterCard({top:`${pills(REP_PRESETS.map(p=>[p[0],p[1]]),(REP_PRESETS.find(x=>x[2][0]===r.from&&x[2][1]===r.to)||[''])[0],'subPer')}${rangePicker({id:'sub',from:r.from,to:r.to,min:LD_START,max:LD_END,on:'subDate',presets:REP_PRESETS})}`,
     selects:`${sel([['','Semua sales'],...users.map(s=>[s.u,s.name])],q.u||'',"setQ({u:this.value})",{label:'Filter sales',cls:'sm'})}
       ${sel([['','Semua klien'],...live('client').filter(c=>c.status==='Aktif').map(c=>[c.id,c.name])],q.cl||'',"setQ({cl:this.value,tk:''})",{label:'Filter klien',cls:'sm'})}
@@ -5143,9 +5142,9 @@ function pageSubmission(q){
   <div style="margin-bottom:14px">${pills(SUB_ROLES.map(([k,l])=>[k,l,inR.filter(x=>x.kind===k).length]),role,'subTab')}</div>
   <div class="stats">
     ${statCard({label:'Total submission',value:num(scope.length),hint:lapor+' dari '+users.length+' sales mengirim',icon:'file',tone:'ink'})}
-    ${statCard({label:'Selesai',value:num(nDone),hint:q.st==='done'?'Filter aktif · klik untuk hapus':'Terkirim, disetujui, atau selesai',icon:'check',tone:'success',on:stTog('done'),active:q.st==='done'})}
-    ${statCard({label:'Draft',value:num(nDraft),hint:q.st==='draft'?'Filter aktif · klik untuk hapus':'Disimpan sementara, belum dikirim',icon:'edit',tone:nDraft?'warning':'neutral',on:stTog('draft'),active:q.st==='draft'})}
-    ${statCard({label:'Menunggu',value:num(nWait),hint:q.st==='wait'?'Filter aktif · klik untuk hapus':'Approval, verifikasi, atau pesanan baru',icon:'clock',tone:nWait?'info':'neutral',on:stTog('wait'),active:q.st==='wait'})}
+    ${statCard({label:'Selesai',value:num(nDone),hint:'Terkirim, disetujui, atau selesai',icon:'check',tone:'success'})}
+    ${statCard({label:'Draft',value:num(nDraft),hint:'Disimpan sementara, belum dikirim',icon:'edit',tone:nDraft?'warning':'neutral'})}
+    ${statCard({label:'Menunggu',value:num(nWait),hint:'Approval, verifikasi, atau pesanan baru',icon:'clock',tone:nWait?'info':'neutral'})}
   </div>
   <div style="margin-bottom:12px;overflow-x:auto" class="no-scrollbar">${aktPills}</div>
   ${card('Daftar submission',dataTable('sub_'+role,{rows,rowClick:x=>`subPanel('${x.id}')`,colFilters:false,empty:'Tidak ada submission dengan filter ini.',emptyDesc:'Ubah periode atau hapus filter untuk melihat kiriman lain.',cols:[
