@@ -429,8 +429,11 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .sum-other{position:relative;display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:8px 10px 8px 12px;border-radius:14px;color:#fff;background:rgba(10,30,90,.18);font-size:12.5px;font-weight:700;text-align:left}
 .sum-other:active{background:rgba(10,30,90,.28)}
 .sum-obar{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.22);overflow:hidden}.sum-obar i{display:block;height:100%;border-radius:99px;background:#fff}
-.sum-todo .li{min-height:64px}.sum-todo .li:active{background:var(--blue-50)}.sum-todo .li>svg{color:var(--muted);flex:none}
-.sum-done{display:flex;align-items:center;gap:12px;padding:14px 16px}.sum-done b{display:block;font-size:14.5px}.sum-done small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.sum-toko{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:-4px -16px 14px;padding:4px 16px}
+.sum-toko::-webkit-scrollbar{display:none}
+.sum-toko button{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:40px;max-width:220px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:700;color:var(--ink-2);background:rgba(255,255,255,.62);box-shadow:inset 0 0 0 1px rgba(12,46,89,.1)}
+.sum-toko button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sum-toko button.on{color:#fff;background:var(--grad);box-shadow:0 8px 16px -8px rgba(10,110,240,.7)}
 .sum-list{padding:4px 14px}
 .sum-row+.sum-row{border-top:1px solid var(--sep)}
 .sum-rowbtn{display:block;width:100%;text-align:left;padding:12px 0;min-height:44px}
@@ -438,8 +441,17 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .sum-rt{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13.5px}.sum-rt>b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sum-rt>span.num{flex:none;color:var(--ink-2)}
 .sum-ic{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;flex:none;background:var(--blue-100);color:var(--blue-700)}
 .sum-rm{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px;font-size:12px;color:var(--muted)}.sum-rm span:last-child{display:inline-flex;align-items:center;gap:4px;font-weight:700;color:var(--ink-2)}
-.sum-rm svg{transition:transform .2s}.sum-row.open .sum-rm svg{transform:rotate(180deg)}
-.sum-det{display:none;padding:0 0 12px}.sum-row.open .sum-det{display:block}
+.sdt-hero{border-radius:22px;padding:16px;background:var(--card-strong);border:1px solid var(--line);box-shadow:var(--shadow)}
+.sdt-hero .big{display:flex;align-items:baseline;gap:6px;margin:6px 0 10px;flex-wrap:wrap}
+.sdt-hero .big b{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.sdt-hero .big span{font-size:14px;font-weight:600;color:var(--muted)}
+.sdt-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+.sdt-grid div{padding:10px;border-radius:14px;background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 1px rgba(12,46,89,.06);min-width:0}
+.sdt-grid small{display:block;font-size:11px;font-weight:700;color:var(--muted)}
+.sdt-grid b{display:block;font-size:15px;font-weight:800;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sdt-row{padding:12px 0}.sdt-row+.sdt-row{border-top:1px solid var(--sep)}
+.sdt-row .top{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;margin-bottom:7px}
+.sdt-row .top span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
 .sum-dgo{display:inline-flex;align-items:center;min-height:44px}
 .cap3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .cap3 button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 2px;border-radius:14px;text-align:center;min-width:0}
@@ -950,7 +962,7 @@ function doLogin(){
   },900);
 }
 function loginAs(u){
-  S.user=u; S.demo.mode=null; S.sumPer='d'; S.sumOpen={}; fmSyncVisits();
+  S.user=u; S.demo.mode=null; S.sumPer='d'; S.sumToko=''; fmSyncVisits();
   logAdd('Login','Berhasil','key','');
   if(!S.enrolled[u]) reset('enroll-intro'); else reset('home');
   renderPanel();
@@ -2756,48 +2768,81 @@ function sumPct(L){ const H=L.find(i=>i.head); if(H) return Math.round(sumRatio(
 /* Kalimat sisa: "7 pekerjaan lagi" atau "Rp86 jt lagi". */
 function sumGap(i){ const g=Math.max(0,i.total-i.done); if(!g) return 'Tercapai'; if(i.sisa) return g+' '+i.unit+' '+i.sisa; return (i.money?rpShort(g):g+(i.unit?' '+i.unit:''))+' lagi'; }
 const sumNum = (i,n) => i.money?rpShort(n):n.toLocaleString('id-ID');
-const sumGo = go => `act(()=>${go})`.replace(/"/g,'&quot;');
 function sumPer(k){ S.sumPer=k; render(false,true); }
-/* Buka-tutup rincian tanpa render ulang, supaya ring tidak beranimasi lagi. */
-function sumToggle(k){ S.sumOpen=S.sumOpen||{}; S.sumOpen[k]=!S.sumOpen[k];
-  const el=document.querySelector(`[data-sum="${k}"]`); if(!el) return; el.classList.toggle('open',S.sumOpen[k]); el.querySelector('.sum-rowbtn').setAttribute('aria-expanded',S.sumOpen[k]); }
+function sumSetToko(t){ S.sumToko=t; render(false,true); }
+/* Toko yang ditugaskan. Filter toko hanya muncul bila lebih dari satu. SPV dan CBD/REA tidak memakai toko. */
+function sumStores(){ const r=role(); if(r==='spv'||r==='leads') return [];
+  const v=(r==='fmcg'?fmStores():aktStores()).map(x=>x.place), L=v.length?v:((isSpg()||isMobilePromo())?tokoDitugaskan():[]);
+  return [...new Set(L)]; }
+/* Data satu toko. Kunjungan dan pekerjaan toko hari ini memakai status kunjungan toko itu;
+   angka lain adalah data contoh yang dibagi per toko menurut bobot tetap. Quiz & survey milik sales, jadi tidak ikut. */
+function sumByToko(L,per,toko){
+  const T=sumStores(), i=T.indexOf(toko); if(i<0) return L;
+  const wt=T.map((_,j)=>T.length-j+2), sw=wt.reduce((a,b)=>a+b,0), f=[1.1,.8,1,.7][i%4], share=wt[i]/sw;
+  const v=(role()==='fmcg'?fmStores():aktStores()).find(x=>x.place===toko);
+  return L.filter(x=>!/quiz|survey/i.test(x.label)).map(x=>{
+    if(per==='d'&&v&&x.label==='Kunjungan') return {...x,done:['Selesai','Toko tutup'].includes(v.status)?1:0,total:1};
+    if(per==='d'&&v&&x.label==='Pekerjaan toko'){ const t=aktTasks(v).filter(t=>t.st); return {...x,done:t.filter(t=>t.st==='Selesai').length,total:t.length}; }
+    const step=x.money?1e5:1, rnd=n=>Math.round(n/step)*step, tot=Math.max(step,rnd(x.total*share)), dn=rnd(x.done*share*f);
+    return {...x,total:tot,done:x.money?dn:Math.min(dn,tot),detail:''};
+  }).filter(x=>x.total>0);
+}
+/* Item Summary sesuai periode dan filter toko yang sedang dipilih. */
+const sumNow = per => { const t=sumStores().includes(S.sumToko)?S.sumToko:''; return sumByToko(sumItems(per),per,t); };
 function sumRing(pct){ const R=42, C=2*Math.PI*R, o=(C*(1-pct/100)).toFixed(1);
   return `<div class="sum-ring" role="img" aria-label="Capaian ${pct} persen"><svg viewBox="0 0 100 100" width="112" height="112" aria-hidden="true"><circle cx="50" cy="50" r="${R}" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="10"/>${pct?`<circle class="pc-arc" cx="50" cy="50" r="${R}" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" transform="rotate(-90 50 50)" style="--c:${C.toFixed(1)};--o:${o}" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${o}"/>`:''}</svg><b class="num">${pct}<small>%</small></b></div>`;
 }
 SCR.summary = () => {
-  const per=S.sumPer==='m'?'m':'d', other=per==='d'?'m':'d', L=sumItems(per), W=L.filter(i=>!i.todo), T=L.filter(i=>i.todo);
-  const pct=sumPct(L), WA=W.filter(i=>!i.head), tuntas=WA.filter(i=>sumRatio(i)>=1).length, oPct=sumPct(sumItems(other));
-  const perLab={d:'Hari ini',m:'Bulan ini'}, when=per==='d'?'Senin, 26 Okt 2026':'Oktober 2026';
+  const per=S.sumPer==='m'?'m':'d', other=per==='d'?'m':'d', L=sumNow(per), W=L.filter(i=>!i.todo), T=L.filter(i=>i.todo);
+  const pct=sumPct(L), WA=W.filter(i=>!i.head), tuntas=WA.filter(i=>sumRatio(i)>=1).length, oPct=sumPct(sumNow(other));
+  const perLab={d:'Hari ini',m:'Bulan ini'}, when=per==='d'?'Senin, 26 Okt 2026':'Oktober 2026', ST=sumStores(), toko=ST.includes(S.sumToko)?S.sumToko:'';
   const seg=`<div class="segtabs sum-seg" role="group" aria-label="Periode">${['d','m'].map(k=>`<button type="button" class="${k===per?'on':''}" aria-pressed="${k===per}" onclick="sumPer('${k}')">${perLab[k]}</button>`).join('')}</div>`;
-  // Sisa pekerjaan: item hitungan dulu, lalu yang paling jauh dari target.
-  const left=W.filter(i=>!i.head&&sumRatio(i)<1).sort((a,b)=>sumRatio(a)-sumRatio(b)), far=left[0];
-  const todoRows=[...T,...left].slice(0,4);
+  const tokoBar=ST.length>1?`<div class="sum-toko" role="group" aria-label="Filter toko">${['',...ST].map(t=>`<button type="button" class="${t===toko?'on':''}" aria-pressed="${t===toko}" onclick="sumSetToko('${esc(t).replace(/'/g,'&#39;')}')">${I(t?'store':'grid',15,2)}<span>${t?esc(t):'Semua toko'}</span></button>`).join('')}</div>`:'';
+  const far=W.filter(i=>!i.head&&sumRatio(i)<1).sort((a,b)=>sumRatio(a)-sumRatio(b))[0];
   let hero;
   if(!L.length) hero=`<section class="sum-hero" aria-label="Capaian ${perLab[per].toLowerCase()}"><div class="sum-hh"><b>Capaian</b><small>${when}</small></div><p class="sum-none">Belum ada pekerjaan ${perLab[per].toLowerCase()}.</p></section>`;
   else hero=`<section class="sum-hero" aria-label="Capaian ${perLab[per].toLowerCase()}">
-    <div class="sum-hh"><b>Capaian</b><small>${when}</small></div>
+    <div class="sum-hh"><b>${toko?esc(toko):'Capaian'}</b><small>${when}</small></div>
     <div class="sum-top">${sumRing(pct)}<div class="sum-meta">
       <div class="sum-cnt"><div><b class="num">${tuntas}</b><small>aktivitas selesai</small></div><div><b class="num">${WA.length-tuntas}</b><small>belum</small></div></div>
       <p class="sum-left">${far?(far.sisa?`<b>${sumGap(far)}</b>`:`<b>${sumGap(far)}</b> di ${esc(far.label)}`):'Semua target tercapai'}${T.length?` · ${T.map(t=>t.total+' '+esc(t.label.toLowerCase())).join(', ')}`:''}</p>
     </div></div>
     <button type="button" class="sum-other" onclick="sumPer('${other}')" aria-label="Lihat ${perLab[other].toLowerCase()}, capaian ${oPct} persen"><span>${perLab[other]}</span><span class="sum-obar" role="progressbar" aria-label="Capaian ${perLab[other].toLowerCase()}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${oPct}"><i style="width:${oPct}%"></i></span><b class="num">${oPct}%</b>${I('right',16,2.4)}</button>
   </section>`;
-  const todo=`<div class="sec-title">Yang perlu dikerjakan${todoRows.length?`<span class="small muted num">${T.length+left.length} sisa</span>`:''}</div>
-  <div class="list sum-todo">${todoRows.length?todoRows.map(i=>{ const p=Math.round(sumRatio(i)*100), tone=i.todo?'amber':p<50?'tan':'';
-    const txt=i.todo?`${i.total} ${esc(i.label.toLowerCase())}`:sumGap(i), sub=i.todo?esc(i.sub||''):`${esc(i.label)} · ${p}% tercapai`;
-    return `<button type="button" class="li sum-trow" onclick="${sumGo(i.go)}"><div class="ico-tile ${tone}">${I(i.ic,20)}</div><div class="grow"><div class="t">${txt}</div><div class="s">${sub}</div></div>${I('right',20)}</button>`; }).join('')
-    :`<div class="sum-done"><div class="ico-tile green">${I('check',20,2.2)}</div><div><b>${L.length?'Semua tuntas '+perLab[per].toLowerCase():'Belum ada pekerjaan'}</b><small>${L.length?'Tidak ada sisa pekerjaan. Kerja bagus.':'Pekerjaan muncul setelah jadwal dibuat.'}</small></div></div>`}</div>`;
-  S.sumOpen=S.sumOpen||{};
-  const rows=W.map((i,n)=>{ const p=Math.round(sumRatio(i)*100), k=per+n, open=!!(i.detail&&S.sumOpen[k]), lab=`${esc(i.label)}: ${sumNum(i,i.done)} dari ${sumNum(i,i.total)}${i.unit?' '+i.unit:''}`;
-    const body=`<div class="sum-rt"><span class="sum-ic">${I(i.ic,16,2)}</span><b>${esc(i.label)}</b><span class="num"><b>${sumNum(i,i.done)}</b> / ${sumNum(i,i.total)}${i.unit?' '+esc(i.unit):''}</span></div>
-      <div class="bar ${p<50?'tan':''}" role="progressbar" aria-label="${esc(i.label)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p}"><i style="width:${p?Math.max(4,p):0}%"></i></div>
-      <div class="sum-rm"><span>${esc(i.sub||'')}</span><span class="num">${p}%${i.detail?I('down',16,2.4):I('right',16,2.4)}</span></div>`;
-    return i.detail
-      ? `<div class="sum-row ${open?'open':''}" data-sum="${k}"><button type="button" class="sum-rowbtn" onclick="sumToggle('${k}')" aria-expanded="${open}" aria-label="${lab}, buka rincian">${body}</button><div class="sum-det">${i.detail}<button type="button" class="link sum-dgo" onclick="${sumGo(i.go)}">Buka halaman ${I('right',16,2.4)}</button></div></div>`
-      : `<div class="sum-row"><button type="button" class="sum-rowbtn" onclick="${sumGo(i.go)}" aria-label="${lab}">${body}</button></div>`; }).join('');
+  const rows=W.map((i,n)=>{ const p=Math.round(sumRatio(i)*100), lab=`${esc(i.label)}: ${sumNum(i,i.done)} dari ${sumNum(i,i.total)}${i.unit?' '+i.unit:''}, lihat detail`;
+    return `<div class="sum-row"><button type="button" class="sum-rowbtn" onclick="go('sum-detail',{per:'${per}',n:${n}})" aria-label="${lab}">
+      <div class="sum-rt"><span class="sum-ic">${I(i.ic,16,2)}</span><b>${esc(i.label)}</b><span class="num"><b>${sumNum(i,i.done)}</b> / ${sumNum(i,i.total)}${i.unit?' '+esc(i.unit):''}</span></div>
+      <div class="bar ${p<50?'tan':''}"><i style="width:${p?Math.max(4,p):0}%"></i></div>
+      <div class="sum-rm"><span>${esc(i.sub||'')}</span><span class="num">${p}%${I('right',16,2.4)}</span></div></button></div>`; }).join('');
   const rincian=W.length?`<div class="sec-title">Rincian</div><div class="card sum-list">${rows}</div>`:'';
-  return {tab:'summary', note:'Summary menjawab dua hal: apa yang sudah dikerjakan dan apa yang tersisa. Filter <b>Hari ini</b> memakai data yang sama dengan kartu Pencapaian di Beranda; <b>Bulan ini</b> memakai target bulanan. Persen = rata-rata capaian tiap aktivitas (penjualan di atas target dihitung 100%). Yang perlu dikerjakan diurutkan dari yang paling jauh dari target; ketuk untuk membuka halaman kerjanya.'+(role()==='spv'?' SPV melihat capaian tim.':' Kartu <b>Pencapaian kamu</b> dipindah dari halaman Target.'),
-  html:`${appbar('Summary',{backBtn:false})}<main class="content">${seg}${hero}${todo}${rincian}${achvCard()}</main>`};
+  return {tab:'summary', note:'Summary menjawab dua hal: apa yang sudah dikerjakan dan apa yang tersisa. Filter <b>Hari ini</b> memakai data yang sama dengan kartu Pencapaian di Beranda; <b>Bulan ini</b> memakai target bulanan. Persen = rata-rata capaian tiap aktivitas (penjualan di atas target dihitung 100%).'+(ST.length>1?' Sales dengan lebih dari satu toko bisa memilih toko; angka per toko selain kunjungan hari ini adalah data contoh.':'')+' Ketuk baris Rincian untuk melihat detailnya.'+(role()==='spv'?' SPV melihat capaian tim.':''),
+  html:`${appbar('Summary',{backBtn:false})}<main class="content">${seg}${tokoBar}${hero}${rincian}${achvCard()}</main>`};
+};
+/* Detail satu baris Rincian: angka, sisa, perbandingan periode, rincian per toko atau per isi. Tidak mengarah ke halaman kerja. */
+const SUM_SISA_HARI=5;
+SCR['sum-detail'] = p => {
+  const per=p.per==='m'?'m':'d', W=sumNow(per).filter(i=>!i.todo), i=W[p.n];
+  if(!i) return {html:`${appbar('Detail summary')}<main class="content"><div class="empty">Data tidak ditemukan. Kembali ke Summary.</div></main>`};
+  const pr=Math.round(sumRatio(i)*100), gap=Math.max(0,i.total-i.done), perLab=per==='d'?'Hari ini':'Bulan ini', ST=sumStores(), toko=ST.includes(S.sumToko)?S.sumToko:'';
+  const n=v=>sumNum(i,v)+(i.money||!i.unit?'':' '+i.unit);
+  const twin=sumNow(per==='d'?'m':'d').find(x=>x.label===i.label);
+  const pace=per==='m'&&gap?`${i.money?rpShort(Math.ceil(gap/SUM_SISA_HARI/1e5)*1e5):Math.ceil(gap/SUM_SISA_HARI)+(i.unit?' '+i.unit:'')}`:per==='d'&&gap?'Selesaikan sebelum jam pulang':'–';
+  const bar=(d,t)=>{ const q=t?Math.min(1,d/t):0; return `<div class="bar ${q<.5?'tan':''}"><i style="width:${q?Math.max(4,q*100):0}%"></i></div>`; };
+  const byToko=!toko&&ST.length>1?ST.map(t=>[t,sumByToko(sumItems(per),per,t).find(x=>x.label===i.label)]).filter(([,x])=>x):[];
+  return {note:'Detail summary untuk satu aktivitas: capaian, sisa, kebutuhan per hari, perbandingan dengan periode lain, dan rincian per toko atau per isi. Halaman ini hanya menampilkan data.',
+  html:`${appbar(i.label)}<main class="content">
+    <section class="sdt-hero">
+      <div class="row between"><span class="small muted">${perLab}${toko?' · '+esc(toko):''}</span>${chip(pr>=100?'Tercapai':pr>=50?'Berjalan':'Perlu dikejar',pr>=100?'green':pr>=50?'blue':'amber')}</div>
+      <div class="big"><b class="num">${sumNum(i,i.done)}</b><span>dari ${n(i.total)}</span></div>
+      <div class="bar ${pr<50?'tan':''}" role="progressbar" aria-label="Capaian ${esc(i.label)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pr}"><i style="width:${pr?Math.max(4,pr):0}%"></i></div>
+      <div class="sdt-grid"><div><small>Capaian</small><b class="num">${pr}%</b></div><div><small>Sisa</small><b class="num">${gap?n(gap):'0'}</b></div><div><small>${per==='m'?'Perlu per hari':'Target'}</small><b>${per==='m'?pace:n(i.total)}</b></div></div>
+      ${per==='m'&&gap?`<p class="hint">Sisa ${SUM_SISA_HARI} hari kerja di bulan ini.</p>`:per==='d'&&gap?`<p class="hint">${pace}.</p>`:''}
+    </section>
+    ${twin?`<div class="sec-title">Perbandingan</div><div class="card">${[[perLab,i],[per==='d'?'Bulan ini':'Hari ini',twin]].map(([l,x])=>`<div class="sdt-row"><div class="top"><span>${l}</span><span class="num"><b>${sumNum(x,x.done)}</b> / ${sumNum(x,x.total)}${x.unit&&!x.money?' '+esc(x.unit):''}</span></div>${bar(x.done,x.total)}</div>`).join('')}</div>`:''}
+    ${byToko.length?`<div class="sec-title">Per toko</div><div class="card">${byToko.map(([t,x])=>`<div class="sdt-row"><div class="top"><span>${esc(t)}</span><span class="num"><b>${sumNum(x,x.done)}</b> / ${sumNum(x,x.total)}</span></div>${bar(x.done,x.total)}</div>`).join('')}</div>`:''}
+    ${i.detail?`<div class="sec-title">Rincian isi</div><div class="card">${i.detail}</div>`:''}
+    <div class="card"><div class="kv"><span>Keterangan</span><span>${esc(i.sub||'–')}</span></div><div class="kv"><span>Periode</span><span>${per==='d'?'Senin, 26 Okt 2026':'Oktober 2026'}</span></div></div>
+  </main>`};
 };
 SCR.target = () => {
   const r=role();
