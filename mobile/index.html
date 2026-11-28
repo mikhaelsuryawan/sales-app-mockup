@@ -770,7 +770,7 @@ function freshState0(){
     returs:[{u:'sales.budi',toko:'Toko Sinar Jaya Elektronik',time:'09:25',reason:'Kemasan penyok',items:[{id:'bl11',q:1,cond:'bad'},{id:'kp16',q:2,cond:'good'}]}],
     shareClient:{tv50:6,tv43:12}, shareComp:[{cb:'ARUNIKA',brand:'Samsung',path:'TV/Smart TV',nama:'Samsung Crystal 55"',qty:14,harga:0},{cb:'ARUNIKA',brand:'LG',path:'TV/Smart TV/Google TV',nama:'LG UHD 50"',qty:10,harga:0},{cb:'ARUNIKA',brand:'Samsung',path:'Kulkas/2 Pintu/Inverter',nama:'Samsung 2 Pintu 300 L',qty:5,harga:0}], shareBrand:'ARUNIKA', sharePath:['TV'], shareState:null,
     quizDone:false, quizScore:null, surveyDone:false,
-    myRequests:[], newToko:seedToko(), logAkun:{},
+    newToko:seedToko(), logAkun:{},
     cart:null, ord:null
   };
 }
@@ -1020,12 +1020,12 @@ const MENUS = {
   spg:[['Riwayat penjualan','file',"go('penjualan')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   mobile:[['Catat penjualan','bag',"act(()=>startSale())",1,'jual'],['Riwayat penjualan','file',"go('penjualan')"],['SKU display','grid',"go('sku')",0,'sku'],['Display share','pie',"go('share')",0,'share'],['Stock opname','box',"go('fm-stok')",0,'stok'],['Campaign & POSM','image',"go('posm')",0,'posm'],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   canvas:[['Usulkan toko','plus',"go('toko-list')"],['Loading Barang','box',"act(()=>go('loading'))",1],['Unloading Barang','retur',"act(()=>go('unloading'))",1],['Riwayat penjualan','file',"go('penjualan')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
-  order:[['Usulkan toko','plus',"go('toko-list')"],['Daftar pesanan','file',"go('pesanan')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
-  leads:[['Leads','users',"act(()=>go('leads',{back:1}))",1],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
-  fmcg:[['Buat jadwal','route',"act(()=>go('kunjungan-form'))",1],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Ajukan izin','file',"go('izin')"]],
+  order:[['Usulkan toko','plus',"go('toko-list')"],['Daftar pesanan','file',"go('pesanan')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  leads:[['Leads','users',"act(()=>go('leads',{back:1}))",1],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"],['Riwayat absen','calendar',"go('absensi')"],['Notifikasi','bell',"go('notif')"]],
+  fmcg:[['Buat jadwal','route',"act(()=>go('kunjungan-form'))",1],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   cbd:[['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   rea:[['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
-  arco:[['Assign leads','users',"go('assign')"],['Semua leads','file',"go('leads-all')"],['Tim saya','user',"tab('tim')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
+  arco:[['Assign leads','users',"go('assign')"],['Semua leads','file',"go('leads-all')"],['Tim saya','user',"tab('tim')"],['Riwayat absen','calendar',"go('absensi')"],['Notifikasi','bell',"go('notif')"]],
   spv:[['Approve Loading Barang','box',"go('approve-loading')"],['Approve Unloading Barang','retur',"go('approve-unloading')"],['Approval kunjungan','route',"go('approval-kunjungan')"],['Assign canvasser','route',"go('assign-canvas')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tugaskan tim','route',"act(()=>go('kunjungan-form',{spv:1}))",1],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   spvM:[['Approval kunjungan','route',"go('approval-kunjungan')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]]
 };
@@ -1272,18 +1272,12 @@ function spvDash(){
 function startAbsen(m){ go('absen-lokasi',{mode:m}); }
 SCR.absensi = () => {
   const a=att();
-  return {tab:'absensi', note:'Hub absensi: absen masuk/pulang, rekap bulanan per kategori + unduh (BRD 1.11.1–1.11.5), pengajuan izin (cuti, sakit, izin, lembur) yang butuh approval, dan riwayat absen beserta status approval.',
-  html:`${appbar('Absensi',{backBtn:false})}<main class="content">
-    ${attCard()}
+  return {tab:'akun', note:'Riwayat absensi: rekap bulanan per kategori + unduh dan riwayat absen beserta status approval (BRD 1.11.1–1.11.5). Absen masuk dan pulang lewat tombol Absen di tab bawah atau kartu di Beranda.',
+  html:`${appbar('Riwayat absensi')}<main class="content">
     <div class="sec-title">Rekap Oktober <a onclick="toast('Riwayat absensi Oktober diunduh (PDF)','file')">Unduh</a></div>
     <div class="card">
       <div style="display:flex;height:12px;border-radius:99px;overflow:hidden;gap:2px">${[[17,'#0FB574'],[2,'#FFB020'],[1,'#0A92F2'],[1,'#F09A66'],[4,'#C3D0DC']].map(([n,c])=>`<i style="flex:${n};background:${c}"></i>`).join('')}</div>
       <div class="row" style="flex-wrap:wrap;gap:6px 14px;margin-top:10px">${[['Hadir',17,'#0FB574'],['Terlambat',2,'#FFB020'],['Sakit',1,'#0A92F2'],['Cuti',1,'#F09A66'],['Off',4,'#C3D0DC']].map(([k,n,c])=>`<span class="small"><i style="display:inline-block;width:9px;height:9px;border-radius:3px;background:${c};margin-right:5px"></i>${k} <b class="num">${n}</b></span>`).join('')}</div>
-    </div>
-    <div class="sec-title">Pengajuan</div>
-    <div class="list">
-      <button class="li" onclick="go('izin')"><div class="ico-tile tan">${I('file',20)}</div><div class="grow"><div class="t">Ajukan cuti, sakit, izin, atau lembur</div><div class="s">Perlu persetujuan supervisor</div></div>${I('right',20)}</button>
-      ${S.myRequests.map(q=>`<div class="li"><div class="ico-tile amber">${I('clock',20)}</div><div class="grow"><div class="t">${q.type}</div><div class="s">${q.range}</div></div>${chip('Menunggu','amber')}</div>`).join('')}
     </div>
     <div class="sec-title">Riwayat Oktober 2026</div>
     <div class="list">
@@ -1384,19 +1378,6 @@ SCR['absen-sukses'] = p => {
       <div class="kv"><span>Perangkat</span><span>${esc((isIn?a.in.dev:a.out.dev)||devText())}</span></div>
     </div>${isIn?'':daySummary()}</div></main>
   <footer class="actions"><button class="btn" onclick="reset('home')">Ke beranda</button></footer>`};
-};
-SCR.izin = p => {
-  const t=p.t||'Cuti';
-  return {note:'Pengajuan absen non check-in (cuti, sakit, izin, lembur) yang butuh approval supervisor (BRD 1.10.13–1.10.16). Tidak perlu absen masuk dulu.',
-  html:`${appbar('Ajukan izin')}<main class="content">
-    <div class="field"><span>Jenis pengajuan</span><div class="opts">${['Cuti','Sakit','Izin','Lembur'].map(x=>`<button class="opt ${x===t?'on':''}" onclick="setP({t:'${x}'})">${x}</button>`).join('')}</div></div>
-    ${t==='Cuti'?`<div class="banner blue" style="margin-bottom:14px">${I('calendar',18)}<span>Sisa cuti tahunan kamu <b>8 hari</b> (data dari SIM).</span></div>`:''}
-    ${t==='Lembur'?`<label class="field"><span>Tanggal</span><input class="input" type="date" value="2026-10-26"></label><div class="row" style="gap:10px"><label class="field grow"><span>Mulai</span><input class="input" type="time" value="17:00"></label><label class="field grow"><span>Selesai</span><input class="input" type="time" value="20:00"></label></div>`
-    :`<div class="row" style="gap:10px"><label class="field grow"><span>Dari</span><input class="input" type="date" value="2026-10-27"></label><label class="field grow"><span>Sampai</span><input class="input" type="date" value="2026-10-28"></label></div>`}
-    <label class="field"><span>Alasan</span><textarea class="input" id="ir" placeholder="Tulis alasan singkat"></textarea></label>
-    ${t==='Sakit'?`<div class="field"><span>Surat dokter</span><div class="thumbs"><button class="thumb add" onclick="toast('Foto surat dokter ditambahkan')">${I('camera',22)}</button></div></div>`:''}
-    <div class="kv"><span>Approver</span><span>Sari Wulandari</span></div>
-  </main><footer class="actions"><button class="btn" onclick="S.myRequests.unshift({type:'${t}',range:'${t==='Lembur'?'26 Okt 2026, 17:00–20:00':'27–28 Okt 2026'}'});back();toast('Pengajuan ${t.toLowerCase()} terkirim ke supervisor')">Kirim pengajuan</button></footer>`};
 };
 
 function daySummary(){
@@ -4328,7 +4309,7 @@ const SIAP_TILE=[['slip','Slip gaji','money'],['cuti','Cuti','calendar'],['profi
 function siapPage(pg,p){
   const u=U(), kv=(a,b)=>`<div class="kv"><span>${a}</span><span class="num">${b}</span></div>`, h=t=>`<div class="wv-head"><small>SIM SIAP</small><div style="font-size:17px;font-weight:800;margin-top:2px">${t}</div></div>`;
   if(pg==='slip') return `${h('Slip gaji')}<div style="height:12px"></div><div class="wv-box"><b>Periode Oktober 2026</b>${kv('Gaji pokok','Rp5.100.000')}${kv('Tunjangan transport','Rp600.000')}${kv('Tunjangan makan','Rp520.000')}${kv('Insentif penjualan','Rp850.000')}${kv('Potongan BPJS','−Rp204.000')}${kv('PPh 21','−Rp96.000')}<div class="kv" style="border-top:1px solid #E3E8EF;margin-top:4px;padding-top:10px"><span><b>Take home pay</b></span><span class="num"><b>Rp6.770.000</b></span></div><button class="wv-btn" onclick="toast('Slip gaji Oktober 2026 diunduh','upload')">Unduh PDF</button></div><div class="wv-box">${['September 2026','Agustus 2026'].map(m=>`<div class="kv"><span>${m}</span><a class="link" onclick="toast('Slip gaji ${m} dibuka','file')">Lihat</a></div>`).join('')}</div>`;
-  if(pg==='cuti') return `${h('Cuti')}<div style="height:12px"></div><div class="wv-box">${kv('Sisa cuti tahunan','8 dari 12 hari')}${kv('Cuti terpakai 2026','4 hari')}${p.sent?`<p style="margin:8px 0 0;color:#0C7A4E;font-weight:600">Pengajuan cuti 3–4 Nov terkirim ke atasan.</p>`:`<button class="wv-btn" onclick="setP({sent:1});toast('Pengajuan cuti terkirim ke atasan')">Ajukan cuti 3–4 Nov</button>`}</div><div class="wv-box"><b>Riwayat</b>${kv('20 Okt · Sakit','Disetujui')}${kv('14–15 Agu · Cuti tahunan','Disetujui')}</div>`;
+  if(pg==='cuti') return `${h('Cuti')}<div style="height:12px"></div><div class="wv-box">${kv('Sisa cuti tahunan','8 dari 12 hari')}${kv('Cuti terpakai 2026','4 hari')}</div><div class="wv-box"><b>Riwayat</b>${kv('20 Okt · Sakit','Disetujui')}${kv('14–15 Agu · Cuti tahunan','Disetujui')}</div>`;
   if(pg==='profil') return `${h('Profil')}<div style="height:12px"></div><div class="wv-box">${kv('Nama',esc(u.name))}${kv('NIP',u.nip)}${kv('Jabatan',esc(u.roleLabel))}${kv('Unit',esc(u.unit))}${kv('Penempatan',esc(u.client.split(' & ')[0]))}${kv('Email',u.name.split(' ')[0].toLowerCase()+'@simgroup.example')}</div>`;
   if(pg==='info') return `${h('Pengumuman')}<div style="height:12px"></div>${[['Jadwal libur akhir tahun','Kantor tutup 24–26 Des 2026.','2 hari lalu'],['Pembaruan data BPJS','Cek data keluarga sebelum 15 Nov.','5 hari lalu'],['Pelatihan product knowledge','Kelas daring 30 Okt, 10.00.','1 minggu lalu']].map(a=>`<div class="wv-box"><b>${a[0]}</b><div style="margin-top:4px;color:#5B6B7C">${a[1]}</div><div style="margin-top:6px;font-size:12px;color:#8A97A6">${a[2]}</div></div>`).join('')}`;
   if(pg==='absen') return `${h('Rekap absen')}<div style="height:12px"></div><div class="wv-box"><b>Oktober 2026</b>${kv('Hadir','20 hari')}${kv('Terlambat','2 kali')}${kv('Izin dan sakit','1 hari')}${kv('Off','4 hari')}</div>`;
@@ -4366,7 +4347,7 @@ SCR.akun = () => {
       <button class="li" onclick="go('notif-absen')"><div class="ico-tile">${I('bell',20)}</div><div class="grow"><div class="t">Notifikasi absen</div><div class="s">Pengingat dan suara</div></div>${I('right',20)}</button>
       <button class="li" onclick="go('password')"><div class="ico-tile">${I('key',20)}</div><div class="grow"><div class="t">Ganti password</div></div>${I('right',20)}</button>
       <button class="li" onclick="go('log-aktivitas')"><div class="ico-tile">${I('file',20)}</div><div class="grow"><div class="t">Log aktivitas</div><div class="s">Login, logout, dan ubah password</div></div>${I('right',20)}</button>
-      <button class="li" onclick="tab('absensi')"><div class="ico-tile">${I('calendar',20)}</div><div class="grow"><div class="t">Riwayat absensi</div></div>${I('right',20)}</button>
+      <button class="li" onclick="go('absensi')"><div class="ico-tile">${I('calendar',20)}</div><div class="grow"><div class="t">Riwayat absensi</div></div>${I('right',20)}</button>
       <button class="li" onclick="sheet('<h3 style=&quot;font-size:18px;font-weight:800&quot;>Keluar dari aplikasi?</h3><p class=&quot;small muted&quot; style=&quot;margin:6px 0 16px&quot;>Kamu perlu login lagi dengan username dan password.</p><button class=&quot;btn danger&quot; onclick=&quot;closeSheet();logout()&quot;>Keluar</button>')"><div class="ico-tile red">${I('logout',20)}</div><div class="grow"><div class="t" style="color:var(--red)">Keluar</div></div></button>
     </div>
     <p class="hint" style="text-align:center;margin-top:18px">SIM Sales App v1.0.0</p>
@@ -4435,7 +4416,7 @@ function tabbar(active){
   const a=att(), fabCls=a.out?'done':a.in?'':'off';
   const items=[['home','Beranda','home'],navAkt(),['absensi','Absen','fingerprint'],['summary','Summary','target'],['akun','Akun','user']];
   return items.map((t,i)=> i===2
-    ? `<button class="fab ${fabCls} ${active===t[0]?'on':''}" onclick="tab('absensi')"><span class="ring">${I('fingerprint',28,2)}</span><em>${a.out?'Selesai':a.in?'Pulang':'Absen'}</em></button>`
+    ? `<button class="fab ${fabCls}" onclick="${a.out?"go('absensi')":`startAbsen('${a.in?'out':'in'}')`}"><span class="ring">${I('fingerprint',28,2)}</span><em>${a.out?'Selesai':a.in?'Pulang':'Absen'}</em></button>`
     : `<button class="${active===t[0]?'on':''}" onclick="tab('${t[0]}')">${I(t[2],24,active===t[0]?2.2:1.8)}${t[1]}</button>`).join('');
 }
 function render(scrollTop=true, keepScroll=false){
