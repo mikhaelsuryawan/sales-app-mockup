@@ -750,11 +750,6 @@ function freshState0(){
       {name:'Joko Susilo',no:'PJ-0323-0129',ang:2100000,due:'18 Okt 2026',days:8,phone:'0857-6620-3319',addr:'Kalibata'},
       {name:'Ratna Sari',no:'PJ-0624-0207',ang:650000,due:'22 Okt 2026',days:4,phone:'0838-1192-6670',addr:'Pejaten Barat'}
     ],
-    approvals:[
-      {id:'a1',type:'Absen terlambat',u:'sales.budi',detail:'Masuk 08:21, terlambat 21 menit',reason:'Ban motor bocor di Jl. TB Simatupang',when:'08:22'},
-      {id:'a2',type:'Cuti',u:'sales.dimas',detail:'Cuti tahunan 27–28 Okt 2026 (2 hari)',reason:'Acara keluarga di Bandung',when:'Kemarin'},
-      {id:'a3',type:'Hapus penjualan',u:'spg.rina',detail:'TRX-2510-0087 · Kulkas 2 Pintu · Rp4.084.050',reason:'Salah pilih produk, seharusnya Mesin Cuci',when:'Kemarin'}
-    ],
     visits:{
       spg:[{id:'v1',place:'Electronic City Kemang',time:'08:00 – 17:00',tasks:['Aktivitas saya'],status:'Belum',photos:{}}],
       mobile:[{id:'v1',place:'Electronic City Kemang',time:'08:00 – 13:00',tasks:['Cek SKU display','Penjualan'],status:'Berjalan',photos:{},cin:'08:03'},{id:'v2',place:'Best Denki Senayan City',time:'14:00 – 17:00',tasks:['Survey toko','Cek SKU display','Quiz'],status:'Belum',photos:{}}],
@@ -1031,8 +1026,8 @@ const MENUS = {
   cbd:[['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   rea:[['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
   arco:[['Assign leads','users',"go('assign')"],['Semua leads','file',"go('leads-all')"],['Tim saya','user',"tab('tim')"],['Riwayat absen','calendar',"tab('absensi')"],['Ajukan izin','file',"go('izin')"],['Notifikasi','bell',"go('notif')"]],
-  spv:[['Approve Loading Barang','box',"go('approve-loading')"],['Approve Unloading Barang','retur',"go('approve-unloading')"],['Approval','check',"go('approval')"],['Approval kunjungan','route',"go('approval-kunjungan')"],['Assign canvasser','route',"go('assign-canvas')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tugaskan tim','route',"act(()=>go('kunjungan-form',{spv:1}))",1],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
-  spvM:[['Approval','check',"go('approval')"],['Approval kunjungan','route',"go('approval-kunjungan')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]]
+  spv:[['Approve Loading Barang','box',"go('approve-loading')"],['Approve Unloading Barang','retur',"go('approve-unloading')"],['Approval kunjungan','route',"go('approval-kunjungan')"],['Assign canvasser','route',"go('assign-canvas')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tugaskan tim','route',"act(()=>go('kunjungan-form',{spv:1}))",1],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]],
+  spvM:[['Approval kunjungan','route',"go('approval-kunjungan')"],['Task pending','alert',"go('task-pending')"],['Assign leads','users',"go('assign')"],['Tim saya','user',"tab('tim')"],['Data overdue','alert',"go('overdue')"],['Semua leads','file',"go('leads-all')"],['Summary','target',"tab('summary')"],['Quiz','quiz',"go('quiz')"],['Survey','survey',"go('survey')"]]
 };
 MENUS.spvF=MENUS.spv;
 /* Super Admin: semua menu mobile dari semua role, tanpa duplikat nama. */
@@ -1260,7 +1255,7 @@ function spvDash(){
   const unassigned=L.filter(l=>!l.owner).length;
   return `<div class="sec-title">Kehadiran tim hari ini <a onclick="tab('tim')">Detail</a></div>
   <div class="card"><div class="stat3"><div><small>Hadir</small><b>2<span class="muted small">/4</span></b></div><div><small>Terlambat</small><b style="color:var(--amber)">1</b></div><div><small>Cuti / belum</small><b>2</b></div></div>
-  <button class="li" style="padding:12px 0 0;margin-top:12px;border-top:1px solid var(--line)" onclick="go('approval')"><div class="ico-tile amber">${I('check',20)}</div><div class="grow"><div class="t">${otherReqs().length} pengajuan menunggu approval</div><div class="s">Absen terlambat, cuti, hapus penjualan</div></div>${I('right',20)}</button><button class="li" style="padding:12px 0 0;margin-top:12px;border-top:1px solid var(--line)" onclick="go('approval-kunjungan')"><div class="ico-tile amber">${I('route',20)}</div><div class="grow"><div class="t">${visitReqs().length} kunjungan menunggu approval</div><div class="s">Kunjungan tambahan dari sales</div></div>${I('right',20)}</button></div>
+  <button class="li" style="padding:12px 0 0;margin-top:12px;border-top:1px solid var(--line)" onclick="go('approval-kunjungan')"><div class="ico-tile amber">${I('route',20)}</div><div class="grow"><div class="t">${visitReqs().length} kunjungan menunggu approval</div><div class="s">Kunjungan tambahan dari sales</div></div>${I('right',20)}</button></div>
   <div class="sec-title">Leads pinjaman <a onclick="go('leads-all')">Semua leads</a></div>
   <div class="card">
     <div class="row between"><div><div class="small muted">Total pengajuan Oktober</div><div class="big-num num">${L.length+38}</div></div><div style="text-align:right"><div class="small muted">Sudah dihubungi</div><b class="num">${L.filter(l=>l.status!=='Baru').length+27}</b></div></div>
@@ -1410,7 +1405,6 @@ function daySummary(){
   if(r==='spg'||r==='canvas'){ const l=salesList().filter(x=>!x.d); rows+=`<div class="kv"><span>Penjualan</span><span class="num">${rp(l.reduce((s,x)=>s+x.total,0))} · ${l.length} trx</span></div>`; }
   if(r==='order') rows+=`<div class="kv"><span>Pesanan dibuat hari ini</span><span>${S.orders.filter(o=>o.date==='26 Okt 2026').length}</span></div>`;
   if(r==='leads'){ const m=S.leads.filter(l=>l.owner===S.user); rows+=`<div class="kv"><span>Leads dihubungi</span><span>${m.filter(l=>l.status!=='Baru'||l.calls).length} dari ${m.length}</span></div>`; }
-  if(r==='spv') rows+=`<div class="kv"><span>Approval diproses</span><span>${4-otherReqs().length} dari 4</span></div>`;
   return `<div class="card" style="width:100%;margin-top:12px;text-align:left"><b>Ringkasan hari ini</b>${rows}</div>`;
 }
 
@@ -2620,7 +2614,6 @@ SCR.tim = () => ({tab:'tim', note:'Supervisor memantau kehadiran, mode kerja, da
     <div class="list">${TEAM.map(t=>{const u=USERS[t.u];return `<button class="li" onclick="go('tim-detail',{u:'${t.u}'})"><div class="av blue">${u.init}</div><div class="grow"><div class="t">${u.name}</div><div class="s">${u.roleLabel}${t.time!=='–'?' · masuk '+t.time+' '+t.mode:''}</div></div>${chip(t.status,t.tone)}</button>`}).join('')}</div>
     <div class="sec-title">Aksi cepat</div>
     <div class="list">
-      <button class="li" onclick="go('approval')"><div class="ico-tile amber">${I('check',20)}</div><div class="grow"><div class="t">Approval</div><div class="s">${otherReqs().length} menunggu</div></div>${I('right',20)}</button>
       <button class="li" onclick="go('approval-kunjungan')"><div class="ico-tile amber">${I('route',20)}</div><div class="grow"><div class="t">Approval kunjungan</div><div class="s">${visitReqs().length} menunggu</div></div>${I('right',20)}</button>
       <button class="li" onclick="go('assign')"><div class="ico-tile">${I('users',20)}</div><div class="grow"><div class="t">Assign leads</div><div class="s">${S.leads.filter(l=>!l.owner).length} leads belum di-assign</div></div>${I('right',20)}</button>
       <button class="li" onclick="go('overdue')"><div class="ico-tile red">${I('alert',20)}</div><div class="grow"><div class="t">Data overdue</div><div class="s">${S.overdue.length} nasabah lewat jatuh tempo</div></div>${I('right',20)}</button>
@@ -2639,7 +2632,6 @@ SCR['tim-detail'] = p => {
 };
 /* Approval kunjungan tambahan (Team Leader) */
 const visitReqs = () => reqAll().filter(r=>r.status==='Menunggu').map(r=>({...r,u:r.login,detail:'Kunjungan tambahan ke '+r.place}));
-const otherReqs = () => S.approvals;
 SCR['approval-kunjungan'] = p => {
   const L=visitReqs(), f=p.sales||'', list=L.filter(a=>!f||a.u===f);
   const sales=[...new Set([...TEAM.map(t=>t.u),...L.map(a=>a.u)])].filter(u=>USERS[u]);
@@ -2665,22 +2657,6 @@ SCR['approval-kunjungan-detail'] = p => {
       ${kv('Alamat',t.addr)}${kv('Kategori toko',t.cat)}${kv('Jenis kunjungan',d.jenis)}${kv('Tanggal',d.tgl)}${kv('Jam',d.jam)}${kv('Periode',d.periode)}${kv('Ulangi setiap',d.hari)}${kv('Mulai',d.mulai)}${kv('Berakhir',d.akhir)}${kv('Jenis tugas',(d.tasks||[]).join(', '))}${kv('Keterangan',a.reason)}${kv('Diajukan',a.when)}</div>
   </main><footer class="actions"><button class="btn red grow" onclick="act(()=>visitRejectSheet('${a.id}'))">${I('x',18,2.4)} Tolak</button><button class="btn green grow" onclick="act(()=>visitApprove('${a.id}'))">${I('check',18,2.4)} Setuju</button></footer>`};
 };
-SCR.approval = p => {
-  const A=otherReqs(), f=p.f||'Semua', types=['Semua',...new Set(A.map(a=>a.type))], list=A.filter(a=>f==='Semua'||a.type===f);
-  return {note:'Approval supervisor: absen terlambat, cuti/sakit/lembur, hapus penjualan. Kunjungan tambahan diproses di Approval kunjungan. Menolak wajib isi alasan (BRD 1.10.27). Bisa setujui banyak sekaligus (BRD 1.10.23).',
-  html:`${appbar('Approval')}<main class="content">
-    <div class="segtabs">${types.map(x=>`<button class="${f===x?'on':''}" onclick="setP({f:'${x}'})">${x}</button>`).join('')}</div>
-    ${list.length?list.map(a=>{const u=USERS[a.u];return `<div class="card"><div class="row"><div class="av blue">${u.init}</div><div class="grow"><b>${u.name}</b><div class="small muted">${a.when}</div></div>${chip(a.type,'tan')}</div>
-      <div style="margin:12px 0 4px;font-weight:700;font-size:14.5px">${a.detail}</div><div class="small muted" style="line-height:1.5">“${a.reason}”</div><div class="small" style="margin-top:6px;color:var(--blue-700)">Alur approval: ${apprChain(a.u)}</div>
-      <div class="row" style="gap:8px;margin-top:14px"><button class="btn ghost sm grow" onclick="act(()=>rejectSheet('${a.id}'))">Tolak</button><button class="btn sm grow" onclick="act(()=>approveIt('${a.id}'))">Setujui</button></div></div>`}).join(''):`<div class="empty"><div class="ico-tile green">${I('check',24)}</div>Semua pengajuan sudah diproses.</div>`}
-  </main>${list.length>1?`<footer class="actions"><button class="btn sec" onclick="act(()=>{const ids=[${list.map(a=>`'${a.id}'`).join(',')}];S.approvals=S.approvals.filter(a=>!ids.includes(a.id));render(false);toast(ids.length+' pengajuan disetujui')})">Setujui semua (${list.length})</button></footer>`:''}`};
-};
-function approveIt(id){ S.approvals=S.approvals.filter(a=>a.id!==id); render(false); toast('Disetujui. Notifikasi dikirim ke sales'); }
-function rejectSheet(id){
-  sheet(`<h3 style="font-size:18px;font-weight:800">Tolak pengajuan</h3><p class="small muted" style="margin:6px 0 14px">Alasan wajib diisi dan akan dikirim ke sales.</p>
-  <label class="field"><span>Alasan penolakan</span><textarea class="input" id="rr" placeholder="Tulis alasan"></textarea></label><div id="rerr"></div>
-  <button class="btn danger" onclick="if(!val('rr')){$('#rerr').innerHTML='<div class=err>Alasan wajib diisi.</div>';return;}S.approvals=S.approvals.filter(a=>a.id!=='${id}');closeSheet();render(false);toast('Pengajuan ditolak')">Tolak pengajuan</button>`);
-}
 SCR.assign = p => {
   const sel=p.sel||[], list=S.leads.filter(l=>!l.owner&&leadCab(l)===S.cabang), u=p.u, members=mfUsers();
   const note='Arco dan Team Leader meng-assign leads berdasarkan cabang: pilih user REA atau CBD di cabang itu, lalu pilih satu leads atau lebih (MOM 12.5).';
@@ -4267,9 +4243,9 @@ function sumItems(per){
   if(per==='d'){
     if(r==='spv'){
       const set=new Set(spvSet().sales.map(x=>x[0])), tm=TEAM.filter(t=>set.has(t.u));
-      const hadir=tm.filter(t=>t.status==='Hadir'||t.status==='Terlambat').length, wait=otherReqs().length+visitReqs().length;
+      const hadir=tm.filter(t=>t.status==='Hadir'||t.status==='Terlambat').length, wait=visitReqs().length;
       out=[mk('Tim hadir','users',hadir,tm.length,'orang',tm.filter(t=>t.status==='Cuti').length+' cuti',akt,{sisa:'belum hadir',detail:kv(tm.map(t=>[USERS[t.u]?USERS[t.u].name:t.u,t.status+' · '+t.time]))}),
-        mk('Approval menunggu','check',0,wait,'permintaan','perlu diproses',"go('approval')",{todo:true})];
+        mk('Approval menunggu','check',0,wait,'permintaan','perlu diproses',"go('approval-kunjungan')",{todo:true})];
     } else {
       out=capItems().map(c=>mk(c.label,ICON[c.c]||'grid',c.done,c.total,c.unit||(c.c==='visit'?'toko':c.c==='task'?'tugas':'pekerjaan'),c.sub,c.go));
       if(r==='spg'||r==='canvas'){ const h=salesHarian(), uang=v=>v>=1e6?rpShort(v):'Rp'+Math.round(v/1e3).toLocaleString('id-ID')+' rb';
